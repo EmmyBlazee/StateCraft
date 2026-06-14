@@ -1,0 +1,381 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: baeda2237f0052a42be5a9e9529bf96e, type: 3}
+  m_Name: Nigeria
+  m_EditorClassIdentifier: 
+  countryName: Nigeria
+  capitalCity: Abuja
+  currencyName: Naira
+  currencySymbol: "\u20A6"
+  countryFlag: {fileID: 0}
+  mapColor: {r: 0.37807375, g: 0.8165946, b: 0.7795663, a: 1}
+  population: 214572290
+  populationGrowthRate: 0.025
+  populationChangeLastTurn: 2601157
+  invRiceTonnes: 0
+  invCassavaTonnes: 0
+  invCocoaTonnes: 960000
+  invMineralsTonnes: 0
+  invOilBarrels: 999000000
+  invTechGoods: 0
+  intelligenceLevel: 5
+  intelligenceBudget: 58
+  satelliteCount: 1
+  satellitesUnderConstruction: 0
+  satelliteBuildMonthsRemaining: 0
+  operativeCount: 12
+  globalIntelCoverage: 22.5
+  foreignAgentsDetected: 0
+  agencyIntegrity: 82
+  activeCovertOps: []
+  detectedThreats: []
+  gdp: 252.80000
+  income: 10.04347
+  spending: 0.1
+  treasury: 19.24705
+  inflationRate: 0.0062364046
+  gdpGrowthRate: 0.034
+  playerBudget: 0
+  exchangeRate: 1550
+  baseExchangeRate: 1550
+  debt: 115.20698
+  domesticDebt: 4.7763997e+10
+  foreignDebt: 3.1842664e+10
+  taxRate: 12.8
+  subsidyLevel: 0
+  importTariffRate: 19.6
+  corruptionIndex: 30
+  povertyRate: 45
+  unemploymentRate: 12
+  foreignInvestment: 615999940
+  resourceSovereignty: 100
+  foodSecurity: 72
+  environmentScore: 50
+  debtServiceRatio: 0
+  centralBankInterestRate: 20
+  publicApproval: 20
+  creditRating: D
+  foreignAidReceived: 0
+  tradeVolumeUSD: 0
+  resources:
+  - type: 0
+    abundance: 85
+    marketValue: 0
+  - type: 6
+    abundance: 70
+    marketValue: 0
+  - type: 1
+    abundance: 45
+    marketValue: 0
+  - type: 8
+    abundance: 30
+    marketValue: 0
+  - type: 10
+    abundance: 40
+    marketValue: 0
+  roadLevel: 2
+  railLevel: 0
+  portLevel: 1
+  airportLevel: 1
+  healthcareLevel: 1
+  educationLevel: 1
+  hospitalLevel: 1
+  telecomLevel: 1
+  electricityLevel: 30
+  hasNuclearPower: 0
+  isImportingUranium: 0
+  powerGasPlants: 3
+  powerHydroPlants: 4
+  powerNuclearPlants: 0
+  powerSolarPlants: 0
+  powerWindPlants: 0
+  gridTransmissionEfficiency: 0.85
+  currentBlackoutRisk: 0
+  indAgriRice: 2
+  indAgriCassava: 0
+  indAgriCocoa: 1
+  indMiningLocal: 0
+  indMiningOil: 10
+  indTechIT: 0
+  indTechFintech: 0
+  indManufacturing: 0
+  techIndustryOutput: 100
+  workforceOil: 30000
+  workforceMining: 25000
+  workforceAgri: 150000
+  workforceManufacturing: 5000
+  stability: 64.46847
+  security: 58.348576
+  nationalPoliceSize: 55000
+  militaryStrength: 2.5044074
+  armyStrength: 5
+  navyStrength: 0.014441828
+  airForceStrength: 0.0050632954
+  unitInfantry: 3874
+  unitTanks: 503
+  unitAPCs: 1475
+  unitArtillery: 0
+  unitRifles: 4000
+  unitFighters: 22
+  unitBombers: 5
+  unitAttackHelis: 46
+  unitUAVs: 1
+  unitFrigates: 1
+  unitDestroyers: 0
+  unitSubmarines: 0
+  unitPatrolBoats: 0
+  baseArmyCount: 0
+  baseNavyCount: 0
+  baseAirForceCount: 0
+  baseRDFCount: 0
+  baseDefenseFactoryCount: 0
+  importsThisTurn: 0
+  rdfReadiness: 100
+  militaryBudgetPercent: 2.5
+  militaryDoctrine: 1
+  securitySpending: 0
+  militaryProjects: []
+  militaryBudgetUSD: 0.1
+  militaryReadiness: 100
+  armyStats:
+    branchName: Army
+    personnel: 3874
+    equipment: 1978
+    readiness: 95
+    morale: 80
+  navyStats:
+    branchName: Navy
+    personnel: 4250
+    equipment: 1
+    readiness: 92
+    morale: 75
+  airForceStats:
+    branchName: Air Force
+    personnel: 1550
+    equipment: 74
+    readiness: 65
+    morale: 85
+  rdfStats:
+    branchName: Rapid Deployable Force
+    personnel: 0
+    equipment: 80
+    readiness: 100
+    morale: 95
+  reserveFuel: 100
+  reserveAmmo: 76
+  reserveMedical: 100
+  reserveFood: 84
+  activeOperations: []
+  trainingPipelines: []
+  warEnemyName: 
+  warTurnsActive: 1
+  warExhaustion: 2
+  warWillToFight: 98.5
+  totalKIA: 0
+  totalWounded: 0
+  warFatigueStabilityDrain: 0
+  assignedGenerals: []
+  activeBlockades: []
+  isBlockaded: 0
+  hasNuclearWeapon: 0
+  hasChemicalWeapon: 0
+  wmdDevelopmentProgress: 0
+  wmdProgramDiscovered: 0
+  rdfCooldownMonths: 0
+  lastRDFTurn: -100
+  lastRDFRegionIndex: -1
+  globalPrestige: 16
+  allianceCount: 0
+  sanctionIssuedCount: 1
+  sanctionReceivedCount: 0
+  inboxMessages: []
+  activeCrises:
+  - crisisName: 'Diplomatic Ultimatum: Broken Contract'
+    affectedRegion: Algeria
+    severity: Critical
+    internationalPressure: 95
+  - crisisName: 'Diplomatic Ultimatum: Broken Contract'
+    affectedRegion: Angola
+    severity: Critical
+    internationalPressure: 95
+  - crisisName: 'Diplomatic Ultimatum: Broken Contract'
+    affectedRegion: Algeria
+    severity: Critical
+    internationalPressure: 95
+  - crisisName: 'Diplomatic Ultimatum: Broken Contract'
+    affectedRegion: Benin
+    severity: Critical
+    internationalPressure: 95
+  - crisisName: 'Diplomatic Ultimatum: Broken Contract'
+    affectedRegion: Botswana
+    severity: Critical
+    internationalPressure: 95
+  - crisisName: 'Diplomatic Ultimatum: Broken Contract'
+    affectedRegion: Algeria
+    severity: Critical
+    internationalPressure: 95
+  - crisisName: 'Diplomatic Ultimatum: Broken Contract'
+    affectedRegion: Algeria
+    severity: Critical
+    internationalPressure: 95
+  activeTradeAgreements:
+  - id: f6a64f6c-d07f-4900-8c0d-9f8e7896dc0d
+    partnerCountry: Algeria
+    resource: 0
+    monthlyPaymentUSD: 6.40366e+11
+    durationMonths: 9
+    status: 4
+    resourceQuantity: 8.365948e+9
+    isBulkTransfer: 0
+    isSeller: 1
+    originalPaymentUSD: 6.40366e+11
+    originalDurationMonths: 11
+    counterReason: 
+  - id: 63b631d0-0432-4a1c-8250-174eb51a57f3
+    partnerCountry: Angola
+    resource: 0
+    monthlyPaymentUSD: 1.0844874e+11
+    durationMonths: 9
+    status: 4
+    resourceQuantity: 1.399998e+9
+    isBulkTransfer: 0
+    isSeller: 1
+    originalPaymentUSD: 1.0844874e+11
+    originalDurationMonths: 11
+    counterReason: 
+  - id: 4d2e5442-4b7e-40b0-a2d8-16d91e3344a3
+    partnerCountry: Angola
+    resource: 1
+    monthlyPaymentUSD: 302359140
+    durationMonths: 0
+    status: 4
+    resourceQuantity: 7000000
+    isBulkTransfer: 0
+    isSeller: 1
+    originalPaymentUSD: 302359140
+    originalDurationMonths: 10
+    counterReason: 
+  - id: fbf31599-415b-470b-ad21-30f341692d07
+    partnerCountry: Algeria
+    resource: 3
+    monthlyPaymentUSD: 3.8737183e+9
+    durationMonths: 10
+    status: 4
+    resourceQuantity: 9320000
+    isBulkTransfer: 0
+    isSeller: 1
+    originalPaymentUSD: 3.8737183e+9
+    originalDurationMonths: 12
+    counterReason: 
+  - id: 4a2bc946-de58-4a2a-9027-40921963c5ed
+    partnerCountry: Benin
+    resource: 0
+    monthlyPaymentUSD: 1.1788489e+11
+    durationMonths: 10
+    status: 4
+    resourceQuantity: 1.58e+9
+    isBulkTransfer: 0
+    isSeller: 1
+    originalPaymentUSD: 1.1788489e+11
+    originalDurationMonths: 12
+    counterReason: 
+  - id: f3ee804e-2637-43b6-9910-55bedd1397b7
+    partnerCountry: Botswana
+    resource: 0
+    monthlyPaymentUSD: 2.7633402e+11
+    durationMonths: 11
+    status: 4
+    resourceQuantity: 3.82e+9
+    isBulkTransfer: 0
+    isSeller: 1
+    originalPaymentUSD: 2.7633402e+11
+    originalDurationMonths: 13
+    counterReason: 
+  - id: f041dedd-d08d-4fe6-80a8-f4ae3b85d5ee
+    partnerCountry: Algeria
+    resource: 0
+    monthlyPaymentUSD: 1.4597257e+10
+    durationMonths: 11
+    status: 4
+    resourceQuantity: 180000000
+    isBulkTransfer: 0
+    isSeller: 1
+    originalPaymentUSD: 1.4597257e+10
+    originalDurationMonths: 13
+    counterReason: 
+  - id: ab195ad0-1491-4a1e-9996-cb5f820ea6b6
+    partnerCountry: Angola
+    resource: 1
+    monthlyPaymentUSD: 299879600
+    durationMonths: 0
+    status: 4
+    resourceQuantity: 7000000
+    isBulkTransfer: 0
+    isSeller: 1
+    originalPaymentUSD: 299879600
+    originalDurationMonths: 11
+    counterReason: 
+  - id: 84c8f850-73e8-4adf-ae2c-e887427e2904
+    partnerCountry: Algeria
+    resource: 3
+    monthlyPaymentUSD: 2.0374906e+9
+    durationMonths: 12
+    status: 4
+    resourceQuantity: 5420000
+    isBulkTransfer: 0
+    isSeller: 1
+    originalPaymentUSD: 2.0374906e+9
+    originalDurationMonths: 14
+    counterReason: 
+  - id: 31d0da94-b8fd-4223-bb6c-73794b1b1016
+    partnerCountry: Central African Republic
+    resource: 2
+    monthlyPaymentUSD: 46620230
+    durationMonths: 7
+    status: 2
+    resourceQuantity: 1000
+    isBulkTransfer: 0
+    isSeller: 0
+    originalPaymentUSD: 46620230
+    originalDurationMonths: 11
+    counterReason: 
+  activeTreaties: []
+  covertBudget: 0
+  counterIntelligence: 46.7
+  exposureRisk: 0
+  recruitedAssets: []
+  regions:
+  - {fileID: 11400000, guid: da348be1548a3f9499a296c0ed2d508b, type: 2}
+  - {fileID: 11400000, guid: 961a7012e8bc8db45a9e406774928d18, type: 2}
+  - {fileID: 11400000, guid: dd6d138aaec0d0f46b39940cf91fb6fa, type: 2}
+  - {fileID: 11400000, guid: d1d7ea7cd7da43045913db54163700eb, type: 2}
+  - {fileID: 11400000, guid: 2d7a6a2b3b1743648a2dd5c66c62331f, type: 2}
+  - {fileID: 11400000, guid: f13a3de8fa878ca40a66ab2600a8e9f6, type: 2}
+  activeFactions: []
+  activePolicies: []
+  activeProjects:
+  - projectName: Hydroelectric Dam
+    projectType: Energy
+    regionName: Abuja
+    targetID: PowerHydro
+    totalCost: 55
+    monthsRemaining: 111
+    totalMonths: 30
+    stage: 3
+  - projectName: Hydroelectric Dam
+    projectType: Energy
+    regionName: Abuja
+    targetID: PowerHydro
+    totalCost: 55
+    monthsRemaining: 111
+    totalMonths: 30
+    stage: 3

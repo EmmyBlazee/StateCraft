@@ -1,0 +1,28 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/Global.uss" />
+    <ui:VisualElement name="SelectorRoot" style="width: 100%; height: 100%; align-items: center; justify-content: center; background-color: rgba(0, 0, 0, 0.7); position: absolute; left: 0; top: 0; display: flex; opacity: 0; z-index: 50;">
+        <ui:VisualElement name="SelectorWindow" class="glass-panel" style="width: 500px; height: 700px; padding: 30px; border-radius: 8px; background-color: rgba(10, 15, 25, 0.98); border-width: 1px; border-color: #00d2ff;">
+            
+            <!-- Header -->
+            <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom-width: 1px; border-bottom-color: rgba(0, 210, 255, 0.3); padding-bottom: 15px;">
+                <ui:VisualElement>
+                    <ui:Label text="NATION SELECTOR" style="font-size: 22px; color: #00d2ff; -unity-font-style: bold;" />
+                    <ui:Label text="SELECT YOUR BASE OF OPERATIONS" style="font-size: 10px; color: #90a4ae;" />
+                </ui:VisualElement>
+                <ui:Button name="CloseSelector" text="✕" class="button-premium" style="width: 35px; height: 35px; border-radius: 20px; font-size: 16px; color: white;" />
+            </ui:VisualElement>
+
+            <!-- Search Bar -->
+            <ui:VisualElement style="flex-direction: row; align-items: center; background-color: rgba(255, 255, 255, 0.05); border-radius: 4px; padding: 10px 15px; margin-bottom: 25px; border-width: 1px; border-color: rgba(0, 210, 255, 0.2);">
+                <ui:Label text="SCAN" style="margin-right: 15px; color: #00d2ff; font-size: 10px; -unity-font-style: bold;" />
+                <ui:TextField name="SearchInput" placeholder-text="Search countries..." style="flex-grow: 1; background-color: rgba(0,0,0,0); border-width: 0; color: white;" />
+            </ui:VisualElement>
+
+            <!-- Country List -->
+            <ui:ScrollView name="CountryList" style="flex-grow: 1; margin-bottom: 20px;" />
+
+            <!-- Footer -->
+            <ui:Label text="TOTAL NATIONS DISCOVERED: 54" style="font-size: 9px; color: #90a4ae; align-self: center;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

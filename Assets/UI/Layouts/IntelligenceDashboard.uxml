@@ -1,0 +1,144 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/Global.uss" />
+    <ui:VisualElement name="IntelligenceDashboard" class="standard-dashboard hologram-border" style="display: none;">
+
+        
+        <!-- HEADER -->
+        <ui:VisualElement name="Header" style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom-width: 1px; border-bottom-color: rgba(186, 104, 200, 0.3); padding-bottom: 8px;">
+            <ui:VisualElement style="flex-direction: row; align-items: center;">
+                <ui:Label name="IntelHeaderTitle" text="NATIONAL INTELLIGENCE COMMAND" style="font-size: 24px; color: white; -unity-font-style: bold; letter-spacing: 2px; margin-right: 20px;" />
+                <ui:VisualElement style="flex-direction: row; align-items: center;">
+                    <ui:Label text="COVERAGE:" style="font-size: 10px; color: grey; margin-right: 5px;" />
+                    <ui:Label name="GlobalCoverageScore" text="15/100" style="font-size: 12px; color: rgb(186, 104, 200); -unity-font-style: bold;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            
+            <ui:VisualElement style="flex-direction: row; align-items: center;">
+                <ui:VisualElement style="align-items: flex-end; margin-right: 30px;">
+                    <ui:Label text="AGENCY BUDGET" style="font-size: 9px; color: grey;" />
+                    <ui:Label name="HeaderIntelBudget" text="₦50.0M / Turn" style="font-size: 14px; color: rgb(0, 210, 255); -unity-font-style: bold;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="align-items: flex-end; margin-right: 30px;">
+                    <ui:Label text="TOTAL OPERATIVES" style="font-size: 9px; color: grey;" />
+                    <ui:Label name="HeaderOperativeCount" text="12" style="font-size: 14px; color: white; -unity-font-style: bold;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="align-items: flex-end; margin-right: 30px;">
+                    <ui:Label text="EXPOSURE RISK" style="font-size: 9px; color: grey;" />
+                    <ui:Label name="ExposureRiskLabel" text="0%" style="font-size: 14px; color: rgb(0, 210, 100); -unity-font-style: bold;" />
+                </ui:VisualElement>
+                <ui:Button name="CloseIntelligence" text="×" class="button-premium" style="width: 40px; height: 40px; border-radius: 20px; font-size: 20px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- SUB-TAB NAVIGATION -->
+        <ui:VisualElement name="SubTabs" style="flex-direction: row; margin-bottom: 8px; background-color: rgba(0,0,0,0.4); border-radius: 8px; padding: 5px;">
+            <ui:Button name="TabSurveillance" text="SURVEILLANCE" class="nav-button active-tab" style="flex-grow: 1;" />
+            <ui:Button name="TabCovertOps" text="COVERT OPS" class="nav-button" style="flex-grow: 1;" />
+            <ui:Button name="TabThreatBoard" text="THREAT BOARD" class="nav-button" style="flex-grow: 1;" />
+            <ui:Button name="TabCounterIntel" text="COUNTERINTELLIGENCE" class="nav-button" style="flex-grow: 1;" />
+        </ui:VisualElement>
+
+        <!-- CONTENT PANELS -->
+        <ui:VisualElement name="PanelContainer" style="flex-grow: 1;">
+            
+            <!-- 1. SURVEILLANCE TAB -->
+            <ui:VisualElement name="PanelSurveillance" style="display: flex; height: 100%;">
+                <ui:VisualElement style="flex-direction: row; height: 100%;">
+                    <ui:VisualElement name="IntelMap" style="width: 65%; background-color: rgba(0,0,0,0.5); border-radius: 8px; border-width: 1px; border-color: rgba(255,255,255,0.1); padding: 8px;">
+                        <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <ui:Label text="GLOBAL MONITORING GRID" style="font-size: 10px; color: grey; letter-spacing: 2px;" />
+                            <ui:Button name="BtnLaunchSatellite" text="LAUNCH SPY SAT" class="button-premium" style="width: 120px; height: 20px; font-size: 8px;" />
+                        </ui:VisualElement>
+                        <ui:ScrollView style="flex-grow: 1; height: 100%;">
+                            <ui:VisualElement name="IntelGridList" />
+                            <ui:VisualElement class="live-feed-panel" style="margin-top: 8px;">
+                                <ui:Label text="SIGINT INTERCEPTS" class="live-feed-title" />
+                                <ui:ScrollView name="IntelInterceptFeed" style="max-height: 90px;" />
+                            </ui:VisualElement>
+                        </ui:ScrollView>
+                    </ui:VisualElement>
+                    <ui:VisualElement style="width: 35%; padding-left: 20px;">
+                        <ui:Label text="REGIONAL COVERAGE" style="font-size: 11px; color: grey; margin-bottom: 8px;" />
+                        <ui:ScrollView name="RegionalCoverageList" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- 2. COVERT OPS TAB -->
+            <ui:VisualElement name="PanelCovertOps" style="display: none; height: 100%; background-color: rgba(0,0,0,0.5); border-radius: 8px; border-width: 1px; border-color: rgba(255,255,255,0.1); padding: 5px;">
+                <ui:ScrollView style="flex-grow: 1; padding: 8px;">
+                    <!-- Covert Budget Controls -->
+                    <ui:VisualElement class="sub-panel" style="padding: 8px; margin-bottom: 8px; flex-direction: row; align-items: center; justify-content: space-between; background-color: rgba(0,0,0,0.3); border-radius: 4px; border-width: 1px; border-color: rgba(186,104,200,0.2);">
+                        <ui:VisualElement style="flex-direction: column; width: 55%;">
+                            <ui:Label text="COVERT BUDGET ALLOCATION" style="font-size: 9px; color: grey; letter-spacing: 2px;" />
+                            <ui:Slider name="CovertBudgetSlider" low-value="0" high-value="5" value="1" style="margin-top: 8px;" />
+                            <ui:Label name="CovertBudgetValueLabel" text="$1.0B / Turn" style="font-size: 10px; color: rgb(0, 210, 255); margin-top: 4px;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: column; align-items: flex-end; width: 40%;">
+                            <ui:Label text="EXPOSURE RISK METER" style="font-size: 9px; color: grey; letter-spacing: 2px;" />
+                            <ui:ProgressBar name="ExposureRiskBar" high-value="100" value="0" style="width: 100%; height: 8px; margin-top: 6px;" />
+                            <ui:Label name="ExposureRiskBarLabel" text="LOW RISK" style="font-size: 9px; color: rgb(0, 210, 100); margin-top: 4px;" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <!-- Active Ops List -->
+                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <ui:Label text="MISSION QUEUE" style="font-size: 11px; color: grey; letter-spacing: 2px;" />
+                        <ui:Button name="BtnLaunchCovertOp" text="+ DISPATCH AGENT" class="button-premium" style="width: 160px; height: 30px;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="CovertOpsContainer" style="flex-grow: 1;" />
+                    <!-- Recruited Assets -->
+                    <ui:Label text="RECRUITED FOREIGN ASSETS" style="font-size: 11px; color: grey; letter-spacing: 2px; margin-top: 8px; margin-bottom: 6px;" />
+                    <ui:VisualElement name="RecruitedAssetsList" style="flex-grow: 1;" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+
+            <!-- 3. THREAT BOARD TAB -->
+            <ui:VisualElement name="PanelThreatBoard" style="display: none; height: 100%; background-color: rgba(0,0,0,0.5); border-radius: 8px; border-width: 1px; border-color: rgba(255,255,255,0.1); padding: 8px;">
+                <ui:ScrollView>
+                    <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                        <ui:VisualElement style="width: 32%;">
+                            <ui:Label text="FOREIGN INTERFERENCE" style="font-size: 12px; color: rgb(255, 82, 82); -unity-font-style: bold; margin-bottom: 8px;" />
+                            <ui:VisualElement name="ForeignThreatsList" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="width: 32%;">
+                            <ui:Label text="INSURGENT ACTIVITY" style="font-size: 12px; color: rgb(255, 171, 64); -unity-font-style: bold; margin-bottom: 8px;" />
+                            <ui:VisualElement name="InsurgentThreatsList" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="width: 32%;">
+                            <ui:Label text="INTERNAL THREATS" style="font-size: 12px; color: rgb(241, 196, 15); -unity-font-style: bold; margin-bottom: 8px;" />
+                            <ui:VisualElement name="InternalThreatsList" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:ScrollView>
+            </ui:VisualElement>
+
+            <!-- 4. COUNTERINTELLIGENCE TAB -->
+            <ui:VisualElement name="PanelCounterIntel" style="display: none; height: 100%; background-color: rgba(0,0,0,0.5); border-radius: 8px; border-width: 1px; border-color: rgba(255,255,255,0.1); padding: 5px;">
+                <ui:ScrollView style="flex-grow: 1; padding: 8px;">
+                    <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                        <ui:VisualElement style="width: 45%;">
+                            <ui:Label text="AGENCY INTEGRITY" style="font-size: 12px; color: rgb(0, 210, 255); -unity-font-style: bold; margin-bottom: 8px;" />
+                            <ui:VisualElement class="sub-panel" style="padding: 8px; background-color: rgba(0,0,0,0.3); border-radius: 4px; border-width: 1px; border-color: rgba(0,210,255,0.2);">
+                                <ui:Label text="SECURITY SCORE" class="metric-label" />
+                                <ui:ProgressBar name="AgencyIntegrityBar" value="85" style="height: 10px; margin-top: 5px;" />
+                                
+                                <ui:VisualElement style="margin-top: 8px;">
+                                    <ui:Label name="ForeignAgentsLabel" text="FOREIGN AGENTS DETECTED: 0" style="font-size: 14px; color: rgb(255, 82, 82); -unity-font-style: bold;" />
+                                    <ui:Label name="MoleHuntLabel" text="Ongoing mole hunts: 0" style="font-size: 10px; color: grey;" />
+                                </ui:VisualElement>
+                                
+                                <ui:Button name="BtnInternalAudit" text="RUN INTERNAL AUDIT" class="button-premium" style="margin-top: 12px; height: 40px; background-color: rgba(186, 104, 200, 0.2); border-color: rgba(186, 104, 200, 0.8); color: white;" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        
+                        <ui:VisualElement style="width: 50%;">
+                            <ui:Label text="ACTIVE COUNTER-ESPIONAGE" style="font-size: 12px; color: rgb(0, 210, 255); -unity-font-style: bold; margin-bottom: 8px;" />
+                            <ui:VisualElement name="CounterEspionageList" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:ScrollView>
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

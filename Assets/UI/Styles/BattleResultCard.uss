@@ -1,0 +1,238 @@
+/*
+  FILE: UI/Styles/BattleResultCard.uss
+  PURPOSE: Styles for BattleResultCard.uxml
+  Add @import url("BattleResultCard.uss"); to your Global.uss
+*/
+
+/* ── Card shell ────────────────────────────────────────────── */
+.battle-card {
+    background-color: rgba(10, 18, 28, 0.96);
+    border-color: rgba(255, 255, 255, 0.12);
+    border-width: 1px;
+    border-radius: 6px;
+    margin: 4px 0;
+    padding: 0;
+    flex-direction: column;
+}
+
+/* ── Header ────────────────────────────────────────────────── */
+.battle-header {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 14px 8px 14px;
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+    border-bottom-width: 1px;
+}
+
+.header-meta {
+    flex: 1;
+    flex-direction: column;
+    margin-left: 10px;
+}
+
+.enemy-name {
+    font-size: 14px;
+    color: rgb(220, 220, 220);
+    -unity-font-style: bold;
+}
+
+.battle-date {
+    font-size: 11px;
+    color: rgb(130, 130, 130);
+    margin-top: 2px;
+}
+
+/* ── Outcome badge ─────────────────────────────────────────── */
+.outcome-badge {
+    border-radius: 4px;
+    padding: 4px 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+.outcome-text {
+    font-size: 11px;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+}
+
+.outcome-victory {
+    background-color: rgba(30, 100, 50, 0.85);
+    border-color: rgba(60, 180, 90, 0.6);
+    border-width: 1px;
+}
+.outcome-victory .outcome-text { color: rgb(100, 230, 130); }
+
+.outcome-defeat {
+    background-color: rgba(100, 20, 20, 0.85);
+    border-color: rgba(200, 60, 60, 0.6);
+    border-width: 1px;
+}
+.outcome-defeat .outcome-text { color: rgb(240, 100, 100); }
+
+.outcome-stalemate {
+    background-color: rgba(80, 70, 20, 0.85);
+    border-color: rgba(200, 170, 50, 0.6);
+    border-width: 1px;
+}
+.outcome-stalemate .outcome-text { color: rgb(230, 195, 80); }
+
+/* ── Front status badge ────────────────────────────────────── */
+.front-badge {
+    border-radius: 4px;
+    padding: 4px 8px;
+    margin-left: 8px;
+}
+
+.front-text {
+    font-size: 11px;
+    -unity-font-style: bold;
+}
+
+.front-advancing  { background-color: rgba(20, 80, 40, 0.7); }
+.front-advancing .front-text  { color: rgb(80, 210, 110); }
+
+.front-retreating { background-color: rgba(90, 20, 20, 0.7); }
+.front-retreating .front-text { color: rgb(220, 90, 90); }
+
+.front-stalemate  { background-color: rgba(50, 50, 50, 0.7); }
+.front-stalemate .front-text  { color: rgb(180, 180, 180); }
+
+/* ── Narrative line ────────────────────────────────────────── */
+.narrative-label {
+    font-size: 12px;
+    color: rgb(160, 160, 170);
+    -unity-text-align: upper-left;
+    white-space: normal;
+    padding: 8px 14px 4px 14px;
+}
+
+/* ── Losses table ──────────────────────────────────────────── */
+.losses-table {
+    flex-direction: column;
+    margin: 4px 14px 0 14px;
+    border-color: rgba(255, 255, 255, 0.08);
+    border-width: 1px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.table-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 7px 10px;
+}
+
+.table-header-row {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-bottom-color: rgba(255, 255, 255, 0.10);
+    border-bottom-width: 1px;
+}
+
+.table-row-alt {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.col-label-header {
+    font-size: 10px;
+    -unity-font-style: bold;
+    letter-spacing: 0.5px;
+    color: rgb(110, 110, 120);
+}
+
+/* Column widths */
+.col-type  { flex: 2; }
+.col-our   { flex: 1; -unity-text-align: upper-center; }
+.col-enemy { flex: 1; -unity-text-align: upper-center; }
+
+.row-label-group {
+    flex-direction: row;
+    align-items: center;
+    flex: 2;
+}
+
+.row-unit-label {
+    font-size: 12px;
+    color: rgb(190, 190, 200);
+    margin-left: 8px;
+}
+
+/* Unit type colour-coded icons (simple coloured squares — replace with sprites) */
+.unit-icon {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+.infantry-icon { background-color: rgb(80, 160, 100); }
+.tank-icon     { background-color: rgb(160, 130, 60); }
+.apc-icon      { background-color: rgb(100, 140, 170); }
+.fighter-icon  { background-color: rgb(80, 120, 200); }
+.ship-icon     { background-color: rgb(40, 100, 160); }
+
+/* Loss values */
+.loss-value {
+    font-size: 13px;
+    -unity-font-style: bold;
+    -unity-text-align: upper-center;
+}
+
+/* Our losses: white */
+.col-our .loss-value  { color: rgb(220, 220, 220); }
+/* Enemy losses: slightly dimmed / amber */
+.col-enemy .loss-value { color: rgb(210, 175, 80); }
+
+/* ── KIA / Wounded bar ─────────────────────────────────────── */
+.casualty-bar {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 14px;
+    border-top-color: rgba(255, 255, 255, 0.08);
+    border-top-width: 1px;
+}
+
+.casualty-item {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+}
+
+.cas-label {
+    font-size: 10px;
+    color: rgb(110, 110, 120);
+    letter-spacing: 0.5px;
+}
+
+.cas-value {
+    font-size: 16px;
+    -unity-font-style: bold;
+    margin-top: 2px;
+}
+
+.cas-kia     { color: rgb(220, 80, 80); }
+.cas-wounded { color: rgb(220, 160, 60); }
+.cas-enemy   { color: rgb(150, 200, 130); }
+
+.casualty-divider {
+    width: 1px;
+    height: 30px;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Supply / exhaustion footer ────────────────────────────── */
+.supply-footer {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 6px 14px 10px 14px;
+    border-top-color: rgba(255, 255, 255, 0.06);
+    border-top-width: 1px;
+}
+
+.supply-item {
+    font-size: 11px;
+    color: rgb(130, 130, 140);
+    margin-right: 14px;
+    margin-top: 2px;
+}
+
+.supply-warn { color: rgb(220, 140, 60); }

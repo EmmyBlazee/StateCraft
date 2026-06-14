@@ -1,0 +1,599 @@
+using UnityEngine;
+using UnityEngine.UIElements;
+using System.Collections.Generic;
+using StateCraft.Core;
+using StateCraft.Data;
+using StateCraft.Systems;
+using StateCraft.Interfaces;
+
+namespace StateCraft.UI
+{
+    public class TradeAgreementController : MonoBehaviour
+    {
+        private VisualElement _root;
+        private VisualElement _panel;
+
+        private ScrollView _activeAgreementsScroll;
+
+        private DropdownField _dropdownTradeDirection;
+        private DropdownField _dropdownPartner;
+        private DropdownField _dropdownResource;
+        private TextField _inputQuantity;
+        private Label _lblMarketValue;
+        private TextField _inputDuration;
+        private Button _btnMaxQuantity;
+        
+        private Label _lblRelationsImpact;
+        private Label _lblTreasuryDelta;
+        private Label _lblStrategicRisk;
+        private Label _lblAdviserRecommendation;
+        
+        private Button _btnPropose;
+        private Button _btnClose;
+        
+        private VisualElement _counterOfferArea;
+        private Label _lblCounterDetails;
+        private Button _btnAccept;
+        private Button _btnReject;
+
+        private string _currentProposalId = null;
+
+        private void Awake()
+        {
+            var uiDoc = GetComponent<UIDocument>();
+            if (uiDoc == null) return;
+            
+            // Force this panel to render in front of standard dashboards
+            uiDoc.sortingOrder = 100;
+            
+            _root = uiDoc.rootVisualElement;
+            _panel = _root.Q<VisualElement>("TradeAgreementPanel");
+            if (_panel == null) return;
+            
+            _activeAgreementsScroll = _panel.Q<ScrollView>("ActiveAgreementsScroll");
+            _lblRelationsImpact = _panel.Q<Label>("LblRelationsImpact");
+            _lblTreasuryDelta = _panel.Q<Label>("LblTreasuryDelta");
+            _lblStrategicRisk = _panel.Q<Label>("LblStrategicRisk");
+            _lblAdviserRecommendation = _panel.Q<Label>("LblAdviserRecommendation");
+            
+            _dropdownTradeDirection = _panel.Q<DropdownField>("DropdownTradeDirection");
+            _dropdownPartner = _panel.Q<DropdownField>("DropdownPartner");
+            _dropdownResource = _panel.Q<DropdownField>("DropdownResource");
+            _inputQuantity = _panel.Q<TextField>("InputQuantity");
+            _lblMarketValue = _panel.Q<Label>("LblMarketValue");
+            _btnMaxQuantity = _panel.Q<Button>("BtnMaxQuantity");
+            
+            _inputQuantity?.RegisterValueChangedCallback(evt => 
+            {
+                ValidateQuantityInput();
+                UpdateMarketValue();
+            });
+            if (_btnMaxQuantity != null)
+                _btnMaxQuantity.clicked += OnMaxQuantityClicked;
+            _dropdownTradeDirection?.RegisterValueChangedCallback(evt => 
+            {
+                if (evt.newValue != "Export (Sell)" && evt.newValue != "Import (Buy)") return;
+                if (_dropdownResource != null) _dropdownResource.style.display = DisplayStyle.Flex;
+                PopulateDropdowns();
+            });
+            _dropdownResource?.RegisterValueChangedCallback(evt => 
+            {
+                UpdatePartners();
+                UpdateMarketValue();
+            });
+            _inputDuration = _panel.Q<TextField>("InputDuration");
+            
+            _btnPropose = _panel.Q<Button>("BtnPropose");
+            _btnClose = _panel.Q<Button>("BtnCloseTrade");
+            
+            _counterOfferArea = _panel.Q<VisualElement>("CounterOfferArea");
+            _lblCounterDetails = _panel.Q<Label>("LblCounterDetails");
+            _btnAccept = _panel.Q<Button>("BtnAccept");
+            _btnReject = _panel.Q<Button>("BtnReject");
+
+            _btnPropose.clicked += OnPropose;
+            _btnClose.clicked += Hide;
+            _btnAccept.clicked += OnAccept;
+            _btnReject.clicked += OnReject;
+        }
+
+        public void Show()
+        {
+            if (_panel == null) return;
+            
+            _panel.style.display = DisplayStyle.Flex;
+            _counterOfferArea.style.display = DisplayStyle.None;
+            _currentProposalId = null;
+            
+            if (_dropdownTradeDirection != null)
+            {
+                _dropdownTradeDirection.index = -1;
+                _dropdownTradeDirection.value = "Select Trade Type";
+            }
+            if (_dropdownResource != null) _dropdownResource.style.display = DisplayStyle.None;
+            
+            if (_dropdownPartner != null) 
+            {
+                _dropdownPartner.choices = new List<string> { "Select Direction & Resource" };
+                _dropdownPartner.index = 0;
+            }
+            
+            UpdateMarketValue();
+            PopulateActiveAgreements();
+        }
+
+        public void Hide()
+        {
+            if (_panel != null)
+                _panel.style.display = DisplayStyle.None;
+            
+            if (!string.IsNullOrEmpty(_currentProposalId))
+            {
+                OnReject(); // Auto-reject if closed while proposing
+            }
+        }
+
+        private void PopulateDropdowns()
+        {
+            var gm = GameManager.Instance;
+            if (gm == null || gm.allCountries == null) return;
+
+            var resources = new List<string>();
+            var player = gm.playerCountry;
+            bool isSelling = _dropdownTradeDirection == null || _dropdownTradeDirection.value == "Export (Sell)";
+            
+            if (isSelling)
+            {
+                if (player.invOilBarrels > 0 || player.resources.Exists(r => r.type == MineralType.Oil))
+                    resources.Add($"Oil ({player.invOilBarrels:N0} barrels)");
+                    
+                if (player.resources.Exists(r => r.type == MineralType.NaturalGas))
+                {
+                    float amt = player.resources.Find(r => r.type == MineralType.NaturalGas).abundance * 100000f;
+                    resources.Add($"Gas ({amt:N0} units)");
+                }
+                    
+                if (player.resources.Exists(r => r.type == MineralType.Uranium))
+                {
+                    float amt = player.resources.Find(r => r.type == MineralType.Uranium).abundance * 500f;
+                    resources.Add($"Uranium ({amt:N0} units)");
+                }
+                    
+                float food = player.invRiceTonnes + player.invCassavaTonnes + player.invCocoaTonnes;
+                if (food > 0)
+                    resources.Add($"Food ({food:N0} tonnes)");
+                    
+                if (player.invMineralsTonnes > 0 || player.resources.Exists(r => r.type == MineralType.Gold || r.type == MineralType.Copper || r.type == MineralType.Cobalt))
+                    resources.Add($"Minerals ({player.invMineralsTonnes:N0} tonnes)");
+            }
+            else
+            {
+                // If buying, player can attempt to buy ANY valid trade resource
+                resources.Add("Oil");
+                resources.Add("Gas");
+                resources.Add("Uranium");
+                resources.Add("Food");
+                resources.Add("Minerals");
+                resources.Add("Timber");
+            }
+
+            if (resources.Count == 0)
+                resources.Add("None");
+
+            _dropdownResource.choices = resources;
+            _dropdownResource.index = 0;
+            
+            UpdatePartners();
+            UpdateMarketValue();
+            PopulateActiveAgreements();
+        }
+
+        private void UpdatePartners()
+        {
+            if (_dropdownPartner == null || _dropdownResource == null) return;
+            
+            var gm = GameManager.Instance;
+            if (gm == null || gm.allCountries == null) return;
+            
+            string selectedStr = _dropdownResource.value;
+            TradeResourceType selectedResource = TradeResourceType.Other;
+            
+            if (!string.IsNullOrEmpty(selectedStr) && selectedStr != "None")
+            {
+                string resourceEnumStr = selectedStr.Split(' ')[0];
+                System.Enum.TryParse(resourceEnumStr, out selectedResource);
+            }
+
+            bool isSelling = _dropdownTradeDirection == null || _dropdownTradeDirection.value == "Export (Sell)";
+            
+            var partners = new List<string>();
+            foreach (var country in gm.allCountries)
+            {
+                if (country == gm.playerCountry) continue;
+
+                // ── GATE: only show countries with a signed Trade Agreement ──
+                if (!StateCraft.Systems.DiplomacySystem.HasSignedTradeAgreementTreaty(gm.playerCountry, country))
+                    continue;
+
+                bool validPartner = false;
+                
+                if (isSelling)
+                {
+                    // Player sells, AI buys (AI must have a shortage)
+                    switch (selectedResource)
+                    {
+                        case TradeResourceType.Oil: validPartner = country.invOilBarrels < 2000000; break;
+                        case TradeResourceType.Gas: validPartner = !country.resources.Exists(r => r.type == MineralType.NaturalGas); break;
+                        case TradeResourceType.Uranium: validPartner = !country.resources.Exists(r => r.type == MineralType.Uranium); break;
+                        case TradeResourceType.Food: validPartner = (country.invRiceTonnes + country.invCassavaTonnes + country.invCocoaTonnes) < 500000; break;
+                        case TradeResourceType.Minerals: validPartner = country.invMineralsTonnes < 1000000; break;
+                        default: validPartner = true; break; 
+                    }
+                }
+                else
+                {
+                    // Player buys, AI sells (AI must have a surplus / abundance)
+                    switch (selectedResource)
+                    {
+                        case TradeResourceType.Oil: validPartner = country.invOilBarrels > 1000000 || country.resources.Exists(r => r.type == MineralType.Oil); break;
+                        case TradeResourceType.Gas: validPartner = country.resources.Exists(r => r.type == MineralType.NaturalGas); break;
+                        case TradeResourceType.Uranium: validPartner = country.resources.Exists(r => r.type == MineralType.Uranium); break;
+                        case TradeResourceType.Food: validPartner = (country.invRiceTonnes + country.invCassavaTonnes + country.invCocoaTonnes) > 200000; break;
+                        case TradeResourceType.Minerals: validPartner = country.invMineralsTonnes > 500000 || country.resources.Exists(r => r.type == MineralType.Gold); break;
+                        default: validPartner = true; break; 
+                    }
+                }
+                
+                if (validPartner) partners.Add(country.countryName);
+            }
+            
+            if (partners.Count == 0)
+                partners.Add("No Interested Partners");
+
+            _dropdownPartner.choices = partners;
+            _dropdownPartner.index = 0;
+        }
+
+        private float GetPlayerStock(TradeResourceType resource)
+        {
+            var gm = GameManager.Instance;
+            if (gm == null || gm.playerCountry == null) return 0f;
+            var player = gm.playerCountry;
+
+            switch (resource)
+            {
+                case TradeResourceType.Oil: return player.invOilBarrels;
+                case TradeResourceType.Gas: 
+                    int idxGas = player.resources.FindIndex(r => r.type == MineralType.NaturalGas);
+                    return idxGas >= 0 ? player.resources[idxGas].abundance * 100000f : 0f;
+                case TradeResourceType.Uranium:
+                    int idxUra = player.resources.FindIndex(r => r.type == MineralType.Uranium);
+                    return idxUra >= 0 ? player.resources[idxUra].abundance * 500f : 0f;
+                case TradeResourceType.Food: return player.invRiceTonnes + player.invCassavaTonnes + player.invCocoaTonnes;
+                case TradeResourceType.Minerals: return player.invMineralsTonnes;
+                default: return 0f;
+            }
+        }
+
+        private void OnMaxQuantityClicked()
+        {
+            if (_dropdownResource == null || _inputQuantity == null) return;
+            string selectedStr = _dropdownResource.value;
+            if (string.IsNullOrEmpty(selectedStr) || selectedStr == "None") return;
+            
+            bool isSelling = _dropdownTradeDirection == null || _dropdownTradeDirection.value == "Export (Sell)";
+            if (!isSelling) return; // Only makes sense to Max when selling your own stock
+
+            string resourceEnumStr = selectedStr.Split(' ')[0];
+            if (System.Enum.TryParse(resourceEnumStr, out TradeResourceType resource))
+            {
+                float stock = GetPlayerStock(resource);
+                _inputQuantity.value = stock.ToString("F0");
+            }
+        }
+
+        private void ValidateQuantityInput()
+        {
+            if (_inputQuantity == null || string.IsNullOrEmpty(_inputQuantity.value)) return;
+            bool isSelling = _dropdownTradeDirection == null || _dropdownTradeDirection.value == "Export (Sell)";
+            if (!isSelling) return;
+
+            string selectedStr = _dropdownResource?.value;
+            if (string.IsNullOrEmpty(selectedStr) || selectedStr == "None") return;
+
+            string resourceEnumStr = selectedStr.Split(' ')[0];
+            if (System.Enum.TryParse(resourceEnumStr, out TradeResourceType resource))
+            {
+                if (float.TryParse(_inputQuantity.value, out float qty))
+                {
+                    float stock = GetPlayerStock(resource);
+                    if (qty > stock)
+                    {
+                        _inputQuantity.SetValueWithoutNotify(stock.ToString("F0"));
+                        NotificationManager.Instance?.AddNotification("Quantity exceeds available inventory!", Color.yellow);
+                    }
+                }
+            }
+        }
+
+        private void PopulateActiveAgreements()
+        {
+            if (_activeAgreementsScroll == null) return;
+            _activeAgreementsScroll.Clear();
+
+            var gm = GameManager.Instance;
+            if (gm == null || gm.playerCountry == null) return;
+            
+            var player = gm.playerCountry;
+            bool foundAny = false;
+
+            if (player.activeTradeAgreements != null)
+            {
+                foreach (var route in player.activeTradeAgreements)
+                {
+                    if (route.status != StateCraft.Interfaces.TradeAgreementStatus.Active) continue;
+                    
+                    foundAny = true;
+                    var box = new VisualElement();
+                    box.style.backgroundColor = new StyleColor(new Color(0,0,0,0.3f));
+                    box.style.borderTopWidth = box.style.borderBottomWidth = box.style.borderLeftWidth = box.style.borderRightWidth = 1;
+                    box.style.borderTopColor = box.style.borderBottomColor = box.style.borderLeftColor = box.style.borderRightColor = new StyleColor(new Color(255/255f, 255/255f, 255/255f, 0.1f));
+                    box.style.paddingLeft = 8;
+                    box.style.paddingRight = 8;
+                    box.style.paddingTop = 6;
+                    box.style.paddingBottom = 6;
+                    box.style.marginBottom = 5;
+
+                    bool isSeller = route.isSeller;
+                    string partner = route.partnerCountry;
+                    string dirText = isSeller ? "EXPORTING" : "IMPORTING";
+                    
+                    var title = new Label($"{dirText} ➔ {partner.ToUpper()}");
+                    title.style.color = new StyleColor(isSeller ? new Color(0, 0.9f, 0.47f) : new Color(0, 0.82f, 1f));
+                    title.style.fontSize = 10;
+                    title.style.unityFontStyleAndWeight = FontStyle.Bold;
+                    box.Add(title);
+
+                    float localVal = route.monthlyPaymentUSD * player.exchangeRate;
+                    string valString = UiFormat.Money(localVal, player.currencySymbol);
+                    
+                    var stats = new Label($"{route.resource} : {UiFormat.MoneyRaw(route.resourceQuantity, "")} Units\nValue: {valString}/m | {route.durationMonths} mo. left");
+                    stats.style.color = new StyleColor(Color.white);
+                    stats.style.fontSize = 9;
+                    box.Add(stats);
+                    
+                    _activeAgreementsScroll.Add(box);
+                }
+            }
+
+            if (!foundAny)
+            {
+                var lbl = new Label("No Active Trade Routes");
+                lbl.style.color = new StyleColor(Color.grey);
+                lbl.style.fontSize = 10;
+                lbl.style.marginTop = 10;
+                _activeAgreementsScroll.Add(lbl);
+            }
+        }
+
+        private void UpdateMarketValue()
+        {
+            if (_lblMarketValue == null || _dropdownResource == null || _inputQuantity == null) return;
+            
+            string selectedStr = _dropdownResource.value;
+            if (string.IsNullOrEmpty(selectedStr) || selectedStr == "None")
+            {
+                _lblMarketValue.text = "₦0.0 / Month";
+                if (_lblTreasuryDelta != null) _lblTreasuryDelta.text = "-";
+                if (_lblRelationsImpact != null) _lblRelationsImpact.text = "-";
+                if (_lblStrategicRisk != null) _lblStrategicRisk.text = "Low";
+                if (_lblAdviserRecommendation != null) _lblAdviserRecommendation.text = "Awaiting proposal...";
+                return;
+            }
+            
+            string resourceEnumStr = selectedStr.Split(' ')[0];
+            if (System.Enum.TryParse(resourceEnumStr, out TradeResourceType resource))
+            {
+                if (float.TryParse(_inputQuantity.value, out float qty))
+                {
+                    bool isSelling = _dropdownTradeDirection == null || _dropdownTradeDirection.value == "Export (Sell)";
+                    float pricePerUnit = GlobalTradeMarket.GetPricePerUnit(resource);
+                    float totalValUSD = qty * pricePerUnit;
+                    
+                    var gm = GameManager.Instance;
+                    string localStr = "";
+                    float localVal = 0;
+                    if (gm != null && gm.playerCountry != null)
+                    {
+                        var p = gm.playerCountry;
+                        localVal = totalValUSD * p.exchangeRate;
+                        localStr = $"{UiFormat.Money(localVal, p.currencySymbol)}";
+                    }
+                    
+                    _lblMarketValue.text = $"{localStr} / Month";
+
+                    if (_lblTreasuryDelta != null)
+                    {
+                        _lblTreasuryDelta.text = isSelling ? $"+{localStr}" : $"-{localStr}";
+                        _lblTreasuryDelta.style.color = new StyleColor(isSelling ? new Color(0, 0.9f, 0.47f) : new Color(1f, 0.32f, 0.32f));
+                    }
+
+                    if (_lblRelationsImpact != null)
+                    {
+                        float relGain = (totalValUSD / 10000000f) + (isSelling ? 0.5f : 1.5f);
+                        relGain = UnityEngine.Mathf.Clamp(relGain, 1f, 15f);
+                        _lblRelationsImpact.text = $"+{relGain:F1}";
+                        _lblRelationsImpact.style.color = new StyleColor(new Color(0, 0.82f, 1f));
+                    }
+
+                    if (_lblStrategicRisk != null)
+                    {
+                        if (resource == TradeResourceType.Uranium)
+                        {
+                            _lblStrategicRisk.text = "HIGH";
+                            _lblStrategicRisk.style.color = new StyleColor(new Color(1f, 0.32f, 0.32f));
+                        }
+                        else
+                        {
+                            _lblStrategicRisk.text = "Low";
+                            _lblStrategicRisk.style.color = new StyleColor(new Color(0, 0.9f, 0.47f));
+                        }
+                    }
+
+                    if (_lblAdviserRecommendation != null)
+                    {
+                        if (qty == 0) _lblAdviserRecommendation.text = "Adjust the volume slider.";
+                        else if (isSelling) _lblAdviserRecommendation.text = $"Exporting {resource} will strengthen ties and inject {localStr}/month into our treasury. Recommended.";
+                        else _lblAdviserRecommendation.text = $"Importing this secures vital stock but costs {localStr}/month. Assess if the deficit is sustainable.";
+                    }
+                }
+            }
+        }
+
+        private void ShowErrorOnButton(string errorMsg)
+        {
+            if (_btnPropose != null)
+            {
+                string oldText = _btnPropose.text;
+                _btnPropose.text = errorMsg;
+                _btnPropose.style.backgroundColor = new StyleColor(Color.red);
+                
+                // Reset after 3 seconds
+                _btnPropose.schedule.Execute(() => 
+                {
+                    _btnPropose.text = "PROPOSE TRADE";
+                    _btnPropose.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0)); // Revert to stylesheet default
+                }).StartingIn(3000);
+            }
+        }
+
+        private void OnPropose()
+        {
+            var gm = GameManager.Instance;
+            if (gm == null || gm.DiplomacySystem == null) return;
+
+            if (_dropdownTradeDirection != null && _dropdownTradeDirection.value != "Export (Sell)" && _dropdownTradeDirection.value != "Import (Buy)")
+            {
+                ShowErrorOnButton("ERROR: SELECT TRADE TYPE");
+                return;
+            }
+
+            string partnerName = _dropdownPartner.value;
+            if (partnerName == "No Interested Partners" || string.IsNullOrEmpty(partnerName))
+            {
+                // Give a more helpful message if the list is empty due to no treaties
+                bool hasAnyTreaty = gm.playerCountry?.activeTreaties != null &&
+                    gm.playerCountry.activeTreaties.Exists(t => t.treatyName == "Trade Agreement");
+                if (!hasAnyTreaty)
+                    ShowErrorOnButton("SIGN TRADE AGREEMENT FIRST");
+                else
+                    ShowErrorOnButton("ERROR: NO PARTNER");
+                return;
+            }
+
+            CountryDataSO partner = null;
+            foreach (var c in gm.allCountries)
+            {
+                if (c.countryName == partnerName)
+                {
+                    partner = c;
+                    break;
+                }
+            }
+
+            if (partner == null) return;
+
+            string selectedStr = _dropdownResource.value;
+            if (string.IsNullOrEmpty(selectedStr) || selectedStr == "None")
+            {
+                ShowErrorOnButton("ERROR: NO RESOURCE");
+                return;
+            }
+            
+            // Extract the first word which maps to TradeResourceType
+            string resourceEnumStr = selectedStr.Split(' ')[0];
+            TradeResourceType resource = (TradeResourceType)System.Enum.Parse(typeof(TradeResourceType), resourceEnumStr);
+            
+            if (!float.TryParse(_inputQuantity.value, out float quantity))
+                quantity = 1000f;
+            
+            if (!int.TryParse(_inputDuration.value, out int duration))
+                duration = 12;
+
+            bool isSelling = _dropdownTradeDirection == null || _dropdownTradeDirection.value == "Export (Sell)";
+            if (isSelling && quantity > GetPlayerStock(resource))
+            {
+                ShowErrorOnButton("ERROR: INSUFFICIENT STOCK");
+                return;
+            }
+
+            bool isBulk = false;
+            
+            float pricePerUnit = GlobalTradeMarket.GetPricePerUnit(resource);
+            float basePayment = (quantity * pricePerUnit) / 1e6f; // Store payment internally in Millions if needed, wait, the game uses raw USD or Millions? 
+            // In DiplomacySystem we usually use raw USD. Let's use raw USD.
+            basePayment = quantity * pricePerUnit;
+
+            if (gm.DiplomacySystem is DiplomacySystem diplo)
+            {
+                var proposal = diplo.CreateProposal(gm.playerCountry, partner, resource, basePayment, duration, isSelling);
+                if (proposal == null)
+                {
+                    ShowErrorOnButton("SIGN TRADE AGREEMENT FIRST");
+                    return;
+                }
+                proposal.resourceQuantity = quantity;
+                proposal.isBulkTransfer = isBulk;
+                
+                // Immediately show the counter offer (since AI evaluation is synchronous in the plan)
+                OnReceiveCounterOffer(proposal);
+            }
+        }
+
+        private void OnReceiveCounterOffer(TradeAgreementProposal proposal)
+        {
+            _currentProposalId = proposal.id;
+            _counterOfferArea.style.display = DisplayStyle.Flex;
+            string type = "MONTHLY";
+            
+            float usd = proposal.baseMonthlyPaymentUSD;
+            float local = usd * GameManager.Instance.playerCountry.exchangeRate;
+            string currSym = GameManager.Instance.playerCountry.currencySymbol;
+            string currName = GameManager.Instance.playerCountry.currencyName;
+            
+            _lblCounterDetails.text = $"Payment ({type}): {UiFormat.MoneyRaw(usd, "$")} USD ({UiFormat.MoneyRaw(local, currSym)} {currName}) | Qty: {UiFormat.MoneyRaw(proposal.resourceQuantity, "")} | Duration: {proposal.baseDurationMonths} Months";
+        }
+
+        private void OnAccept()
+        {
+            if (string.IsNullOrEmpty(_currentProposalId)) return;
+
+            var gm = GameManager.Instance;
+            if (gm != null && gm.DiplomacySystem is DiplomacySystem diplo)
+            {
+                diplo.AcceptProposal(_currentProposalId);
+                _currentProposalId = null;
+                _counterOfferArea.style.display = DisplayStyle.None;
+                
+                // Refresh diplomacy dashboard to show the new agreement
+                var dashboard = FindObjectOfType<DiplomacyDashboardController>();
+                if (dashboard != null) dashboard.RefreshDiplomacyData();
+                Hide();
+            }
+        }
+
+        private void OnReject()
+        {
+            if (string.IsNullOrEmpty(_currentProposalId)) return;
+            
+            var gm = GameManager.Instance;
+            if (gm != null && gm.DiplomacySystem is DiplomacySystem diplo)
+            {
+                diplo.CancelProposal(_currentProposalId);
+            }
+            
+            _currentProposalId = null;
+            _counterOfferArea.style.display = DisplayStyle.None;
+        }
+    }
+}

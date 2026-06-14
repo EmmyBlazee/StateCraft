@@ -1,0 +1,121 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <!--
+        FILE: UI/Layouts/BattleResultCard.uxml
+        PURPOSE: Renders a single BattleResultMessage as a structured
+                 card with a losses table — mirrors the Supremacy 1914
+                 battle report style.
+        USED BY: MilitaryInboxController.cs — call BuildBattleCard()
+                 when the selected inbox item has isBattleResult == true.
+    -->
+
+    <ui:VisualElement name="BattleResultCard" class="battle-card">
+
+        <!-- ── Header bar ─────────────────────────────────── -->
+        <ui:VisualElement name="CardHeader" class="battle-header">
+            <ui:VisualElement name="OutcomeBadge" class="outcome-badge outcome-victory">
+                <ui:Label name="OutcomeLabel" text="VICTORY" class="outcome-text" />
+            </ui:VisualElement>
+            <ui:VisualElement name="HeaderMeta" class="header-meta">
+                <ui:Label name="EnemyName"  text="vs Nigeria" class="enemy-name" />
+                <ui:Label name="DateLabel"  text="11-06-2025" class="battle-date" />
+            </ui:VisualElement>
+            <ui:VisualElement name="FrontBadge" class="front-badge front-advancing">
+                <ui:Label name="FrontLabel" text="Advancing ▲" class="front-text" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ── Narrative line ─────────────────────────────── -->
+        <ui:Label name="NarrativeLabel"
+                  text="Our forces pushed back the enemy advance along the northern front."
+                  class="narrative-label" />
+
+        <!-- ── Losses table ───────────────────────────────── -->
+        <ui:VisualElement name="LossesTable" class="losses-table">
+
+            <!-- Column headers -->
+            <ui:VisualElement name="TableHeader" class="table-row table-header-row">
+                <ui:Label text="Unit type"    class="col-type col-label-header" />
+                <ui:Label name="OurFlagLabel"   text="OUR LOSSES" class="col-our col-label-header" />
+                <ui:Label name="EnemyFlagLabel" text="ENEMY EST."  class="col-enemy col-label-header" />
+            </ui:VisualElement>
+
+            <!-- Infantry row -->
+            <ui:VisualElement name="RowInfantry" class="table-row table-row-alt">
+                <ui:VisualElement class="col-type row-label-group">
+                    <ui:VisualElement class="unit-icon infantry-icon" />
+                    <ui:Label text="Infantry" class="row-unit-label" />
+                </ui:VisualElement>
+                <ui:Label name="OurInfantry"   text="0" class="col-our  loss-value" />
+                <ui:Label name="EnemyInfantry" text="0" class="col-enemy loss-value" />
+            </ui:VisualElement>
+
+            <!-- Tanks row -->
+            <ui:VisualElement name="RowTanks" class="table-row">
+                <ui:VisualElement class="col-type row-label-group">
+                    <ui:VisualElement class="unit-icon tank-icon" />
+                    <ui:Label text="Tanks" class="row-unit-label" />
+                </ui:VisualElement>
+                <ui:Label name="OurTanks"   text="0" class="col-our  loss-value" />
+                <ui:Label name="EnemyTanks" text="0" class="col-enemy loss-value" />
+            </ui:VisualElement>
+
+            <!-- APCs row -->
+            <ui:VisualElement name="RowAPCs" class="table-row table-row-alt">
+                <ui:VisualElement class="col-type row-label-group">
+                    <ui:VisualElement class="unit-icon apc-icon" />
+                    <ui:Label text="Armoured vehicles" class="row-unit-label" />
+                </ui:VisualElement>
+                <ui:Label name="OurAPCs"   text="0" class="col-our  loss-value" />
+                <ui:Label name="EnemyAPCs" text="0" class="col-enemy loss-value" />
+            </ui:VisualElement>
+
+            <!-- Aircraft row -->
+            <ui:VisualElement name="RowAir" class="table-row">
+                <ui:VisualElement class="col-type row-label-group">
+                    <ui:VisualElement class="unit-icon fighter-icon" />
+                    <ui:Label text="Aircraft" class="row-unit-label" />
+                </ui:VisualElement>
+                <ui:Label name="OurFighters"   text="0" class="col-our  loss-value" />
+                <ui:Label name="EnemyFighters" text="0" class="col-enemy loss-value" />
+            </ui:VisualElement>
+
+            <!-- Ships row -->
+            <ui:VisualElement name="RowNavy" class="table-row table-row-alt">
+                <ui:VisualElement class="col-type row-label-group">
+                    <ui:VisualElement class="unit-icon ship-icon" />
+                    <ui:Label text="Naval vessels" class="row-unit-label" />
+                </ui:VisualElement>
+                <ui:Label name="OurShips"   text="0" class="col-our  loss-value" />
+                <ui:Label name="EnemyShips" text="0" class="col-enemy loss-value" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <!-- ── KIA / Wounded summary ──────────────────────── -->
+        <ui:VisualElement name="CasualtyBar" class="casualty-bar">
+            <ui:VisualElement class="casualty-item">
+                <ui:Label text="KIA"     class="cas-label" />
+                <ui:Label name="KIACount" text="0" class="cas-value cas-kia" />
+            </ui:VisualElement>
+            <ui:VisualElement class="casualty-divider" />
+            <ui:VisualElement class="casualty-item">
+                <ui:Label text="Wounded"      class="cas-label" />
+                <ui:Label name="WoundedCount" text="0" class="cas-value cas-wounded" />
+            </ui:VisualElement>
+            <ui:VisualElement class="casualty-divider" />
+            <ui:VisualElement class="casualty-item">
+                <ui:Label text="Enemy KIA (est.)" class="cas-label" />
+                <ui:Label name="EnemyKIACount"    text="0" class="cas-value cas-enemy" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ── Supply / exhaustion footer ────────────────── -->
+        <ui:VisualElement name="SupplyFooter" class="supply-footer">
+            <ui:Label name="AmmoLabel"      text="Ammo: 100"       class="supply-item" />
+            <ui:Label name="FuelLabel"      text="Fuel: 100"       class="supply-item" />
+            <ui:Label name="ExhaustLabel"   text="Exhaustion: 20%" class="supply-item supply-warn" />
+            <ui:Label name="WillLabel"      text="Will: 85%"       class="supply-item" />
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

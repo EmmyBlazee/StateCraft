@@ -1,0 +1,62 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/Global.uss" />
+    <Style src="project://database/Assets/UI/Styles/EventDashboard.uss" />
+
+    <ui:VisualElement name="EventDashboard" class="event-dashboard-container" style="display: none; position: absolute; top:0; left:0; width:100%; height:100%; z-index:40;">
+        
+        <!-- Live Ticker Bar -->
+        <ui:VisualElement name="LiveTickerContainer" class="ticker-bar">
+            <!-- Pinned scrolling text -->
+            <ui:Label name="TickerText" text="NO CRITICAL ALERTS" class="ticker-text" />
+        </ui:VisualElement>
+
+        <!-- 3 Columns Split -->
+        <ui:VisualElement class="three-column-wrapper">
+            
+            <!-- LEFT: Active Alerts -->
+            <ui:VisualElement name="ColumnLeft" class="column-panel">
+                <ui:Label text="ACTIVE ALERTS" class="column-header" />
+                <ui:ScrollView name="ActiveAlertsScrollView">
+                    <!-- Populated dynamically by EventDashboardController -->
+                </ui:ScrollView>
+            </ui:VisualElement>
+
+            <!-- CENTER: Troop Tracker -->
+            <ui:VisualElement name="ColumnCenter" class="column-panel">
+                <ui:Label text="🪖 DEPLOYMENT IN PROGRESS" class="column-header" />
+                <ui:Label text="Track all active troop deployments in transit." style="margin-bottom:10px; font-size:12px; color:grey; white-space:normal;" />
+                <ui:ScrollView name="TroopTrackerScrollView">
+                    <!-- Populated dynamically by EventDashboardController -->
+                </ui:ScrollView>
+            </ui:VisualElement>
+
+            <!-- RIGHT: Decisions & AI Suggestions -->
+            <ui:VisualElement name="ColumnRight" class="column-panel">
+                <ui:Label text="DECISIONS &amp; ADVISORIES" class="column-header" />
+                <ui:Label text="Unresolved crises and strategic advice from your intelligence team." style="margin-bottom:10px; font-size:12px; color:grey; white-space:normal;" />
+                <ui:ScrollView name="SuggestionsScrollView">
+                    <!-- Populated dynamically by EventDashboardController -->
+                </ui:ScrollView>
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <!-- BOTTOM: Event History -->
+        <ui:VisualElement class="history-section">
+            <ui:VisualElement class="history-filters">
+                <ui:Button name="FilterAll" text="ALL" class="filter-btn filter-active" />
+                <ui:Button name="FilterMilitary" text="MILITARY" class="filter-btn" />
+                <ui:Button name="FilterDiplomacy" text="DIPLOMACY" class="filter-btn" />
+                <ui:Button name="FilterEconomy" text="ECONOMY" class="filter-btn" />
+                <ui:Button name="FilterInsurgency" text="INSURGENCY" class="filter-btn" />
+            </ui:VisualElement>
+            
+            <ui:ScrollView name="HistoryLogScrollView" style="flex-grow: 1;">
+                <!-- Populated by NewsSystem History -->
+            </ui:ScrollView>
+
+            <ui:Button name="BtnCloseEventDashboard" text="CLOSE EVENTS" class="button-premium" style="position: absolute; right: 20px; top: -15px; width: 140px; background-color: rgb(200, 50, 50);" />
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

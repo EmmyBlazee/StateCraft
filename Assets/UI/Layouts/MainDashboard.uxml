@@ -1,0 +1,61 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/Global.uss?fileID=7433441132597879392&amp;guid=f18ee3d1960f75747bcbb641ec70876e&amp;type=3#Global" />
+    <ui:VisualElement name="MainDashboard" picking-mode="Ignore" style="width: 100%; height: 100%; position: absolute; display: flex; pointer-events: none;">
+        <ui:VisualElement name="TopBar" picking-mode="Ignore" class="glass-panel hologram-border" style="height: 65px; width: 100%; flex-direction: row; align-items: center; padding: 0 25px; position: absolute; top: 0; pointer-events: auto; z-index: 10; justify-content: space-between;">
+            <ui:VisualElement name="PlayerInfo" style="flex-direction: row; align-items: center; width: 300px;">
+                <ui:Image name="PlayerFlag" style="width: 40px; height: 26px; border-radius: 2px; margin-right: 12px; background-color: rgba(0, 0, 0, 0.2);" />
+                <ui:VisualElement>
+                    <ui:Label name="PlayerCountryName" text="SELECT COUNTRY" style="font-size: 14px; color: rgb(0, 210, 255); -unity-font-style: bold;" />
+                    <ui:Label name="CurrentDateValue" text="JAN 2026" style="font-size: 10px; color: grey;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="PlayerVitals" style="flex-direction: row; align-items: center; justify-content: center; flex-grow: 1;">
+                <ui:VisualElement class="stat-container" style="margin-right: 30px;">
+                    <ui:Label text="TREASURY" class="stat-label" />
+                    <ui:Label name="TreasuryValue" text="$0.0B" class="stat-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="stat-container" style="margin-right: 30px;">
+                    <ui:Label text="STABILITY" class="stat-label" />
+                    <ui:Label name="StabilityValue" text="--%" class="stat-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="stat-container">
+                    <ui:Label text="INTEL" class="stat-label" />
+                    <ui:Label name="IntelValue" text="LOW" class="stat-value" style="color: rgb(186, 104, 200);" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="TimeControls" style="flex-direction: row; width: 300px; justify-content: flex-end;">
+                <ui:Button name="TimePause" text="‖" class="time-btn" />
+                <ui:Button name="Time1x" text="1x" class="time-btn time-btn-active" />
+                <ui:Button name="Time2x" text="2x" class="time-btn" />
+                <ui:Button name="Time3x" text="3x" class="time-btn" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="PanelContainer" style="position: absolute; top: 65px; bottom: 115px; left: 0; right: 0; width: 100%; pointer-events: auto;" />
+        <ui:VisualElement name="BottomNavBar" class="glass-panel hologram-border" style="height: 80px; width: 100%; position: absolute; bottom: 0; pointer-events: auto; flex-direction: row; justify-content: space-around; align-items: center; padding: 0 10%; z-index: 10;">
+            <ui:Button name="NavEconomy" class="modern-nav-btn">
+                <ui:Label class="modern-nav-icon" style="background-image: url(&quot;project://database/Assets/icons/economy.png?fileID=2800000&amp;guid=9818a6cb1c3fccb4aa6859f9d8f8c7c4&amp;type=3#economy&quot;); width: 56px; -unity-background-scale-mode: scale-to-fit;" />
+                <ui:Label text="ECONOMY" class="modern-nav-label" />
+            </ui:Button>
+            <ui:Button name="NavMilitary" class="modern-nav-btn">
+                <ui:Label class="modern-nav-icon" style="background-image: url(&quot;project://database/Assets/icons/Military.png?fileID=2800000&amp;guid=8b4eb402129b60c488f4626d9dfc9158&amp;type=3#Military&quot;); width: 63px; -unity-background-scale-mode: scale-to-fit;" />
+                <ui:Label text="MILITARY" class="modern-nav-label" />
+            </ui:Button>
+            <ui:Button name="NavIntelligence" class="modern-nav-btn">
+                <ui:Label class="modern-nav-icon" style="background-image: url(&quot;project://database/Assets/icons/Intel.png?fileID=2800000&amp;guid=6b9946a1be5292f468bc6a42d62b456a&amp;type=3#Intel&quot;); width: 67px; -unity-background-scale-mode: scale-to-fit;" />
+                <ui:Label text="INTEL" class="modern-nav-label" />
+            </ui:Button>
+            <ui:Button name="NavDiplomacy" class="modern-nav-btn">
+                <ui:Label class="modern-nav-icon" style="background-image: url(&quot;project://database/Assets/icons/Diplomacy.png?fileID=2800000&amp;guid=97bd2638a7141aa4c878c98a78d52d0f&amp;type=3#Diplomacy&quot;); width: 81px; -unity-background-scale-mode: scale-to-fit;" />
+                <ui:Label text="DIPLOMACY" class="modern-nav-label" />
+            </ui:Button>
+            <ui:Button name="NavEvents" class="modern-nav-btn" style="background-image: none; -unity-background-scale-mode: scale-to-fit; height: 67px;">
+                <ui:Label text="📰" class="modern-nav-icon" style="height: 46px; background-image: url(&quot;project://database/Assets/icons/EVENT.png?fileID=2800000&amp;guid=7b6feb2de27a2a6459f46aeb6bf4ef53&amp;type=3#EVENT&quot;); -unity-background-scale-mode: scale-to-fit; width: 76px;" />
+                <ui:Label text="EVENTS" class="modern-nav-label" />
+            </ui:Button>
+            <ui:Button name="NavSearch" class="modern-nav-btn">
+                <ui:Label class="modern-nav-icon" style="background-image: url(&quot;project://database/Assets/icons/Global.png?fileID=2800000&amp;guid=80a83b8d287064a4ba7e6cfbd8df2284&amp;type=3#Global&quot;); -unity-background-scale-mode: scale-to-fit; width: 83px;" />
+                <ui:Label text="GLOBAL" class="modern-nav-label" />
+            </ui:Button>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

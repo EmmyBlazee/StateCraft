@@ -1,0 +1,202 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: baeda2237f0052a42be5a9e9529bf96e, type: 3}
+  m_Name: Libya
+  m_EditorClassIdentifier: 
+  countryName: Libya
+  capitalCity: Tripoli
+  currencyName: Dinar
+  currencySymbol: LD
+  countryFlag: {fileID: 0}
+  mapColor: {r: 0.25808373, g: 0.97445893, b: 0.4064477, a: 1}
+  population: 7236089
+  populationGrowthRate: 0.025
+  populationChangeLastTurn: 918855
+  invRiceTonnes: 0
+  invCassavaTonnes: 0
+  invCocoaTonnes: 0
+  invMineralsTonnes: 0
+  invOilBarrels: 0
+  invTechGoods: 0
+  intelligenceLevel: 5
+  intelligenceBudget: 50
+  satelliteCount: 0
+  satellitesUnderConstruction: 0
+  satelliteBuildMonthsRemaining: 0
+  operativeCount: 12
+  globalIntelCoverage: 5
+  foreignAgentsDetected: 0
+  agencyIntegrity: 67
+  activeCovertOps: []
+  detectedThreats: []
+  gdp: 45.00000
+  income: 8.006789
+  spending: 2.930588
+  treasury: 2.72587
+  inflationRate: 0.004
+  gdpGrowthRate: 0.02
+  playerBudget: 0
+  exchangeRate: 4.8
+  baseExchangeRate: 4.8
+  debt: 102.41571
+  domesticDebt: 9.775441e+9
+  foreignDebt: 6.516961e+9
+  taxRate: 15
+  subsidyLevel: 5
+  importTariffRate: 10
+  corruptionIndex: 30
+  povertyRate: 45
+  unemploymentRate: 12
+  foreignInvestment: 50
+  resourceSovereignty: 100
+  foodSecurity: 70
+  environmentScore: 50
+  debtServiceRatio: 100
+  centralBankInterestRate: 5
+  publicApproval: 97.5
+  creditRating: D
+  foreignAidReceived: 0
+  tradeVolumeUSD: 0
+  resources:
+  - type: 0
+    abundance: 95
+    marketValue: 0
+  - type: 6
+    abundance: 60
+    marketValue: 0
+  roadLevel: 1
+  railLevel: 0
+  portLevel: 1
+  airportLevel: 1
+  healthcareLevel: 1
+  educationLevel: 1
+  hospitalLevel: 1
+  telecomLevel: 1
+  electricityLevel: 30
+  hasNuclearPower: 0
+  isImportingUranium: 0
+  powerGasPlants: 2
+  powerHydroPlants: 1
+  powerNuclearPlants: 0
+  powerSolarPlants: 0
+  powerWindPlants: 0
+  gridTransmissionEfficiency: 0.85
+  currentBlackoutRisk: 0
+  indAgriRice: 0
+  indAgriCassava: 0
+  indAgriCocoa: 0
+  indMiningLocal: 0
+  indMiningOil: 0
+  indTechIT: 0
+  indTechFintech: 0
+  indManufacturing: 0
+  techIndustryOutput: 100
+  workforceOil: 10000
+  workforceMining: 25000
+  workforceAgri: 150000
+  workforceManufacturing: 5000
+  stability: 84.72612
+  security: 58.82168
+  nationalPoliceSize: 15000
+  militaryStrength: 2.8853045
+  armyStrength: 5
+  navyStrength: 0.7706087
+  airForceStrength: 0.7706087
+  unitInfantry: 343239
+  unitTanks: 1168
+  unitAPCs: 3746
+  unitArtillery: 80
+  unitRifles: 345933
+  unitFighters: 136
+  unitBombers: 10
+  unitAttackHelis: 337
+  unitUAVs: 50
+  unitFrigates: 5
+  unitDestroyers: 2
+  unitSubmarines: 1
+  unitPatrolBoats: 12
+  baseArmyCount: 23
+  baseNavyCount: 2
+  baseAirForceCount: 3
+  baseRDFCount: 1
+  baseDefenseFactoryCount: 0
+  importsThisTurn: 0
+  rdfReadiness: 100
+  militaryBudgetPercent: 2.5
+  militaryDoctrine: 1
+  securitySpending: 0
+  militaryProjects: []
+  militaryBudgetUSD: 0.97712547
+  militaryReadiness: 75
+  armyStats:
+    branchName: Army
+    personnel: 343239
+    equipment: 4794
+    readiness: 75
+    morale: 80
+  navyStats:
+    branchName: Navy
+    personnel: 12000
+    equipment: 45
+    readiness: 60
+    morale: 75
+  airForceStats:
+    branchName: Air Force
+    personnel: 8000
+    equipment: 528
+    readiness: 65
+    morale: 85
+  rdfStats:
+    branchName: Rapid Deployable Force
+    personnel: 5000
+    equipment: 80
+    readiness: 90
+    morale: 95
+  reserveFuel: 100
+  reserveAmmo: 100
+  reserveMedical: 100
+  reserveFood: 100
+  activeOperations: []
+  trainingPipelines: []
+  warEnemyName: 
+  warTurnsActive: 0
+  warExhaustion: 0
+  warWillToFight: 100
+  totalKIA: 0
+  totalWounded: 0
+  warFatigueStabilityDrain: 0
+  assignedGenerals: []
+  activeBlockades: []
+  isBlockaded: 0
+  hasNuclearWeapon: 0
+  hasChemicalWeapon: 0
+  wmdDevelopmentProgress: 0
+  wmdProgramDiscovered: 0
+  rdfCooldownMonths: 0
+  lastRDFTurn: -100
+  lastRDFRegionIndex: -1
+  globalPrestige: 50
+  allianceCount: 0
+  sanctionIssuedCount: 0
+  sanctionReceivedCount: 0
+  inboxMessages: []
+  activeCrises: []
+  activeTradeAgreements: []
+  activeTreaties: []
+  covertBudget: 0
+  counterIntelligence: 43.7
+  exposureRisk: 0
+  recruitedAssets: []
+  regions: []
+  activeFactions: []
+  activePolicies: []
+  activeProjects: []
