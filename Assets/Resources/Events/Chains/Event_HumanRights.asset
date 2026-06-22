@@ -31,4 +31,4 @@ MonoBehaviour:
   maxStability: 100
   nextEventIfA: {fileID: 0}
   nextEventIfB: {fileID: 0}
-  turnsUntilNextEvent: 1
+  turnsUntilNextEvent: 0

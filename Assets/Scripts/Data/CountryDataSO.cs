@@ -3,6 +3,16 @@ using UnityEngine;
 
 namespace StateCraft.Data
 {
+    [System.Serializable]
+    public class BudgetAllocation
+    {
+        public string id;
+        public string title;
+        public string description;
+        public string faIcon;
+        [Range(0f, 100f)] public float sharePercentage;
+    }
+
     [CreateAssetMenu(fileName = "NewCountry", menuName = "StateCraft/Country Data")]
     public class CountryDataSO : ScriptableObject
     {
@@ -11,6 +21,7 @@ namespace StateCraft.Data
 
         private void OnEnable()
         {
+            EnsureBudgetAllocations();
             if (militaryState == null) militaryState = new StateCraft.Systems.MilitaryState();
             // Populate new personnel from existing legacy stats for backwards compatibility
             if (militaryState.army.infantry == 0 && unitInfantry > 0)
@@ -107,15 +118,41 @@ namespace StateCraft.Data
         public float draftImportTariffRate;
         public float draftExportDutyRate;
         public bool hasBudgetDraft;
-        public float budgetMilitaryShare = 23f;
-        public float budgetIntelligenceShare = 7f;
-        public float budgetEducationShare = 14f;
-        public float budgetHealthShare = 12f;
-        public float budgetInfrastructureShare = 18f;
-        public float budgetAgricultureShare = 9f;
-        public float budgetEnergyShare = 8f;
-        public float budgetWelfareShare = 5f;
+        [Header("Dynamic Budget Allocations")]
+        public List<BudgetAllocation> budgetAllocations = new List<BudgetAllocation>();
+
+        // Backwards compatibility properties mapping to budgetAllocations
+        public float budgetMilitaryShare { get => GetBudgetShare("MILITARY"); set => SetBudgetShare("MILITARY", value); }
+        public float budgetIntelligenceShare { get => GetBudgetShare("INTELLIGENCE"); set => SetBudgetShare("INTELLIGENCE", value); }
+        public float budgetEducationShare { get => GetBudgetShare("EDUCATION"); set => SetBudgetShare("EDUCATION", value); }
+        public float budgetHealthShare { get => GetBudgetShare("HEALTH"); set => SetBudgetShare("HEALTH", value); }
+        public float budgetInfrastructureShare { get => GetBudgetShare("INFRASTRUCTURE"); set => SetBudgetShare("INFRASTRUCTURE", value); }
+        public float budgetAgricultureShare { get => GetBudgetShare("AGRICULTURE"); set => SetBudgetShare("AGRICULTURE", value); }
+        public float budgetEnergyShare { get => GetBudgetShare("ENERGY"); set => SetBudgetShare("ENERGY", value); }
+        public float budgetWelfareShare { get => GetBudgetShare("WELFARE"); set => SetBudgetShare("WELFARE", value); }
+
+        private float GetBudgetShare(string id) => budgetAllocations?.Find(b => b.id == id)?.sharePercentage ?? 0f;
+        private void SetBudgetShare(string id, float val) { var b = budgetAllocations?.Find(x => x.id == id); if (b != null) b.sharePercentage = val; }
+
+        public void EnsureBudgetAllocations()
+        {
+            if (budgetAllocations != null && budgetAllocations.Count > 0) return;
+            
+            budgetAllocations = new List<BudgetAllocation>
+            {
+                new BudgetAllocation { id = "MILITARY", title = "MILITARY", description = "Defense, operations, equipment and personnel.", faIcon = "&#xf0e4;", sharePercentage = 23f }, // f0e4 = shield-halved or gauge
+                new BudgetAllocation { id = "INTELLIGENCE", title = "INTELLIGENCE", description = "Surveillance and counter operations.", faIcon = "&#xf8d9;", sharePercentage = 7f }, // secret
+                new BudgetAllocation { id = "EDUCATION", title = "EDUCATION", description = "Schools, universities and education programs.", faIcon = "&#xf549;", sharePercentage = 14f }, // school
+                new BudgetAllocation { id = "HEALTH", title = "HEALTH", description = "Hospitals, healthcare programs and research.", faIcon = "&#xf0fe;", sharePercentage = 12f }, // plus-square
+                new BudgetAllocation { id = "INFRASTRUCTURE", title = "INFRASTRUCTURE", description = "Roads, rail, ports, airports and public works.", faIcon = "&#xf6fc;", sharePercentage = 18f }, // tractor/city
+                new BudgetAllocation { id = "AGRICULTURE", title = "AGRICULTURE", description = "Farming, irrigation, food security and rural development.", faIcon = "&#xf4d8;", sharePercentage = 9f }, // seedling
+                new BudgetAllocation { id = "ENERGY", title = "ENERGY", description = "Power generation, distribution and renewable energy.", faIcon = "&#xf0e7;", sharePercentage = 8f }, // bolt
+                new BudgetAllocation { id = "WELFARE", title = "SOCIAL WELFARE", description = "Pensions, welfare schemes and social support.", faIcon = "&#xf4c8;", sharePercentage = 5f } // hand-holding-heart
+            };
+        }
+
         public string lastTaxReformSummary = "";
+        public int lastBudgetApprovalTurn = -3; // Initialize negative to allow immediate day 1 budget passing
         public string lastBudgetDraftSummary = "";
         public string lastAdviserDecision = "";
         public List<string> taxReformLog = new List<string>();
@@ -243,6 +280,7 @@ namespace StateCraft.Data
         public List<MilitaryProject> militaryProjects = new List<MilitaryProject>();
 
         public float militaryBudgetUSD = 2.5f; // Billions
+        public float militaryUpkeepUSD = 0f;
 
         public float militaryReadiness = 75f; // Percentage
         

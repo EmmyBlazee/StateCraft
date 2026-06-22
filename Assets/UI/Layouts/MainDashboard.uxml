@@ -12,7 +12,7 @@
             <ui:VisualElement name="PlayerVitals" style="flex-direction: row; align-items: center; justify-content: center; flex-grow: 1;">
                 <ui:VisualElement class="stat-container" style="margin-right: 30px;">
                     <ui:Label text="TREASURY" class="stat-label" />
-                    <ui:Label name="TreasuryValue" text="$0.0B" class="stat-value" />
+                    <ui:Label name="TreasuryValue" text="" class="stat-value" />
                 </ui:VisualElement>
                 <ui:VisualElement class="stat-container" style="margin-right: 30px;">
                     <ui:Label text="STABILITY" class="stat-label" />

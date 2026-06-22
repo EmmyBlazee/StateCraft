@@ -17,6 +17,10 @@ namespace StateCraft.Core
         public CountryDataSO playerCountry;
         public float playerBudget = 1000f;
 
+        [Header("Economy Database")]
+        public Data.Economy.EconomyDatabaseSO EconomyDatabase;
+
+
         // Phase 2: Global World Tension (0-100). Rises with wars, falls with diplomacy.
         public float worldTension = 20f;
 

@@ -1,0 +1,1 @@
+﻿                            <ui:VisualElement name="BudgetAlertsContainer" class="budget-panel"><ui:Label text="BUDGET ALERTS" class="budget-panel-title" /><ui:Button text="VIEW ALL ALERTS  ?" class="budget-report-btn" /></ui:VisualElement>

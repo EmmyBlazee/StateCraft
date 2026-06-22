@@ -1,0 +1,106 @@
+/* ═══════════════════════════════════════════════════════════════
+   Splash.uss  —  StateCraft splash screen & loading widget styles
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Root overlay ─────────────────────────────────────────────── */
+.splash-root {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    background-color: rgba(0, 0, 0, 0);   /* transparent — Splash.png shows through */
+}
+
+/* ── Loading widget — bottom-right corner ─────────────────────── */
+.loading-widget {
+    position: absolute;
+    right: 40px;
+    bottom: 40px;
+    width: 260px;
+    align-items: flex-end;
+    flex-direction: column;
+}
+
+/* ── Animated pulse ring ──────────────────────────────────────── */
+.pulse-ring {
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;
+    border-width: 2px;
+    border-color: rgba(0, 210, 255, 0.9);
+    background-color: rgba(0, 210, 255, 0.15);
+    margin-bottom: 10px;
+    /* Unity USS transition — pulses opacity */
+    transition-property: opacity;
+    transition-duration: 0.8s;
+    transition-timing-function: ease-in-out;
+}
+
+/* ── Dots row ─────────────────────────────────────────────────── */
+.dots-row {
+    flex-direction: row;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.loading-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 4px;
+    background-color: rgba(0, 210, 255, 1);
+    margin-left: 5px;
+    opacity: 0.2;
+    transition-property: opacity;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-in-out;
+}
+
+/* ── Bar group ────────────────────────────────────────────────── */
+.bar-group {
+    width: 260px;
+    align-items: flex-end;
+}
+
+/* ── LOADING label ────────────────────────────────────────────── */
+.loading-label {
+    font-size: 10px;
+    color: rgba(0, 210, 255, 0.85);
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+}
+
+/* ── Progress bar track ───────────────────────────────────────── */
+.loading-bar {
+    width: 260px;
+    height: 3px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 2px;
+    border-width: 0;
+}
+
+/* Unity UIToolkit ProgressBar inner fill — targeted via USS */
+.loading-bar > .unity-progress-bar__progress {
+    background-color: rgba(0, 210, 255, 1);
+    border-radius: 2px;
+    /* Glow effect via box-shadow isn't available in UIToolkit,
+       so we use a bright solid fill — clean & legible */
+}
+
+.loading-bar > .unity-progress-bar__background {
+    background-color: rgba(255, 255, 255, 0.07);
+    border-radius: 2px;
+    border-width: 0;
+}
+
+/* ── Version watermark — bottom-left ──────────────────────────── */
+.version-label {
+    position: absolute;
+    left: 40px;
+    bottom: 44px;
+    font-size: 8px;
+    color: rgba(144, 164, 174, 0.55);
+    -unity-font-style: bold;
+    letter-spacing: 3px;
+}

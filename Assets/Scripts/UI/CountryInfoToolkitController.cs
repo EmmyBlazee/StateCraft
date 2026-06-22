@@ -206,7 +206,19 @@ namespace StateCraft.UI
             var player = GameManager.Instance?.playerCountry;
 
             if (_nameLabel != null) _nameLabel.text = country.countryName.ToUpper();
-            if (_flagImage != null && country.countryFlag != null) _flagImage.sprite = country.countryFlag;
+            if (_flagImage != null)
+            {
+                string flagName = country.countryName.Replace(" ", "_");
+                Sprite flagSprite = UnityEngine.Resources.Load<Sprite>($"Flags/{flagName}");
+                if (flagSprite != null)
+                {
+                    _flagImage.sprite = flagSprite;
+                }
+                else if (country.countryFlag != null)
+                {
+                    _flagImage.sprite = country.countryFlag; // Fallback to serialized flag
+                }
+            }
 
             // Derive a government descriptor from available data (no governmentType field on SO)
             string govType = country.stability > 70f ? "STABLE DEMOCRACY" :

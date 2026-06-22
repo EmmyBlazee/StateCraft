@@ -12,10 +12,65 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: baeda2237f0052a42be5a9e9529bf96e, type: 3}
   m_Name: Kenya
   m_EditorClassIdentifier: 
+  militaryState:
+    army:
+      infantry: 342536
+      rdfPersonnel: 5000
+    airForce:
+      pilots: 1200
+      groundCrew: 4800
+      airControllers: 2000
+    navy:
+      sailors: 12000
+      navalOfficers: 0
+      marines: 0
+      technicalCrew: 0
+    armyReadiness:
+      personnel: 0
+      training: 0
+      equipment: 0
+      funding: 0
+      morale: 0
+    airForceReadiness:
+      personnel: 0
+      training: 0
+      equipment: 0
+      funding: 0
+      morale: 0
+    navyReadiness:
+      personnel: 0
+      training: 0
+      equipment: 0
+      funding: 0
+      morale: 0
+    activeOperations: []
+    battleLog: []
+    currentWar:
+      enemyCountryName: 
+      turnsActive: 0
+      warExhaustion: 0
+      willToFight: 0
+      totalKIA: 0
+      totalWounded: 0
+      frontlineAdvance: 0
+      airSuperiorityHeld: 0
+      currentPhase: 
+      recentBattles: []
+    navalMissions:
+      coastalPatrolActive: 0
+      antiPiracyMissionActive: 0
+      maritimeMonitoringActive: 0
+      offshoreResourceGuard: 0
+      seaTradeProtection: 0
+    pipelines: []
   countryName: Kenya
   capitalCity: Nairobi
   currencyName: Shilling
   currencySymbol: KSh
+  scenarioTitle: 
+  scenarioContext: 
+  scenarioPriorities: 
+  hasShownBriefing: 0
   countryFlag: {fileID: 0}
   mapColor: {r: 0.33444157, g: 0.78286755, b: 0.100849524, a: 1}
   population: 54550234
@@ -38,7 +93,7 @@ MonoBehaviour:
   agencyIntegrity: 67
   activeCovertOps: []
   detectedThreats: []
-  gdp: 131.50000
+  gdp: 131.5
   income: 6.72076
   spending: 2.9669476
   treasury: 3.14191
@@ -53,6 +108,65 @@ MonoBehaviour:
   taxRate: 15
   subsidyLevel: 5
   importTariffRate: 10
+  incomeTaxRate: 12
+  corporateTaxRate: 18
+  vatRate: 7.5
+  exportDutyRate: 2
+  draftIncomeTaxRate: 0
+  draftCorporateTaxRate: 0
+  draftVatRate: 0
+  draftImportTariffRate: 0
+  draftExportDutyRate: 0
+  hasBudgetDraft: 0
+  budgetAllocations:
+  - id: MILITARY
+    title: MILITARY
+    description: Defense, operations, equipment and personnel.
+    faIcon: '&#xf0e4;'
+    sharePercentage: 23
+  - id: INTELLIGENCE
+    title: INTELLIGENCE
+    description: Surveillance and counter operations.
+    faIcon: '&#xf8d9;'
+    sharePercentage: 7
+  - id: EDUCATION
+    title: EDUCATION
+    description: Schools, universities and education programs.
+    faIcon: '&#xf549;'
+    sharePercentage: 14
+  - id: HEALTH
+    title: HEALTH
+    description: Hospitals, healthcare programs and research.
+    faIcon: '&#xf0fe;'
+    sharePercentage: 12
+  - id: INFRASTRUCTURE
+    title: INFRASTRUCTURE
+    description: Roads, rail, ports, airports and public works.
+    faIcon: '&#xf6fc;'
+    sharePercentage: 18
+  - id: AGRICULTURE
+    title: AGRICULTURE
+    description: Farming, irrigation, food security and rural development.
+    faIcon: '&#xf4d8;'
+    sharePercentage: 9
+  - id: ENERGY
+    title: ENERGY
+    description: Power generation, distribution and renewable energy.
+    faIcon: '&#xf0e7;'
+    sharePercentage: 8
+  - id: WELFARE
+    title: SOCIAL WELFARE
+    description: Pensions, welfare schemes and social support.
+    faIcon: '&#xf4c8;'
+    sharePercentage: 5
+  lastTaxReformSummary: 
+  lastBudgetApprovalTurn: -3
+  lastBudgetDraftSummary: 
+  lastAdviserDecision: 
+  taxReformLog: []
+  dismissedAdviserTitles: []
+  adviserDismissTurn: 0
+  adviserNextRecommendationTurn: 0
   corruptionIndex: 30
   povertyRate: 45
   unemploymentRate: 12
@@ -66,6 +180,12 @@ MonoBehaviour:
   creditRating: D
   foreignAidReceived: 0
   tradeVolumeUSD: 0
+  prevInflationRate: 0
+  prevPublicApproval: 0
+  prevMonthlyTaxRevenue: 0
+  prevMonthBalance: 0
+  taxArrears: 0
+  budgetHistory: []
   resources:
   - type: 0
     abundance: 30
@@ -139,6 +259,7 @@ MonoBehaviour:
   securitySpending: 0
   militaryProjects: []
   militaryBudgetUSD: 0.98453784
+  militaryUpkeepUSD: 0
   militaryReadiness: 75
   armyStats:
     branchName: Army
@@ -169,6 +290,7 @@ MonoBehaviour:
   reserveMedical: 100
   reserveFood: 100
   activeOperations: []
+  activeInsurgentCamps: []
   trainingPipelines: []
   warEnemyName: 
   warTurnsActive: 0
@@ -195,6 +317,7 @@ MonoBehaviour:
   activeCrises: []
   activeTradeAgreements: []
   activeTreaties: []
+  battleResults: []
   covertBudget: 0
   counterIntelligence: 43.7
   exposureRisk: 0

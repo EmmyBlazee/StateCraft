@@ -24,6 +24,55 @@ namespace StateCraft.UI
             public System.Action<CountryDataSO> Apply;
         }
 
+        public static string GetEconomicAdviserName(CountryDataSO c)
+        {
+            // Future placeholder for actual Cabinet/Minister lookup
+            return "Chief Economic Adviser";
+        }
+
+        public static Dictionary<string, float> GetAutoAllocateWeights(CountryDataSO c)
+        {
+            if (c == null) return new Dictionary<string, float>();
+
+            // Base weights adjusted dynamically by crises or national state
+            var weights = new Dictionary<string, float>
+            {
+                { "MILITARY", c.warTurnsActive > 0 ? 30f : 20f },
+                { "INTELLIGENCE", c.exposureRisk > 50f ? 12f : 7f },
+                { "EDUCATION", 16f },
+                { "HEALTH", 14f },
+                { "INFRASTRUCTURE", c.electricityLevel < 50f ? 20f : 18f },
+                { "AGRICULTURE", c.foodSecurity < 50f ? 18f : 10f },
+                { "ENERGY", 9f },
+                { "WELFARE", c.povertyRate > 50f ? 8f : 4f }
+            };
+
+            // Normalize weights to 100%
+            float total = 0f;
+            foreach (var w in weights.Values) total += w;
+            var normalized = new Dictionary<string, float>();
+            foreach (var kvp in weights) normalized[kvp.Key] = (kvp.Value / total) * 100f;
+
+            return normalized;
+        }
+
+        public static float GetDynamicBorrowAmount(CountryDataSO c)
+        {
+            if (c == null) return 50f;
+            // Borrow tranche scales with GDP (e.g. 1% of GDP converted to local currency)
+            float amt = (c.gdp * 0.01f) * c.exchangeRate;
+            return Mathf.Max(10f, Mathf.Round(amt / 10f) * 10f); // Round to nearest 10
+        }
+
+        public static float GetDynamicRepayAmount(CountryDataSO c)
+        {
+            if (c == null) return 50f;
+            // Repay tranche scales with total debt
+            float debtLocal = c.debt * c.exchangeRate;
+            float amt = debtLocal * 0.05f;
+            return Mathf.Max(10f, Mathf.Round(amt / 10f) * 10f); // Round to nearest 10
+        }
+
         // ─────────────────────────────────────────────────────────────────────
         // Public API
         // ─────────────────────────────────────────────────────────────────────
@@ -275,9 +324,37 @@ namespace StateCraft.UI
                     }
                 });
 
+            // 10. High Deficit / Blocked Budget Finance Lock
+            float deficit = c.spending - c.income;
+            if (deficit > 0f && c.treasury < deficit)
+                list.Add(new AdviserRecommendation
+                {
+                    Title      = "Issue Sovereign Bonds (Deficit Finance)",
+                    Category   = "Debt Management",
+                    Rationale  = $"Treasury is insufficient to finance the projected deficit of {sym}{deficit * c.exchangeRate:F1}B. Operations are blocked.",
+                    Benefits   = $"+ Instant {sym}2.5T injection to Treasury\n+ Unlocks budget approval",
+                    Risks      = "- Massive increase in National Debt\n- Credit rating pressure",
+                    Cost       = 0f,
+                    UrgencyScore = 98,
+                    Apply = country =>
+                    {
+                        float borrowAmountBUSD = 2500f / country.exchangeRate; // Approx 2.5T local
+                        country.debt += borrowAmountBUSD;
+                        if (Core.GameManager.Instance != null) {
+                            Core.GameManager.Instance.playerBudget += borrowAmountBUSD;
+                            country.treasury = Core.GameManager.Instance.playerBudget;
+                        } else {
+                            country.treasury += borrowAmountBUSD;
+                        }
+                        country.publicApproval     = Mathf.Max(0f, country.publicApproval - 2f);
+                        LogReform(country, "Sovereign Bonds Issued: Treasury augmented to finance deficit.", sym);
+                    }
+                });
+
             // Sort by urgency descending
             list.Sort((a, b) => b.UrgencyScore.CompareTo(a.UrgencyScore));
             return list;
+
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -316,3 +393,4 @@ namespace StateCraft.UI
         }
     }
 }
+

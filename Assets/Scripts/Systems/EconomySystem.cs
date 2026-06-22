@@ -16,21 +16,54 @@ namespace StateCraft.Systems
             if (float.IsNaN(country.stability) || float.IsInfinity(country.stability)) country.stability = 50f;
 
             // Calculate dynamic military upkeep based on active forces
-            country.militaryBudgetUSD = country.CalculateMilitaryUpkeep();
+            country.militaryUpkeepUSD = country.CalculateMilitaryUpkeep();
 
-            // Reset income/spending based on base values + policies
+            // Reset income based on base values + policies
             country.income = CalculateProjectedIncome(country);
             
             // Subsidies are a direct cost based on GDP (applied monthly)
             float subsidyCost = (country.gdp / 12f) * (country.subsidyLevel / 100f);
+            float uraniumImportFee = country.isImportingUranium ? 0.05f : 0f; // 0.05B = 
             
-            // NEW: Uranium Import Fee (Fixed monthly cost if importing)
-            float uraniumImportFee = country.isImportingUranium ? 0.05f : 0f; // 0.05B = $50M
-            
-            // Add dynamic military upkeep (in Billions USD) directly to monthly spending
-            country.spending = subsidyCost + country.militaryBudgetUSD + uraniumImportFee; 
+            // Check for underfunded military
+            if (country.militaryUpkeepUSD > country.militaryBudgetUSD) {
+                country.militaryReadiness = Mathf.Max(0f, country.militaryReadiness - 2f);
+                country.stability = Mathf.Max(0f, country.stability - 0.5f);
+                if (country == Core.GameManager.Instance?.playerCountry) {
+                    NotificationManager.Instance?.AddNotification($"MILITARY UNDERFUNDED: Allocated budget is insufficient to cover active unit upkeep! Readiness dropping.", UnityEngine.Color.red);
+                }
+            } else {
+                country.militaryReadiness = Mathf.Min(100f, country.militaryReadiness + 0.5f);
+            }
+
+            // DO NOT OVERWRITE country.spending! Let it be ruled by the Economy UI True Deficit allocations!
+            // Deduct mandatory background operations directly from income so they don't break the locked budget UI.
+            country.income -= (subsidyCost + uraniumImportFee);
+
+            // ── Tax Gap → Arrears Accumulation ───────────────────────────────
+            // Theoretical full-compliance revenue vs what is actually collected.
+            // The gap is accumulated monthly into taxArrears (unpaid taxes owed to the state).
+            {
+                float fullRevenue      = EconomyLogicEvaluator.GetTotalTaxRevenue(country);
+                // Match the UI's compliance/efficiency formulas exactly
+                float compliancePct    = Mathf.Clamp(100f - country.corruptionIndex, 10f, 100f);
+                float collectionEff    = Mathf.Lerp(60f, 95f, country.stability / 100f) / 100f;
+                float actualCollected  = fullRevenue * (compliancePct / 100f) * collectionEff;
+                float monthlyGap       = Mathf.Max(0f, fullRevenue - actualCollected);
+                country.taxArrears    += monthlyGap;
+
+                // High unpaid arrears slowly erode the credit rating (~every 6 months of 20%+ GDP gap)
+                float gdpMonthly = country.gdp / 12f;
+                if (gdpMonthly > 0f && (country.taxArrears / gdpMonthly) > 0.20f)
+                {
+                    // Downgrade credit rating with low probability (≈10% per month at crisis level)
+                    if (UnityEngine.Random.value < 0.10f)
+                        country.creditRating = DegradeRating(country.creditRating);
+                }
+            }
 
             // Apply Policy Effects
+
             foreach (var policy in country.activePolicies)
             {
                 country.income -= policy.recurringCost; // Some policies might be costs
@@ -240,15 +273,46 @@ namespace StateCraft.Systems
 
                 float net = country.income - country.spending - debtInt - corruptLeak - opsCost;
 
+                float monthlyGDP = country.gdp / 12f;
+                float regionalDisruption = 1f;
+                if (country.regions != null)
+                {
+                    foreach (var region in country.regions)
+                    {
+                        if (region.specialization == RegionSpecialization.ResourceRich && region.insurgencyLevel > 30f)
+                        {
+                            regionalDisruption -= (region.insurgencyLevel - 30f) * 0.005f;  
+                        }
+                    }
+                }
+                regionalDisruption = Mathf.Max(0.1f, regionalDisruption);
+                monthlyGDP *= regionalDisruption;
+
+                float exactTaxRevenue = StateCraft.Systems.EconomyLogicEvaluator.GetTaxRevenue(country, "Income") + 
+                                        StateCraft.Systems.EconomyLogicEvaluator.GetTaxRevenue(country, "Corporate") + 
+                                        StateCraft.Systems.EconomyLogicEvaluator.GetTaxRevenue(country, "VAT");
+                float exactTariffRevenue = StateCraft.Systems.EconomyLogicEvaluator.GetTaxRevenue(country, "Import") + 
+                                           StateCraft.Systems.EconomyLogicEvaluator.GetTaxRevenue(country, "Export");
+
+                float exactResourceIncome = 0;
+                if (country.resources != null)
+                {
+                    foreach (var res in country.resources)
+                    {
+                        float infraBonus = 1f + (country.railLevel * 0.05f) + (country.portLevel * 0.03f) + (country.electricityLevel / 200f);
+                        exactResourceIncome += (res.abundance / 100f) * (monthlyGDP * 0.05f) * infraBonus;
+                    }
+                }
+
                 var entry = new EconomyLedgerEntry
                 {
                     month           = gm.TurnSystem?.CurrentTurn ?? 0,
                     openingTreasury = country.treasury - net,
                     closingTreasury = country.treasury,
                     netChange       = net,
-                    taxRevenue      = country.income * 0.6f,   // approximate split
-                    resourceIncome  = country.income * 0.3f,
-                    tariffRevenue   = country.income * 0.1f,
+                    taxRevenue      = exactTaxRevenue,
+                    resourceIncome  = exactResourceIncome,
+                    tariffRevenue   = exactTariffRevenue,
                     tradeIncome     = tradeInc,
                     militaryUpkeep  = milUpkeep,
                     subsidyCost     = subsidyCostCalc,
@@ -463,11 +527,8 @@ namespace StateCraft.Systems
             regionalDisruption = Mathf.Max(0.1f, regionalDisruption);
             monthlyGDP *= regionalDisruption;
 
-            // Revenue based on player-set Tax Rate (applied to monthly GDP)
-            float taxRevenue = monthlyGDP * (country.taxRate / 100f);
-            
-            // Tariff Revenue: Generated based on importTariffRate
-            float tariffRevenue = monthlyGDP * 0.015f * (country.importTariffRate / 100f);
+            // Revenue based on all individual tax rates
+            float totalTaxAndTariffRevenue = EconomyLogicEvaluator.GetTotalTaxRevenue(country);
             
             // Resource Dividend: 5% of Monthly GDP scaled by resource wealth
             float resourceIncome = 0;
@@ -478,12 +539,7 @@ namespace StateCraft.Systems
                 resourceIncome += (res.abundance / 100f) * (monthlyGDP * 0.05f) * infraBonus;
             }
             
-            // Adjust by stability (tax collection efficiency)
-            // Infrastructure (Roads) improves tax reach
-            float reachBonus = 1f + (country.roadLevel * 0.02f);
-            taxRevenue *= (0.3f + (country.stability / 142f)) * reachBonus; 
-            
-            return taxRevenue + resourceIncome + tariffRevenue;
+            return totalTaxAndTariffRevenue + resourceIncome;
         }
 
         private void ProcessDebtService(CountryDataSO country)
@@ -650,3 +706,4 @@ namespace StateCraft.Systems
         }
     }
 }
+

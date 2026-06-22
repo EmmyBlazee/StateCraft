@@ -338,7 +338,7 @@ namespace StateCraft.UI
                 _threatLevelBadge.style.borderRightColor = stageColor;
             }
 
-            if (_headerBudget != null) _headerBudget.text = $"{UiFormat.Money(country.militaryBudgetUSD * country.exchangeRate, sym)} / Turn";
+            if (_headerBudget != null) _headerBudget.text = $"Allocated: {UiFormat.Money(country.militaryBudgetUSD * country.exchangeRate, sym)}  |  Upkeep: {UiFormat.Money(country.CalculateMilitaryUpkeep() * country.exchangeRate, sym)} / Turn";
             if (_headerReadiness != null)
             {
                 _headerReadiness.text = $"{country.militaryReadiness:F0}%";

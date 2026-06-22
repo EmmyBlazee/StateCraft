@@ -13,10 +13,10 @@
             </ui:VisualElement>
 
             <!-- Search Bar -->
-            <ui:VisualElement style="flex-direction: row; align-items: center; background-color: rgba(255, 255, 255, 0.05); border-radius: 4px; padding: 10px 15px; margin-bottom: 25px; border-width: 1px; border-color: rgba(0, 210, 255, 0.2);">
-                <ui:Label text="SCAN" style="margin-right: 15px; color: #00d2ff; font-size: 10px; -unity-font-style: bold;" />
-                <ui:TextField name="SearchInput" placeholder-text="Search countries..." style="flex-grow: 1; background-color: rgba(0,0,0,0); border-width: 0; color: white;" />
-            </ui:VisualElement>
+            <ui:VisualElement style="flex-direction: row; align-items: center; background-color: rgba(255, 255, 255, 0.05); border-radius: 4px; padding: 2px 10px; margin-bottom: 25px; border-width: 1px; border-color: rgba(0, 210, 255, 0.2); height: 36px;">
+    <ui:Label text="SCAN" style="margin-right: 8px; color: #00d2ff; font-size: 10px; -unity-font-style: bold;" />
+    <ui:TextField name="SearchInput" class="search-input-field" placeholder-text="Search countries..." style="flex-grow: 1; margin: 0; padding: 0;" />
+</ui:VisualElement>
 
             <!-- Country List -->
             <ui:ScrollView name="CountryList" style="flex-grow: 1; margin-bottom: 20px;" />

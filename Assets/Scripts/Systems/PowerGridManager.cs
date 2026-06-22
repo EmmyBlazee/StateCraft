@@ -40,14 +40,20 @@ namespace StateCraft.Systems
             }
         }
         
+        public const float GasPlantCapacity = 500f;
+        public const float HydroPlantCapacity = 1200f;
+        public const float NuclearPlantCapacity = 3000f;
+        public const float SolarPlantCapacity = 200f;
+        public const float WindPlantCapacity = 150f;
+
         public float CalculateCapacity(CountryDataSO country)
         {
             float total = 0;
-            total += country.powerGasPlants * 500f; // 500 MW
-            total += country.powerHydroPlants * 1200f; // 1200 MW
-            total += country.powerNuclearPlants * 3000f; // 3000 MW
-            total += country.powerSolarPlants * 200f; // 200 MW
-            total += country.powerWindPlants * 150f; // 150 MW
+            total += country.powerGasPlants * GasPlantCapacity;
+            total += country.powerHydroPlants * HydroPlantCapacity;
+            total += country.powerNuclearPlants * NuclearPlantCapacity;
+            total += country.powerSolarPlants * SolarPlantCapacity;
+            total += country.powerWindPlants * WindPlantCapacity;
             return total;
         }
 

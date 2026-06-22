@@ -1,0 +1,38 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         engine="UnityEngine.UIElements"
+         editor="UnityEditor.UIElements"
+         noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+
+    <Style src="project://database/Assets/UI/Styles/Splash.uss" />
+
+    <!-- Full-screen anchor — sits on top of the Splash.png image -->
+    <ui:VisualElement name="SplashRoot" class="splash-root">
+
+        <!-- Bottom-right loading widget -->
+        <ui:VisualElement name="LoadingWidget" class="loading-widget">
+
+            <!-- Animated pulse ring -->
+            <ui:VisualElement name="PulseRing" class="pulse-ring" />
+
+            <!-- Three bouncing dots -->
+            <ui:VisualElement name="DotsRow" class="dots-row">
+                <ui:VisualElement name="Dot1" class="loading-dot" />
+                <ui:VisualElement name="Dot2" class="loading-dot" />
+                <ui:VisualElement name="Dot3" class="loading-dot" />
+            </ui:VisualElement>
+
+            <!-- Label + thin progress bar stacked -->
+            <ui:VisualElement name="BarGroup" class="bar-group">
+                <ui:Label name="LoadingLabel" text="LOADING  0%" class="loading-label" />
+                <ui:ProgressBar name="LoadingBar" value="0" class="loading-bar" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <!-- Subtle version watermark bottom-left -->
+        <ui:Label name="VersionLabel" text="STATECRAFT  v0.1  ALPHA" class="version-label" />
+
+    </ui:VisualElement>
+</ui:UXML>
