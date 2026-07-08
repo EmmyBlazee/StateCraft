@@ -1,62 +1,52 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/Styles/Global.uss" />
-    <Style src="project://database/Assets/UI/Styles/EventDashboard.uss" />
+    <ui:VisualElement name="EventDashboard" class="standard-dashboard hologram-border" style="display: none;">
 
-    <ui:VisualElement name="EventDashboard" class="event-dashboard-container" style="display: none; position: absolute; top:0; left:0; width:100%; height:100%; z-index:40;">
-        
-        <!-- Live Ticker Bar -->
-        <ui:VisualElement name="LiveTickerContainer" class="ticker-bar">
-            <!-- Pinned scrolling text -->
-            <ui:Label name="TickerText" text="NO CRITICAL ALERTS" class="ticker-text" />
+        <!-- HEADER -->
+        <ui:VisualElement name="Header" class="econ-topbar">
+            <ui:VisualElement class="econ-country-block">
+                <ui:VisualElement>
+                    <ui:VisualElement class="econ-country-line">
+                        <ui:Label text="SITUATION ROOM" class="econ-country-name" style="color: rgb(255, 82, 82);" />
+                        <ui:VisualElement class="econ-flag" />
+                    </ui:VisualElement>
+                    <ui:Label text="ACTION REQUIRED" class="econ-country-subtitle" style="color: rgb(255, 152, 0);" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="econ-kpi-strip">
+                <ui:VisualElement class="econ-kpi"><ui:Label text="ACTIVE EVENTS" class="econ-kpi-label" /><ui:Label name="KpiActiveEvents" text="12" class="econ-kpi-value" /><ui:Label text="Total" class="econ-kpi-delta" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="CRITICAL" class="econ-kpi-label" style="color: rgb(255, 82, 82);" /><ui:Label name="KpiCritical" text="2" class="econ-kpi-value" /><ui:Label text="Immediate" class="econ-kpi-delta negative" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="HIGH" class="econ-kpi-label" style="color: rgb(255, 152, 0);" /><ui:Label name="KpiHigh" text="4" class="econ-kpi-value" /><ui:Label text="Urgent" class="econ-kpi-delta warning" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="MEDIUM" class="econ-kpi-label" style="color: rgb(241, 196, 15);" /><ui:Label name="KpiMedium" text="6" class="econ-kpi-value" /><ui:Label text="Pending" class="econ-kpi-delta" /></ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="econ-date-box">
+                <ui:Label name="DateMain" text="08 JAN 2026" class="econ-date-main" />
+                <ui:Label name="DateSub" text="Thursday, 09:12" class="econ-date-sub" />
+            </ui:VisualElement>
+            <ui:Button name="BtnCloseEventDashboard" text="×" class="econ-icon-button" />
         </ui:VisualElement>
 
-        <!-- 3 Columns Split -->
-        <ui:VisualElement class="three-column-wrapper">
+        <!-- CONTENT -->
+        <ui:VisualElement style="flex-grow: 1; flex-direction: row;">
             
-            <!-- LEFT: Active Alerts -->
-            <ui:VisualElement name="ColumnLeft" class="column-panel">
-                <ui:Label text="ACTIVE ALERTS" class="column-header" />
-                <ui:ScrollView name="ActiveAlertsScrollView">
-                    <!-- Populated dynamically by EventDashboardController -->
+            <!-- CURRENT EVENTS (Actionable) -->
+            <ui:VisualElement style="flex-grow: 1; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                <ui:Label text="CURRENT EVENTS" style="font-size: 16px; color: white; -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
+                <ui:ScrollView name="ActiveEventsScroll" style="flex-grow: 1;">
+                    <ui:VisualElement name="ActiveEventsList" style="flex-direction: column;" />
                 </ui:ScrollView>
             </ui:VisualElement>
 
-            <!-- CENTER: Troop Tracker -->
-            <ui:VisualElement name="ColumnCenter" class="column-panel">
-                <ui:Label text="🪖 DEPLOYMENT IN PROGRESS" class="column-header" />
-                <ui:Label text="Track all active troop deployments in transit." style="margin-bottom:10px; font-size:12px; color:grey; white-space:normal;" />
-                <ui:ScrollView name="TroopTrackerScrollView">
-                    <!-- Populated dynamically by EventDashboardController -->
-                </ui:ScrollView>
-            </ui:VisualElement>
-
-            <!-- RIGHT: Decisions & AI Suggestions -->
-            <ui:VisualElement name="ColumnRight" class="column-panel">
-                <ui:Label text="DECISIONS &amp; ADVISORIES" class="column-header" />
-                <ui:Label text="Unresolved crises and strategic advice from your intelligence team." style="margin-bottom:10px; font-size:12px; color:grey; white-space:normal;" />
-                <ui:ScrollView name="SuggestionsScrollView">
-                    <!-- Populated dynamically by EventDashboardController -->
+            <!-- UPCOMING EVENTS (Calendar) -->
+            <ui:VisualElement style="width: 250px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                <ui:Label text="UPCOMING" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
+                <ui:ScrollView name="UpcomingEventsScroll" style="flex-grow: 1;">
+                    <ui:VisualElement name="UpcomingEventsList" style="flex-direction: column;" />
                 </ui:ScrollView>
             </ui:VisualElement>
 
         </ui:VisualElement>
-
-        <!-- BOTTOM: Event History -->
-        <ui:VisualElement class="history-section">
-            <ui:VisualElement class="history-filters">
-                <ui:Button name="FilterAll" text="ALL" class="filter-btn filter-active" />
-                <ui:Button name="FilterMilitary" text="MILITARY" class="filter-btn" />
-                <ui:Button name="FilterDiplomacy" text="DIPLOMACY" class="filter-btn" />
-                <ui:Button name="FilterEconomy" text="ECONOMY" class="filter-btn" />
-                <ui:Button name="FilterInsurgency" text="INSURGENCY" class="filter-btn" />
-            </ui:VisualElement>
-            
-            <ui:ScrollView name="HistoryLogScrollView" style="flex-grow: 1;">
-                <!-- Populated by NewsSystem History -->
-            </ui:ScrollView>
-
-            <ui:Button name="BtnCloseEventDashboard" text="CLOSE EVENTS" class="button-premium" style="position: absolute; right: 20px; top: -15px; width: 140px; background-color: rgb(200, 50, 50);" />
-        </ui:VisualElement>
-
     </ui:VisualElement>
 </ui:UXML>

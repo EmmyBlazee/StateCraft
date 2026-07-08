@@ -1,4 +1,4 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
     <!--
         FILE: UI/Layouts/BattleResultCard.uxml
         PURPOSE: Renders a single BattleResultMessage as a structured

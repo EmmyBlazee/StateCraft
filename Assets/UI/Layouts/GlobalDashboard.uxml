@@ -1,0 +1,72 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/Global.uss" />
+    <ui:VisualElement name="GlobalDashboard" class="standard-dashboard hologram-border" style="display: none; background-color: rgba(5,8,12,0.95);">
+
+        <!-- HEADER -->
+        <ui:VisualElement name="Header" class="econ-topbar">
+            <ui:VisualElement class="econ-country-block">
+                <ui:VisualElement>
+                    <ui:VisualElement class="econ-country-line">
+                        <ui:Label text="GLOBAL OVERVIEW" class="econ-country-name" style="color: rgb(0, 200, 255);" />
+                        <ui:VisualElement class="econ-flag" />
+                    </ui:VisualElement>
+                    <ui:Label text="WORLD MONITOR" class="econ-country-subtitle" style="color: rgb(150, 150, 150);" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="econ-kpi-strip">
+                <ui:VisualElement class="econ-kpi"><ui:Label text="WORLD STABILITY" class="econ-kpi-label" /><ui:Label name="KpiWorldStab" text="72%" class="econ-kpi-value" /><ui:Label text="Average" class="econ-kpi-delta" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="AFRICAN STABILITY" class="econ-kpi-label" /><ui:Label name="KpiAfrStab" text="65%" class="econ-kpi-value" /><ui:Label text="Average" class="econ-kpi-delta" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="OIL PRICE" class="econ-kpi-label" style="color: rgb(241, 196, 15);" /><ui:Label name="KpiOil" text="$84" class="econ-kpi-value" /><ui:Label text="per barrel" class="econ-kpi-delta" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="GLOBAL INFLATION" class="econ-kpi-label" style="color: rgb(255, 82, 82);" /><ui:Label name="KpiInflation" text="4.2%" class="econ-kpi-value" /><ui:Label text="Rising" class="econ-kpi-delta negative" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="MAJOR WARS" class="econ-kpi-label" style="color: rgb(255, 82, 82);" /><ui:Label name="KpiWars" text="2" class="econ-kpi-value" /><ui:Label text="Active" class="econ-kpi-delta negative" /></ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="econ-date-box">
+                <ui:Label name="DateMain" text="08 JAN 2026" class="econ-date-main" />
+                <ui:Label name="DateSub" text="Thursday, 09:12" class="econ-date-sub" />
+            </ui:VisualElement>
+            <ui:Button name="BtnCloseGlobalDashboard" text="×" class="econ-icon-button" />
+        </ui:VisualElement>
+
+        <!-- CONTENT -->
+        <ui:ScrollView style="flex-grow: 1; padding: 16px;">
+            
+            <ui:VisualElement style="flex-direction: row; margin-bottom: 16px;">
+                <!-- LIVE WORLD EVENTS -->
+                <ui:VisualElement style="flex-grow: 1; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                    <ui:Label text="LIVE WORLD EVENTS" style="font-size: 16px; color: white; -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
+                    <ui:VisualElement name="LiveEventsList" style="flex-direction: column;" />
+                </ui:VisualElement>
+
+                <!-- WORLD LEADERS EXTREMES -->
+                <ui:VisualElement style="width: 300px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                    <ui:Label text="WORLD LEADERS" style="font-size: 16px; color: white; -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
+                    <ui:VisualElement name="LeadersList" style="flex-direction: column;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- RANKINGS -->
+            <ui:VisualElement style="flex-direction: row; margin-bottom: 16px;">
+                <!-- TOP ECONOMIES -->
+                <ui:VisualElement style="flex-grow: 1; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                    <ui:Label text="TOP 10 ECONOMIES" style="font-size: 16px; color: white; -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
+                    <ui:VisualElement name="TopEconomiesList" style="flex-direction: column;" />
+                </ui:VisualElement>
+
+                <!-- TOP MILITARY POWERS -->
+                <ui:VisualElement style="flex-grow: 1; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                    <ui:Label text="TOP MILITARY POWERS" style="font-size: 16px; color: white; -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
+                    <ui:VisualElement name="TopMilitaryList" style="flex-direction: column;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- REGIONAL SUMMARIES -->
+            <ui:VisualElement style="padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                <ui:Label text="REGIONAL STABILITY" style="font-size: 16px; color: white; -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
+                <ui:VisualElement name="RegionalSummariesGrid" style="flex-direction: row; flex-wrap: wrap; justify-content: space-between;" />
+            </ui:VisualElement>
+
+        </ui:ScrollView>
+    </ui:VisualElement>
+</ui:UXML>

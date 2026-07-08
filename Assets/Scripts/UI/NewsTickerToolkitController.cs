@@ -53,6 +53,8 @@ namespace StateCraft.UI
 
         private void OnDisable()
         {
+            _initialized = false;
+            _isScrolling = false;
             if (NewsSystem.Instance != null)
                 NewsSystem.Instance.OnGlobalNewsPublished -= AddNews;
         }
@@ -278,6 +280,9 @@ namespace StateCraft.UI
         private void Update()
         {
             if (!_initialized || !_isScrolling)
+                return;
+
+            if (_newsLabel == null || _tickerTrack == null)
                 return;
 
             if (_textWidth <= 0)

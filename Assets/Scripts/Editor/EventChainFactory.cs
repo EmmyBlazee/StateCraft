@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using StateCraft.Data;
-using System.IO;
+using System.Collections.Generic;
 
 namespace StateCraft.Editor
 {
@@ -26,37 +26,62 @@ namespace StateCraft.Editor
             GameEventSO crisis = ScriptableObject.CreateInstance<GameEventSO>();
             crisis.eventTitle = "Economic Crisis";
             crisis.description = "Treasury reserves are dwindling rapidly due to unforeseen market shocks. The people are looking for an immediate solution.";
-            crisis.optionAText = "Print Money";
-            crisis.optionAStability = -2f;
-            crisis.optionAGDP = 0f;
-            crisis.optionBText = "Borrow Foreign Aid";
-            crisis.optionBCost = -5f; // Positive treasury injection but with debt implication later
-            crisis.optionBStability = 0f;
+            crisis.severity = "High";
+            crisis.timeRemainingDays = 12;
+            crisis.turnsUntilNextEvent = 2;
 
             GameEventSO inflation = ScriptableObject.CreateInstance<GameEventSO>();
             inflation.eventTitle = "Inflation Surge";
             inflation.description = "The decision to print money has devalued our currency. Savings have been wiped out, and public anger is mounting rapidly.";
-            inflation.optionAText = "Subsidize Basic Goods";
-            inflation.optionACost = 3f;
-            inflation.optionAStability = 5f;
-            inflation.optionBText = "Ignore The Crisis";
-            inflation.optionBCost = 0f;
-            inflation.optionBStability = -15f;
-
+            inflation.severity = "Critical";
+            inflation.timeRemainingDays = 6;
+            
             GameEventSO debtCrisis = ScriptableObject.CreateInstance<GameEventSO>();
             debtCrisis.eventTitle = "Debt Crisis";
             debtCrisis.description = "Our creditors are demanding immediate repayment of our recent massive loans. We must either default or enact severe austerity.";
-            debtCrisis.optionAText = "Enact Austerity";
-            debtCrisis.optionACost = 0f;
-            debtCrisis.optionAStability = -20f;
-            debtCrisis.optionBText = "Default on Debt";
-            debtCrisis.optionBCost = 0f;
-            debtCrisis.optionBStability = -10f; // Leads to debt default event via Economy system dynamically
+            debtCrisis.severity = "Critical";
+            debtCrisis.timeRemainingDays = 6;
 
-            // Link them
-            crisis.nextEventIfA = inflation;
-            crisis.nextEventIfB = debtCrisis;
-            crisis.turnsUntilNextEvent = 2; // Trigger consequence 2 months later
+            crisis.choices = new List<GameEventChoice> {
+                new GameEventChoice {
+                    choiceText = "Print Money",
+                    stabilityEffect = -2f,
+                    gdpEffect = 0f,
+                    nextEvent = inflation
+                },
+                new GameEventChoice {
+                    choiceText = "Borrow Foreign Aid",
+                    costUSD = -5f, // Gain 5B
+                    stabilityEffect = 0f,
+                    nextEvent = debtCrisis
+                }
+            };
+
+            inflation.choices = new List<GameEventChoice> {
+                new GameEventChoice {
+                    choiceText = "Subsidize Basic Goods",
+                    costUSD = 3f,
+                    stabilityEffect = 5f
+                },
+                new GameEventChoice {
+                    choiceText = "Ignore The Crisis",
+                    costUSD = 0f,
+                    stabilityEffect = -15f
+                }
+            };
+
+            debtCrisis.choices = new List<GameEventChoice> {
+                new GameEventChoice {
+                    choiceText = "Enact Austerity",
+                    costUSD = 0f,
+                    stabilityEffect = -20f
+                },
+                new GameEventChoice {
+                    choiceText = "Default on Debt",
+                    costUSD = 0f,
+                    stabilityEffect = -10f
+                }
+            };
 
             // Save Chain 1
             AssetDatabase.CreateAsset(debtCrisis, $"{folderPath}/Event_DebtCrisis.asset");
@@ -69,34 +94,59 @@ namespace StateCraft.Editor
             GameEventSO coup = ScriptableObject.CreateInstance<GameEventSO>();
             coup.eventTitle = "Coup Attempt";
             coup.description = "Dissident generals have mobilized troops in the capital. They demand your immediate resignation.";
-            coup.optionAText = "Crack Down Hard";
-            coup.optionACost = 2f;
-            coup.optionASecurity = -10f;
-            coup.optionAStability = 5f; 
-            coup.optionBText = "Attempt Negotiations";
-            coup.optionBCost = 0f;
-            coup.optionBStability = -5f;
+            coup.severity = "Critical";
+            coup.timeRemainingDays = 2;
+            coup.turnsUntilNextEvent = 1;
 
             GameEventSO humanRights = ScriptableObject.CreateInstance<GameEventSO>();
             humanRights.eventTitle = "Human Rights Criticism";
             humanRights.description = "The international community heavily condemns our violent suppression of the coup. Sanctions are being considered.";
-            humanRights.optionAText = "Defend Actions";
-            humanRights.optionAStability = 5f;
-            humanRights.optionBText = "Apologize";
-            humanRights.optionBStability = -5f;
+            humanRights.severity = "High";
+            humanRights.timeRemainingDays = 12;
 
             GameEventSO factionSplit = ScriptableObject.CreateInstance<GameEventSO>();
             factionSplit.eventTitle = "Military Fracture";
             factionSplit.description = "By negotiating, we showed weakness. The military has fractured into loyalist and rebel factions, plunging us into civil strife.";
-            factionSplit.optionAText = "Mobilize Loyalists";
-            factionSplit.optionASecurity = -20f;
-            factionSplit.optionBText = "Flee The Capital";
-            factionSplit.optionBStability = -30f;
+            factionSplit.severity = "Critical";
+            factionSplit.timeRemainingDays = 6;
 
-            // Link them
-            coup.nextEventIfA = humanRights;
-            coup.nextEventIfB = factionSplit;
-            coup.turnsUntilNextEvent = 1;
+            coup.choices = new List<GameEventChoice> {
+                new GameEventChoice {
+                    choiceText = "Crack Down Hard",
+                    costUSD = 2f,
+                    securityEffect = -10f,
+                    stabilityEffect = 5f,
+                    nextEvent = humanRights
+                },
+                new GameEventChoice {
+                    choiceText = "Attempt Negotiations",
+                    costUSD = 0f,
+                    stabilityEffect = -5f,
+                    nextEvent = factionSplit
+                }
+            };
+
+            humanRights.choices = new List<GameEventChoice> {
+                new GameEventChoice {
+                    choiceText = "Defend Actions",
+                    stabilityEffect = 5f
+                },
+                new GameEventChoice {
+                    choiceText = "Apologize",
+                    stabilityEffect = -5f
+                }
+            };
+
+            factionSplit.choices = new List<GameEventChoice> {
+                new GameEventChoice {
+                    choiceText = "Mobilize Loyalists",
+                    securityEffect = -20f
+                },
+                new GameEventChoice {
+                    choiceText = "Flee The Capital",
+                    stabilityEffect = -30f
+                }
+            };
 
             // Save Chain 2
             AssetDatabase.CreateAsset(humanRights, $"{folderPath}/Event_HumanRights.asset");
@@ -105,6 +155,6 @@ namespace StateCraft.Editor
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-}
+        }
     }
 }

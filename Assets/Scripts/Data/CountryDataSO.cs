@@ -23,6 +23,16 @@ namespace StateCraft.Data
         {
             EnsureBudgetAllocations();
             if (militaryState == null) militaryState = new StateCraft.Systems.MilitaryState();
+            
+            if (trainingPipelines == null) trainingPipelines = new List<RecruitmentPipeline>();
+            if (productionOrders == null) productionOrders = new List<ProductionOrder>();
+            if (completedProductions == null) completedProductions = new List<CompletedProductionItem>();
+            if (availableOffers == null) availableOffers = new List<ProcurementOffer>();
+            if (activeContracts == null) activeContracts = new List<ProcurementContract>();
+            if (researchProjects == null) researchProjects = new List<ResearchProject>();
+            if (activeInsurgentCamps == null) activeInsurgentCamps = new List<StateCraft.Systems.InsurgentCamp>();
+            if (defenseFactories == null) defenseFactories = new List<DefenseFactory>();
+
             // Populate new personnel from existing legacy stats for backwards compatibility
             if (militaryState.army.infantry == 0 && unitInfantry > 0)
             {
@@ -300,6 +310,12 @@ namespace StateCraft.Data
         public List<MilitaryOperation> activeOperations = new List<MilitaryOperation>();
         public List<StateCraft.Systems.InsurgentCamp> activeInsurgentCamps = new List<StateCraft.Systems.InsurgentCamp>();
         public List<RecruitmentPipeline> trainingPipelines = new List<RecruitmentPipeline>();
+        public List<ProductionOrder> productionOrders = new List<ProductionOrder>();
+        public List<CompletedProductionItem> completedProductions = new List<CompletedProductionItem>();
+        public List<ProcurementOffer> availableOffers = new List<ProcurementOffer>();
+        public List<ProcurementContract> activeContracts = new List<ProcurementContract>();
+        public List<ResearchProject> researchProjects = new List<ResearchProject>();
+        public List<DefenseFactory> defenseFactories = new List<DefenseFactory>();
 
         // War Stamina Tracking
         public string warEnemyName = "";      // Name of the country we are at war with
@@ -340,6 +356,13 @@ namespace StateCraft.Data
         public List<GlobalCrisis> activeCrises = new List<GlobalCrisis>();
         public List<StateCraft.Interfaces.TradeAgreement> activeTradeAgreements = new List<StateCraft.Interfaces.TradeAgreement>();
         public List<DiplomaticTreaty> activeTreaties = new List<DiplomaticTreaty>();
+
+        [Header("Diplomacy Models")]
+        public List<DiplomaticEvent> diplomacyEvents = new List<DiplomaticEvent>();
+        public List<Embassy> embassies = new List<Embassy>();
+        public List<InternationalOrganization> internationalOrgs = new List<InternationalOrganization>();
+        public float diplomacyInfluence = 71f;
+        public float embassyBudget = 1.2f; // Billions
 
         [Header("=== Battle History ===")]
         public List<StateCraft.Systems.BattleResultMessage> battleResults = new List<StateCraft.Systems.BattleResultMessage>();
@@ -607,5 +630,88 @@ namespace StateCraft.Data
         public int frigatesAssigned;
         public int destroyersAssigned;
         public int submarinesAssigned;
+    }
+
+    // ─── Production System ───────────────────────────────────────────────────────
+
+    [System.Serializable]
+    public class ProductionOrder
+    {
+        public string id;               // e.g. "TNK", "RIFLE", "FTR"
+        public string unitLabel;        // e.g. "Main Battle Tanks"
+        public string facilityName;     // e.g. "Tank Factory"
+        public string category;         // "Army Equipment", "Vehicles", "Aviation", "Naval"
+        public int quantity;
+        public int monthsTotal;
+        public int monthsRemaining;
+        public float monthlyCostB;      // Billions USD / month
+        public float monthlyOutput;     // Units produced per month
+        public float progressPct => monthsTotal > 0 ? ((monthsTotal - monthsRemaining) / (float)monthsTotal) * 100f : 0f;
+    }
+
+    [System.Serializable]
+    public class DefenseFactory
+    {
+        public string id;               // e.g. "FAC_TANK"
+        public string factoryName;      // e.g. "Tank Factory"
+        public string produceType;      // e.g. "TNK"
+        public int level;               // 1-3
+        public float utilizationPct;    // 0-100
+    }
+
+    [System.Serializable]
+    public class CompletedProductionItem
+    {
+        public string unitLabel;
+        public int quantity;
+        public string completedDate;    // Display string e.g. "02 Jan 2026"
+    }
+
+    [System.Serializable]
+    public class ProcurementOffer {
+        public string id;
+        public string title;
+        public string subtitle;
+        public string[] tags;
+        public string supplier;
+        public string country;
+        public string unitCost;
+        public string totalCost;
+        public string quantity;
+        public string deliveryTime;
+        public string flagEmoji;
+        
+        public string produceType;
+        public int unitQuantity;
+        public int deliveryMonths;
+        public float totalCostB;
+    }
+
+    [System.Serializable]
+    public class ProcurementContract {
+        public string id;
+        public string unitLabel;
+        public string supplier;
+        public string category;
+        public int quantity;
+        public int monthsTotal;
+        public int monthsRemaining;
+        public float totalCostB;
+        public float monthlyCostB;
+        public string status;
+
+        public string produceType;
+        public int unitQuantity;
+    }
+
+    [System.Serializable]
+    public class ResearchProject {
+        public string id;
+        public string projectName;
+        public string category;
+        public int monthsTotal;
+        public int monthsRemaining;
+        public string status;
+        public string completedDate;
     }
 }

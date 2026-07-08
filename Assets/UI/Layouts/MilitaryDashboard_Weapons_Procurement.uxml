@@ -1,0 +1,15 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/Global.uss" />
+
+    <ui:VisualElement name="WPanelProcurementInner"
+        style="display: flex; flex-grow: 1; flex-direction: column; padding: 8px; padding-top: 6px;">
+
+        <ui:VisualElement style="flex-grow: 1; align-items: center; justify-content: center;">
+            <ui:Label text="&#xf07a;" class="fa-icon" style="font-size: 49px; color: rgb(100,100,100); margin-bottom: 16px;" />
+            <ui:Label text="PROCUREMENT MARKET" style="font-size: 18px; color: white; -unity-font-style: bold; letter-spacing: 2px; margin-bottom: 8px;" />
+            <ui:Label text="Purchase equipment from international suppliers" style="font-size: 13px; color: rgb(160,160,160);" />
+            <ui:Label text="Coming soon..." style="font-size: 13px; color: rgb(25, 127, 229); margin-top: 16px;" />
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

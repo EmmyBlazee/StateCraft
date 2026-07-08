@@ -1,9 +1,9 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/Styles/Global.uss" />
     <ui:Style>
         .tax-donut { position: relative; width: 90px; height: 90px; align-items: center; justify-content: center; border-width: 0; }
         .donut-hole { position: absolute; width: 70%; height: 70%; background-color: rgb(18, 22, 30); border-radius: 50%; align-items: center; justify-content: center; }
-        .donut-center-label { font-size: 10px; -unity-text-align: middle-center; color: white; white-space: normal; }
+        .donut-center-label { font-size: 13px; -unity-text-align: middle-center; color: white; white-space: normal; }
     </ui:Style>
     <ui:VisualElement name="EconomyDashboard" class="economy-command standard-dashboard" style="display: none;">
         <ui:VisualElement name="Header" class="econ-topbar">
@@ -348,16 +348,12 @@
 
                             <ui:VisualElement name="IndustryAlertsContainer" class="industry-panel alerts">
                                 <ui:Label text="INDUSTRY ALERTS" class="industry-title" />
-                                <ui:VisualElement class="industry-alert-row"><ui:Label text="⚡" class="industry-alert-icon warning" /><ui:VisualElement><ui:Label text="Energy Shortage" class="industry-card-title" /><ui:Label text="Power shortage reducing industrial output by 12%." class="industry-copy" /></ui:VisualElement><ui:Label text="VIEW" class="market" /></ui:VisualElement>
-                                <ui:VisualElement class="industry-alert-row"><ui:Label text="▥" class="industry-alert-icon negative" /><ui:VisualElement><ui:Label text="High Import Dependence" class="industry-card-title" /><ui:Label text="Manufacturing relies on 68% imported raw materials." class="industry-copy" /></ui:VisualElement><ui:Label text="VIEW" class="market" /></ui:VisualElement>
-                                <ui:VisualElement class="industry-alert-row"><ui:Label text="⚠" class="industry-alert-icon warning" /><ui:VisualElement><ui:Label text="Low R&amp;D Investment" class="industry-card-title" /><ui:Label text="Technology sector growth is stagnant due to low innovation funding." class="industry-copy" /></ui:VisualElement><ui:Label text="VIEW" class="market" /></ui:VisualElement>
                                 <ui:Button text="VIEW ALL ALERTS  +" class="industry-alerts-btn" style="display: none;" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
 
-                    <ui:VisualElement name="IndustrySummary" style="display: none;" />
-                    <ui:VisualElement name="IndustryCardsContainer" style="display: none;" />
+
                 </ui:VisualElement>
             </ui:ScrollView>
 
@@ -396,8 +392,8 @@
                                 <ui:VisualElement style="padding-right:15px; margin-bottom: 10px; margin-top: 5px;">
                                     <ui:VisualElement name="BudgetStackedBar" style="flex-direction: row; height: 18px; border-radius: 9px; overflow: hidden; background-color: #2F3B47;" />
                                     <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-top: 4px;">
-                                        <ui:Label text="Total Budget Allocated" style="color: grey; font-size: 10px;" />
-                                        <ui:Label name="BudgetStackedBar_Total" text="—" style="color: white; font-size: 11px; -unity-font-style: bold;" />
+                                        <ui:Label text="Total Budget Allocated" style="color: grey; font-size: 13px;" />
+                                        <ui:Label name="BudgetStackedBar_Total" text="—" style="color: white; font-size: 14px; -unity-font-style: bold;" />
                                     </ui:VisualElement>
                                 </ui:VisualElement>
                                 <ui:VisualElement name="BudgetDonut_Legend" class="budget-legend"></ui:VisualElement>
@@ -444,15 +440,20 @@
                         </ui:VisualElement>
 
                         <ui:VisualElement class="projects-section-card">
-                            <ui:VisualElement class="projects-section-header"><ui:Label text="BLUEPRINT LIBRARY" class="projects-title market" /><ui:VisualElement class="blueprint-tabs"><ui:Label text="ALL" class="blueprint-tab active" /><ui:Label text="INFRASTRUCTURE" class="blueprint-tab" /><ui:Label text="ENERGY" class="blueprint-tab" /><ui:Label text="DEFENCE" class="blueprint-tab" /><ui:Label text="SPACE" class="blueprint-tab" /><ui:Label text="AGRICULTURE" class="blueprint-tab" /><ui:Label text="TECHNOLOGY" class="blueprint-tab" /></ui:VisualElement></ui:VisualElement>
-                            <ui:VisualElement class="blueprint-grid">
-                                <ui:VisualElement class="blueprint-card"><ui:VisualElement class="blueprint-image highway" /><ui:Label text="COASTAL HIGHWAY PHASE II" class="project-card-title" /><ui:Label text="⚓ INFRASTRUCTURE" class="market" /><ui:Label text="Est. Cost                         ₦200B&#10;Est. Time                       10 Months&#10;Benefits&#10;Improve road connectivity." class="projects-copy" /><ui:Button text="COMMISSION" class="project-detail-btn" /></ui:VisualElement>
-                                <ui:VisualElement class="blueprint-card"><ui:VisualElement class="blueprint-image power" /><ui:Label text="GAS-FIRED POWER COMPLEX" class="project-card-title" /><ui:Label text="⌁ ENERGY" class="positive" /><ui:Label text="Est. Cost                         ₦300B&#10;Est. Time                       14 Months&#10;Benefits&#10;Increase electricity capacity." class="projects-copy" /><ui:Button text="COMMISSION" class="project-detail-btn" /></ui:VisualElement>
-                                <ui:VisualElement class="blueprint-card"><ui:VisualElement class="blueprint-image defence" /><ui:Label text="NORTHERN DEFENCE BASE" class="project-card-title" /><ui:Label text="✚ DEFENCE" class="negative" /><ui:Label text="Est. Cost                         ₦250B&#10;Est. Time                       12 Months&#10;Benefits&#10;Enhance border security." class="projects-copy" /><ui:Button text="COMMISSION" class="project-detail-btn" /></ui:VisualElement>
-                                <ui:VisualElement class="blueprint-card"><ui:VisualElement class="blueprint-image comms" /><ui:Label text="COMMUNICATIONS SATELLITE" class="project-card-title" /><ui:Label text="❄ SPACE" class="market" /><ui:Label text="Est. Cost                         ₦150B&#10;Est. Time                       18 Months&#10;Benefits&#10;Improve national communications." class="projects-copy" /><ui:Button text="COMMISSION" class="project-detail-btn" /></ui:VisualElement>
-                                <ui:VisualElement class="blueprint-card"><ui:VisualElement class="blueprint-image irrigation" /><ui:Label text="NATIONAL IRRIGATION PROGRAM" class="project-card-title" /><ui:Label text="☘ AGRICULTURE" class="positive" /><ui:Label text="Est. Cost                         ₦120B&#10;Est. Time                        9 Months&#10;Benefits&#10;Boost agricultural yield." class="projects-copy" /><ui:Button text="COMMISSION" class="project-detail-btn" /></ui:VisualElement>
-                                <ui:VisualElement class="blueprint-more"><ui:Label text="＋" /><ui:Label text="VIEW ALL&#10;BLUEPRINTS" /></ui:VisualElement>
+                            <ui:VisualElement class="projects-section-header">
+                                <ui:Label text="BLUEPRINT LIBRARY" class="projects-title market" />
+                                <ui:VisualElement name="BlueprintFilterTabs" class="blueprint-tabs">
+                                    <ui:Label text="ALL" class="blueprint-tab active" />
+                                    <ui:Label text="INFRASTRUCTURE" class="blueprint-tab" />
+                                    <ui:Label text="ENERGY" class="blueprint-tab" />
+                                    <ui:Label text="DEFENCE" class="blueprint-tab" />
+                                    <ui:Label text="SPACE" class="blueprint-tab" />
+                                    <ui:Label text="AGRICULTURE" class="blueprint-tab" />
+                                    <ui:Label text="TECHNOLOGY" class="blueprint-tab" />
+                                </ui:VisualElement>
                             </ui:VisualElement>
+                            <!-- Cards are built at runtime by RebuildBlueprintGrid() -->
+                            <ui:VisualElement name="LiveBlueprintGrid" class="blueprint-grid" />
                         </ui:VisualElement>
                     </ui:VisualElement>
 

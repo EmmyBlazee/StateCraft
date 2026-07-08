@@ -83,7 +83,7 @@ namespace StateCraft.Interfaces
     {
         void CheckForEvents(Data.CountryDataSO country);
         System.Collections.Generic.List<Data.GameEventSO> GetPendingEvents(Data.CountryDataSO country);
-        void ResolvePendingEvent(Data.CountryDataSO country, Data.GameEventSO ev, bool chooseA);
+        void ResolvePendingEvent(Data.CountryDataSO country, Data.GameEventSO ev, int choiceIndex);
     }
 
     public interface IElectionSystem

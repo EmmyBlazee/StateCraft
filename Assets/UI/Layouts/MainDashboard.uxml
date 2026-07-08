@@ -1,33 +1,36 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/Styles/Global.uss?fileID=7433441132597879392&amp;guid=f18ee3d1960f75747bcbb641ec70876e&amp;type=3#Global" />
     <ui:VisualElement name="MainDashboard" picking-mode="Ignore" style="width: 100%; height: 100%; position: absolute; display: flex; pointer-events: none;">
-        <ui:VisualElement name="TopBar" picking-mode="Ignore" class="glass-panel hologram-border" style="height: 65px; width: 100%; flex-direction: row; align-items: center; padding: 0 25px; position: absolute; top: 0; pointer-events: auto; z-index: 10; justify-content: space-between;">
-            <ui:VisualElement name="PlayerInfo" style="flex-direction: row; align-items: center; width: 300px;">
-                <ui:Image name="PlayerFlag" style="width: 40px; height: 26px; border-radius: 2px; margin-right: 12px; background-color: rgba(0, 0, 0, 0.2);" />
+        <ui:VisualElement name="TopBar" picking-mode="Ignore" class="econ-topbar" style="position: absolute; top: 0; width: 100%; pointer-events: auto; z-index: 10;">
+            <ui:VisualElement class="econ-country-block" style="width: 250px;">
                 <ui:VisualElement>
-                    <ui:Label name="PlayerCountryName" text="SELECT COUNTRY" style="font-size: 14px; color: rgb(0, 210, 255); -unity-font-style: bold;" />
-                    <ui:Label name="CurrentDateValue" text="JAN 2026" style="font-size: 10px; color: grey;" />
+                    <ui:VisualElement class="econ-country-line">
+                        <ui:Label name="PlayerCountryName" text="SELECT COUNTRY" class="econ-country-name" />
+                        <ui:Image name="PlayerFlag" class="econ-flag" />
+                    </ui:VisualElement>
+                    <ui:Label name="IntelValue" text="ELECTION: --" class="econ-country-subtitle" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:VisualElement name="PlayerVitals" style="flex-direction: row; align-items: center; justify-content: center; flex-grow: 1;">
-                <ui:VisualElement class="stat-container" style="margin-right: 30px;">
-                    <ui:Label text="TREASURY" class="stat-label" />
-                    <ui:Label name="TreasuryValue" text="" class="stat-value" />
-                </ui:VisualElement>
-                <ui:VisualElement class="stat-container" style="margin-right: 30px;">
-                    <ui:Label text="STABILITY" class="stat-label" />
-                    <ui:Label name="StabilityValue" text="--%" class="stat-value" />
-                </ui:VisualElement>
-                <ui:VisualElement class="stat-container">
-                    <ui:Label text="INTEL" class="stat-label" />
-                    <ui:Label name="IntelValue" text="LOW" class="stat-value" style="color: rgb(186, 104, 200);" />
-                </ui:VisualElement>
+
+            <ui:VisualElement class="econ-kpi-strip">
+                <ui:VisualElement class="econ-kpi"><ui:Label text="TREASURY" class="econ-kpi-label" /><ui:Label name="TreasuryValue" text="—" class="econ-kpi-value" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="GDP" class="econ-kpi-label" /><ui:Label name="ValGDP" text="—" class="econ-kpi-value" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="INFLATION" class="econ-kpi-label" /><ui:Label name="ValInflation" text="—" class="econ-kpi-value" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="NATIONAL DEBT" class="econ-kpi-label" /><ui:Label name="ValTotalDebt" text="—" class="econ-kpi-value" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="STABILITY" class="econ-kpi-label" /><ui:Label name="StabilityValue" text="—" class="econ-kpi-value" /></ui:VisualElement>
             </ui:VisualElement>
-            <ui:VisualElement name="TimeControls" style="flex-direction: row; width: 300px; justify-content: flex-end;">
-                <ui:Button name="TimePause" text="‖" class="time-btn" />
-                <ui:Button name="Time1x" text="1x" class="time-btn time-btn-active" />
-                <ui:Button name="Time2x" text="2x" class="time-btn" />
-                <ui:Button name="Time3x" text="3x" class="time-btn" />
+
+            <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: flex-end; flex-grow: 1;">
+                <ui:VisualElement class="econ-date-box" style="margin-right: 15px;">
+                    <ui:Label name="CurrentDateValue" text="JAN 2026" class="econ-date-main" />
+                    <ui:Label name="DateSub" text="Global Time" class="econ-date-sub" />
+                </ui:VisualElement>
+                <ui:VisualElement name="TimeControls" style="flex-direction: row; align-items: center; justify-content: flex-end; width: auto;">
+                    <ui:Button name="TimePause" text="‖" class="time-btn" />
+                    <ui:Button name="Time1x" text="1x" class="time-btn time-btn-active" />
+                    <ui:Button name="Time2x" text="2x" class="time-btn" />
+                    <ui:Button name="Time3x" text="3x" class="time-btn" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="PanelContainer" style="position: absolute; top: 65px; bottom: 115px; left: 0; right: 0; width: 100%; pointer-events: auto;" />

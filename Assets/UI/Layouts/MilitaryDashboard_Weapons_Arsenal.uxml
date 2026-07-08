@@ -1,0 +1,203 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/Global.uss" />
+
+    <ui:VisualElement name="WPanelArsenalInner"
+        style="display: flex; flex-grow: 1; flex-direction: row;
+               padding: 8px; padding-top: 6px;">
+
+        <!-- ─── LEFT SIDEBAR ──────────────────────────── -->
+        <ui:VisualElement
+            style="width: 178px; flex-shrink: 0;
+                   margin-right: 8px; flex-direction: column;">
+
+            <!-- EQUIPMENT OVERVIEW card -->
+            <ui:VisualElement class="sub-panel"
+                style="padding: 10px; margin-bottom: 8px;
+                       align-items: center; flex-direction: column;">
+
+                <ui:Label text="EQUIPMENT OVERVIEW"
+                    style="font-size: 10px; color: rgb(120,120,120);
+                           letter-spacing: 1px; margin-bottom: 8px;
+                           -unity-text-align: middle-center;" />
+
+                <ui:VisualElement name="WArsDonut"
+                    style="width: 110px; height: 110px;
+                           border-radius: 55px;
+                           align-items: center;
+                           justify-content: center;
+                           margin-bottom: 10px;">
+                    <ui:Label text="TOTAL ASSETS"
+                        style="font-size: 9px;
+                               color: rgb(100,100,100);
+                               letter-spacing: 0.5px;
+                               -unity-text-align: middle-center;" />
+                    <ui:Label name="WArsDonutTotal" text="6,231"
+                        style="font-size: 21px; color: white;
+                               -unity-font-style: bold;
+                               -unity-text-align: middle-center;" />
+                </ui:VisualElement>
+
+                <!-- Legend -->
+                <ui:VisualElement style="width: 100%; flex-direction: column;">
+                    <ui:VisualElement
+                        style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <ui:VisualElement style="flex-direction: row; align-items: center;">
+                            <ui:VisualElement style="width: 9px; height: 9px; border-radius: 2px; background-color: rgb(35, 237, 86); margin-right: 5px;" />
+                            <ui:Label text="Army" style="font-size: 11px; color: rgb(160,160,160);" />
+                        </ui:VisualElement>
+                        <ui:Label name="WArsLegArmy" text="68%" style="font-size: 11px; color: white;" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement
+                        style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <ui:VisualElement style="flex-direction: row; align-items: center;">
+                            <ui:VisualElement style="width: 9px; height: 9px; border-radius: 2px; background-color: rgb(25, 127, 229); margin-right: 5px;" />
+                            <ui:Label text="Air Force" style="font-size: 11px; color: rgb(160,160,160);" />
+                        </ui:VisualElement>
+                        <ui:Label name="WArsLegAF" text="17%" style="font-size: 11px; color: white;" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement
+                        style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <ui:VisualElement style="flex-direction: row; align-items: center;">
+                            <ui:VisualElement style="width: 9px; height: 9px; border-radius: 2px; background-color: rgb(25, 127, 229); margin-right: 5px;" />
+                            <ui:Label text="Navy" style="font-size: 11px; color: rgb(160,160,160);" />
+                        </ui:VisualElement>
+                        <ui:Label name="WArsLegNavy" text="12%" style="font-size: 11px; color: white;" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement
+                        style="flex-direction: row; justify-content: space-between; align-items: center;">
+                        <ui:VisualElement style="flex-direction: row; align-items: center;">
+                            <ui:VisualElement style="width: 9px; height: 9px; border-radius: 2px; background-color: rgb(100,100,100); margin-right: 5px;" />
+                            <ui:Label text="Other" style="font-size: 11px; color: rgb(160,160,160);" />
+                        </ui:VisualElement>
+                        <ui:Label name="WArsLegOther" text="3%" style="font-size: 11px; color: white;" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- MILITARY TECH LEVEL card -->
+            <ui:VisualElement class="sub-panel"
+                style="padding: 10px; margin-bottom: 8px; flex-direction: column;">
+                <ui:Label text="MILITARY TECH LEVEL"
+                    style="font-size: 10px; color: rgb(120,120,120); letter-spacing: 1px; margin-bottom: 8px;" />
+
+                <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 6px;">
+                    <ui:VisualElement
+                        style="width: 36px; height: 36px; border-radius: 4px; border-width: 2px; border-color: rgb(229, 153, 0); align-items: center; justify-content: center; margin-right: 8px; background-color: rgba(255,165,0,0.1);">
+                        <ui:Label name="WArsTechLevel" text="4" style="font-size: 18px; color: rgb(229, 153, 0); -unity-font-style: bold;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement style="flex-direction: column;">
+                        <ui:Label name="WArsTechLabel" text="MODERNIZING" style="font-size: 12px; color: rgb(229, 153, 0); -unity-font-style: bold; letter-spacing: 1px;" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:ProgressBar name="WArsTechXPBar" value="62.5" style="height: 5px; margin-bottom: 4px;" />
+                <ui:Label name="WArsTechXP" text="1,250 / 2,000 XP" style="font-size: 10px; color: rgb(100,100,100); -unity-text-align: middle-center;" />
+            </ui:VisualElement>
+
+            <!-- MAINTENANCE STATUS card -->
+            <ui:VisualElement class="sub-panel" style="padding: 10px; flex-direction: column;">
+                <ui:Label text="MAINTENANCE STATUS" style="font-size: 10px; color: rgb(120,120,120); letter-spacing: 1px; margin-bottom: 8px;" />
+
+                <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px;">
+                    <ui:Label text="&#xf0ad;" class="fa-icon" style="font-size: 14px; color: rgb(35, 237, 86); margin-right: 6px;" />
+                    <ui:Label name="WArsMaintLabel" text="Good" style="font-size: 13px; color: rgb(35, 237, 86); -unity-font-style: bold; flex-grow: 1;" />
+                    <ui:Label name="WArsMaintPct" text="82%" style="font-size: 18px; color: rgb(35, 237, 86); -unity-font-style: bold;" />
+                </ui:VisualElement>
+
+                <ui:Label text="Average readiness of all equipment" style="font-size: 10px; color: rgb(100,100,100); margin-bottom: 6px;" />
+                <ui:ProgressBar name="WArsMaintBar" value="82" style="height: 5px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ─── CENTRE: EQUIPMENT TABLE ──────────────── -->
+        <ui:VisualElement style="flex-grow: 1; flex-direction: column; min-width: 0; margin-right: 8px;">
+            <ui:VisualElement class="sub-panel" style="flex-direction: column; flex-grow: 1; padding: 0; overflow: hidden;">
+                <ui:ScrollView mode="Vertical" show-horizontal-scroller="False" style="flex-grow: 1;">
+                    <!-- ARMY SECTION -->
+                    <ui:VisualElement name="WArsSectionHeaderArmy" style="flex-direction: row; align-items: center; padding: 7px 12px 5px 12px; background-color: transparent; border-bottom-width: 1px; border-bottom-color: rgba(0,200,120,0.2);">
+                        <ui:Label text="ARMY" style="font-size: 12px; color: rgb(35, 237, 86); -unity-font-style: bold; letter-spacing: 2px; flex-grow: 1;" />
+                        <ui:Label text="QUANTITY" style="font-size: 10px; color: rgb(80,80,80); letter-spacing: 1px; width: 68px; -unity-text-align: middle-center;" />
+                        <ui:Label text="READINESS" style="font-size: 10px; color: rgb(80,80,80); letter-spacing: 1px; width: 130px; -unity-text-align: middle-center;" />
+                        <ui:Label text="CONDITION" style="font-size: 10px; color: rgb(80,80,80); letter-spacing: 1px; width: 68px; -unity-text-align: middle-right;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="WeaponsGrid" style="flex-direction: column;" />
+
+                    <!-- AIR FORCE SECTION -->
+                    <ui:VisualElement name="WArsSectionHeaderAir" style="flex-direction: row; align-items: center; padding: 7px 12px 5px 12px; background-color: transparent; border-bottom-width: 1px; border-bottom-color: rgba(33,150,243,0.2);">
+                        <ui:Label text="AIR FORCE" style="font-size: 12px; color: rgb(25, 127, 229); -unity-font-style: bold; letter-spacing: 2px; flex-grow: 1;" />
+                        <ui:Label text="QUANTITY" style="font-size: 10px; color: rgb(80,80,80); letter-spacing: 1px; width: 68px; -unity-text-align: middle-center;" />
+                        <ui:Label text="READINESS" style="font-size: 10px; color: rgb(80,80,80); letter-spacing: 1px; width: 130px; -unity-text-align: middle-center;" />
+                        <ui:Label text="CONDITION" style="font-size: 10px; color: rgb(80,80,80); letter-spacing: 1px; width: 68px; -unity-text-align: middle-right;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="WeaponsGridAir" style="flex-direction: column;" />
+
+                    <!-- NAVY SECTION -->
+                    <ui:VisualElement name="WArsSectionHeaderNavy" style="flex-direction: row; align-items: center; padding: 7px 12px 5px 12px; background-color: transparent; border-bottom-width: 1px; border-bottom-color: rgba(0,210,255,0.2);">
+                        <ui:Label text="NAVY" style="font-size: 12px; color: rgb(25, 127, 229); -unity-font-style: bold; letter-spacing: 2px; flex-grow: 1;" />
+                        <ui:Label text="QUANTITY" style="font-size: 10px; color: rgb(80,80,80); letter-spacing: 1px; width: 68px; -unity-text-align: middle-center;" />
+                        <ui:Label text="READINESS" style="font-size: 10px; color: rgb(80,80,80); letter-spacing: 1px; width: 130px; -unity-text-align: middle-center;" />
+                        <ui:Label text="CONDITION" style="font-size: 10px; color: rgb(80,80,80); letter-spacing: 1px; width: 68px; -unity-text-align: middle-right;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="WeaponsGridNavy" style="flex-direction: column;" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ─── RIGHT SIDEBAR ────────────────────────── -->
+        <ui:VisualElement style="width: 222px; flex-shrink: 0; flex-direction: column;">
+
+            <!-- QUICK SUMMARY -->
+            <ui:VisualElement class="sub-panel" style="padding: 12px; margin-bottom: 8px; flex-direction: column;">
+                <ui:Label text="QUICK SUMMARY" style="font-size: 10px; color: rgb(120,120,120); letter-spacing: 1px; margin-bottom: 10px;" />
+
+                <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <ui:VisualElement style="flex-direction: row; align-items: center;">
+                        <ui:Label text="&#xf0b1;" class="fa-icon" style="font-size: 13px; color: rgb(25, 127, 229); margin-right: 7px;" />
+                        <ui:Label text="Total Equipment" style="font-size: 12px; color: rgb(180,180,180);" />
+                    </ui:VisualElement>
+                    <ui:Label name="WArsQSTotal" text="6,231" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                </ui:VisualElement>
+
+                <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <ui:VisualElement style="flex-direction: row; align-items: center;">
+                        <ui:VisualElement style="width: 10px; height: 10px; border-radius: 2px; background-color: rgb(35, 237, 86); margin-right: 7px;" />
+                        <ui:Label text="Operational" style="font-size: 12px; color: rgb(180,180,180);" />
+                    </ui:VisualElement>
+                    <ui:Label name="WArsQSOperational" text="5,102" style="font-size: 12px; color: rgb(35, 237, 86); -unity-font-style: bold;" />
+                </ui:VisualElement>
+
+                <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <ui:VisualElement style="flex-direction: row; align-items: center;">
+                        <ui:VisualElement style="width: 10px; height: 10px; border-radius: 2px; background-color: rgb(229, 153, 0); margin-right: 7px;" />
+                        <ui:Label text="In Maintenance" style="font-size: 12px; color: rgb(180,180,180);" />
+                    </ui:VisualElement>
+                    <ui:Label name="WArsQSMaintenance" text="842" style="font-size: 12px; color: rgb(229, 153, 0); -unity-font-style: bold;" />
+                </ui:VisualElement>
+
+                <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center;">
+                    <ui:VisualElement style="flex-direction: row; align-items: center;">
+                        <ui:VisualElement style="width: 10px; height: 10px; border-radius: 2px; background-color: rgb(255,82,82); margin-right: 7px;" />
+                        <ui:Label text="Out of Service" style="font-size: 12px; color: rgb(180,180,180);" />
+                    </ui:VisualElement>
+                    <ui:Label name="WArsQSOutOfService" text="287" style="font-size: 12px; color: rgb(255,82,82); -unity-font-style: bold;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- RECENTLY ACQUIRED -->
+            <ui:VisualElement class="sub-panel" style="padding: 12px; margin-bottom: 8px; flex-direction: column;">
+                <ui:Label text="RECENTLY ACQUIRED" style="font-size: 10px; color: rgb(120,120,120); letter-spacing: 1px; margin-bottom: 10px;" />
+                <ui:ScrollView name="WArsRecentList" mode="Vertical" show-horizontal-scroller="False" style="max-height: 200px;" />
+            </ui:VisualElement>
+
+            <!-- LOW STOCK ALERTS -->
+            <ui:VisualElement class="sub-panel" style="padding: 12px; flex-grow: 1; flex-direction: column; border-width: 1px; border-color: rgba(255,82,82,0.3);">
+                <ui:Label text="LOW STOCK ALERTS" style="font-size: 10px; color: rgb(255,82,82); letter-spacing: 1px; -unity-font-style: bold; margin-bottom: 10px;" />
+                <ui:ScrollView name="WArsAlertsList" mode="Vertical" show-horizontal-scroller="False" style="flex-grow: 1;" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

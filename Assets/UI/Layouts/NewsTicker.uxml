@@ -1,15 +1,15 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/Styles/Global.uss" />
     <ui:VisualElement name="NewsTickerContainer" class="glass-panel" style="position: absolute; bottom: 80px; left: 0; right: 0; width: 100%; height: 35px; border-bottom-width: 0; flex-direction: row; align-items: center; overflow: hidden; border-left-width: 0; border-right-width: 0; display: flex; opacity: 0;">
 
         <!-- Breaking News Badge -->
         <ui:VisualElement name="NewsBadge" style="width: 140px; height: 100%; background-color: rgb(255, 0, 50); justify-content: center; padding: 0 15px; z-index: 100; border-right-width: 2px; border-right-color: rgba(0,0,0,0.3); opacity: 1; flex-shrink: 0;">
-            <ui:Label text="BREAKING NEWS" style="color: white; -unity-font-style: bold; font-size: 11px; letter-spacing: 1px; opacity: 1;" />
+            <ui:Label text="BREAKING NEWS" style="color: white; -unity-font-style: bold; font-size: 14px; letter-spacing: 1px; opacity: 1;" />
         </ui:VisualElement>
 
         <!-- Scrolling Content Area — width:100% ensures layout resolution on first pass -->
         <ui:VisualElement name="TickerTrack" style="flex-grow: 1; flex-shrink: 1; width: 100%; min-width: 200px; height: 100%; flex-direction: row; align-items: center; overflow: hidden;">
-            <ui:Label name="NewsText" text="AWAITING SIGNAL...   •   SCANNING CONTINENTAL FREQUENCIES...   •   " style="white-space: nowrap; font-size: 12px; color: #00d2ff; -unity-font-style: bold;" />
+            <ui:Label name="NewsText" text="AWAITING SIGNAL...   •   SCANNING CONTINENTAL FREQUENCIES...   •   " style="white-space: nowrap; font-size: 14px; color: #00d2ff; -unity-font-style: bold;" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

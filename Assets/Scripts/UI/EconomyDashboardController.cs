@@ -9,10 +9,12 @@ using System.Linq;
 
 namespace StateCraft.UI
 {
+    [DefaultExecutionOrder(-10)]
     public partial class EconomyDashboardController : MonoBehaviour
     {
         private UIDocument _uiDocument;
         private VisualElement _root;
+        private VisualElement _dashboardRoot;
 
         // Tabs
         private Button _tabDashboard, _tabProduction, _tabIndustry, _tabInfrastructure, _tabConstruction;
@@ -68,7 +70,7 @@ namespace StateCraft.UI
 
         // Sub-tab panels
         private VisualElement _productionSummary, _productionCardsContainer, _resourceDepositsList;
-        private VisualElement _industrySummary, _industryCardsContainer;
+        private VisualElement _industryAlertsContainer;
 
         // Industries tab — same caching pattern as the Taxation tab fix: resolved once
         // (with a null-retry on first refresh, in case the panel was display:none at Awake)
@@ -78,7 +80,6 @@ namespace StateCraft.UI
         private Label _lblIndTopName, _lblIndTopRevenue, _lblIndTopGrowth;
         private Label _lblIndWeakName, _lblIndWeakRevenue;
         private Label _lblIndAdviserName, _lblIndAdviserRec, _lblIndAdviserBody;
-        private VisualElement _industryAlertsContainer;
 
         private class IndustryRowRefs
         {
@@ -86,6 +87,7 @@ namespace StateCraft.UI
             public Button Btn;
         }
         private readonly Dictionary<string, IndustryRowRefs> _industryRowRefs = new Dictionary<string, IndustryRowRefs>();
+        private readonly HashSet<string> _industryIdsLogged = new HashSet<string>();
         private VisualElement _infraSummary, _infraCardsContainer;
         private Label _infraSynergyText;
         private VisualElement _constructionSummary, _constructionCardsContainer, _blueprintCatalog;
@@ -148,6 +150,7 @@ namespace StateCraft.UI
             var dashboard = _root?.Q<VisualElement>("EconomyDashboard");
             if (dashboard != null) 
             {
+                _dashboardRoot = dashboard;
                 InitializeElements(dashboard);
                 dashboard.style.display = DisplayStyle.None;
             }
@@ -275,8 +278,6 @@ namespace StateCraft.UI
             _productionSummary = root.Q<VisualElement>("ProductionSummary");
             _productionCardsContainer = root.Q<VisualElement>("ProductionCardsContainer");
             _resourceDepositsList = root.Q<VisualElement>("ResourceDepositsList");
-            _industrySummary = root.Q<VisualElement>("IndustrySummary");
-            _industryCardsContainer = root.Q<VisualElement>("IndustryCardsContainer");
             _infraSummary = root.Q<VisualElement>("InfraSummary");
             _infraSynergyText = root.Q<Label>("InfraSynergyText");
             _infraCardsContainer = root.Q<VisualElement>("InfraCardsContainer");
@@ -971,7 +972,16 @@ namespace StateCraft.UI
 
             if (index == 0) _tabDashboard.AddToClassList("active-tab");
             else if (index == 1) _tabProduction.AddToClassList("active-tab");
-            else if (index == 2) _tabIndustry.AddToClassList("active-tab");
+            else if (index == 2)
+            {
+                _tabIndustry.AddToClassList("active-tab");
+                var country = GameManager.Instance?.playerCountry;
+                if (country != null)
+                {
+                    string sym = string.IsNullOrEmpty(country.currencySymbol) ? "\u20a6" : country.currencySymbol;
+                    RefreshIndustryTab(country, sym);
+                }
+            }
             else if (index == 3)
             {
                 _tabInfrastructure.AddToClassList("active-tab");
@@ -983,7 +993,18 @@ namespace StateCraft.UI
                     RefreshBudgetTab(country, sym);
                 }
             }
-            else if (index == 4) _tabConstruction.AddToClassList("active-tab");
+            else if (index == 4)
+            {
+                _tabConstruction.AddToClassList("active-tab");
+                // Panel is now Flex — safe to resolve hidden elements and refresh
+                var country4 = GameManager.Instance?.playerCountry;
+                if (country4 != null)
+                {
+                    string sym4 = string.IsNullOrEmpty(country4.currencySymbol) ? "\u20a6" : country4.currencySymbol;
+                    InitConstructionTab();          // re-resolve _liveBlueprintGrid now the panel is visible
+                    RefreshProjectsTab(country4, sym4);
+                }
+            }
         }
 
 
@@ -997,7 +1018,7 @@ namespace StateCraft.UI
 
         public void Show()
         {
-            var panel = _root.Q<VisualElement>("EconomyDashboard");
+            var panel = _dashboardRoot;
             if (panel != null)
             {
                 panel.style.display = DisplayStyle.Flex;
@@ -1044,27 +1065,27 @@ namespace StateCraft.UI
             }
 
             // Header date box
-            if (_root.Q<Label>("DateMain") is Label lDateMain)
+            if (_dashboardRoot?.Q<Label>("DateMain") is Label lDateMain)
                 lDateMain.text = gm?.TurnSystem != null ? gm.TurnSystem.CurrentDate : "—";
-            if (_root.Q<Label>("DateSub") is Label lDateSub)
+            if (_dashboardRoot?.Q<Label>("DateSub") is Label lDateSub)
                 lDateSub.text = System.DateTime.Now.ToString("dddd, HH:mm");
 
             // KPI strip: MoM deltas & debt ratio
-            if (_root.Q<Label>("ValInflationDelta") is Label lInfD)
+            if (_dashboardRoot?.Q<Label>("ValInflationDelta") is Label lInfD)
             {
                 float dInf = country.inflationRate - country.prevInflationRate;
                 lInfD.text = $"{(dInf >= 0 ? "+" : "")}{dInf:P1} MoM";
                 lInfD.RemoveFromClassList("positive"); lInfD.RemoveFromClassList("negative");
                 lInfD.AddToClassList(dInf > 0.005f ? "negative" : "positive");
             }
-            if (_root.Q<Label>("ValDebtRatio") is Label lDR)
+            if (_dashboardRoot?.Q<Label>("ValDebtRatio") is Label lDR)
             {
                 float dRat = country.gdp > 0 ? country.debt / country.gdp : 0f;
                 lDR.text = $"{dRat:P1} of GDP";
                 lDR.RemoveFromClassList("warning"); lDR.RemoveFromClassList("negative"); lDR.RemoveFromClassList("positive");
                 lDR.AddToClassList(dRat > 0.6f ? "negative" : dRat > 0.4f ? "warning" : "positive");
             }
-            if (_root.Q<Label>("ValApprovalDelta") is Label lAppD)
+            if (_dashboardRoot?.Q<Label>("ValApprovalDelta") is Label lAppD)
             {
                 float dApp = country.publicApproval - country.prevPublicApproval;
                 lAppD.text = $"{(dApp >= 0 ? "+" : "")}{dApp:F1}% MoM";

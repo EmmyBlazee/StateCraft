@@ -38,115 +38,34 @@ namespace StateCraft.UI
             UpgradeIndustry(industryId);
         }
 
-        private void PopulateIndustry(CountryDataSO country, string sym)
-        {
-            var db = GameManager.Instance?.EconomyDatabase;
-            if (db == null) return;
-
-            float totalRev = 0f;
-            foreach (var ind in db.industries)
-                totalRev += StateCraft.Systems.EconomyLogicEvaluator.GetIndustryRevenue(country, ind);
-
-            if (_industrySummary != null)
-            {
-                _industrySummary.Clear();
-                _industrySummary.Add(new Label($"INDUSTRIAL OUTPUT · Est. {UiFormat.Money(totalRev, sym)}/mo across {db.industries.Count} sectors")
-                {
-                    style = { color = Color.white, fontSize = 11, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 10 }
-                });
-
-                var barRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, height = 8 } };
-                Color[] sectorColors =
-                {
-                    new Color(1f, 0.6f, 0.1f), new Color(0.6f, 0.6f, 0.65f), new Color(0.2f, 0.8f, 0.3f),
-                    new Color(0.3f, 0.5f, 1f), new Color(0.7f, 0.4f, 1f)
-                };
-                for (int i = 0; i < db.industries.Count; i++)
-                {
-                    var ind = db.industries[i];
-                    float share = totalRev > 0 ? StateCraft.Systems.EconomyLogicEvaluator.GetIndustryRevenue(country, ind) / totalRev : 0.2f;
-                    var seg = new VisualElement() { style = { flexGrow = share, backgroundColor = sectorColors[i % sectorColors.Length], height = 8 } };
-                    barRow.Add(seg);
-                }
-                _industrySummary.Add(barRow);
-                _industrySummary.Add(new Label($"Unemployment {country.unemploymentRate:F0}% · Corruption leakage {country.corruptionIndex:F0}%")
-                {
-                    style = { color = Color.grey, fontSize = 8, marginTop = 8 }
-                });
-            }
-
-            if (_industryCardsContainer == null) return;
-            _industryCardsContainer.Clear();
-            foreach (var ind in db.industries)
-                AddIndustryCard(country, ind, sym);
-        }
-
-        private void AddIndustryCard(CountryDataSO country, StateCraft.Data.Economy.IndustryDataSO ind, string sym)
-        {
-            int level = StateCraft.Systems.EconomyLogicEvaluator.GetIndustryLevel(country, ind.id);
-            bool bullish = StateCraft.Systems.EconomyLogicEvaluator.IsIndustryBullish(country, ind.id);
-            float cost = StateCraft.Systems.EconomyLogicEvaluator.GetIndustryUpgradeCost(country, ind);
-            float revenue = StateCraft.Systems.EconomyLogicEvaluator.GetIndustryRevenue(country, ind);
-
-            var card = new VisualElement();
-            card.AddToClassList("sub-panel");
-            card.style.width = Length.Percent(48);
-            card.style.marginBottom = 12;
-            card.style.paddingTop = 14;
-            card.style.paddingBottom = 14;
-            card.style.paddingLeft = 14;
-            card.style.paddingRight = 14;
-
-            var header = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween } };
-            header.Add(new Label(ind.title) { style = { color = new Color(0, 210/255f, 1f), unityFontStyleAndWeight = FontStyle.Bold, fontSize = 11 } });
-            header.Add(new Label(bullish ? "▲ BULLISH" : "▼ PRESSURE") { style = { color = bullish ? new Color(0, 230/255f, 118/255f) : new Color(241/255f, 196/255f, 15/255f), fontSize = 8 } });
-            card.Add(header);
-
-            card.Add(new Label($"Tier {level}/10 · Workforce {(StateCraft.Systems.EconomyLogicEvaluator.GetIndustryWorkforce(country, ind.id) / 1000f):F1}k") { style = { color = Color.white, fontSize = 10, marginTop = 6 } });
-            card.Add(new Label($"Revenue ≈ {UiFormat.Money(revenue, sym)}/mo") { style = { color = new Color(0, 230/255f, 118/255f), fontSize = 10, marginTop = 4 } });
-            card.Add(new Label($"Synergy: {StateCraft.Systems.EconomyLogicEvaluator.GetIndustrySynergy(country, ind.id)}") { style = { color = Color.grey, fontSize = 8, marginTop = 6, whiteSpace = WhiteSpace.Normal } });
-
-            card.Add(new ProgressBar() { value = level * 10f, highValue = 100, style = { height = 5, marginTop = 8 } });
-
-            var btnRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, marginTop = 10, justifyContent = Justify.SpaceBetween } };
-            var upgradeBtn = new Button(() =>
-            {
-                if (StateCraft.Systems.EconomyLogicEvaluator.TryUpgradeIndustry(country, ind, out string msg))
-                    NotificationManager.Instance?.AddNotification(msg, Color.cyan);
-                else
-                    NotificationManager.Instance?.AddNotification(msg, Color.red);
-                RefreshDisplay();
-            }) { text = $"UPGRADE · {UiFormat.Money(cost, sym)}" };
-            upgradeBtn.AddToClassList("button-premium");
-            upgradeBtn.style.height = 26;
-            upgradeBtn.style.fontSize = 8;
-            upgradeBtn.style.flexGrow = 1;
-            btnRow.Add(upgradeBtn);
-            card.Add(btnRow);
-
-            _industryCardsContainer.Add(card);
-        }
-
         private void RefreshIndustryTab(CountryDataSO country, string sym)
         {
             if (_root == null) return;
             var db = GameManager.Instance?.EconomyDatabase;
             if (db == null) { Debug.LogWarning("[IndustryUI] RefreshIndustryTab — GameManager.EconomyDatabase is NULL. Assign an EconomyDatabaseSO asset to GameManager.EconomyDatabase for this tab to show real data."); return; }
 
+            // Query from _panelIndustry (the ScrollView) rather than _root.
+            // _root is the EconomyDashboard scoped element; when PanelIndustry is display:none
+            // on the first RefreshDisplay call, Unity's Q<> traversal doesn't descend into it
+            // reliably, so every query returns null. Querying from the panel itself works
+            // regardless of its display state because the element is still in the tree.
+            var panel = _panelIndustry ?? _root.Q<VisualElement>("PanelIndustry");
+            if (panel == null) { Debug.LogWarning("[IndustryUI] PanelIndustry not found — aborting refresh."); return; }
+
             // Re-attempt any static refs that were null at startup (panel was display:none then)
-            if (_lblIndOverviewOutput == null) _lblIndOverviewOutput = _root.Q<Label>("IndustryOverview_Output");
-            if (_lblIndOverviewGDPPct == null) _lblIndOverviewGDPPct = _root.Q<Label>("IndustryOverview_GDPPct");
-            if (_lblIndOverviewMeter  == null) _lblIndOverviewMeter  = _root.Q<Label>("IndustryOverview_Meter");
-            if (_pbIndOverview        == null) _pbIndOverview        = _root.Q<ProgressBar>("IndustryOverview_Bar");
-            if (_lblIndTopName        == null) _lblIndTopName        = _root.Q<Label>("IndustryTop_Name");
-            if (_lblIndTopRevenue     == null) _lblIndTopRevenue     = _root.Q<Label>("IndustryTop_Revenue");
-            if (_lblIndTopGrowth      == null) _lblIndTopGrowth      = _root.Q<Label>("IndustryTop_Growth");
-            if (_lblIndWeakName       == null) _lblIndWeakName       = _root.Q<Label>("IndustryWeak_Name");
-            if (_lblIndWeakRevenue    == null) _lblIndWeakRevenue    = _root.Q<Label>("IndustryWeak_Revenue");
-            if (_lblIndAdviserName    == null) _lblIndAdviserName    = _root.Q<Label>("IndustryAdviserName");
-            if (_lblIndAdviserRec     == null) _lblIndAdviserRec     = _root.Q<Label>("IndustryAdviserRec");
-            if (_lblIndAdviserBody    == null) _lblIndAdviserBody    = _root.Q<Label>("IndustryAdviserBody");
-            if (_industryAlertsContainer == null) _industryAlertsContainer = _root.Q<VisualElement>("IndustryAlertsContainer");
+            if (_lblIndOverviewOutput == null) _lblIndOverviewOutput = panel.Q<Label>("IndustryOverview_Output");
+            if (_lblIndOverviewGDPPct == null) _lblIndOverviewGDPPct = panel.Q<Label>("IndustryOverview_GDPPct");
+            if (_lblIndOverviewMeter  == null) _lblIndOverviewMeter  = panel.Q<Label>("IndustryOverview_Meter");
+            if (_pbIndOverview        == null) _pbIndOverview        = panel.Q<ProgressBar>("IndustryOverview_Bar");
+            if (_lblIndTopName        == null) _lblIndTopName        = panel.Q<Label>("IndustryTop_Name");
+            if (_lblIndTopRevenue     == null) _lblIndTopRevenue     = panel.Q<Label>("IndustryTop_Revenue");
+            if (_lblIndTopGrowth      == null) _lblIndTopGrowth      = panel.Q<Label>("IndustryTop_Growth");
+            if (_lblIndWeakName       == null) _lblIndWeakName       = panel.Q<Label>("IndustryWeak_Name");
+            if (_lblIndWeakRevenue    == null) _lblIndWeakRevenue    = panel.Q<Label>("IndustryWeak_Revenue");
+            if (_lblIndAdviserName    == null) _lblIndAdviserName    = panel.Q<Label>("IndustryAdviserName");
+            if (_lblIndAdviserRec     == null) _lblIndAdviserRec     = panel.Q<Label>("IndustryAdviserRec");
+            if (_lblIndAdviserBody    == null) _lblIndAdviserBody    = panel.Q<Label>("IndustryAdviserBody");
+            if (_industryAlertsContainer == null) _industryAlertsContainer = panel.Q<VisualElement>("IndustryAlertsContainer");
 
             float totalRev = 0f;
             StateCraft.Data.Economy.IndustryDataSO topInd = null;
@@ -196,20 +115,36 @@ namespace StateCraft.UI
                     refs = new IndustryRowRefs();
                     _industryRowRefs[ind.id] = refs;
                 }
-                if (refs.Tier     == null) refs.Tier     = _root.Q<Label>($"Industry{ind.id}_Tier");
-                if (refs.Btn      == null) refs.Btn      = _root.Q<Button>($"Industry{ind.id}_Btn");
-                if (refs.Stat1    == null) refs.Stat1    = _root.Q<Label>($"Industry{ind.id}_Stat1");
-                if (refs.Stat2    == null) refs.Stat2    = _root.Q<Label>($"Industry{ind.id}_Stat2");
-                if (refs.Stat3    == null) refs.Stat3    = _root.Q<Label>($"Industry{ind.id}_Stat3");
-                if (refs.Stat4    == null) refs.Stat4    = _root.Q<Label>($"Industry{ind.id}_Stat4");
-                if (refs.Growth   == null) refs.Growth   = _root.Q<Label>($"Industry{ind.id}_Growth");
-                if (refs.Outlook  == null) refs.Outlook  = _root.Q<Label>($"Industry{ind.id}_Outlook");
-                if (refs.Pressure == null) refs.Pressure = _root.Q<Label>($"Industry{ind.id}_Pressure");
-                if (refs.Benefits == null) refs.Benefits = _root.Q<Label>($"Industry{ind.id}_Benefits");
-                if (refs.Ring     == null) refs.Ring     = _root.Q<Label>($"Ring{ind.id}");
+                if (refs.Tier     == null) refs.Tier     = panel.Q<Label>($"Industry{ind.id}_Tier");
+                if (refs.Btn      == null)
+                {
+                    refs.Btn = panel.Q<Button>($"Industry{ind.id}_Btn");
+                    if (refs.Btn != null)
+                    {
+                        // Capture ind.id for the closure — do NOT capture the loop variable
+                        string capturedId = ind.id;
+                        refs.Btn.RegisterCallback<ClickEvent>(_ => UpgradeIndustry(capturedId));
+                    }
+                }
+                if (refs.Stat1    == null) refs.Stat1    = panel.Q<Label>($"Industry{ind.id}_Stat1");
+                if (refs.Stat2    == null) refs.Stat2    = panel.Q<Label>($"Industry{ind.id}_Stat2");
+                if (refs.Stat3    == null) refs.Stat3    = panel.Q<Label>($"Industry{ind.id}_Stat3");
+                if (refs.Stat4    == null) refs.Stat4    = panel.Q<Label>($"Industry{ind.id}_Stat4");
+                if (refs.Growth   == null) refs.Growth   = panel.Q<Label>($"Industry{ind.id}_Growth");
+                if (refs.Outlook  == null) refs.Outlook  = panel.Q<Label>($"Industry{ind.id}_Outlook");
+                if (refs.Pressure == null) refs.Pressure = panel.Q<Label>($"Industry{ind.id}_Pressure");
+                if (refs.Benefits == null) refs.Benefits = panel.Q<Label>($"Industry{ind.id}_Benefits");
+                if (refs.Ring     == null) refs.Ring     = panel.Q<Label>($"Ring{ind.id}");
 
                 if (refs.Tier != null) refs.Tier.text = $"Tier {level}/10  •  Workforce {workforce:F1}k";
-                if (refs.Btn  != null) refs.Btn.text  = $"UPGRADE TO TIER {Mathf.Min(level + 1, 10)}\nCost: {UiFormat.Money(cost, sym)}";
+                bool atMax = level >= 10;
+                if (refs.Btn != null)
+                {
+                    refs.Btn.SetEnabled(!atMax);
+                    refs.Btn.text = atMax
+                        ? "MAX TIER REACHED"
+                        : $"UPGRADE TO TIER {level + 1}\nCost: {UiFormat.Money(cost, sym)}";
+                }
                 if (refs.Stat1 != null) refs.Stat1.text = $"Contribution to GDP\n{contrib:F1}%";
                 if (refs.Stat2 != null) refs.Stat2.text = $"Synergy\n{synergy}";
                 if (refs.Stat3 != null) refs.Stat3.text = $"Efficiency\n{(level * 10f):F0}%";

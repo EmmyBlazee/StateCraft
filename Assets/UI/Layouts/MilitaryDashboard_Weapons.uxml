@@ -1,0 +1,77 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/Global.uss" />
+
+    <ui:Template name="Template_Weapons_Arsenal" src="project://database/Assets/UI/Layouts/MilitaryDashboard_Weapons_Arsenal.uxml" />
+    <ui:Template name="Template_Weapons_Production" src="project://database/Assets/UI/Layouts/MilitaryDashboard_Weapons_Production.uxml" />
+    <ui:Template name="Template_Weapons_Procurement" src="project://database/Assets/UI/Layouts/MilitaryDashboard_Weapons_Procurement.uxml" />
+    <ui:Template name="Template_Weapons_Research" src="project://database/Assets/UI/Layouts/MilitaryDashboard_Weapons_Research.uxml" />
+
+    <ui:VisualElement name="PanelWeapons"
+        style="display: none; height: 100%; flex-direction: column;">
+
+        <!-- ═══════════════════════════════════════════════════════
+             WEAPONS SUB-TAB BAR
+        ═══════════════════════════════════════════════════════ -->
+        <ui:VisualElement name="WeaponsSubTabs"
+            style="flex-direction: row;
+                   background-color: rgb(10,14,20);
+                   border-bottom-width: 2px;
+                   border-bottom-color: rgba(0,210,255,0.15);
+                   flex-shrink: 0;">
+
+            <ui:Button name="WTabArsenal" class="nav-button active-tab"
+                style="flex-grow: 1; height: 42px; flex-direction: row;
+                       align-items: center; justify-content: center;
+                       border-bottom-width: 2px;
+                       border-bottom-color: rgb(25, 127, 229);">
+                <ui:Label text="&#xf187;" class="fa-icon"
+                    style="font-size: 14px; margin-right: 6px;
+                           color: rgb(25, 127, 229);" />
+                <ui:Label text="ARSENAL"
+                    style="font-size: 12px; -unity-font-style: bold;
+                           color: white; letter-spacing: 1px;" />
+            </ui:Button>
+
+            <ui:Button name="WTabProduction" class="nav-button"
+                style="flex-grow: 1; height: 42px; flex-direction: row;
+                       align-items: center; justify-content: center;">
+                <ui:Label text="&#xf275;" class="fa-icon"
+                    style="font-size: 14px; margin-right: 6px;
+                           color: rgb(100,100,100);" />
+                <ui:Label text="PRODUCTION"
+                    style="font-size: 12px; color: rgb(160,160,160);
+                           letter-spacing: 1px;" />
+            </ui:Button>
+
+            <ui:Button name="WTabProcurement" class="nav-button"
+                style="flex-grow: 1; height: 42px; flex-direction: row;
+                       align-items: center; justify-content: center;">
+                <ui:Label text="&#xf07a;" class="fa-icon"
+                    style="font-size: 14px; margin-right: 6px;
+                           color: rgb(100,100,100);" />
+                <ui:Label text="PROCUREMENT"
+                    style="font-size: 12px; color: rgb(160,160,160);
+                           letter-spacing: 1px;" />
+            </ui:Button>
+
+            <ui:Button name="WTabResearch" class="nav-button"
+                style="flex-grow: 1; height: 42px; flex-direction: row;
+                       align-items: center; justify-content: center;">
+                <ui:Label text="&#xf0c3;" class="fa-icon"
+                    style="font-size: 14px; margin-right: 6px;
+                           color: rgb(100,100,100);" />
+                <ui:Label text="RESEARCH"
+                    style="font-size: 12px; color: rgb(160,160,160);
+                           letter-spacing: 1px;" />
+            </ui:Button>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="WeaponsContentArea" style="flex-grow: 1; overflow: hidden; background-color: rgb(16,20,28);">
+            <ui:Instance template="Template_Weapons_Arsenal" name="WPanelArsenal" style="flex-grow: 1; display: flex;" />
+            <ui:Instance template="Template_Weapons_Production" name="WPanelProduction" style="flex-grow: 1; display: none;" />
+            <ui:Instance template="Template_Weapons_Procurement" name="WPanelProcurement" style="flex-grow: 1; display: none;" />
+            <ui:Instance template="Template_Weapons_Research" name="WPanelResearch" style="flex-grow: 1; display: none;" />
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

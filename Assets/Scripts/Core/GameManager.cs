@@ -118,7 +118,8 @@ Destroy(gameObject);
                     
                     if (country == playerCountry)
                     {
-                        if (float.IsNaN(playerBudget) || float.IsInfinity(playerBudget) || Mathf.Abs(playerBudget) > 10000f) playerBudget = 12f;
+                        if (float.IsNaN(playerBudget) || float.IsInfinity(playerBudget) || Mathf.Abs(playerBudget) > 10000f) playerBudget = country.treasury;
+                        else playerBudget = country.treasury;
                     }
                 }
             }
@@ -299,6 +300,8 @@ foreach (var country in allCountries)
 
                 ProcessRecruitmentPipelines(country);
                 ProcessMilitaryProjects(country);
+                ProcessProductionOrders(country);
+                ProcessProcurementContracts(country);
             }
 
             // 13. Monthly news generation
@@ -375,6 +378,128 @@ foreach (var country in allCountries)
                     if (country == playerCountry)
                     {
 }
+                }
+            }
+        }
+
+        private void ProcessProductionOrders(CountryDataSO country)
+        {
+            if (country.productionOrders == null) return;
+
+            for (int i = country.productionOrders.Count - 1; i >= 0; i--)
+            {
+                var order = country.productionOrders[i];
+                UnityEngine.Debug.Log($"[Backend] Processing order {order.id}. Months remaining: {order.monthsRemaining} -> {order.monthsRemaining - 1}");
+                order.monthsRemaining--;
+
+                if (country == playerCountry)
+                {
+                    playerBudget -= order.monthlyCostB;
+                    country.treasury = playerBudget;
+                }
+                else
+                {
+                    country.treasury -= order.monthlyCostB * country.exchangeRate;
+                }
+
+                if (order.monthsRemaining <= 0)
+                {
+                    switch (order.id)
+                    {
+                        case "RIFLE": country.unitRifles += order.quantity; break;
+                        case "APC": country.unitAPCs += order.quantity; break;
+                        case "TNK": country.unitTanks += order.quantity; break;
+                        case "ARTILLERY": country.unitArtillery += order.quantity; break;
+                        case "UAV": country.unitUAVs += order.quantity; break;
+                        case "FTR": country.unitFighters += order.quantity; break;
+                        case "BOMBER": country.unitBombers += order.quantity; break;
+                        case "HEL": country.unitAttackHelis += order.quantity; break;
+                        case "PATROL_BOAT": country.unitPatrolBoats += order.quantity; break;
+                        case "FRG": country.unitFrigates += order.quantity; break;
+                        case "SUB": country.unitSubmarines += order.quantity; break;
+                        case "DESTROYER": country.unitDestroyers += order.quantity; break;
+                    }
+
+                    if (country.completedProductions == null) country.completedProductions = new System.Collections.Generic.List<StateCraft.Data.CompletedProductionItem>();
+                    string curDate = TurnSystem is TurnSystem ts ? ts.CurrentDate : "Unknown Date";
+                    country.completedProductions.Insert(0, new StateCraft.Data.CompletedProductionItem
+                    {
+                        unitLabel = order.unitLabel,
+                        quantity = order.quantity,
+                        completedDate = curDate
+                    });
+                    
+                    if (country.completedProductions.Count > 10)
+                        country.completedProductions.RemoveAt(country.completedProductions.Count - 1);
+
+                    if (country == playerCountry)
+                    {
+                        UI.NotificationManager.Instance?.AddNotification($"PRODUCTION COMPLETE: {order.quantity:N0} {order.unitLabel} delivered to Arsenal!", UnityEngine.Color.green);
+                    }
+                    if (NewsSystem != null)
+                    {
+                        NewsSystem.PublishNews($"MILITARY: {country.countryName} has completed production of {order.quantity:N0} {order.unitLabel}.");
+                    }
+
+                    country.productionOrders.RemoveAt(i);
+                }
+            }
+        }
+
+        private void ProcessProcurementContracts(CountryDataSO country)
+        {
+            if (country.activeContracts == null) return;
+
+            for (int i = country.activeContracts.Count - 1; i >= 0; i--)
+            {
+                var contract = country.activeContracts[i];
+                contract.monthsRemaining--;
+
+                // Deduct monthly installment
+                if (country == playerCountry)
+                {
+                    playerBudget -= contract.monthlyCostB;
+                    country.treasury = playerBudget;
+                }
+                else
+                {
+                    country.treasury -= contract.monthlyCostB * country.exchangeRate;
+                }
+
+                if (contract.monthsRemaining <= 0)
+                {
+                    switch (contract.produceType)
+                    {
+                        case "RIFLE": country.unitRifles += contract.unitQuantity; break;
+                        case "APC": country.unitAPCs += contract.unitQuantity; break;
+                        case "TNK": country.unitTanks += contract.unitQuantity; break;
+                        case "ARTILLERY": country.unitArtillery += contract.unitQuantity; break;
+                        case "UAV": country.unitUAVs += contract.unitQuantity; break;
+                        case "FTR": country.unitFighters += contract.unitQuantity; break;
+                        case "BOMBER": country.unitBombers += contract.unitQuantity; break;
+                        case "HEL": country.unitAttackHelis += contract.unitQuantity; break;
+                        case "PATROL_BOAT": country.unitPatrolBoats += contract.unitQuantity; break;
+                        case "FRG": country.unitFrigates += contract.unitQuantity; break;
+                        case "SUB": country.unitSubmarines += contract.unitQuantity; break;
+                        case "DESTROYER": country.unitDestroyers += contract.unitQuantity; break;
+                    }
+
+                    if (country == playerCountry)
+                    {
+                        UI.NotificationManager.Instance?.AddNotification($"PROCUREMENT DELIVERED: {contract.unitLabel} from {contract.supplier} has arrived!", UnityEngine.Color.green);
+                    }
+                    if (NewsSystem != null)
+                    {
+                        NewsSystem.PublishNews($"MILITARY: {country.countryName} has received delivery of {contract.unitLabel} from {contract.supplier}.");
+                    }
+
+                    country.activeContracts.RemoveAt(i);
+                }
+                else
+                {
+                    // Update status dynamically
+                    if (contract.monthsRemaining <= 1) contract.status = "In Transit";
+                    else if (contract.monthsRemaining <= contract.monthsTotal / 2) contract.status = "Production Phase";
                 }
             }
         }
@@ -575,8 +700,8 @@ foreach (var country in allCountries)
             {
                 currentDay = 1;
                 CurrentTurn++;
-                OnTurnEnded?.Invoke();
                 OnMonthEnded?.Invoke();
+                OnTurnEnded?.Invoke();
             }
             // Fire news/economy update every 3 days without changing the month counter
             else if (currentDay % 3 == 0)

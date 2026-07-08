@@ -1,0 +1,459 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/Global.uss" />
+            <ui:VisualElement name="PanelForces" style="display: flex; height: 100%;">
+                <ui:ScrollView style="flex-grow: 1; padding: 8px;">
+
+                    <!-- â”€â”€ ROW 1: POSTURE | READINESS OVERVIEW | SUMMARY â”€â”€ -->
+                    <ui:VisualElement style="flex-direction: row; margin-bottom: 8px; align-items: stretch; min-height: 160px; flex-shrink: 0;">
+
+                        <!-- DEFENCE POSTURE -->
+                        <ui:VisualElement class="sub-panel" name="PosturePanel" style="width: 18%; margin-right: 8px; padding: 10px; flex-direction: column; flex-shrink: 0;">
+                            <ui:Label text="DEFENCE POSTURE" style="font-size: 12px; color: rgb(140,140,140); letter-spacing: 1px; margin-bottom: 8px;" />
+                            <!-- Posture icon + badge -->
+                            <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 6px;">
+                                <ui:VisualElement name="PostureIconBg" style="width: 32px; height: 32px; background-color: rgba(0,230,118,0.15); border-radius: 4px; border-width: 1px; border-color: rgba(0,230,118,0.4); align-items: center; justify-content: center; margin-right: 8px;">
+                                    <ui:VisualElement name="PostureIcon" style="width: 16px; height: 16px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_defend.png'); -unity-background-scale-mode: scale-to-fit;" />
+                                </ui:VisualElement>
+                                <ui:Label name="PostureLabel" text="PEACETIME" style="font-size: 15px; color: rgb(0, 230, 118); -unity-font-style: bold;" />
+                            </ui:VisualElement>
+                            <ui:Label name="PostureDesc" text="Normal readiness posture. Lower costs but slower mobilisation." style="font-size: 12px; color: rgb(170,170,170); white-space: normal; margin-bottom: 10px;" />
+                            <ui:Button name="BtnChangePosture" text="CHANGE POSTURE" class="button-premium" style="height: 26px; font-size: 11px; border-color: rgba(0,230,118,0.5); color: rgb(0,230,118); background-color: rgba(0,230,118,0.1);" />
+                        </ui:VisualElement>
+
+                        <!-- FORCE READINESS OVERVIEW -->
+                        <ui:VisualElement name="ReadinessOverviewPanel" style="flex-grow: 1; margin-right: 8px;">
+                            <ui:VisualElement class="sub-panel" style="padding: 10px; flex-direction: column; height: 100%;">
+                                <ui:Label text="FORCE READINESS OVERVIEW" style="font-size: 12px; color: rgb(140,140,140); letter-spacing: 1px; margin-bottom: 8px;" />
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; flex-grow: 1;">
+
+                                    <!-- ARMY -->
+                                    <ui:VisualElement name="ReadinessArmy" class="readiness-branch-card" style="flex-grow: 1; align-items: center; margin-right: 8px; justify-content: center;">
+                                        <ui:Label text="ARMY" style="font-size: 12px; color: rgb(140,140,140); letter-spacing: 1px; margin-bottom: 4px;" />
+                                        <ui:Label name="ReadinessArmyPct" text="86%" style="font-size: 29px; color: white; -unity-font-style: bold; margin-bottom: 4px;" />
+                                        <ui:ProgressBar name="ReadinessArmyBar" value="86" style="width: 100%; height: 4px; margin-bottom: 4px;" />
+                                        <ui:Label name="ReadinessArmyDelta" text="+3%" style="font-size: 12px; color: rgb(0,230,118);" />
+                                    </ui:VisualElement>
+
+                                    <!-- NAVY -->
+                                    <ui:VisualElement name="ReadinessNavy" class="readiness-branch-card" style="flex-grow: 1; align-items: center; margin-right: 8px; justify-content: center;">
+                                        <ui:Label text="NAVY" style="font-size: 12px; color: rgb(140,140,140); letter-spacing: 1px; margin-bottom: 4px;" />
+                                        <ui:Label name="ReadinessNavyPct" text="92%" style="font-size: 29px; color: white; -unity-font-style: bold; margin-bottom: 4px;" />
+                                        <ui:ProgressBar name="ReadinessNavyBar" value="92" style="width: 100%; height: 4px; margin-bottom: 4px;" />
+                                        <ui:Label name="ReadinessNavyDelta" text="+2%" style="font-size: 12px; color: rgb(0,230,118);" />
+                                    </ui:VisualElement>
+
+                                    <!-- AIR FORCE -->
+                                    <ui:VisualElement name="ReadinessAF" class="readiness-branch-card" style="flex-grow: 1; align-items: center; margin-right: 8px; justify-content: center;">
+                                        <ui:Label text="AIR FORCE" style="font-size: 12px; color: rgb(140,140,140); letter-spacing: 1px; margin-bottom: 4px;" />
+                                        <ui:Label name="ReadinessAFPct" text="65%" style="font-size: 29px; color: rgb(255, 180, 0); -unity-font-style: bold; margin-bottom: 4px;" />
+                                        <ui:ProgressBar name="ReadinessAFBar" value="65" style="width: 100%; height: 4px; margin-bottom: 4px;" />
+                                        <ui:Label name="ReadinessAFDelta" text="-2%" style="font-size: 12px; color: rgb(255,82,82);" />
+                                    </ui:VisualElement>
+
+                                    <!-- RAPID DEPLOYMENT -->
+                                    <ui:VisualElement name="ReadinessRDF" class="readiness-branch-card" style="flex-grow: 1; align-items: center; justify-content: center;">
+                                        <ui:Label text="RAPID DEPLOYMENT" style="font-size: 12px; color: rgb(140,140,140); letter-spacing: 1px; margin-bottom: 4px;" />
+                                        <ui:Label name="ReadinessRDFPct" text="88%" style="font-size: 29px; color: white; -unity-font-style: bold; margin-bottom: 4px;" />
+                                        <ui:ProgressBar name="ReadinessRDFBar" value="88" style="width: 100%; height: 4px; margin-bottom: 4px;" />
+                                        <ui:Label name="ReadinessRDFDelta" text="+4%" style="font-size: 12px; color: rgb(0,230,118);" />
+                                    </ui:VisualElement>
+
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- MILITARY SUMMARY -->
+                        <ui:VisualElement class="sub-panel" name="MilSummaryPanel" style="width: 20%; padding: 10px; flex-direction: column; flex-shrink: 0;">
+                            <ui:Label text="MILITARY SUMMARY" style="font-size: 12px; color: rgb(140,140,140); letter-spacing: 1px; margin-bottom: 8px;" />
+
+                            <ui:VisualElement class="summary-row" style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
+                                <ui:Label text="Total Personnel" style="font-size: 12px; color: rgb(180,180,180);" />
+                                <ui:Label name="SumPersonnel" text="142,850" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="summary-row" style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
+                                <ui:Label text="Total Equipment" style="font-size: 12px; color: rgb(180,180,180);" />
+                                <ui:Label name="SumEquipment" text="12,614" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="summary-row" style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
+                                <ui:Label text="Annual Defence Budget" style="font-size: 12px; color: rgb(180,180,180);" />
+                                <ui:Label name="SumAnnualBudget" text="$1.55T" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="summary-row" style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
+                                <ui:Label text="Defence Spending" style="font-size: 12px; color: rgb(180,180,180);" />
+                                <ui:Label name="SumDefenceGDP" text="2.4% of GDP" style="font-size: 12px; color: rgb(25, 127, 229); -unity-font-style: bold;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="height: 1px; background-color: rgba(255,255,255,0.08); margin: 6px 0;" />
+                            <ui:VisualElement class="summary-row" style="flex-direction: row; justify-content: space-between;">
+                                <ui:Label text="Veterans" style="font-size: 12px; color: rgb(180,180,180);" />
+                                <ui:Label name="SumVeterans" text="23,410" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="height: 1px; background-color: rgba(255,255,255,0.08); margin: 6px 0;" />
+                            <!-- Header KIA / budget refs kept for controller compat -->
+                            <ui:Label name="HeaderKIA"       text="" style="display: none;" />
+                            <ui:Label name="HeaderMilBudget" text="" style="display: none;" />
+                            <ui:Label name="HeaderReadiness" text="" style="display: none;" />
+                        </ui:VisualElement>
+
+                    </ui:VisualElement>
+                    <!-- END ROW 1 -->
+
+                    <!-- â”€â”€ ROW 2: CHAIN OF COMMAND (4 branch cards) â”€â”€ -->
+                    <ui:VisualElement style="margin-bottom: 8px; flex-shrink: 0;">
+                        <ui:Label text="CHAIN OF COMMAND" style="font-size: 13px; color: rgb(140,140,140); letter-spacing: 1px; margin-bottom: 6px; -unity-font-style: bold;" />
+                        <ui:VisualElement name="BranchContainer" style="flex-direction: row; justify-content: space-between; height: 450px;">
+
+                            <!-- ARMY CARD -->
+                            <ui:VisualElement name="BranchCardArmy" class="branch-card" style="flex-grow: 1; margin-right: 6px; background-color: rgb(14,18,26); border-width: 1px; border-color: rgba(0,210,255,0.25); border-radius: 6px; overflow: hidden;">
+                                <!-- Atmosphere image area -->
+                                <ui:VisualElement name="BranchImgArmy" style="height: 250px; background-color: rgb(18,24,34); background-image: url('project://database/Assets/Images/army%20(2).png?fileID=2800000&amp;guid=3f3226adfba7d5d49952eac795e96dbc&amp;type=3#army (2)'); -unity-background-scale-mode: scale-and-crop; align-items: flex-start; justify-content: flex-end; padding: 8px; border-bottom-width: 1px; border-bottom-color: rgba(0,210,255,0.15);">
+                                    <!-- Gradient overlay feel -->
+                                    <ui:VisualElement style="position: absolute; bottom: 0; left: 0; right: 0; height: 50px; background-color: rgba(10,14,20,0.7);" />
+                                    <ui:VisualElement style="flex-direction: row; align-items: center; position: absolute; bottom: 8px; left: 8px;">
+                                        <ui:Label text="&#xf6de;" class="fa-icon" style="font-size: 21px; color: rgb(25, 127, 229); margin-right: 8px;" />
+                                        <ui:VisualElement>
+                                            <ui:Label text="ARMY" style="font-size: 16px; color: rgb(25, 127, 229); -unity-font-style: bold; letter-spacing: 2px;" />
+                                            <ui:Label text="The Nigerian Army" style="font-size: 12px; color: rgb(180,180,180);" />
+                                        </ui:VisualElement>
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <!-- Stats -->
+                                <ui:VisualElement style="padding: 8px; flex-direction: column;">
+                                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 3px;">
+                                        <ui:Label text="Personnel" style="font-size: 12px; color: rgb(160,160,160);" />
+                                        <ui:Label name="ArmyPersonnel" text="83,874" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 3px;">
+                                        <ui:Label text="Equipment" style="font-size: 12px; color: rgb(160,160,160);" />
+                                        <ui:Label name="ArmyEquipment" text="6,142" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                                        <ui:Label text="Readiness" style="font-size: 12px; color: rgb(160,160,160);" />
+                                        <ui:ProgressBar name="ArmyReadinessBar" value="86" style="width: 60%; height: 6px;" />
+                                        <ui:Label name="ArmyReadinessPct" text="86%" style="font-size: 12px; color: rgb(25, 127, 229); -unity-font-style: bold;" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                        <ui:Label text="Morale" style="font-size: 12px; color: rgb(160,160,160);" />
+                                        <ui:ProgressBar name="ArmyMoraleBar" value="78" style="width: 60%; height: 6px;" />
+                                        <ui:Label name="ArmyMoralePct" text="78%" style="font-size: 12px; color: rgb(0,230,118); -unity-font-style: bold;" />
+                                    </ui:VisualElement>
+                                    <!-- Commander strip -->
+                                    <ui:VisualElement style="display: none; flex-direction: row; align-items: center; background-color: rgba(0,0,0,0.3); border-radius: 4px; padding: 4px; border-top-width: 1px; border-top-color: rgba(255,255,255,0.08);">
+                                        <ui:VisualElement name="ArmyCdrPortrait" style="width: 28px; height: 28px; border-radius: 14px; background-color: rgba(0,210,255,0.2); margin-right: 8px; border-width: 1px; border-color: rgba(0,210,255,0.4);" />
+                                        <ui:VisualElement style="flex-grow: 1;">
+                                            <ui:Label text="COMMANDER" style="font-size: 10px; color: rgb(140,140,140); letter-spacing: 1px;" />
+                                            <ui:Label name="ArmyCdrName" text="Lt. Gen. Taoreed Lagbaja" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                            <ui:Label name="ArmyCdrTitle" text="Chief of Army Staff" style="font-size: 11px; color: rgb(160,160,160);" />
+                                            <ui:Label name="ArmyCdrBonus" text="Readiness Bonus: +5%" style="font-size: 11px; color: rgb(0,230,118);" />
+                                        </ui:VisualElement>
+                                        <ui:Button name="BtnArmyCdrProfile" text="&#xf007;" class="button-premium fa-icon" style="width: 24px; height: 24px; font-size: 14px;" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:Button name="BtnViewArmy" text="VIEW DETAILS" class="button-premium" style="margin: 0 6px 6px 6px; height: 22px; font-size: 11px; color: rgb(25, 127, 229); border-color: rgba(0,210,255,0.4);" />
+                            </ui:VisualElement>
+
+                            <!-- NAVY CARD -->
+                            <ui:VisualElement name="BranchCardNavy" class="branch-card" style="flex-grow: 1; margin-right: 6px; background-color: rgb(14,18,26); border-width: 1px; border-color: rgba(33,150,243,0.25); border-radius: 6px; overflow: hidden;">
+                                <ui:VisualElement name="BranchImgNavy" style="height: 250px; background-color: rgb(14,20,32); background-image: url('project://database/Assets/Images/navy.png?fileID=2800000&amp;guid=aaecf84f06278aa469a64fbb6503e333&amp;type=3#navy'); -unity-background-scale-mode: scale-and-crop; align-items: flex-start; justify-content: flex-end; padding: 8px; border-bottom-width: 1px; border-bottom-color: rgba(33,150,243,0.15);">
+                                    <ui:VisualElement style="position: absolute; bottom: 0; left: 0; right: 0; height: 50px; background-color: rgba(10,14,20,0.7);" />
+                                    <ui:VisualElement style="flex-direction: row; align-items: center; position: absolute; bottom: 8px; left: 8px;">
+                                        <ui:Label text="&#xf21a;" class="fa-icon" style="font-size: 21px; color: rgb(25, 127, 229); margin-right: 8px;" />
+                                        <ui:VisualElement>
+                                            <ui:Label text="NAVY" style="font-size: 16px; color: rgb(25, 127, 229); -unity-font-style: bold; letter-spacing: 2px;" />
+                                            <ui:Label text="The Nigerian Navy" style="font-size: 12px; color: rgb(180,180,180);" />
+                                        </ui:VisualElement>
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:VisualElement style="padding: 8px; flex-direction: column;">
+                                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 3px;">
+                                        <ui:Label text="Personnel" style="font-size: 12px; color: rgb(160,160,160);" />
+                                        <ui:Label name="NavyPersonnel" text="22,450" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 3px;">
+                                        <ui:Label text="Equipment" style="font-size: 12px; color: rgb(160,160,160);" />
+                                        <ui:Label name="NavyEquipment" text="2,138" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                                        <ui:Label text="Readiness" style="font-size: 12px; color: rgb(160,160,160);" />
+                                        <ui:ProgressBar name="NavyReadinessBar" value="92" style="width: 60%; height: 6px;" />
+                                        <ui:Label name="NavyReadinessPct" text="92%" style="font-size: 12px; color: rgb(25, 127, 229); -unity-font-style: bold;" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                        <ui:Label text="Morale" style="font-size: 12px; color: rgb(160,160,160);" />
+                                        <ui:ProgressBar name="NavyMoraleBar" value="81" style="width: 60%; height: 6px;" />
+                                        <ui:Label name="NavyMoralePct" text="81%" style="font-size: 12px; color: rgb(0,230,118); -unity-font-style: bold;" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement style="display: none; flex-direction: row; align-items: center; background-color: rgba(0,0,0,0.3); border-radius: 4px; padding: 4px; border-top-width: 1px; border-top-color: rgba(255,255,255,0.08);">
+                                        <ui:VisualElement name="NavyCdrPortrait" style="width: 28px; height: 28px; border-radius: 14px; background-color: rgba(33,150,243,0.2); margin-right: 8px; border-width: 1px; border-color: rgba(33,150,243,0.4);" />
+                                        <ui:VisualElement style="flex-grow: 1;">
+                                            <ui:Label text="COMMANDER" style="font-size: 10px; color: rgb(140,140,140); letter-spacing: 1px;" />
+                                            <ui:Label name="NavyCdrName" text="Vice Adm. Emmanuel Ogalla" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                            <ui:Label name="NavyCdrTitle" text="Chief of Naval Staff" style="font-size: 11px; color: rgb(160,160,160);" />
+                                            <ui:Label name="NavyCdrBonus" text="Readiness Bonus: +7%" style="font-size: 11px; color: rgb(0,230,118);" />
+                                        </ui:VisualElement>
+                                        <ui:Button name="BtnNavyCdrProfile" text="&#xf007;" class="button-premium fa-icon" style="width: 24px; height: 24px; font-size: 14px;" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:Button name="BtnViewNavy" text="VIEW DETAILS" class="button-premium" style="margin: 0 6px 6px 6px; height: 22px; font-size: 11px; color: rgb(25, 127, 229); border-color: rgba(33,150,243,0.4);" />
+                            </ui:VisualElement>
+
+                            <!-- AIR FORCE CARD -->
+                            <ui:VisualElement name="BranchCardAF" class="branch-card" style="flex-grow: 1; margin-right: 6px; background-color: rgb(14,18,26); border-width: 1px; border-color: rgba(156,39,176,0.3); border-radius: 6px; overflow: hidden;">
+                                <ui:VisualElement name="BranchImgAF" style="height: 250px; background-color: rgb(20,14,28); background-image: url('project://database/Assets/Images/airforce.png?fileID=2800000&amp;guid=4ae945ba0f614ba4dabbe84b7bacd777&amp;type=3#airforce'); -unity-background-scale-mode: scale-and-crop; align-items: flex-start; justify-content: flex-end; padding: 8px; border-bottom-width: 1px; border-bottom-color: rgba(156,39,176,0.15);">
+                                    <ui:VisualElement style="position: absolute; bottom: 0; left: 0; right: 0; height: 50px; background-color: rgba(10,14,20,0.7);" />
+                                    <ui:VisualElement style="flex-direction: row; align-items: center; position: absolute; bottom: 8px; left: 8px;">
+                                        <ui:Label text="&#xf072;" class="fa-icon" style="font-size: 21px; color: rgb(186,104,200); margin-right: 8px;" />
+                                        <ui:VisualElement>
+                                            <ui:Label text="AIR FORCE" style="font-size: 16px; color: rgb(186,104,200); -unity-font-style: bold; letter-spacing: 2px;" />
+                                            <ui:Label text="The Nigerian Air Force" style="font-size: 12px; color: rgb(180,180,180);" />
+                                        </ui:VisualElement>
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:VisualElement style="padding: 8px; flex-direction: column;">
+                                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 3px;">
+                                        <ui:Label text="Personnel" style="font-size: 12px; color: rgb(160,160,160);" />
+                                        <ui:Label name="AFPersonnel" text="18,650" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 3px;">
+                                        <ui:Label text="Equipment" style="font-size: 12px; color: rgb(160,160,160);" />
+                                        <ui:Label name="AFEquipment" text="2,946" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                                        <ui:Label text="Readiness" style="font-size: 12px; color: rgb(160,160,160);" />
+                                        <ui:ProgressBar name="AFReadinessBar" value="65" style="width: 60%; height: 6px;" />
+                                        <ui:Label name="AFReadinessPct" text="65%" style="font-size: 12px; color: rgb(255,180,0); -unity-font-style: bold;" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                        <ui:Label text="Morale" style="font-size: 12px; color: rgb(160,160,160);" />
+                                        <ui:ProgressBar name="AFMoraleBar" value="60" style="width: 60%; height: 6px;" />
+                                        <ui:Label name="AFMoralePct" text="60%" style="font-size: 12px; color: rgb(255,180,0); -unity-font-style: bold;" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement style="display: none; flex-direction: row; align-items: center; background-color: rgba(0,0,0,0.3); border-radius: 4px; padding: 4px; border-top-width: 1px; border-top-color: rgba(255,255,255,0.08);">
+                                        <ui:VisualElement name="AFCdrPortrait" style="width: 28px; height: 28px; border-radius: 14px; background-color: rgba(186,104,200,0.2); margin-right: 8px; border-width: 1px; border-color: rgba(186,104,200,0.4);" />
+                                        <ui:VisualElement style="flex-grow: 1;">
+                                            <ui:Label text="COMMANDER" style="font-size: 10px; color: rgb(140,140,140); letter-spacing: 1px;" />
+                                            <ui:Label name="AFCdrName" text="Air Marshal Hasan Abubakar" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                            <ui:Label name="AFCdrTitle" text="Chief of Air Staff" style="font-size: 11px; color: rgb(160,160,160);" />
+                                            <ui:Label name="AFCdrBonus" text="Readiness Bonus: +3%" style="font-size: 11px; color: rgb(0,230,118);" />
+                                        </ui:VisualElement>
+                                        <ui:Button name="BtnAFCdrProfile" text="&#xf007;" class="button-premium fa-icon" style="width: 24px; height: 24px; font-size: 14px;" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:Button name="BtnViewAF" text="VIEW DETAILS" class="button-premium" style="margin: 0 6px 6px 6px; height: 22px; font-size: 11px; color: rgb(186,104,200); border-color: rgba(186,104,200,0.4);" />
+                            </ui:VisualElement>
+
+                            <!-- RAPID DEPLOYMENT FORCE CARD -->
+                            <ui:VisualElement name="BranchCardRDF" class="branch-card" style="flex-grow: 1; background-color: rgb(14,18,26); border-width: 1px; border-color: rgba(241,196,15,0.3); border-radius: 6px; overflow: hidden;">
+                                <ui:VisualElement name="BranchImgRDF" style="height: 250px; background-color: rgb(24,18,10); background-image: url('project://database/Assets/Images/rdf.png?fileID=2800000&amp;guid=d3a644dec176d184eb19d86be3cb0519&amp;type=3#rdf'); -unity-background-scale-mode: scale-and-crop; align-items: flex-start; justify-content: flex-end; padding: 8px; border-bottom-width: 1px; border-bottom-color: rgba(241,196,15,0.15);">
+                                    <ui:VisualElement style="position: absolute; bottom: 0; left: 0; right: 0; height: 50px; background-color: rgba(10,14,20,0.7);" />
+                                    <ui:VisualElement style="flex-direction: row; align-items: center; position: absolute; bottom: 8px; left: 8px;">
+                                        <ui:Label text="&#xf0e7;" class="fa-icon" style="font-size: 21px; color: rgb(229, 153, 0); margin-right: 8px;" />
+                                        <ui:VisualElement>
+                                            <ui:Label text="RAPID DEPLOYMENT FORCE" style="font-size: 14px; color: rgb(229, 153, 0); -unity-font-style: bold; letter-spacing: 1px;" />
+                                            <ui:Label text="Joint Rapid Response Command" style="font-size: 12px; color: rgb(180,180,180);" />
+                                        </ui:VisualElement>
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:VisualElement style="padding: 8px; flex-direction: column;">
+                                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 3px;">
+                                        <ui:Label text="Personnel" style="font-size: 12px; color: rgb(160,160,160);" />
+                                        <ui:Label name="RDFPersonnel" text="17,876" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 3px;">
+                                        <ui:Label text="Equipment" style="font-size: 12px; color: rgb(160,160,160);" />
+                                        <ui:Label name="RDFEquipment" text="1,388" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                                        <ui:Label text="Readiness" style="font-size: 12px; color: rgb(160,160,160);" />
+                                        <ui:ProgressBar name="RDFReadinessBar" value="88" style="width: 60%; height: 6px;" />
+                                        <ui:Label name="RDFReadinessPct" text="88%" style="font-size: 12px; color: rgb(229, 153, 0); -unity-font-style: bold;" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                        <ui:Label text="Morale" style="font-size: 12px; color: rgb(160,160,160);" />
+                                        <ui:ProgressBar name="RDFMoraleBar" value="76" style="width: 60%; height: 6px;" />
+                                        <ui:Label name="RDFMoralePct" text="76%" style="font-size: 12px; color: rgb(0,230,118); -unity-font-style: bold;" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement style="display: none; flex-direction: row; align-items: center; background-color: rgba(0,0,0,0.3); border-radius: 4px; padding: 4px; border-top-width: 1px; border-top-color: rgba(255,255,255,0.08);">
+                                        <ui:VisualElement name="RDFCdrPortrait" style="width: 28px; height: 28px; border-radius: 14px; background-color: rgba(241,196,15,0.2); margin-right: 8px; border-width: 1px; border-color: rgba(241,196,15,0.4);" />
+                                        <ui:VisualElement style="flex-grow: 1;">
+                                            <ui:Label text="COMMANDER" style="font-size: 10px; color: rgb(140,140,140); letter-spacing: 1px;" />
+                                            <ui:Label name="RDFCdrName" text="Maj. Gen. Emmanuel Undiandeye" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                            <ui:Label name="RDFCdrTitle" text="Commander, RDF" style="font-size: 11px; color: rgb(160,160,160);" />
+                                            <ui:Label name="RDFCdrBonus" text="Readiness Bonus: +6%" style="font-size: 11px; color: rgb(0,230,118);" />
+                                        </ui:VisualElement>
+                                        <ui:Button name="BtnRDFCdrProfile" text="&#xf007;" class="button-premium fa-icon" style="width: 24px; height: 24px; font-size: 14px;" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:Button name="BtnViewRDF" text="VIEW DETAILS" class="button-premium" style="margin: 0 6px 6px 6px; height: 22px; font-size: 11px; color: rgb(229, 153, 0); border-color: rgba(241,196,15,0.4);" />
+                            </ui:VisualElement>
+
+                        </ui:VisualElement>
+                        <!-- /BranchContainer -->
+                    </ui:VisualElement>
+                    <!-- END ROW 2 -->
+
+                    <!-- â”€â”€ ROW 3: READINESS FACTORS | RECENT OPERATIONS | FORCE STATUS â”€â”€ -->
+                    <ui:VisualElement style="flex-direction: row; align-items: stretch; flex-shrink: 0; height: 180px;">
+
+                        <!-- DEFENCE READINESS FACTORS -->
+                        <ui:VisualElement class="sub-panel" style="width: 26%; margin-right: 8px; padding: 10px; flex-direction: column;">
+                            <ui:Label text="DEFENCE READINESS FACTORS" style="font-size: 12px; color: rgb(140,140,140); letter-spacing: 1px; margin-bottom: 8px; -unity-font-style: bold;" />
+
+                            <ui:VisualElement name="ReadinessFactorList" style="flex-direction: column;">
+                                <!-- Equipment Maintenance -->
+                                <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 6px;">
+                                    <ui:VisualElement style="width: 12px; height: 12px; margin-right: 8px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_equipment.png'); -unity-background-scale-mode: scale-to-fit;" />
+                                    <ui:Label text="Equipment Maintenance" style="font-size: 12px; color: rgb(180,180,180); flex-grow: 1;" />
+                                    <ui:ProgressBar name="FactorEquipBar" value="90" style="width: 70px; height: 6px; margin-right: 6px;" />
+                                    <ui:Label name="FactorEquipLabel" text="GOOD" style="font-size: 12px; color: rgb(0,230,118); -unity-font-style: bold; width: 44px;" />
+                                </ui:VisualElement>
+                                <!-- Training -->
+                                <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 6px;">
+                                    <ui:VisualElement style="width: 12px; height: 12px; margin-right: 8px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_target.png'); -unity-background-scale-mode: scale-to-fit;" />
+                                    <ui:Label text="Training &amp; Exercises" style="font-size: 12px; color: rgb(180,180,180); flex-grow: 1;" />
+                                    <ui:ProgressBar name="FactorTrainBar" value="85" style="width: 70px; height: 6px; margin-right: 6px;" />
+                                    <ui:Label name="FactorTrainLabel" text="GOOD" style="font-size: 12px; color: rgb(0,230,118); -unity-font-style: bold; width: 44px;" />
+                                </ui:VisualElement>
+                                <!-- Intelligence Support -->
+                                <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 6px;">
+                                    <ui:VisualElement style="width: 12px; height: 12px; margin-right: 8px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_eyes.png'); -unity-background-scale-mode: scale-to-fit;" />
+                                    <ui:Label text="Intelligence Support" style="font-size: 12px; color: rgb(180,180,180); flex-grow: 1;" />
+                                    <ui:ProgressBar name="FactorIntelBar" value="80" style="width: 70px; height: 6px; margin-right: 6px;" />
+                                    <ui:Label name="FactorIntelLabel" text="GOOD" style="font-size: 12px; color: rgb(0,230,118); -unity-font-style: bold; width: 44px;" />
+                                </ui:VisualElement>
+                                <!-- Logistics -->
+                                <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 6px;">
+                                    <ui:VisualElement style="width: 12px; height: 12px; margin-right: 8px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_logistic.png'); -unity-background-scale-mode: scale-to-fit;" />
+                                    <ui:Label text="Logistics &amp; Supply" style="font-size: 12px; color: rgb(180,180,180); flex-grow: 1;" />
+                                    <ui:ProgressBar name="FactorLogBar" value="60" style="width: 70px; height: 6px; margin-right: 6px;" />
+                                    <ui:Label name="FactorLogLabel" text="MEDIUM" style="font-size: 12px; color: rgb(255,180,0); -unity-font-style: bold; width: 44px;" />
+                                </ui:VisualElement>
+                                <!-- Personnel Welfare -->
+                                <ui:VisualElement style="flex-direction: row; align-items: center;">
+                                    <ui:VisualElement style="width: 12px; height: 12px; margin-right: 8px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_personnel.png'); -unity-background-scale-mode: scale-to-fit;" />
+                                    <ui:Label text="Personnel Welfare" style="font-size: 12px; color: rgb(180,180,180); flex-grow: 1;" />
+                                    <ui:ProgressBar name="FactorWelfBar" value="55" style="width: 70px; height: 6px; margin-right: 6px;" />
+                                    <ui:Label name="FactorWelfLabel" text="MEDIUM" style="font-size: 12px; color: rgb(255,180,0); -unity-font-style: bold; width: 44px;" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- RECENT OPERATIONS -->
+                        <ui:VisualElement class="sub-panel" style="flex-grow: 1; margin-right: 8px; padding: 10px; flex-direction: column;">
+                            <ui:Label text="RECENT OPERATIONS" style="font-size: 12px; color: rgb(140,140,140); letter-spacing: 1px; margin-bottom: 8px; -unity-font-style: bold;" />
+
+                            <ui:VisualElement name="RecentOpsList" style="flex-direction: column; flex-grow: 1;">
+                                <!-- Op Row 1 -->
+                                <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 8px; padding-bottom: 8px; border-bottom-width: 1px; border-bottom-color: rgba(255,255,255,0.06);">
+                                    <ui:VisualElement style="width: 28px; height: 28px; background-color: rgba(0,210,255,0.1); border-radius: 4px; border-width: 1px; border-color: rgba(0,210,255,0.3); align-items: center; justify-content: center; margin-right: 8px; flex-shrink: 0;">
+                                        <ui:VisualElement style="width: 14px; height: 14px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_defend.png'); -unity-background-scale-mode: scale-to-fit;" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement style="flex-grow: 1;">
+                                        <ui:Label name="RecentOp1Name" text="Operation Safe Borders" style="font-size: 13px; color: white; -unity-font-style: bold;" />
+                                        <ui:Label name="RecentOp1Desc" text="Border security operation in Borno State" style="font-size: 12px; color: rgb(160,160,160);" />
+                                    </ui:VisualElement>
+                                    <ui:Label name="RecentOp1Date" text="07 Jan 2026" style="font-size: 12px; color: rgb(140,140,140); margin-right: 8px;" />
+                                    <ui:Label name="RecentOp1Status" text="ONGOING" style="font-size: 11px; color: rgb(0,230,118); -unity-font-style: bold; border-width: 1px; border-color: rgba(0,230,118,0.4); padding: 2px 6px; border-radius: 3px;" />
+                                </ui:VisualElement>
+                                <!-- Op Row 2 -->
+                                <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 8px; padding-bottom: 8px; border-bottom-width: 1px; border-bottom-color: rgba(255,255,255,0.06);">
+                                    <ui:VisualElement style="width: 28px; height: 28px; background-color: rgba(33,150,243,0.1); border-radius: 4px; border-width: 1px; border-color: rgba(33,150,243,0.3); align-items: center; justify-content: center; margin-right: 8px; flex-shrink: 0;">
+                                        <ui:VisualElement style="width: 28px; height: 28px; background-color: rgba(33,150,243,0.1); border-radius: 4px; border-width: 1px; border-color: rgba(33,150,243,0.3); align-items: center; justify-content: center; margin-right: 8px; flex-shrink: 0;">
+                                            <ui:VisualElement style="width: 14px; height: 14px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_defend.png'); -unity-background-scale-mode: scale-to-fit;" />
+                                        </ui:VisualElement>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement style="flex-grow: 1;">
+                                        <ui:Label name="RecentOp2Name" text="Operation Delta Shield" style="font-size: 13px; color: white; -unity-font-style: bold;" />
+                                        <ui:Label name="RecentOp2Desc" text="Maritime patrol in the Gulf of Guinea" style="font-size: 12px; color: rgb(160,160,160);" />
+                                    </ui:VisualElement>
+                                    <ui:Label name="RecentOp2Date" text="04 Jan 2026" style="font-size: 12px; color: rgb(140,140,140); margin-right: 8px;" />
+                                    <ui:Label name="RecentOp2Status" text="ONGOING" style="font-size: 11px; color: rgb(0,230,118); -unity-font-style: bold; border-width: 1px; border-color: rgba(0,230,118,0.4); padding: 2px 6px; border-radius: 3px;" />
+                                </ui:VisualElement>
+                                <!-- Op Row 3 -->
+                                <ui:VisualElement style="flex-direction: row; align-items: center;">
+                                    <ui:VisualElement style="width: 28px; height: 28px; background-color: rgba(186,104,200,0.1); border-radius: 4px; border-width: 1px; border-color: rgba(186,104,200,0.3); align-items: center; justify-content: center; margin-right: 8px; flex-shrink: 0;">
+                                        <ui:VisualElement style="width: 14px; height: 14px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_defend.png'); -unity-background-scale-mode: scale-to-fit;" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement style="flex-grow: 1;">
+                                        <ui:Label name="RecentOp3Name" text="Operation Air Vigil" style="font-size: 13px; color: white; -unity-font-style: bold;" />
+                                        <ui:Label name="RecentOp3Desc" text="Airspace surveillance and reconnaissance" style="font-size: 12px; color: rgb(160,160,160);" />
+                                    </ui:VisualElement>
+                                    <ui:Label name="RecentOp3Date" text="02 Jan 2026" style="font-size: 12px; color: rgb(140,140,140); margin-right: 8px;" />
+                                    <ui:Label name="RecentOp3Status" text="ONGOING" style="font-size: 11px; color: rgb(0,230,118); -unity-font-style: bold; border-width: 1px; border-color: rgba(0,230,118,0.4); padding: 2px 6px; border-radius: 3px;" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- FORCE STATUS -->
+                        <ui:VisualElement class="sub-panel" style="width: 22%; padding: 10px; flex-direction: column;">
+                            <ui:Label text="FORCE STATUS" style="font-size: 12px; color: rgb(140,140,140); letter-spacing: 1px; margin-bottom: 8px; -unity-font-style: bold;" />
+
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <ui:VisualElement style="flex-direction: row; align-items: center;">
+                                    <ui:VisualElement style="width: 12px; height: 12px; margin-right: 6px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_attack.png'); -unity-background-scale-mode: scale-to-fit;" />
+                                    <ui:Label text="Active Deployments" style="font-size: 12px; color: rgb(180,180,180);" />
+                                </ui:VisualElement>
+                                <ui:Label name="ForceStatusDeployments" text="4" style="font-size: 14px; color: rgb(255,180,0); -unity-font-style: bold;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <ui:VisualElement style="flex-direction: row; align-items: center;">
+                                    <ui:VisualElement style="width: 12px; height: 12px; margin-right: 6px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_rank1.png'); -unity-background-scale-mode: scale-to-fit;" />
+                                    <ui:Label text="Personnel in Training" style="font-size: 12px; color: rgb(180,180,180);" />
+                                </ui:VisualElement>
+                                <ui:Label name="ForceStatusTraining" text="3,250" style="font-size: 14px; color: rgb(25, 127, 229); -unity-font-style: bold;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <ui:VisualElement style="flex-direction: row; align-items: center;">
+                                    <ui:VisualElement style="width: 12px; height: 12px; margin-right: 6px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_maintenance.png'); -unity-background-scale-mode: scale-to-fit;" />
+                                    <ui:Label text="Equipment Maintenance" style="font-size: 12px; color: rgb(180,180,180);" />
+                                </ui:VisualElement>
+                                <ui:Label name="ForceStatusMaintenance" text="12%" style="font-size: 14px; color: rgb(255,180,0); -unity-font-style: bold;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="height: 1px; background-color: rgba(255,255,255,0.08); margin: 4px 0;" />
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <ui:VisualElement style="flex-direction: row; align-items: center;">
+                                    <ui:VisualElement style="width: 12px; height: 12px; margin-right: 6px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_report.png'); -unity-background-scale-mode: scale-to-fit;" />
+                                    <ui:Label text="Medical Evacuation Ready" style="font-size: 12px; color: rgb(180,180,180);" />
+                                </ui:VisualElement>
+                                <ui:Label name="ForceStatusMedEvac" text="100%" style="font-size: 14px; color: rgb(0,230,118); -unity-font-style: bold;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center;">
+                                <ui:VisualElement style="flex-direction: row; align-items: center;">
+                                    <ui:VisualElement style="width: 12px; height: 12px; margin-right: 6px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_time.png'); -unity-background-scale-mode: scale-to-fit;" />
+                                    <ui:Label text="Reserves Mobilisation Time" style="font-size: 12px; color: rgb(180,180,180);" />
+                                </ui:VisualElement>
+                                <ui:Label name="ForceStatusMobTime" text="48 Hours" style="font-size: 14px; color: rgb(0,230,118); -unity-font-style: bold;" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                    </ui:VisualElement>
+                    <!-- END ROW 3 -->
+
+                    <!-- Hidden/legacy elements retained for controller bindings -->
+                    <ui:VisualElement style="display: none;">
+                        <ui:ScrollView name="GeneralsContainer" />
+                        <ui:ScrollView name="BlockadesContainer" />
+                        <ui:Button name="BtnRecruitGeneral" />
+                        <ui:Button name="BtnDeclareBlockade" />
+                        <ui:VisualElement name="InternalSecurityContainer">
+                            <ui:VisualElement name="RegionPoliceList" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="GlobalPowerBalanceContainer">
+                            <ui:ScrollView name="GlobalPowerList" />
+                        </ui:VisualElement>
+                        <ui:ProgressBar name="WMDProgressBar" value="0" />
+                        <ui:Label name="WMDStatusLabel" text="Inactive" />
+                        <ui:Label name="WMDOperationalBadge" text="NUCLEAR SECURED" />
+                        <ui:Label name="MilBriefing" text="Awaiting theatre reportsâ€¦" />
+                        <ui:ScrollView name="MilLiveFeed" />
+                        <ui:Label name="DoctrineDesc" text="" />
+                        <ui:Button name="BtnPostureDefensive" />
+                        <ui:Button name="BtnPostureDeterrence" />
+                        <ui:Button name="BtnPostureOffensive" />
+                        <ui:Button name="BtnPostureCOIN" />
+                        <ui:Button name="BtnInbox" />
+                    </ui:VisualElement>
+
+                </ui:ScrollView>
+            </ui:VisualElement>
+            <!-- END PanelForces -->
+</ui:UXML>

@@ -1,0 +1,195 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/Global.uss" />
+    <ui:VisualElement name="PanelOperations" style="display: none; flex-grow: 1; flex-direction: column; overflow: hidden; padding: 15px; background-color: rgb(8, 14, 20);">
+        
+        <!-- Top Header -->
+        <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-shrink: 0;">
+            <ui:VisualElement style="flex-direction: row; align-items: center;">
+                <ui:VisualElement class="ops-cmd-icon" style="width: 24px; height: 24px; margin-right: 10px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_operations.png'); -unity-background-scale-mode: scale-to-fit;" />
+                <ui:VisualElement>
+                    <ui:Label text="OPERATIONS COMMAND" class="ops-cmd-title" />
+                    <ui:Label text="Plan, execute and monitor military operations." class="ops-cmd-subtitle" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Button name="btn-launch-new" text="+ NEW OPERATION" class="ops-btn-new" />
+        </ui:VisualElement>
+
+        <!-- Main Content Grid -->
+        <ui:VisualElement style="flex-direction: row; flex-grow: 1; min-height: 0;">
+            
+            <!-- Left: Active Operations List -->
+            <ui:VisualElement class="ops-col-left" style="width: 280px; flex-shrink: 0; margin-right: 15px; flex-direction: column; min-height: 0;">
+                <ui:Label name="lbl-active-ops-count" text="ACTIVE OPERATIONS (0)" class="ops-section-header" style="margin-bottom: 10px;" />
+                <ui:ScrollView name="ops-master-list" style="flex-grow: 1; min-height: 0;" />
+                <ui:Button name="btn-view-completed" text="VIEW COMPLETED OPERATIONS" class="ops-btn-outline" style="margin-top: 10px; flex-shrink: 0;" />
+            </ui:VisualElement>
+
+            <!-- Center: Operation Details (Hidden when no selection) -->
+            <ui:VisualElement name="ops-detail-view" style="flex-grow: 1; flex-direction: row; display: none; min-height: 0;">
+                
+                <!-- Center-Left: Stats and Resources -->
+                <ui:VisualElement style="flex-grow: 1; flex-direction: column; margin-right: 15px; min-width: 0; min-height: 0;">
+                    <!-- Header Card -->
+                    <ui:VisualElement class="ops-card" style="flex-direction: row; justify-content: space-between; margin-bottom: 15px; flex-shrink: 0;">
+                        <ui:VisualElement>
+                            <ui:Label name="det-op-name" text="OPERATION: LAGOS SHIELD" class="det-title" />
+                            <ui:Label name="det-op-type" text="Counter Terrorism Operation" class="det-subtitle" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="align-items: flex-end;">
+                            <ui:VisualElement style="flex-direction: row; align-items: center;">
+                                <ui:VisualElement class="status-dot active" />
+                                <ui:Label name="det-op-status" text="ACTIVE" class="det-status" />
+                            </ui:VisualElement>
+                            <ui:Label name="det-start-date" text="Started: 02 Jan 2026" class="det-date" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- 6 Stat blocks in a row -->
+                    <ui:VisualElement class="ops-card" style="flex-direction: row; flex-wrap: wrap; margin-bottom: 15px; padding: 10px 5px; flex-shrink: 0;">
+                        <!-- repeated stat blocks -->
+                        <ui:VisualElement class="det-stat-box"><ui:VisualElement class="det-stat-icon" style="width: 14px; height: 14px; margin-right: 6px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_bases.png'); -unity-background-scale-mode: scale-to-fit;"/><ui:VisualElement><ui:Label text="REGION" class="det-stat-key"/><ui:Label name="stat-region" text="-" class="det-stat-val"/></ui:VisualElement></ui:VisualElement>
+                        <ui:VisualElement class="det-stat-box"><ui:VisualElement class="det-stat-icon" style="width: 14px; height: 14px; margin-right: 6px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_target.png'); -unity-background-scale-mode: scale-to-fit;"/><ui:VisualElement><ui:Label text="PRIMARY OBJECTIVE" class="det-stat-key"/><ui:Label name="stat-objective" text="-" class="det-stat-val"/></ui:VisualElement></ui:VisualElement>
+                        <ui:VisualElement class="det-stat-box"><ui:VisualElement class="det-stat-icon" style="width: 14px; height: 14px; margin-right: 6px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_time.png'); -unity-background-scale-mode: scale-to-fit;"/><ui:VisualElement><ui:Label text="DURATION" class="det-stat-key"/><ui:Label name="stat-duration" text="- / -" class="det-stat-val"/></ui:VisualElement></ui:VisualElement>
+                        <ui:VisualElement class="det-stat-box"><ui:VisualElement class="det-stat-icon" style="width: 14px; height: 14px; margin-right: 6px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_defend.png'); -unity-background-scale-mode: scale-to-fit;"/><ui:VisualElement><ui:Label text="SUCCESS CHANCE" class="det-stat-key"/><ui:Label name="stat-chance" text="-" class="det-stat-val"/></ui:VisualElement></ui:VisualElement>
+                        <ui:VisualElement class="det-stat-box"><ui:VisualElement class="det-stat-icon" style="width: 14px; height: 14px; margin-right: 6px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_report.png'); -unity-background-scale-mode: scale-to-fit;"/><ui:VisualElement><ui:Label text="INTEL QUALITY" class="det-stat-key"/><ui:Label name="stat-intel" text="-" class="det-stat-val"/></ui:VisualElement></ui:VisualElement>
+                        <ui:VisualElement class="det-stat-box"><ui:VisualElement class="det-stat-icon" style="width: 14px; height: 14px; margin-right: 6px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_attack.png'); -unity-background-scale-mode: scale-to-fit;"/><ui:VisualElement><ui:Label text="THREAT LEVEL" class="det-stat-key"/><ui:Label name="stat-threat" text="-" class="det-stat-val"/></ui:VisualElement></ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- Grid for Forces, Equipment, Status, Resources -->
+                    <ui:VisualElement style="flex-direction: row; flex-grow: 1; min-height: 0;">
+                        <!-- Left side -->
+                        <ui:VisualElement style="flex-grow: 1; margin-right: 15px; flex-direction: column;">
+                            <ui:VisualElement class="ops-card" style="margin-bottom: 15px; flex-grow: 1; min-height: 0;">
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 10px; flex-shrink: 0;">
+                                    <ui:Label text="FORCES ASSIGNED" class="ops-section-header" />
+                                    <ui:Button name="btn-modify-forces" text="MODIFY" class="ops-btn-small" />
+                                </ui:VisualElement>
+                                <ui:ScrollView name="det-forces-list" style="flex-grow: 1; min-height: 0;" />
+                            </ui:VisualElement>
+
+                            <ui:VisualElement class="ops-card" style="flex-grow: 1; min-height: 0;">
+                                <ui:Label text="EQUIPMENT ASSIGNED" class="ops-section-header" style="margin-bottom: 10px; flex-shrink: 0;" />
+                                <ui:ScrollView name="det-equip-list" style="flex-grow: 1; min-height: 0;" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- Right side -->
+                        <ui:VisualElement style="flex-grow: 1; flex-direction: column;">
+                            <ui:VisualElement class="ops-card" style="margin-bottom: 15px; flex-grow: 1; min-height: 0;">
+                                <ui:Label text="OPERATION STATUS" class="ops-section-header" style="margin-bottom: 10px; flex-shrink: 0;" />
+                                <ui:ScrollView name="det-status-list" style="flex-grow: 1; min-height: 0;" />
+                            </ui:VisualElement>
+
+                            <ui:VisualElement class="ops-card" style="flex-grow: 1; min-height: 0;">
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 10px; flex-shrink: 0;">
+                                    <ui:Label text="OPERATION RESOURCES" class="ops-section-header" />
+                                    <ui:VisualElement style="flex-direction: row; align-items: flex-end;">
+                                        <ui:Label text="Estimated Daily Cost " style="font-size: 12px; color: grey; margin-right: 6px;" />
+                                        <ui:Label name="stat-cost" text="-" style="font-size: 14px; color: white; -unity-font-style: bold;" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:ScrollView name="det-res-list" style="flex-grow: 1; min-height: 0;" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- Mission Feed -->
+                    <ui:VisualElement class="ops-card" style="height: 140px; margin-top: 15px; flex-shrink: 0;">
+                        <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 10px;">
+                            <ui:Label text="MISSION FEED (LIVE UPDATES)" class="ops-section-header" />
+                            <ui:Button name="btn-view-feed" text="VIEW ALL" class="ops-btn-small" />
+                        </ui:VisualElement>
+                        <ui:ScrollView name="det-feed-list" style="flex-grow: 1;" />
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+                <!-- Right: Mission Outlook & Actions -->
+                <ui:VisualElement class="ops-col-right" style="width: 250px; flex-shrink: 0; flex-direction: column;">
+                    <ui:VisualElement class="ops-card" style="margin-bottom: 15px;">
+                        <ui:Label text="MISSION OUTLOOK" class="ops-section-header" style="margin-bottom: 15px;" />
+                        <ui:VisualElement style="align-items: center; justify-content: center; margin-bottom: 15px;">
+                            <!-- Mock Circular Gauge -->
+                            <ui:VisualElement style="width: 100px; height: 100px; border-radius: 50%; border-width: 4px; border-color: rgba(36, 238, 87, 0.2); justify-content: center; align-items: center;">
+                                <ui:VisualElement name="gauge-fill" style="position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px; border-radius: 50%; border-width: 4px; border-top-color: rgb(36, 238, 87); border-right-color: rgb(36, 238, 87); border-bottom-color: transparent; border-left-color: transparent; rotate: 45deg;" />
+                                <ui:Label name="stat-success-main" text="-" style="font-size: 27px; color: white; -unity-font-style: bold;" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        
+                        <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 4px;">
+                            <ui:Label text="• Success Probability" style="color: grey; font-size: 13px;" />
+                            <ui:Label name="out-prob" text="-" style="color: white; font-size: 13px; -unity-font-style: bold;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 4px;">
+                            <ui:Label text="• Friendly Losses" style="color: grey; font-size: 13px;" />
+                            <ui:Label name="out-losses" text="-" style="color: white; font-size: 13px; -unity-font-style: bold;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 4px;">
+                            <ui:Label text="• Civilian Risk" style="color: grey; font-size: 13px;" />
+                            <ui:Label name="out-civ" text="-" style="color: white; font-size: 13px; -unity-font-style: bold;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 4px;">
+                            <ui:Label text="• Political Impact" style="color: grey; font-size: 13px;" />
+                            <ui:Label name="out-pol" text="-" style="color: rgb(36, 238, 87); font-size: 13px; -unity-font-style: bold;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                            <ui:Label text="• Intel Confidence" style="color: grey; font-size: 13px;" />
+                            <ui:Label name="out-intel" text="-" style="color: white; font-size: 13px; -unity-font-style: bold;" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="ops-card" style="margin-bottom: 15px; flex-grow: 1; min-height: 0;">
+                        <ui:Label text="COMMAND DECISIONS" class="ops-section-header" style="margin-bottom: 10px; flex-shrink: 0;" />
+                        <ui:ScrollView style="flex-grow: 1;">
+                            <ui:Button name="btn-action-airstrike" class="ops-action-btn">
+                                <ui:VisualElement class="action-icon" style="width: 16px; height: 16px; margin-right: 8px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_attack.png'); -unity-background-scale-mode: scale-to-fit;" />
+                                <ui:VisualElement>
+                                    <ui:Label text="Call Air Strike" class="action-title" />
+                                    <ui:Label text="Request precision air strike on target." class="action-desc" />
+                                </ui:VisualElement>
+                            </ui:Button>
+                            <ui:Button name="btn-action-recon" class="ops-action-btn">
+                                <ui:VisualElement class="action-icon" style="width: 16px; height: 16px; margin-right: 8px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_eyes.png'); -unity-background-scale-mode: scale-to-fit;" />
+                                <ui:VisualElement>
+                                    <ui:Label text="Deploy Recon Drone" class="action-title" />
+                                    <ui:Label text="Launch drone for area surveillance." class="action-desc" />
+                                </ui:VisualElement>
+                            </ui:Button>
+                            <ui:Button name="btn-action-reinforce" class="ops-action-btn">
+                                <ui:VisualElement class="action-icon" style="width: 16px; height: 16px; margin-right: 8px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_defend.png'); -unity-background-scale-mode: scale-to-fit;" />
+                                <ui:VisualElement>
+                                    <ui:Label text="Reinforce Operation" class="action-title" />
+                                    <ui:Label text="Send additional troops and equipment." class="action-desc" />
+                                </ui:VisualElement>
+                            </ui:Button>
+                            <ui:Button name="btn-action-intel" class="ops-action-btn">
+                                <ui:VisualElement class="action-icon" style="width: 16px; height: 16px; margin-right: 8px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_report.png'); -unity-background-scale-mode: scale-to-fit;" />
+                                <ui:VisualElement>
+                                    <ui:Label text="Request Intelligence" class="action-title" />
+                                    <ui:Label text="Request updated intelligence report." class="action-desc" />
+                                </ui:VisualElement>
+                            </ui:Button>
+                        </ui:ScrollView>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="ops-card" style="flex-shrink: 0;">
+                        <ui:Label text="OPERATION ACTIONS" class="ops-section-header" style="margin-bottom: 10px;" />
+                        <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 10px;">
+                            <ui:Button name="btn-op-save" text="SAVE CHANGES" class="ops-btn-save" />
+                            <ui:Button name="btn-op-pause" text="‖ PAUSE" class="ops-btn-outline" />
+                        </ui:VisualElement>
+                        <ui:Button name="btn-op-abort" text="✕ ABORT OPERATION" class="ops-btn-abort" />
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Placeholder when no operation is selected -->
+            <ui:VisualElement name="ops-no-selection" style="flex-grow: 1; justify-content: center; align-items: center; display: flex;">
+                <ui:Label text="SELECT AN OPERATION" style="font-size: 19px; color: rgba(255, 255, 255, 0.3); -unity-font-style: bold; letter-spacing: 2px;" />
+                <ui:Label text="Choose an active operation from the list or launch a new one." style="font-size: 14px; color: rgba(150, 160, 170, 0.5); margin-top: 10px;" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

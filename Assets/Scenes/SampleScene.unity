@@ -6577,7 +6577,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_PanelSettings: {fileID: 11400000, guid: 68fecfc738ddaab44960bbd38e92731e, type: 2}
   m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: 42b60a3885efd9d4eb1de3005a7f1cec, type: 3}
   m_SortingOrder: 0
 --- !u!4 &1675259089
 Transform:
@@ -6606,8 +6606,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86865327c79bbe74f907a41083ca9b0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rowPrefab: {fileID: 1675259087}
-  contentParent: {fileID: 0}
 --- !u!1 &1699277256
 GameObject:
   m_ObjectHideFlags: 0

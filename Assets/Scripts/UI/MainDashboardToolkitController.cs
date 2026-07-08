@@ -7,6 +7,8 @@ using StateCraft.Systems;
 
 namespace StateCraft.UI
 {
+    // Run after all sub-dashboard controllers have initialized (default order = 0)
+    [DefaultExecutionOrder(10)]
     public class MainDashboardToolkitController : MonoBehaviour
     {
         public static MainDashboardToolkitController Instance { get; private set; }
@@ -100,6 +102,42 @@ namespace StateCraft.UI
 
             _btnEvents = _root.Q<Button>("NavEvents");
             if (_btnEvents != null) _btnEvents.clicked += () => ShowPanel("Events");
+
+            InjectNavImages();
+        }
+
+        private void InjectNavImages()
+        {
+            if (_btnEconomy != null) 
+            {
+                var icon = _btnEconomy.Q<Label>(className: "modern-nav-icon");
+                if (icon != null) icon.style.backgroundImage = new StyleBackground(Resources.Load<Texture2D>("NavIcons/economy"));
+            }
+            if (_btnMilitary != null) 
+            {
+                var icon = _btnMilitary.Q<Label>(className: "modern-nav-icon");
+                if (icon != null) icon.style.backgroundImage = new StyleBackground(Resources.Load<Texture2D>("NavIcons/Military"));
+            }
+            if (_btnIntel != null) 
+            {
+                var icon = _btnIntel.Q<Label>(className: "modern-nav-icon");
+                if (icon != null) icon.style.backgroundImage = new StyleBackground(Resources.Load<Texture2D>("NavIcons/Intel"));
+            }
+            if (_btnDiplomacy != null) 
+            {
+                var icon = _btnDiplomacy.Q<Label>(className: "modern-nav-icon");
+                if (icon != null) icon.style.backgroundImage = new StyleBackground(Resources.Load<Texture2D>("NavIcons/Diplomacy"));
+            }
+            if (_btnEvents != null) 
+            {
+                var icon = _btnEvents.Q<Label>(className: "modern-nav-icon");
+                if (icon != null) icon.style.backgroundImage = new StyleBackground(Resources.Load<Texture2D>("NavIcons/EVENT"));
+            }
+            if (_btnSearch != null) 
+            {
+                var icon = _btnSearch.Q<Label>(className: "modern-nav-icon");
+                if (icon != null) icon.style.backgroundImage = new StyleBackground(Resources.Load<Texture2D>("NavIcons/Global"));
+            }
         }
 
         private void Start()
@@ -126,28 +164,51 @@ namespace StateCraft.UI
                 _panels[key] = p;
             }
 
-            var ecoCtrl = FindObjectOfType<EconomyDashboardController>();
-            if (ecoCtrl?.GetComponent<UIDocument>() != null)
-                InjectPanel(ecoCtrl.GetComponent<UIDocument>().rootVisualElement.Q("EconomyDashboard"), "Economy");
-            
-            var milCtrl = FindObjectOfType<MilitaryDashboardController>();
-            if (milCtrl?.GetComponent<UIDocument>() != null)
-                InjectPanel(milCtrl.GetComponent<UIDocument>().rootVisualElement.Q("MilitaryDashboard"), "Military");
-            
-            var intCtrl = FindObjectOfType<IntelligenceDashboardController>();
-            if (intCtrl?.GetComponent<UIDocument>() != null)
-                InjectPanel(intCtrl.GetComponent<UIDocument>().rootVisualElement.Q("IntelligenceDashboard"), "Intel");
+            // Helper: get a dashboard panel VisualElement from a controller's UIDocument.
+            // Prefers rootVisualElement (already built), but falls back to CloneTree() directly
+            // from the visualTreeAsset when rootVisualElement is empty — this happens when
+            // UIDocument defers its build past our Start() call. The element will be injected
+            // into MainDashboard's own panel container, so IntelUI's runtime panel is irrelevant.
+            VisualElement GetDashboardPanel(MonoBehaviour ctrl, string panelName)
+            {
+                if (ctrl == null) return null;
+                var doc = ctrl.GetComponent<UIDocument>();
+                if (doc == null) return null;
 
-            var dipCtrl = FindObjectOfType<DiplomacyDashboardController>();
-            if (dipCtrl?.GetComponent<UIDocument>() != null)
-                InjectPanel(dipCtrl.GetComponent<UIDocument>().rootVisualElement.Q("DiplomacyDashboard"), "Diplomacy");
+                // First try: rootVisualElement (works if UIDocument has already built the tree)
+                var panel = doc.rootVisualElement?.Q(panelName);
 
-            var evtCtrl = FindObjectOfType<EventDashboardController>();
-            if (evtCtrl?.GetComponent<UIDocument>() != null)
-                InjectPanel(evtCtrl.GetComponent<UIDocument>().rootVisualElement.Q("EventDashboard"), "Events");
+                // Fallback: clone directly from the visual tree asset
+                if (panel == null && doc.visualTreeAsset != null)
+                {
+                    var container = new VisualElement();
+                    doc.visualTreeAsset.CloneTree(container);
+                    panel = container.Q(panelName);
+                }
+
+                if (panel == null)
+                    Debug.LogWarning($"[Dashboard] '{panelName}' not found in {ctrl?.name}. Check the UXML element name.");
+                return panel;
+            }
+
+            var ecoCtrl = FindObjectOfType<EconomyDashboardController>(true);
+            InjectPanel(GetDashboardPanel(ecoCtrl, "EconomyDashboard"), "Economy");
+            
+            var milCtrl = FindObjectOfType<MilitaryDashboardController>(true);
+            InjectPanel(GetDashboardPanel(milCtrl, "MilitaryDashboard"), "Military");
+            
+            var intCtrl = FindObjectOfType<IntelligenceDashboardController>(true);
+            InjectPanel(GetDashboardPanel(intCtrl, "IntelligenceDashboard"), "Intel");
+
+            var dipCtrl = FindObjectOfType<DiplomacyDashboardController>(true);
+            InjectPanel(GetDashboardPanel(dipCtrl, "DiplomacyDashboard"), "Diplomacy");
+
+            var evtCtrl = FindObjectOfType<EventDashboardController>(true);
+            InjectPanel(GetDashboardPanel(evtCtrl, "EventDashboard"), "Events");
 
             HideAllPanels();
         }
+
 
         public void ShowPanel(string name)
         {
@@ -160,15 +221,23 @@ namespace StateCraft.UI
                 // Trigger refresh if needed on the controller
                 switch (name)
                 {
-                    case "Economy": FindObjectOfType<EconomyDashboardController>()?.Show(); break;
-                    case "Military": FindObjectOfType<MilitaryDashboardController>()?.Show(); break;
-                    case "Intel": FindObjectOfType<IntelligenceDashboardController>()?.Show(); break;
-                    case "Diplomacy": FindObjectOfType<DiplomacyDashboardController>()?.Show(); break;
-                    case "Events": FindObjectOfType<EventDashboardController>()?.Show(); break;
+                    case "Economy": FindObjectOfType<EconomyDashboardController>(true)?.Show(); break;
+                    case "Military": FindObjectOfType<MilitaryDashboardController>(true)?.Show(); break;
+                    case "Intel": FindObjectOfType<IntelligenceDashboardController>(true)?.Show(); break;
+                    case "Diplomacy": FindObjectOfType<DiplomacyDashboardController>(true)?.Show(); break;
+                    case "Events": FindObjectOfType<EventDashboardController>(true)?.Show(); break;
                 }
+
+                // Log any overflowing UI elements in this panel (runs after next layout pass)
+                UIStateManager.LogOverflowingElements(_panels[name], name);
+            }
+            else
+            {
+                Debug.LogWarning($"[Dashboard] Panel '{name}' not found — check that the UXML is assigned.");
             }
             UpdateActiveNavButton(name);
         }
+
 
         public void HideAllPanels()
         {
@@ -323,8 +392,14 @@ namespace StateCraft.UI
         {
             if (GameManager.Instance?.TurnSystem == null) return;
 
+            string currentDate = GameManager.Instance.TurnSystem.CurrentDate;
+
             if (_dateLabel != null)
-                _dateLabel.text = GameManager.Instance.TurnSystem.CurrentDate;
+                _dateLabel.text = currentDate;
+
+            // Update date across all integrated dashboards
+            _root.Query<Label>("DateMain").ForEach(lbl => lbl.text = currentDate);
+            _root.Query<Label>("HdrDate").ForEach(lbl => lbl.text = currentDate);
 
             // ── Election countdown in header ──
             var country = GameManager.Instance.playerCountry;

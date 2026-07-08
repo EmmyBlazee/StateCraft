@@ -1,0 +1,89 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/Global.uss" />
+    <ui:VisualElement name="PanelLogistics" style="display: none; height: 100%; padding: 12px;">
+        
+        <!-- HEADER -->
+        <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 15px;">
+            <!-- Truck Icon Mock -->
+            <ui:VisualElement style="width: 20px; height: 16px; background-color: white; margin-right: 10px; border-radius: 2px;" /> 
+            <ui:VisualElement>
+                <ui:Label text="LOGISTICS COMMAND" style="font-size: 16px; color: white; -unity-font-style: bold; margin-bottom: 2px;" />
+                <ui:Label text="Manage military supplies, transport and resource distribution." style="font-size: 13px; color: rgb(150, 160, 170);" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ROW 1 (4 panels) -->
+        <ui:VisualElement style="flex-direction: row; height: 230px; margin-bottom: 10px;">
+            <!-- SUPPLY STATUS -->
+            <ui:VisualElement class="sub-panel" style="flex: 1; margin-right: 10px; padding: 12px;">
+                <ui:Label text="SUPPLY STATUS" style="font-size: 13px; color: rgb(150, 160, 170); -unity-font-style: bold; margin-bottom: 12px;" />
+                <ui:VisualElement name="SupplyStatusContainer" style="flex-grow: 1; justify-content: space-between;" />
+            </ui:VisualElement>
+
+            <!-- DAILY CONSUMPTION -->
+            <ui:VisualElement class="sub-panel" style="flex: 1; margin-right: 10px; padding: 12px;">
+                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 12px;">
+                    <ui:Label text="DAILY CONSUMPTION" style="font-size: 13px; color: rgb(150, 160, 170); -unity-font-style: bold;" />
+                    <ui:Label text="(Estimated)" style="font-size: 12px; color: grey;" />
+                </ui:VisualElement>
+                <ui:VisualElement name="ConsumptionContainer" style="flex-grow: 1; justify-content: space-between;" />
+            </ui:VisualElement>
+
+            <!-- STORAGE & DEPOTS -->
+            <ui:VisualElement class="sub-panel" style="flex: 1; margin-right: 10px; padding: 12px;">
+                <ui:Label text="STORAGE &amp; DEPOTS" style="font-size: 13px; color: rgb(150, 160, 170); -unity-font-style: bold; margin-bottom: 12px;" />
+                <ui:VisualElement name="DepotsContainer" style="flex-grow: 1; justify-content: space-between;" />
+            </ui:VisualElement>
+
+            <!-- OPERATIONAL READINESS -->
+            <ui:VisualElement class="sub-panel" style="flex: 1; padding: 12px;">
+                <ui:Label text="OPERATIONAL READINESS" style="font-size: 13px; color: rgb(150, 160, 170); -unity-font-style: bold; margin-bottom: 12px;" />
+                <ui:VisualElement name="ReadinessContainer" style="flex-grow: 1; justify-content: space-between;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ROW 2 (3 panels, mid is wide) -->
+        <ui:VisualElement style="flex-direction: row; height: 260px; margin-bottom: 15px;">
+            <!-- ACTIVE CONVOYS -->
+            <ui:VisualElement class="sub-panel" style="flex: 1; margin-right: 10px; padding: 12px;">
+                <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <ui:Label text="ACTIVE CONVOYS" style="font-size: 13px; color: rgb(150, 160, 170); -unity-font-style: bold;" />
+                    <ui:Button text="VIEW ALL" class="button-premium" style="width: 60px; height: 18px; font-size: 11px; margin: 0; padding: 0;" />
+                </ui:VisualElement>
+                <ui:ScrollView name="ConvoysScroll" mode="Vertical" style="flex-grow: 1;" />
+                <ui:Button text="+ NEW CONVOY" class="button-premium" style="height: 24px; margin-top: 10px; background-color: rgba(255,255,255,0.03);" />
+            </ui:VisualElement>
+
+            <!-- PROCUREMENT & PURCHASES -->
+            <ui:VisualElement class="sub-panel" style="flex: 1.5; margin-right: 10px; padding: 12px;">
+                <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <ui:Label text="PROCUREMENT &amp; PURCHASES" style="font-size: 13px; color: rgb(150, 160, 170); -unity-font-style: bold;" />
+                    <ui:Button text="VIEW MARKET" class="button-premium" style="width: 80px; height: 18px; font-size: 11px; margin: 0; padding: 0;" />
+                </ui:VisualElement>
+                <ui:ScrollView name="ProcurementScroll" mode="Vertical" style="flex-grow: 1;" />
+            </ui:VisualElement>
+
+            <!-- EMERGENCY ACTIONS -->
+            <ui:VisualElement class="sub-panel" style="flex: 1; padding: 12px;">
+                <ui:Label text="EMERGENCY LOGISTICS ACTIONS" style="font-size: 13px; color: rgb(150, 160, 170); -unity-font-style: bold; margin-bottom: 10px;" />
+                <ui:VisualElement name="EmergencyActionsContainer" style="flex-grow: 1; justify-content: space-between;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ROW 3 (Bottom bar) -->
+        <ui:VisualElement style="flex-direction: row; height: 75px;">
+            <!-- LOGISTICS ALERTS -->
+            <ui:VisualElement style="flex: 1.5; margin-right: 10px; justify-content: flex-end;">
+                <ui:Label text="LOGISTICS ALERTS" style="font-size: 13px; color: rgb(255, 82, 82); -unity-font-style: bold; margin-bottom: 6px;" />
+                <ui:VisualElement name="AlertsContainer" style="flex-direction: row; justify-content: space-between; height: 45px;" />
+            </ui:VisualElement>
+
+            <!-- LOGISTICS SUMMARY -->
+            <ui:VisualElement class="sub-panel" style="flex: 1; padding: 8px 12px; justify-content: space-between;">
+                <ui:Label text="LOGISTICS SUMMARY" style="font-size: 13px; color: rgb(150, 160, 170); -unity-font-style: bold; margin-bottom: 4px;" />
+                <ui:VisualElement name="SummaryContainer" style="flex-direction: row; justify-content: space-between; align-items: center;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

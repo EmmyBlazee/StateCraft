@@ -655,6 +655,70 @@ doc.gameObject.SetActive(false);
             });
         }
 
+        /// <summary>
+        /// Logs any VisualElement whose resolved layout width or height exceeds its parent's.
+        /// Call after a panel becomes visible so layout has been resolved.
+        /// Uses GeometryChangedEvent to wait for the first layout pass.
+        /// </summary>
+        public static void LogOverflowingElements(VisualElement root, string panelLabel = "")
+        {
+            if (root == null) return;
+
+            // Wait for the first geometry pass so resolvedStyle dimensions are valid
+            root.RegisterCallback<GeometryChangedEvent>(OnLayout);
+
+            void OnLayout(GeometryChangedEvent _)
+            {
+                root.UnregisterCallback<GeometryChangedEvent>(OnLayout);
+                int found = 0;
+
+                root.Query<VisualElement>().ForEach(ve =>
+                {
+                    var parent = ve.parent;
+                    if (parent == null) return;
+
+                    // Skip internal Unity elements (scrollbars, sliders, etc.)
+                    string n = ve.name ?? "";
+                    if (n.StartsWith("unity-")) return;
+
+                    float veW = ve.resolvedStyle.width;
+                    float veH = ve.resolvedStyle.height;
+                    float pW  = parent.resolvedStyle.width;
+                    float pH  = parent.resolvedStyle.height;
+
+                    // Skip unresolved (NaN / 0) layouts
+                    if (float.IsNaN(veW) || float.IsNaN(veH) || pW <= 0 || pH <= 0) return;
+
+                    bool overflowsX = veW > pW + 2f;  // 2px tolerance for rounding
+                    bool overflowsY = veH > pH + 2f;
+
+                    if (overflowsX || overflowsY)
+                    {
+                        string label  = panelLabel != "" ? $"[{panelLabel}] " : "";
+                        string elName = string.IsNullOrEmpty(ve.name) ? "(unnamed)" : ve.name;
+                        string cls    = ve.GetClasses() is var c ? string.Join(" ", c) : "";
+                        string dir    = (overflowsX && overflowsY) ? "X+Y"
+                                      : overflowsX ? "X" : "Y";
+
+                        Debug.LogWarning(
+                            $"[UI Overflow] {label}{dir} | " +
+                            $"elem='{elName}' classes='{cls}' " +
+                            $"size=({veW:F0}x{veH:F0}) " +
+                            $"parent='{(string.IsNullOrEmpty(parent.name) ? "(unnamed)" : parent.name)}' " +
+                            $"parentSize=({pW:F0}x{pH:F0})");
+                        found++;
+                    }
+                });
+
+                string prefix = panelLabel != "" ? $"[{panelLabel}] " : "";
+                if (found == 0)
+                    Debug.Log($"[UI Overflow] {prefix}No overflowing elements found.");
+                else
+                    Debug.LogWarning($"[UI Overflow] {prefix}{found} overflowing element(s) found — see warnings above.");
+            }
+        }
+
+
         // Static version for global UI utility calls
         public static void ApplySafeTransition(VisualElement element, string[] properties, float duration)
         {

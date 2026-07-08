@@ -1,0 +1,484 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/Global.uss" />
+            <ui:VisualElement name="PanelRecruit" style="display: none; height: 100%; flex-direction: row;">
+
+                <!-- ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ LEFT / MAIN COLUMN ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ -->
+                <ui:ScrollView style="flex-grow: 1; padding: 10px;" mode="Vertical" show-horizontal-scroller="False">
+
+                    <!-- HERO BANNER -->
+                    <ui:VisualElement style="height: 110px; background-color: rgb(10,16,28); -unity-background-scale-mode: scale-and-crop; border-radius: 6px; margin-bottom: 10px; flex-shrink: 0; overflow: hidden; border-width: 1px; border-color: rgba(0,210,255,0.15);">
+                        <!-- dark overlay -->
+                        <ui:VisualElement style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(5,10,20,0.55);" />
+                        <ui:VisualElement style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; padding: 14px 18px; flex-direction: column; justify-content: center;">
+                            <ui:Label text="PERSONNEL RECRUITMENT &amp; TRAINING" style="font-size: 19px; color: white; -unity-font-style: bold; letter-spacing: 2px;" />
+                            <ui:Label text="Manage recruitment, training and reserves across all branches." style="font-size: 12px; color: rgb(180,180,180); margin-top: 4px;" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- KPI STAT STRIP -->
+                    <ui:VisualElement style="flex-direction: row; margin-bottom: 10px; flex-shrink: 0;" class="sub-panel">
+                        <!-- Available Manpower -->
+                        <ui:VisualElement style="flex-direction: column; flex-grow: 1; border-right-width: 1px; border-right-color: rgba(255,255,255,0.1); padding: 10px 15px;">
+                            <ui:Label text="AVAILABLE MANPOWER" style="font-size: 9px; color: rgb(140,140,140); margin-bottom: 2px;" />
+                            <ui:Label name="RctManpower" text="1,200,000" style="font-size: 18px; color: white; -unity-font-style: bold;" />
+                            <ui:Label text="Military eligible population" style="font-size: 11px; color: rgb(120,120,120);" />
+                        </ui:VisualElement>
+                        <!-- Monthly Recruits -->
+                        <ui:VisualElement style="flex-direction: column; flex-grow: 1; border-right-width: 1px; border-right-color: rgba(255,255,255,0.1); padding: 10px 15px;">
+                            <ui:Label text="MONTHLY RECRUITS" style="font-size: 9px; color: rgb(140,140,140); margin-bottom: 2px;" />
+                            <ui:Label name="RctMonthlyRecruits" text="+18,500" style="font-size: 18px; color: rgb(0,230,118); -unity-font-style: bold;" />
+                            <ui:Label text="Projected this month" style="font-size: 11px; color: rgb(120,120,120);" />
+                        </ui:VisualElement>
+                        <!-- Total In Training -->
+                        <ui:VisualElement style="flex-direction: column; flex-grow: 1; border-right-width: 1px; border-right-color: rgba(255,255,255,0.1); padding: 10px 15px;">
+                            <ui:Label text="TOTAL IN TRAINING" style="font-size: 9px; color: rgb(140,140,140); margin-bottom: 2px;" />
+                            <ui:Label name="RctInTraining" text="10,674" style="font-size: 18px; color: white; -unity-font-style: bold;" />
+                            <ui:Label text="Across all academies" style="font-size: 11px; color: rgb(120,120,120);" />
+                        </ui:VisualElement>
+                        <!-- Monthly Cost -->
+                        <ui:VisualElement style="flex-grow: 1; flex-direction: row; align-items: center; padding: 10px 12px; border-right-width: 1px; border-right-color: rgba(255,255,255,0.07);">
+                            <!-- Icon removed -->
+                            <ui:VisualElement>
+                                <ui:Label text="MONTHLY COST" style="font-size: 11px; color: rgb(140,140,140); letter-spacing: 1px;" />
+                                <ui:Label name="RctMonthlyCost" text="₦77.2B" style="font-size: 19px; color: white; -unity-font-style: bold;" />
+                                <ui:Label text="Training &amp; recruitment" style="font-size: 11px; color: rgb(120,120,120);" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <!-- Training Efficiency -->
+                        <ui:VisualElement style="flex-grow: 1; flex-direction: row; align-items: center; padding: 10px 12px;">
+                            <!-- Icon removed -->
+                            <ui:VisualElement>
+                                <ui:Label text="TRAINING EFFICIENCY" style="font-size: 11px; color: rgb(140,140,140); letter-spacing: 1px;" />
+                                <ui:Label name="RctEfficiency" text="87%" style="font-size: 19px; color: rgb(0,230,118); -unity-font-style: bold;" />
+                                <ui:Label text="Overall effectiveness" style="font-size: 11px; color: rgb(120,120,120);" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- SECTION: TRAINING ACADEMIES -->
+                    <ui:Label text="TRAINING ACADEMIES" style="font-size: 13px; color: rgb(0,230,118); -unity-font-style: bold; letter-spacing: 2px; margin-bottom: 8px; flex-shrink: 0;" />
+
+                    <ui:VisualElement style="flex-direction: row; margin-bottom: 10px; flex-shrink: 0;">
+
+                        <!-- ARMY TRAINING COMMAND -->
+                        <ui:VisualElement name="AcademyCardArmy" class="sub-panel" style="flex-grow: 1; margin-right: 6px; overflow: hidden; border-color: rgba(0,230,118,0.25);">
+                            <!-- card image -->
+                            <ui:VisualElement name="RecruitImgArmy" style="height: 140px; background-color: rgb(10,20,14); -unity-background-scale-mode: scale-and-crop; border-bottom-width: 1px; border-bottom-color: rgba(0,230,118,0.15); overflow: hidden;">
+                                <ui:VisualElement style="position: absolute; bottom: 0; left: 0; right: 0; height: 42px; background-color: rgba(5,10,8,0.75);" />
+                                <ui:VisualElement style="position: absolute; bottom: 6px; left: 8px; flex-direction: row; align-items: center;">
+                                    <!-- Icon removed -->
+                                    <ui:VisualElement>
+                                        <ui:Label text="ARMY TRAINING COMMAND" style="font-size: 12px; color: rgb(0,230,118); -unity-font-style: bold; letter-spacing: 1px;" />
+                                        <ui:Label text="The Nigerian Army" style="font-size: 11px; color: rgb(180,180,180);" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                            <!-- stats -->
+                            <ui:VisualElement style="padding: 8px; flex-direction: column;">
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 3px;">
+                                    <ui:Label text="Capacity" style="font-size: 12px; color: rgb(160,160,160);" />
+                                    <ui:Label name="ArmyAcadCapacity" text="5,000" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 3px;">
+                                    <ui:Label text="Current Trainees" style="font-size: 12px; color: rgb(160,160,160);" />
+                                    <ui:Label name="ArmyAcadTrainees" text="3,874" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                                    <ui:Label text="Readiness" style="font-size: 12px; color: rgb(160,160,160);" />
+                                    <ui:ProgressBar name="ArmyAcadReadinessBar" value="86" style="width: 55%; height: 5px;" />
+                                    <ui:Label name="ArmyAcadReadinessPct" text="86%" style="font-size: 12px; color: rgb(0,230,118); -unity-font-style: bold;" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <ui:Label text="Graduation Rate" style="font-size: 12px; color: rgb(160,160,160);" />
+                                    <ui:ProgressBar name="ArmyAcadGradBar" value="92" style="width: 55%; height: 5px;" />
+                                    <ui:Label name="ArmyAcadGradPct" text="92%" style="font-size: 12px; color: rgb(0,230,118); -unity-font-style: bold;" />
+                                </ui:VisualElement>
+                                <!-- recruit buttons -->
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
+                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
+                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
+                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
+                                    <ui:Button name="BtnArmyRecruit100"  text="+100"  class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px; margin-right: 3px; color: rgb(0,230,118); border-color: rgba(0,230,118,0.4);" />
+                                    <ui:Button name="BtnArmyRecruit500"  text="+500"  class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px; margin-right: 3px; color: rgb(0,230,118); border-color: rgba(0,230,118,0.4);" />
+                                    <ui:Button name="BtnArmyRecruit1000" text="+1000" class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px;              color: rgb(0,230,118); border-color: rgba(0,230,118,0.4);" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                                    <ui:Label text="Est. Completion" style="font-size: 11px; color: rgb(140,140,140);" />
+                                    <ui:Label name="ArmyAcadETA" text="18 - 22 Days" style="font-size: 11px; color: rgb(0,230,118); -unity-font-style: bold;" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- AIR FORCE ACADEMY -->
+                        <ui:VisualElement name="AcademyCardAF" class="sub-panel" style="flex-grow: 1; margin-right: 6px; overflow: hidden; border-color: rgba(33,150,243,0.25);">
+                            <ui:VisualElement name="RecruitImgAF" style="height: 140px; background-color: rgb(10,24,30); -unity-background-scale-mode: scale-and-crop; border-bottom-width: 1px; border-bottom-color: rgba(33,150,243,0.15); overflow: hidden;">
+                                <ui:VisualElement style="position: absolute; bottom: 0; left: 0; right: 0; height: 42px; background-color: rgba(5,8,16,0.75);" />
+                                <ui:VisualElement style="position: absolute; bottom: 6px; left: 8px; flex-direction: row; align-items: center;">
+                                    <!-- Icon removed -->
+                                    <ui:VisualElement>
+                                        <ui:Label text="AIR FORCE ACADEMY" style="font-size: 12px; color: rgb(25, 127, 229); -unity-font-style: bold; letter-spacing: 1px;" />
+                                        <ui:Label text="The Nigerian Air Force" style="font-size: 11px; color: rgb(180,180,180);" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                            <ui:VisualElement style="padding: 8px; flex-direction: column;">
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 3px;">
+                                    <ui:Label text="Capacity" style="font-size: 12px; color: rgb(160,160,160);" />
+                                    <ui:Label name="AFAcadCapacity" text="500" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 3px;">
+                                    <ui:Label text="Current Trainees" style="font-size: 12px; color: rgb(160,160,160);" />
+                                    <ui:Label name="AFAcadTrainees" text="1,550" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                                    <ui:Label text="Readiness" style="font-size: 12px; color: rgb(160,160,160);" />
+                                    <ui:ProgressBar name="AFAcadReadinessBar" value="65" style="width: 55%; height: 5px;" />
+                                    <ui:Label name="AFAcadReadinessPct" text="65%" style="font-size: 12px; color: rgb(255,180,0); -unity-font-style: bold;" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <ui:Label text="Graduation Rate" style="font-size: 12px; color: rgb(160,160,160);" />
+                                    <ui:ProgressBar name="AFAcadGradBar" value="88" style="width: 55%; height: 5px;" />
+                                    <ui:Label name="AFAcadGradPct" text="88%" style="font-size: 12px; color: rgb(25, 127, 229); -unity-font-style: bold;" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
+                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
+                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
+                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
+                                    <ui:Button name="BtnAFRecruit25"  text="+25"  class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px; margin-right: 3px; color: rgb(25, 127, 229); border-color: rgba(33,150,243,0.4);" />
+                                    <ui:Button name="BtnAFRecruit50"  text="+50"  class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px; margin-right: 3px; color: rgb(25, 127, 229); border-color: rgba(33,150,243,0.4);" />
+                                    <ui:Button name="BtnAFRecruit150" text="+150" class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px;              color: rgb(25, 127, 229); border-color: rgba(33,150,243,0.4);" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                                    <ui:Label text="Est. Completion" style="font-size: 11px; color: rgb(140,140,140);" />
+                                    <ui:Label name="AFAcadETA" text="10 - 14 Days" style="font-size: 11px; color: rgb(25, 127, 229); -unity-font-style: bold;" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- NAVAL TRAINING COMMAND -->
+                        <ui:VisualElement name="AcademyCardNavy" class="sub-panel" style="flex-grow: 1; margin-right: 6px; overflow: hidden; border-color: rgba(0,188,212,0.25);">
+                            <ui:VisualElement name="RecruitImgNavy" style="height: 140px; background-color: rgb(8,14,22); -unity-background-scale-mode: scale-and-crop; border-bottom-width: 1px; border-bottom-color: rgba(0,188,212,0.15); overflow: hidden;">
+                                <ui:VisualElement style="position: absolute; bottom: 0; left: 0; right: 0; height: 42px; background-color: rgba(4,10,18,0.75);" />
+                                <ui:VisualElement style="position: absolute; bottom: 6px; left: 8px; flex-direction: row; align-items: center;">
+                                    <!-- Icon removed -->
+                                    <ui:VisualElement>
+                                        <ui:Label text="NAVAL TRAINING COMMAND" style="font-size: 12px; color: rgb(0,188,212); -unity-font-style: bold; letter-spacing: 1px;" />
+                                        <ui:Label text="The Nigerian Navy" style="font-size: 11px; color: rgb(180,180,180);" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                            <ui:VisualElement style="padding: 8px; flex-direction: column;">
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 3px;">
+                                    <ui:Label text="Capacity" style="font-size: 12px; color: rgb(160,160,160);" />
+                                    <ui:Label name="NavyAcadCapacity" text="1,000" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 3px;">
+                                    <ui:Label text="Current Trainees" style="font-size: 12px; color: rgb(160,160,160);" />
+                                    <ui:Label name="NavyAcadTrainees" text="4,250" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                                    <ui:Label text="Readiness" style="font-size: 12px; color: rgb(160,160,160);" />
+                                    <ui:ProgressBar name="NavyAcadReadinessBar" value="92" style="width: 55%; height: 5px;" />
+                                    <ui:Label name="NavyAcadReadinessPct" text="92%" style="font-size: 12px; color: rgb(0,188,212); -unity-font-style: bold;" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <ui:Label text="Graduation Rate" style="font-size: 12px; color: rgb(160,160,160);" />
+                                    <ui:ProgressBar name="NavyAcadGradBar" value="94" style="width: 55%; height: 5px;" />
+                                    <ui:Label name="NavyAcadGradPct" text="94%" style="font-size: 12px; color: rgb(0,188,212); -unity-font-style: bold;" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
+                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
+                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
+                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
+                                    <ui:Button name="BtnNavyRecruit50"  text="+50"  class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px; margin-right: 3px; color: rgb(0,188,212); border-color: rgba(0,188,212,0.4);" />
+                                    <ui:Button name="BtnNavyRecruit100" text="+100" class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px; margin-right: 3px; color: rgb(0,188,212); border-color: rgba(0,188,212,0.4);" />
+                                    <ui:Button name="BtnNavyRecruit250" text="+250" class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px;              color: rgb(0,188,212); border-color: rgba(0,188,212,0.4);" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                                    <ui:Label text="Est. Completion" style="font-size: 11px; color: rgb(140,140,140);" />
+                                    <ui:Label name="NavyAcadETA" text="15 - 20 Days" style="font-size: 11px; color: rgb(0,188,212); -unity-font-style: bold;" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- RDF COMMAND CENTER -->
+                        <ui:VisualElement name="AcademyCardRDF" class="sub-panel" style="flex-grow: 1; overflow: hidden; border-color: rgba(255,180,0,0.25);">
+                            <ui:VisualElement name="RecruitImgRDF" style="height: 140px; background-color: rgb(20,16,8); -unity-background-scale-mode: scale-and-crop; border-bottom-width: 1px; border-bottom-color: rgba(255,180,0,0.15); overflow: hidden;">
+                                <ui:VisualElement style="position: absolute; bottom: 0; left: 0; right: 0; height: 42px; background-color: rgba(14,10,4,0.75);" />
+                                <ui:VisualElement style="position: absolute; bottom: 6px; left: 8px; flex-direction: row; align-items: center;">
+                                    <!-- Icon removed -->
+                                    <ui:VisualElement>
+                                        <ui:Label text="RDF COMMAND CENTER" style="font-size: 12px; color: rgb(255,180,0); -unity-font-style: bold; letter-spacing: 1px;" />
+                                        <ui:Label text="Special Operations" style="font-size: 11px; color: rgb(180,180,180);" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                            <ui:VisualElement style="padding: 8px; flex-direction: column;">
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 3px;">
+                                    <ui:Label text="Capacity" style="font-size: 12px; color: rgb(160,160,160);" />
+                                    <ui:Label name="RDFAcadCapacity" text="5,000" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 3px;">
+                                    <ui:Label text="Current Trainees" style="font-size: 12px; color: rgb(160,160,160);" />
+                                    <ui:Label name="RDFAcadTrainees" text="55,000" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                                    <ui:Label text="Readiness" style="font-size: 12px; color: rgb(160,160,160);" />
+                                    <ui:ProgressBar name="RDFAcadReadinessBar" value="78" style="width: 55%; height: 5px;" />
+                                    <ui:Label name="RDFAcadReadinessPct" text="78%" style="font-size: 12px; color: rgb(255,180,0); -unity-font-style: bold;" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <ui:Label text="Graduation Rate" style="font-size: 12px; color: rgb(160,160,160);" />
+                                    <ui:ProgressBar name="RDFAcadGradBar" value="90" style="width: 55%; height: 5px;" />
+                                    <ui:Label name="RDFAcadGradPct" text="90%" style="font-size: 12px; color: rgb(255,180,0); -unity-font-style: bold;" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
+                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
+                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
+                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
+                                    <ui:Button name="BtnRDFRecruit250"  text="+250"  class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px; margin-right: 3px; color: rgb(255,180,0); border-color: rgba(255,180,0,0.4);" />
+                                    <ui:Button name="BtnRDFRecruit500"  text="+500"  class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px; margin-right: 3px; color: rgb(255,180,0); border-color: rgba(255,180,0,0.4);" />
+                                    <ui:Button name="BtnRDFRecruit1000" text="+1000" class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px;              color: rgb(255,180,0); border-color: rgba(255,180,0,0.4);" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                                    <ui:Label text="Est. Completion" style="font-size: 11px; color: rgb(140,140,140);" />
+                                    <ui:Label name="RDFAcadETA" text="20 - 25 Days" style="font-size: 11px; color: rgb(255,180,0); -unity-font-style: bold;" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                    </ui:VisualElement>
+                    <!-- /TRAINING ACADEMIES -->
+
+                    <!-- BOTTOM ROW: Recruitment Overview + Recruitment Summary -->
+                    <ui:VisualElement style="flex-direction: row; flex-shrink: 0; margin-bottom: 6px;">
+
+                        <!-- RECRUITMENT OVERVIEW (chart placeholder) -->
+                        <ui:VisualElement name="RctOverviewPanel" class="sub-panel" style="flex-grow: 1; margin-right: 8px; padding: 10px; flex-direction: column;">
+                            <ui:Label text="RECRUITMENT OVERVIEW" style="font-size: 12px; color: rgb(140,140,140); letter-spacing: 2px; -unity-font-style: bold; margin-bottom: 6px;" />
+                            <!-- branch legend -->
+                            <ui:VisualElement style="flex-direction: row; margin-bottom: 8px;">
+                                <ui:VisualElement style="flex-direction: row; align-items: center; margin-right: 12px;">
+                                    <ui:VisualElement style="width: 14px; height: 3px; background-color: rgb(0,230,118); margin-right: 4px; border-radius: 1px;" />
+                                    <ui:Label text="Army" style="font-size: 11px; color: rgb(160,160,160);" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; align-items: center; margin-right: 12px;">
+                                    <ui:VisualElement style="width: 14px; height: 3px; background-color: rgb(25, 127, 229); margin-right: 4px; border-radius: 1px;" />
+                                    <ui:Label text="Air Force" style="font-size: 11px; color: rgb(160,160,160);" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; align-items: center; margin-right: 12px;">
+                                    <ui:VisualElement style="width: 14px; height: 3px; background-color: rgb(0,188,212); margin-right: 4px; border-radius: 1px;" />
+                                    <ui:Label text="Navy" style="font-size: 11px; color: rgb(160,160,160);" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="flex-direction: row; align-items: center;">
+                                    <ui:VisualElement style="width: 14px; height: 3px; background-color: rgb(255,180,0); margin-right: 4px; border-radius: 1px;" />
+                                    <ui:Label text="RDF" style="font-size: 11px; color: rgb(160,160,160);" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                            <!-- chart canvas (controller-rendered) -->
+                            <ui:VisualElement name="RctOverviewChart" style="flex-grow: 1; min-height: 140px; background-color: rgba(0,0,0,0.2); border-radius: 4px;" />
+                            <!-- x-axis month labels -->
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between; padding: 0 6px; margin-top: 4px;">
+                                <ui:Label text="JUL" style="font-size: 10px; color: rgb(100,100,100);" />
+                                <ui:Label text="AUG" style="font-size: 10px; color: rgb(100,100,100);" />
+                                <ui:Label text="SEP" style="font-size: 10px; color: rgb(100,100,100);" />
+                                <ui:Label text="OCT" style="font-size: 10px; color: rgb(100,100,100);" />
+                                <ui:Label text="NOV" style="font-size: 10px; color: rgb(100,100,100);" />
+                                <ui:Label text="DEC" style="font-size: 10px; color: rgb(100,100,100);" />
+                                <ui:Label text="JAN" style="font-size: 10px; color: rgb(100,100,100);" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- RECRUITMENT SUMMARY -->
+                        <ui:VisualElement name="RctSummaryPanel" class="sub-panel" style="width: 42%; padding: 10px; flex-direction: column;">
+                            <ui:Label text="RECRUITMENT SUMMARY" style="font-size: 12px; color: rgb(140,140,140); letter-spacing: 2px; -unity-font-style: bold; margin-bottom: 10px;" />
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-around; flex-grow: 1;">
+
+                                <!-- Total Trainees -->
+                                <ui:VisualElement style="align-items: center; flex-grow: 1;">
+                                    <ui:VisualElement style="width: 52px; height: 52px; border-radius: 26px; background-color: rgba(0,210,255,0.1); border-width: 2px; border-color: rgba(0,210,255,0.4); align-items: center; justify-content: center; margin-bottom: 6px;">
+                                        <ui:VisualElement style="width: 24px; height: 24px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_personnel.png'); -unity-background-image-tint-color: rgb(0,210,255);" />
+                                    </ui:VisualElement>
+                                    <ui:Label text="Total Trainees" style="font-size: 11px; color: rgb(140,140,140); -unity-text-align: middle-center;" />
+                                    <ui:Label name="SumTotalTrainees" text="10,674" style="font-size: 16px; color: white; -unity-font-style: bold; -unity-text-align: middle-center;" />
+                                    <ui:Label text="Across all branches" style="font-size: 10px; color: rgb(100,100,100); -unity-text-align: middle-center;" />
+                                </ui:VisualElement>
+
+                                <!-- Avg Training Time -->
+                                <ui:VisualElement style="align-items: center; flex-grow: 1;">
+                                    <ui:VisualElement style="width: 52px; height: 52px; border-radius: 26px; background-color: rgba(0,210,255,0.1); border-width: 2px; border-color: rgba(0,210,255,0.4); align-items: center; justify-content: center; margin-bottom: 6px;">
+                                        <ui:VisualElement style="width: 24px; height: 24px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_time.png'); -unity-background-image-tint-color: rgb(0,210,255);" />
+                                    </ui:VisualElement>
+                                    <ui:Label text="Avg. Training Time" style="font-size: 11px; color: rgb(140,140,140); -unity-text-align: middle-center;" />
+                                    <ui:Label name="SumAvgTime" text="16" style="font-size: 16px; color: rgb(25, 127, 229); -unity-font-style: bold; -unity-text-align: middle-center;" />
+                                    <ui:Label text="Days" style="font-size: 10px; color: rgb(25, 127, 229); -unity-text-align: middle-center;" />
+                                </ui:VisualElement>
+
+                                <!-- Graduation Rate -->
+                                <ui:VisualElement style="align-items: center; flex-grow: 1;">
+                                    <ui:VisualElement style="width: 52px; height: 52px; border-radius: 26px; background-color: rgba(0,230,118,0.1); border-width: 2px; border-color: rgba(0,230,118,0.4); align-items: center; justify-content: center; margin-bottom: 6px;">
+                                        <ui:VisualElement style="width: 24px; height: 24px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_success.png'); -unity-background-image-tint-color: rgb(0,230,118);" />
+                                    </ui:VisualElement>
+                                    <ui:Label text="Graduation Rate" style="font-size: 11px; color: rgb(140,140,140); -unity-text-align: middle-center;" />
+                                    <ui:Label name="SumGradRate" text="91%" style="font-size: 16px; color: rgb(0,230,118); -unity-font-style: bold; -unity-text-align: middle-center;" />
+                                    <ui:Label text="Average" style="font-size: 10px; color: rgb(100,100,100); -unity-text-align: middle-center;" />
+                                </ui:VisualElement>
+
+                                <!-- Retention Rate -->
+                                <ui:VisualElement style="align-items: center; flex-grow: 1;">
+                                    <ui:VisualElement style="width: 52px; height: 52px; border-radius: 26px; background-color: rgba(255,180,0,0.1); border-width: 2px; border-color: rgba(255,180,0,0.4); align-items: center; justify-content: center; margin-bottom: 6px;">
+                                        <ui:VisualElement style="width: 24px; height: 24px; background-image: url('project://database/Assets/Images/MilitaryIcons/icon_approval.png'); -unity-background-image-tint-color: rgb(255,180,0);" />
+                                    </ui:VisualElement>
+                                    <ui:Label text="Retention Rate" style="font-size: 11px; color: rgb(140,140,140); -unity-text-align: middle-center;" />
+                                    <ui:Label name="SumRetentionRate" text="89%" style="font-size: 16px; color: rgb(255,180,0); -unity-font-style: bold; -unity-text-align: middle-center;" />
+                                    <ui:Label text="Average" style="font-size: 10px; color: rgb(100,100,100); -unity-text-align: middle-center;" />
+                                </ui:VisualElement>
+
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                    </ui:VisualElement>
+                    <!-- /BOTTOM ROW -->
+
+                </ui:ScrollView>
+                <!-- /MAIN COLUMN -->
+
+                <!-- ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ RIGHT SIDEBAR ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ -->
+                <ui:VisualElement style="width: 300px; flex-shrink: 0; flex-direction: column; padding: 10px 8px 10px 10px; border-left-width: 1px; border-left-color: rgba(0,210,255,0.08);">
+                    <ui:ScrollView style="flex-grow: 1;" mode="Vertical" show-horizontal-scroller="False">
+
+                        <!-- ACTIVE TRAINING QUEUE -->
+                        <ui:Label text="ACTIVE TRAINING QUEUE" style="font-size: 12px; color: rgb(25, 127, 229); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 8px;" />
+
+                        <!-- Queue: Army -->
+                        <ui:VisualElement class="sub-panel" style="padding: 8px; margin-bottom: 6px; flex-direction: column;">
+                            <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 5px;">
+                                <!-- Icon removed -->
+                                <ui:Label text="Army Recruits" style="font-size: 12px; color: white; flex-grow: 1; -unity-font-style: bold;" />
+                                <ui:Label name="QueueArmyCount" text="1,000" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                <ui:Label text=" &#8250;" style="font-size: 13px; color: rgb(140,140,140);" />
+                            </ui:VisualElement>
+                            <ui:ProgressBar name="QueueArmyBar" value="42" style="height: 6px; margin-bottom: 4px;" />
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                                <ui:Label name="QueueArmyPct" text="42%" style="font-size: 11px; color: rgb(0,230,118);" />
+                                <ui:Label name="QueueArmyETA" text="ETA: 18 Days" style="font-size: 11px; color: rgb(140,140,140);" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- Queue: Air Force -->
+                        <ui:VisualElement class="sub-panel" style="padding: 8px; margin-bottom: 6px; flex-direction: column;">
+                            <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 5px;">
+                                <!-- Icon removed -->
+                                <ui:Label text="Air Force Cadets" style="font-size: 12px; color: white; flex-grow: 1; -unity-font-style: bold;" />
+                                <ui:Label name="QueueAFCount" text="150" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                <ui:Label text=" &#8250;" style="font-size: 13px; color: rgb(140,140,140);" />
+                            </ui:VisualElement>
+                            <ui:ProgressBar name="QueueAFBar" value="63" style="height: 6px; margin-bottom: 4px;" />
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                                <ui:Label name="QueueAFPct" text="63%" style="font-size: 11px; color: rgb(25, 127, 229);" />
+                                <ui:Label name="QueueAFETA" text="ETA: 9 Days" style="font-size: 11px; color: rgb(140,140,140);" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- Queue: Naval Crew -->
+                        <ui:VisualElement class="sub-panel" style="padding: 8px; margin-bottom: 6px; flex-direction: column;">
+                            <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 5px;">
+                                <!-- Icon removed -->
+                                <ui:Label text="Naval Crew" style="font-size: 12px; color: white; flex-grow: 1; -unity-font-style: bold;" />
+                                <ui:Label name="QueueNavyCount" text="250" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                <ui:Label text=" &#8250;" style="font-size: 13px; color: rgb(140,140,140);" />
+                            </ui:VisualElement>
+                            <ui:ProgressBar name="QueueNavyBar" value="28" style="height: 6px; margin-bottom: 4px;" />
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                                <ui:Label name="QueueNavyPct" text="28%" style="font-size: 11px; color: rgb(0,188,212);" />
+                                <ui:Label name="QueueNavyETA" text="ETA: 25 Days" style="font-size: 11px; color: rgb(140,140,140);" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- Queue: RDF -->
+                        <ui:VisualElement class="sub-panel" style="padding: 8px; margin-bottom: 12px; flex-direction: column;">
+                            <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 5px;">
+                                <!-- Icon removed -->
+                                <ui:Label text="RDF Recruits" style="font-size: 12px; color: white; flex-grow: 1; -unity-font-style: bold;" />
+                                <ui:Label name="QueueRDFCount" text="500" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                                <ui:Label text=" &#8250;" style="font-size: 13px; color: rgb(140,140,140);" />
+                            </ui:VisualElement>
+                            <ui:ProgressBar name="QueueRDFBar" value="71" style="height: 6px; margin-bottom: 4px;" />
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                                <ui:Label name="QueueRDFPct" text="71%" style="font-size: 11px; color: rgb(255,180,0);" />
+                                <ui:Label name="QueueRDFETA" text="ETA: 12 Days" style="font-size: 11px; color: rgb(140,140,140);" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- RESERVES & MANPOWER -->
+                        <ui:Label text="RESERVES &amp; MANPOWER" style="font-size: 12px; color: rgb(25, 127, 229); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 8px;" />
+                        <ui:VisualElement class="sub-panel" style="padding: 8px; margin-bottom: 12px;">
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 5px;">
+                                <ui:VisualElement style="flex-direction: row; align-items: center;">
+                                    <!-- Icon removed -->
+                                    <ui:Label text="Available Population" style="font-size: 12px; color: rgb(160,160,160);" />
+                                </ui:VisualElement>
+                                <ui:Label name="ResvAvailPop" text="1,200,000" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 5px;">
+                                <ui:VisualElement style="flex-direction: row; align-items: center;">
+                                    <!-- Icon removed -->
+                                    <ui:Label text="Military Eligible" style="font-size: 12px; color: rgb(160,160,160);" />
+                                </ui:VisualElement>
+                                <ui:Label name="ResvMilEligible" text="680,000" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 5px;">
+                                <ui:VisualElement style="flex-direction: row; align-items: center;">
+                                    <!-- Icon removed -->
+                                    <ui:Label text="Active Personnel" style="font-size: 12px; color: rgb(160,160,160);" />
+                                </ui:VisualElement>
+                                <ui:Label name="ResvActivePersonnel" text="198,450" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 5px;">
+                                <ui:VisualElement style="flex-direction: row; align-items: center;">
+                                    <!-- Icon removed -->
+                                    <ui:Label text="Reserve Personnel" style="font-size: 12px; color: rgb(160,160,160);" />
+                                </ui:VisualElement>
+                                <ui:Label name="ResvReservePersonnel" text="125,000" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 8px;">
+                                <ui:VisualElement style="flex-direction: row; align-items: center;">
+                                    <!-- Icon removed -->
+                                    <ui:Label text="Veterans" style="font-size: 12px; color: rgb(160,160,160);" />
+                                </ui:VisualElement>
+                                <ui:Label name="ResvVeterans" text="87,300" style="font-size: 12px; color: white; -unity-font-style: bold;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="height: 1px; background-color: rgba(255,255,255,0.07); margin-bottom: 8px;" />
+                            <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: space-between;">
+                                <ui:VisualElement style="flex-direction: row; align-items: center;">
+                                    <!-- Icon removed -->
+                                    <ui:Label text="Mobilization Readiness" style="font-size: 12px; color: rgb(160,160,160);" />
+                                </ui:VisualElement>
+                                <!-- Donut placeholder -->
+                                <ui:VisualElement name="MobilizationDonut" style="width: 28px; height: 28px; border-radius: 14px; background-color: transparent; border-width: 3px; border-color: rgb(0,230,118);" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- COMMAND ACTIONS (Commented out for now) -->
+                        <!--
+                        <ui:Label text="COMMAND ACTIONS" style="font-size: 12px; color: rgb(25, 127, 229); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 8px;" />
+                        <ui:Button name="BtnStartRecruitCampaign" text="+ START RECRUITMENT CAMPAIGN" class="button-premium" style="height: 32px; font-size: 12px; margin-bottom: 5px; background-color: rgba(0,230,118,0.15); border-color: rgba(0,230,118,0.5); color: rgb(0,230,118); -unity-font-style: bold;" />
+                        <ui:Button name="BtnEmergencyMobilization" text="EMERGENCY MOBILIZATION" class="button-premium" style="background-color: transparent; height: 30px; font-size: 12px; margin-bottom: 5px; border-color: rgba(0,210,255,0.3); color: rgb(25, 127, 229);" />
+                        <ui:Button name="BtnIncreaseTrainingBudget" text="INCREASE TRAINING BUDGET" class="button-premium" style="background-color: transparent; height: 30px; font-size: 12px; margin-bottom: 5px; border-color: rgba(0,210,255,0.3); color: rgb(25, 127, 229);" />
+                        <ui:Button name="BtnExpandTrainingFacilities" text="EXPAND TRAINING FACILITIES" class="button-premium" style="background-color: transparent; height: 30px; font-size: 12px; border-color: rgba(0,210,255,0.3); color: rgb(25, 127, 229);" />
+                        -->
+
+                    </ui:ScrollView>
+                </ui:VisualElement>
+                <!-- /RIGHT SIDEBAR -->
+
+            </ui:VisualElement>
+</ui:UXML>

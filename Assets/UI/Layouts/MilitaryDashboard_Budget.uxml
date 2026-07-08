@@ -1,0 +1,106 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/Global.uss" />
+    <ui:ScrollView name="PanelBudget" style="display: none; height: 100%; padding: 12px;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto">
+        
+        <!-- HEADER -->
+        <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 15px;">
+            <ui:VisualElement style="width: 20px; height: 24px; background-color: white; margin-right: 10px; border-radius: 4px;" /> 
+            <ui:VisualElement>
+                <ui:Label text="MILITARY BUDGET" style="font-size: 16px; color: white; -unity-font-style: bold; margin-bottom: 2px;" />
+                <ui:Label text="Manage and monitor defence spending across all branches." style="font-size: 13px; color: rgb(150, 160, 170);" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- KPI ROW (Top) -->
+        <ui:VisualElement class="sub-panel" style="flex-direction: row; min-height: 85px; margin-bottom: 10px; padding: 12px; justify-content: space-between;">
+            <ui:VisualElement name="KpiTotal" style="width: 18%; justify-content: center;" />
+            <ui:VisualElement name="KpiSpent" style="width: 18%; justify-content: center;" />
+            <ui:VisualElement name="KpiAvailable" style="width: 18%; justify-content: center;" />
+            <ui:VisualElement name="KpiUtilization" style="width: 25%; justify-content: center; padding-right: 15px; border-right-width: 1px; border-right-color: rgba(255,255,255,0.1);" />
+            <ui:VisualElement name="KpiGDP" style="width: 15%; justify-content: center; padding-left: 15px;" />
+        </ui:VisualElement>
+
+        <!-- MIDDLE ROW (Branch Allocations + Indicators) -->
+        <ui:VisualElement style="flex-direction: row; height: 260px; margin-bottom: 10px;">
+            <!-- BRANCHES -->
+            <ui:VisualElement style="width: 70%; padding-right: 10px;">
+                <ui:Label text="BUDGET ALLOCATION BY BRANCH" style="font-size: 14px; color: rgb(150, 160, 170); -unity-font-style: bold; margin-bottom: 10px;" />
+                <ui:VisualElement style="flex-direction: row; flex-grow: 1; justify-content: space-between;">
+                    <ui:VisualElement name="BranchArmy" class="sub-panel" style="flex: 1; margin-right: 8px; padding: 12px; justify-content: space-between;" />
+                    <ui:VisualElement name="BranchAirForce" class="sub-panel" style="flex: 1; margin-right: 8px; padding: 12px; justify-content: space-between;" />
+                    <ui:VisualElement name="BranchNavy" class="sub-panel" style="flex: 1; margin-right: 8px; padding: 12px; justify-content: space-between;" />
+                    <ui:VisualElement name="BranchRDF" class="sub-panel" style="flex: 1; padding: 12px; justify-content: space-between;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- INDICATORS & HEALTH -->
+            <ui:VisualElement style="width: 30%; flex-direction: row; justify-content: space-between;">
+                <ui:VisualElement class="sub-panel" style="flex: 1.5; margin-right: 8px; padding: 12px; justify-content: space-between;">
+                    <ui:Label text="KEY INDICATORS" style="font-size: 14px; color: rgb(150, 160, 170); -unity-font-style: bold; margin-bottom: 10px;" />
+                    <ui:VisualElement name="IndicatorsContainer" style="flex-grow: 1; justify-content: space-between;" />
+                </ui:VisualElement>
+                
+                <ui:VisualElement class="sub-panel" style="flex: 1; padding: 12px; align-items: center;">
+                    <ui:Label text="BUDGET HEALTH" style="font-size: 14px; color: rgb(150, 160, 170); -unity-font-style: bold; margin-bottom: 10px;" />
+                    <ui:VisualElement name="BudgetHealthContainer" style="flex-grow: 1; justify-content: center; align-items: center;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- BOTTOM ROW (3 columns) -->
+        <ui:VisualElement style="flex-direction: row; flex-grow: 1; min-height: 280px;">
+            <!-- LEFT: MONTHLY EXPENSES -->
+            <ui:VisualElement class="sub-panel" style="width: 35%; margin-right: 10px; padding: 12px;">
+                <ui:Label text="MONTHLY DEFENCE EXPENSES (Standing Costs)" style="font-size: 13px; color: rgb(150, 160, 170); -unity-font-style: bold; margin-bottom: 8px;" />
+                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 8px; padding-bottom: 4px; border-bottom-width: 1px; border-bottom-color: rgba(255,255,255,0.1);">
+                    <ui:Label text="CATEGORY" style="font-size: 11px; color: grey;" />
+                    <ui:VisualElement style="flex-direction: row; width: 120px; justify-content: space-between;">
+                        <ui:Label text="THIS TURN" style="font-size: 11px; color: grey; width: 50px;" />
+                        <ui:Label text="% OF BUDGET" style="font-size: 11px; color: grey; width: 60px;" />
+                        <ui:Label text="TREND" style="font-size: 11px; color: grey; width: 30px;" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="ExpensesScroll" style="flex-grow: 1;" />
+                <ui:VisualElement name="TotalExpensesFooter" style="margin-top: 10px; padding-top: 10px; border-top-width: 1px; border-top-color: rgba(255,255,255,0.1);" />
+            </ui:VisualElement>
+
+            <!-- CENTER: OPERATIONS & FORECAST -->
+            <ui:VisualElement style="width: 35%; margin-right: 10px; justify-content: space-between;">
+                <!-- ACTIVE OPS -->
+                <ui:VisualElement class="sub-panel" style="flex-grow: 1; margin-bottom: 10px; padding: 12px; justify-content: flex-start;">
+                    <ui:Label text="ACTIVE OPERATIONS COST" style="font-size: 13px; color: rgb(150, 160, 170); -unity-font-style: bold; margin-bottom: 10px;" />
+                    <ui:VisualElement name="ActiveOpsScroll" style="flex-grow: 1;" />
+                    <ui:VisualElement name="ActiveOpsFooter" style="margin-top: 8px; padding-top: 8px; border-top-width: 1px; border-top-color: rgba(255,255,255,0.1);" />
+                </ui:VisualElement>
+                
+                <!-- FORECAST -->
+                <ui:VisualElement class="sub-panel" style="padding: 12px; justify-content: flex-start;">
+                    <ui:Label text="NEXT TURN FORECAST" style="font-size: 13px; color: rgb(150, 160, 170); -unity-font-style: bold; margin-bottom: 8px;" />
+                    <ui:VisualElement name="ForecastContainer" style="flex-grow: 1; justify-content: space-between;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- RIGHT: COMMITMENTS & ACTIONS -->
+            <ui:VisualElement style="width: 30%; justify-content: space-between;">
+                <!-- PROC COMMITMENTS -->
+                <ui:VisualElement class="sub-panel" style="flex-grow: 1; margin-bottom: 10px; padding: 12px; justify-content: flex-start;">
+                    <ui:Label text="PROCUREMENT COMMITMENTS" style="font-size: 13px; color: rgb(150, 160, 170); -unity-font-style: bold; margin-bottom: 10px;" />
+                    <ui:VisualElement name="CommitmentsScroll" style="flex-grow: 1;" />
+                    <ui:VisualElement name="CommitmentsFooter" style="margin-top: 8px; padding-top: 8px; border-top-width: 1px; border-top-color: rgba(255,255,255,0.1);" />
+                </ui:VisualElement>
+                
+                <!-- BUDGET ACTIONS -->
+                <ui:VisualElement class="sub-panel" style="padding: 12px; justify-content: flex-start;">
+                    <ui:Label text="BUDGET ACTIONS" style="font-size: 13px; color: rgb(150, 160, 170); -unity-font-style: bold; margin-bottom: 8px;" />
+                    <ui:VisualElement style="flex-direction: row; flex-wrap: wrap; justify-content: space-between;">
+                        <ui:Button text="+ Increase Budget" class="button-premium" style="width: 48%; height: 22px; font-size: 11px; margin: 0 0 6px 0; padding: 0; background-color: rgba(255,255,255,0.05);" />
+                        <ui:Button text="❄ Freeze Procurement" class="button-premium" style="width: 48%; height: 22px; font-size: 11px; margin: 0 0 6px 0; padding: 0; background-color: rgba(255,255,255,0.05);" />
+                        <ui:Button text="↓ Reduce Training" class="button-premium" style="width: 48%; height: 22px; font-size: 11px; margin: 0 0 6px 0; padding: 0; background-color: rgba(255,255,255,0.05);" />
+                        <ui:Button text="⚠ Emergency Funding" class="button-premium" style="width: 48%; height: 22px; font-size: 11px; margin: 0 0 6px 0; padding: 0; background-color: rgba(255,255,255,0.05);" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:ScrollView>
+</ui:UXML>
