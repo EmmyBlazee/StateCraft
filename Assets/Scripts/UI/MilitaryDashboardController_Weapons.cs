@@ -185,9 +185,9 @@ namespace StateCraft.UI
 
             // Air Force
             AddWeaponRow("Fighter Jets",      "Multi-Role Combat Aircraft", country.unitFighters,   0.88f, "Good", _wGridAir, "fighter aircaft");
-            AddWeaponRow("Strategic Bombers", "Heavy Payloads",             country.unitBombers,    0.80f, "Good", _wGridAir, "bomber");
+            AddWeaponRow("Strategic Bombers", "Heavy Payloads",             country.unitBombers,    0.80f, "Good", _wGridAir, "bomber1");
             AddWeaponRow("Helicopters",       "Attack & Utility Helicopters",country.unitAttackHelis,0.77f,"Fair", _wGridAir, "helicopter1");
-            AddWeaponRow("UAV Drones",        "Unmanned Aerial Vehicles",   country.unitUAVs,       0.95f, "Excellent", _wGridAir, "drone");
+            AddWeaponRow("UAV Drones",        "Unmanned Aerial Vehicles",   country.unitUAVs,       0.95f, "Excellent", _wGridAir, "uav");
 
             // Navy
             AddWeaponRow("Patrol Boats",  "Coastal Patrol Vessels",    country.unitPatrolBoats, 0.86f, "Good", _wGridNavy, "patrol boat");
@@ -238,8 +238,8 @@ namespace StateCraft.UI
 
             // Tech level: derive from armyStats/airForce readiness → 1-5 tiers
             float techScore = (country.armyStats.readiness + country.airForceStats.readiness) / 2f;
-            int techLevel   = techScore >= 90f ? 5 : techScore >= 75f ? 4 : techScore >= 60f ? 3 : techScore >= 45f ? 2 : 1;
-            string techLabel= techLevel switch { 5 => "ADVANCED", 4 => "MODERNIZING", 3 => "DEVELOPING", 2 => "BASIC", _ => "OUTDATED" };
+            string grade    = techScore >= 90f ? "A" : techScore >= 75f ? "B" : techScore >= 60f ? "C" : techScore >= 45f ? "D" : "F";
+            string techLabel= grade switch { "A" => "COMBAT READY", "B" => "HIGH READINESS", "C" => "MODERATE", "D" => "LOW READINESS", _ => "CRITICAL DEFICIT" };
             float techXP    = techScore; // 0-100 used as XP %
 
             // Maintenance status label
@@ -273,11 +273,11 @@ namespace StateCraft.UI
             }
 
             // Tech Level Styling
-            Color techColor = techLevel switch {
-                5 => new Color(0.1f, 0.5f, 0.9f),       // Blue
-                4 => new Color(0.9f, 0.6f, 0f),       // Orange
-                3 => new Color(0.9f, 0.6f, 0f),  // Yellow
-                2 => new Color(255/255f, 82/255f, 82/255f),   // Red
+            Color techColor = grade switch {
+                "A" => new Color(0.1f, 0.5f, 0.9f),       // Blue
+                "B" => new Color(0.9f, 0.6f, 0f),       // Orange
+                "C" => new Color(0.9f, 0.6f, 0f),  // Yellow
+                "D" => new Color(255/255f, 82/255f, 82/255f),   // Red
                 _ => new Color(160/255f, 160/255f, 160/255f)  // Grey
             };
 
@@ -306,10 +306,10 @@ namespace StateCraft.UI
             Set("WArsLegNavy",     $"{navyPct:F0}%");
             Set("WArsLegOther",    $"{otherPct:F0}%");
 
-            Set("WArsTechLevel",   $"{techLevel}");
+            Set("WArsTechLevel",   $"{grade}");
             Set("WArsTechLabel",   techLabel);
             SetBar("WArsTechXPBar", techXP, techColor);
-            Set("WArsTechXP",      $"{techScore:F0} / 100 pts");
+            Set("WArsTechXP",      $"{techScore:F0} / 100 %");
 
             var maintColor = avgReadiness >= 70f
                 ? new Color(0f, 210/255f, 130/255f)
@@ -435,7 +435,10 @@ namespace StateCraft.UI
             if (label.Contains("artillery") || label.Contains("howitzer")) return "artilery";
             if (label.Contains("fighter") || label.Contains("jet") || label.Contains("jf-17")) return "fighter aircaft";
             if (label.Contains("transport") || label.Contains("cargo")) return "transport aircraft";
+            if (label.Contains("bomber")) return "bomber1";
+            if (label.Contains("uav") || label.Contains("drone")) return "uav";
             if (label.Contains("helicopter")) return "helicopter1";
+            if (label.Contains("submarine") || label.Contains("sub")) return "submarine";
             if (label.Contains("frigate")) return "frigate";
             if (label.Contains("destroyer")) return "destroyer";
             if (label.Contains("patrol") || label.Contains("boat") || label.Contains("opv")) return "patrol boat";
