@@ -25,6 +25,8 @@ namespace StateCraft.UI
         private Button _wTabProcurement;
         private Button _wTabResearch;
 
+        private string _procurementCategoryFilter = "All Categories";
+
         // Cached root used for lazy re-query on PopulateWeapons
         private VisualElement _weaponsRoot;
         private bool _weaponsWired = false;
@@ -177,23 +179,30 @@ namespace StateCraft.UI
             if (_wGridAir   != null) _wGridAir.Clear();
             if (_wGridNavy  != null) _wGridNavy.Clear();
 
+            void AddRow(string title, string desc, int act, int oos, VisualElement grid, string img)
+            {
+                float pct = (act + oos) > 0 ? (float)act / (act + oos) : 0f;
+                string condition = pct >= 0.85f ? "Excellent" : pct >= 0.70f ? "Good" : pct >= 0.40f ? "Fair" : "Poor";
+                AddWeaponRow(title, desc, act, pct, condition, grid, img);
+            }
+
             // Army
-            AddWeaponRow("Assault Rifles",    "Standard Infantry Weapon",   country.unitRifles,     0.92f, "Good", _wGridArmy, "rifle1");
-            AddWeaponRow("APCs",              "Armored Personnel Carriers", country.unitAPCs,       0.85f, "Good", _wGridArmy, "Apcs");
-            AddWeaponRow("Main Battle Tanks", "Heavy Armor",                country.unitTanks,      0.78f, "Fair", _wGridArmy, "maintank");
-            AddWeaponRow("Artillery Systems", "Towed & Self-Propelled",     country.unitArtillery,  0.75f, "Fair", _wGridArmy, "artilery");
+            AddRow("Assault Rifles",    "Standard Infantry Weapon",   country.unitRifles,    country.oosRifles,    _wGridArmy, "rifle1");
+            AddRow("APCs",              "Armored Personnel Carriers", country.unitAPCs,      country.oosAPCs,      _wGridArmy, "Apcs");
+            AddRow("Main Battle Tanks", "Heavy Armor",                country.unitTanks,     country.oosTanks,     _wGridArmy, "maintank");
+            AddRow("Artillery Systems", "Towed & Self-Propelled",     country.unitArtillery, country.oosArtillery, _wGridArmy, "artilery");
 
             // Air Force
-            AddWeaponRow("Fighter Jets",      "Multi-Role Combat Aircraft", country.unitFighters,   0.88f, "Good", _wGridAir, "fighter aircaft");
-            AddWeaponRow("Strategic Bombers", "Heavy Payloads",             country.unitBombers,    0.80f, "Good", _wGridAir, "bomber1");
-            AddWeaponRow("Helicopters",       "Attack & Utility Helicopters",country.unitAttackHelis,0.77f,"Fair", _wGridAir, "helicopter1");
-            AddWeaponRow("UAV Drones",        "Unmanned Aerial Vehicles",   country.unitUAVs,       0.95f, "Excellent", _wGridAir, "uav");
+            AddRow("Fighter Jets",      "Multi-Role Combat Aircraft", country.unitFighters,   country.oosFighters,   _wGridAir, "fighter aircaft");
+            AddRow("Strategic Bombers", "Heavy Payloads",             country.unitBombers,    country.oosBombers,    _wGridAir, "bomber1");
+            AddRow("Helicopters",       "Attack & Utility Helicopters",country.unitAttackHelis,country.oosAttackHelis,_wGridAir, "helicopter1");
+            AddRow("UAV Drones",        "Unmanned Aerial Vehicles",   country.unitUAVs,       country.oosUAVs,       _wGridAir, "uav");
 
             // Navy
-            AddWeaponRow("Patrol Boats",  "Coastal Patrol Vessels",    country.unitPatrolBoats, 0.86f, "Good", _wGridNavy, "patrol boat");
-            AddWeaponRow("Frigates",      "Multi-Role Frigates",        country.unitFrigates,    0.82f, "Good", _wGridNavy, "frigate");
-            AddWeaponRow("Submarines",    "Attack Submarines",          country.unitSubmarines,  0.80f, "Good", _wGridNavy, "submarine");
-            AddWeaponRow("Destroyers",    "Guided Missile Destroyers",  country.unitDestroyers,  0.0f,  "—",   _wGridNavy, "destroyer");
+            AddRow("Patrol Boats",  "Coastal Patrol Vessels",    country.unitPatrolBoats, country.oosPatrolBoats, _wGridNavy, "patrol boat");
+            AddRow("Frigates",      "Multi-Role Frigates",        country.unitFrigates,    country.oosFrigates,    _wGridNavy, "frigate");
+            AddRow("Submarines",    "Attack Submarines",          country.unitSubmarines,  country.oosSubmarines,  _wGridNavy, "submarine");
+            AddRow("Destroyers",    "Guided Missile Destroyers",  country.unitDestroyers,  country.oosDestroyers,  _wGridNavy, "destroyer");
 
             // Populate the left and right sidebars with live data
             PopulateArsenalSidebars(country);
@@ -392,7 +401,7 @@ namespace StateCraft.UI
                 {
                     var ok = new Label("All stock levels nominal.");
                     ok.style.color    = new Color(0f, 210/255f, 130/255f);
-                    ok.style.fontSize = 8;
+                    ok.style.fontSize = 10;
                     alertsList.Add(ok);
                 }
                 else
@@ -404,13 +413,13 @@ namespace StateCraft.UI
 
                         var alertLbl = new Label($"⚠  {label}");
                         alertLbl.style.color = new Color(255/255f, 82/255f, 82/255f);
-                        alertLbl.style.fontSize = 8;
+                        alertLbl.style.fontSize = 11;
                         alertLbl.style.unityFontStyleAndWeight = FontStyle.Bold;
                         alertRow.Add(alertLbl);
 
                         var detailLbl = new Label(detail);
                         detailLbl.style.color   = new Color(140/255f, 140/255f, 140/255f);
-                        detailLbl.style.fontSize = 7;
+                        detailLbl.style.fontSize = 10;
                         alertRow.Add(detailLbl);
 
                         alertsList.Add(alertRow);
@@ -425,24 +434,24 @@ namespace StateCraft.UI
         // ════════════════════════════════════════════════════════════════════
 
 
-                private string GetImageNameForUnit(string label)
+        private string GetImageNameForUnit(string label)
         {
             if (string.IsNullOrEmpty(label)) return null;
             label = label.ToLower();
-            if (label.Contains("rifle") || label.Contains("infantry") || label.Contains("ballistic")) return "rifle1";
-            if (label.Contains("apc") || label.Contains("personnel carrier") || label.Contains("carrier")) return "Apcs";
-            if (label.Contains("tank") || label.Contains("armor")) return "maintank";
-            if (label.Contains("artillery") || label.Contains("howitzer")) return "artilery";
-            if (label.Contains("fighter") || label.Contains("jet") || label.Contains("jf-17")) return "fighter aircaft";
-            if (label.Contains("transport") || label.Contains("cargo")) return "transport aircraft";
-            if (label.Contains("bomber")) return "bomber1";
-            if (label.Contains("uav") || label.Contains("drone")) return "uav";
-            if (label.Contains("helicopter")) return "helicopter1";
+            if (label.Contains("apc") || label.Contains("personnel carrier") || label.Contains("carrier") || label.Contains("ifv") || label.Contains("fighting vehicle") || label.Contains("stryker") || label.Contains("rooikat")) return "Apcs";
+            if (label.Contains("tank") || label.Contains("armor") || label.Contains("leopard") || label.Contains("t-90") || label.Contains("m1a2")) return "maintank";
+            if (label.Contains("artillery") || label.Contains("howitzer") || label.Contains("caesar") || label.Contains("m109")) return "artilery";
+            if (label.Contains("fighter") || label.Contains("jet") || label.Contains("jf-17") || label.Contains("f-16") || label.Contains("su-35")) return "fighter aircaft";
+            if (label.Contains("transport") || label.Contains("cargo") || label.Contains("c-130")) return "transport aircraft";
+            if (label.Contains("bomber") || label.Contains("h-6") || label.Contains("b-2")) return "bomber1";
+            if (label.Contains("uav") || label.Contains("drone") || label.Contains("tb2")) return "uav";
+            if (label.Contains("helicopter") || label.Contains("ah-64") || label.Contains("apache")) return "helicopter1";
             if (label.Contains("submarine") || label.Contains("sub")) return "submarine";
-            if (label.Contains("frigate")) return "frigate";
-            if (label.Contains("destroyer")) return "destroyer";
+            if (label.Contains("frigate") || label.Contains("corvette")) return "frigate";
+            if (label.Contains("destroyer") || label.Contains("cruiser")) return "destroyer";
             if (label.Contains("patrol") || label.Contains("boat") || label.Contains("opv")) return "patrol boat";
-            if (label.Contains("sam") || label.Contains("missile") || label.Contains("radar")) return "artilery";
+            if (label.Contains("sam") || label.Contains("missile") || label.Contains("radar") || label.Contains("surface-to-air") || label.Contains("air defense")) return "artilery";
+            if (label.Contains("rifle") || label.Contains("infantry") || label.Contains("ballistic") || label.Contains("ak-12")) return "rifle1";
             return null;
         }
 
@@ -548,6 +557,7 @@ namespace StateCraft.UI
                 card.style.alignItems    = Align.Center;
 
                 var iconLbl = new Label(icon);
+                iconLbl.AddToClassList("fa-icon");
                 iconLbl.style.fontSize   = 18;
                 iconLbl.style.marginRight = 10;
                 iconLbl.style.color      = cCyan;
@@ -577,11 +587,11 @@ namespace StateCraft.UI
                 parent.Add(card);
             }
 
-            AddOverviewCard(overviewRow, "🏭", $"{activeFactories}", "ACTIVE FACTORIES", $"of {totalFactories} Total", Color.white);
-            AddOverviewCard(overviewRow, "⚙", $"{avgUtil:F0}%", "FACTORY UTILIZATION", "Across all facilities", cGreen);
-            AddOverviewCard(overviewRow, "$", UiFormat.Money(totalMonthlyCost * country.exchangeRate, sym), "MONTHLY PROD. COST", "Operating expenses", cYellow);
-            AddOverviewCard(overviewRow, "📦", UiFormat.Money(totalMonthlyValue * country.exchangeRate, sym), "MONTHLY OUTPUT VALUE", "Total production value", cGreen);
-            AddOverviewCard(overviewRow, "⏱", $"{avgCompletion:F1}", "AVG. COMPLETION TIME", "Months", cCyan, 0.8f);
+            AddOverviewCard(overviewRow, "\uf275", $"{activeFactories}", "ACTIVE FACTORIES", $"of {totalFactories} Total", Color.white);
+            AddOverviewCard(overviewRow, "\uf013", $"{avgUtil:F0}%", "FACTORY UTILIZATION", "Across all facilities", cGreen);
+            AddOverviewCard(overviewRow, "\uf155", UiFormat.Money(totalMonthlyCost * country.exchangeRate, sym), "MONTHLY PROD. COST", "Operating expenses", cYellow);
+            AddOverviewCard(overviewRow, "\uf1b2", UiFormat.Money(totalMonthlyValue * country.exchangeRate, sym), "MONTHLY OUTPUT VALUE", "Total production value", cGreen);
+            AddOverviewCard(overviewRow, "\uf017", $"{avgCompletion:F1}", "AVG. COMPLETION TIME", "Months", cCyan, 0.8f);
 
             // ── Two-column layout: left=main, right=sidebar ──────────────────
             var twoCols = new VisualElement();
@@ -1238,9 +1248,17 @@ namespace StateCraft.UI
             void UpdateCost()
             {
                 float costPerMonth = GetUnitCostB(id) * qtyRef[0] / 12f;
-                int months         = GetUnitProductionMonths(id, qtyRef[0], country.baseDefenseFactoryCount);
+                int months         = GetUnitProductionMonths(id, qtyRef[0], country);
                 float totalCost    = costPerMonth * months;
-                costLbl.text = $"Est. Cost: <color=#00D2FF>{UiFormat.Money(totalCost * country.exchangeRate, sym)}</color> ({months} months)";
+                
+                if (months >= 999) 
+                {
+                    costLbl.text = $"<color=#FF3333>Requires {GetRequiredFactoryType(id)} Factory</color>";
+                }
+                else
+                {
+                    costLbl.text = $"Est. Cost: <color=#00D2FF>{UiFormat.Money(totalCost * country.exchangeRate, sym)}</color> ({months} months)";
+                }
             }
             UpdateCost();
 
@@ -1303,8 +1321,17 @@ namespace StateCraft.UI
             {
                 var gm = GameManager.Instance;
                 if (gm == null) return;
+                
+                int months = GetUnitProductionMonths(id, qtyRef[0], country);
+                if (months >= 999)
+                {
+                    string reqCategory = GetRequiredFactoryType(id);
+                    NotificationManager.Instance?.ShowAlert("PRODUCTION BLOCKED",
+                        $"You do not have an operational {reqCategory} Defense Factory. Construct one from the Bases tab first.", true);
+                    return;
+                }
+                
                 float costPerMonth = GetUnitCostB(id) * qtyRef[0] / 12f;
-                int months         = GetUnitProductionMonths(id, qtyRef[0], country.baseDefenseFactoryCount);
                 float totalCost    = costPerMonth * months;
 
                 if (gm.playerBudget < totalCost * 0.5f)
@@ -1373,8 +1400,36 @@ namespace StateCraft.UI
             return GetUnitCostB(id) * 1.2f; // Produced value is 20% above cost
         }
 
-        private static int GetUnitProductionMonths(string id, int qty, int factoryCount)
+        private static string GetRequiredFactoryType(string id)
         {
+            return id switch
+            {
+                "RIFLE" => "Small Arms",
+                "APC" or "TNK" => "Armored Vehicles",
+                "ARTILLERY" => "Artillery Systems",
+                "FTR" or "BOMBER" or "HEL" or "UAV" => "Aircraft",
+                "PATROL_BOAT" or "FRG" or "SUB" or "DESTROYER" => "Naval Vessels",
+                _ => "Small Arms"
+            };
+        }
+
+        private static int GetUnitProductionMonths(string id, int qty, CountryDataSO country)
+        {
+            string reqCategory = GetRequiredFactoryType(id);
+            int totalLevel = 0;
+            if (country.defenseFactories != null)
+            {
+                foreach (var fac in country.defenseFactories)
+                {
+                    if (fac.level > 0 && fac.produceType == reqCategory)
+                    {
+                        totalLevel += fac.level;
+                    }
+                }
+            }
+            
+            if (totalLevel == 0) return 999;
+
             int baseMonths = id switch
             {
                 "RIFLE"       => Mathf.CeilToInt(qty / 5000f),
@@ -1389,7 +1444,7 @@ namespace StateCraft.UI
                 "FRG"         => Mathf.CeilToInt(qty / 1f) + 8,
                 _             => Mathf.CeilToInt(qty / 3f) + 3,
             };
-            float factoryBonus = 1f - Mathf.Clamp(factoryCount * 0.08f, 0f, 0.4f);
+            float factoryBonus = 1f - Mathf.Clamp(totalLevel * 0.20f, 0f, 0.8f);
             return Mathf.Max(1, Mathf.RoundToInt(baseMonths * factoryBonus));
         }
 
@@ -1442,58 +1497,14 @@ namespace StateCraft.UI
             if (country.activeContracts == null)
                 country.activeContracts = new System.Collections.Generic.List<ProcurementContract>();
 
-            if (country.availableOffers.Count == 0)
-            {
-                country.availableOffers.Add(new ProcurementOffer {
-                    id = "OFF_APC", title = "100 APCs (Rooikat Mk1D)", subtitle = "Armored Personnel Carrier",
-                    tags = new string[]{"8x8", "Mine Resistant", "12 Personnel"}, supplier = "Denel Land Systems",
-                    country = "South Africa", unitCost = "₦420M", totalCost = "₦42.0B", quantity = "100 Units",
-                    deliveryTime = "4 - 6 Months", flagEmoji = "🇿🇦",
-                    produceType = "APC", unitQuantity = 100, deliveryMonths = 5, totalCostB = 42.0f
-                });
-                country.availableOffers.Add(new ProcurementOffer {
-                    id = "OFF_JF17", title = "12 Multi-Role Fighter Jets (JF-17)", subtitle = "Multi-Role Combat Aircraft",
-                    tags = new string[]{"Multi-Role", "4.5 Gen", "Advanced Avionics"}, supplier = "Pakistan Aeronautical Complex",
-                    country = "Pakistan", unitCost = "₦15.0B", totalCost = "₦180.0B", quantity = "12 Units",
-                    deliveryTime = "8 - 10 Months", flagEmoji = "🇵🇰",
-                    produceType = "FTR", unitQuantity = 12, deliveryMonths = 9, totalCostB = 180.0f
-                });
-                country.availableOffers.Add(new ProcurementOffer {
-                    id = "OFF_OPV76", title = "8 Offshore Patrol Boats (OPV 76)", subtitle = "Offshore Patrol Vessel",
-                    tags = new string[]{"76m Length", "High Endurance", "Coastal Ops"}, supplier = "ASFAT",
-                    country = "Turkey", unitCost = "₦11.2B", totalCost = "₦89.6B", quantity = "8 Units",
-                    deliveryTime = "6 - 8 Months", flagEmoji = "🇹🇷",
-                    produceType = "PATROL_BOAT", unitQuantity = 8, deliveryMonths = 7, totalCostB = 89.6f
-                });
-                country.availableOffers.Add(new ProcurementOffer {
-                    id = "OFF_SAM", title = "12 Surface-to-Air Missile Systems", subtitle = "Medium-Range SAM System",
-                    tags = new string[]{"40 km Range", "All-Weather", "Mobile"}, supplier = "China Aerospace",
-                    country = "China", unitCost = "₦8.5B", totalCost = "₦102.0B", quantity = "12 Units",
-                    deliveryTime = "9 - 12 Months", flagEmoji = "🇨🇳",
-                    produceType = "ARTILLERY", unitQuantity = 12, deliveryMonths = 10, totalCostB = 102.0f
-                });
-            }
+            country.availableOffers.Clear();
+            StateCraft.Systems.ProcurementMarketSystem.RefreshMarket(country);
 
-            if (country.activeContracts.Count == 0)
+            // No more mock active contracts, use live data.
+            // Purge any lingering mock data that got saved into the ScriptableObject asset:
+            if (country.activeContracts != null)
             {
-                country.activeContracts.Add(new ProcurementContract {
-                    id = "CON_CAESAR", unitLabel = "50 Caesar Howitzers", supplier = "Nexter Systems, France",
-                    category = "Artillery", quantity = 50, monthsTotal = 12, monthsRemaining = 8,
-                    totalCostB = 95.0f, monthlyCostB = 7.9f, status = "Price Negotiation",
-                    produceType = "ARTILLERY", unitQuantity = 50
-                });
-                country.activeContracts.Add(new ProcurementContract {
-                    id = "CON_C130", unitLabel = "6 C-130J Transport Aircraft", supplier = "Lockheed Martin, USA",
-                    category = "Aviation", quantity = 6, monthsTotal = 24, monthsRemaining = 18,
-                    totalCostB = 210.6f, monthlyCostB = 8.7f, status = "Technical Evaluation",
-                    produceType = "BOMBER", unitQuantity = 6
-                });
-                country.activeContracts.Add(new ProcurementContract {
-                    id = "CON_RADAR", unitLabel = "Radar Systems Package", supplier = "ELTA Systems, Israel",
-                    category = "Defense Systems", quantity = 1, monthsTotal = 6, monthsRemaining = 2,
-                    totalCostB = 68.0f, monthlyCostB = 11.3f, status = "Contract Drafting",
-                    produceType = "ARTILLERY", unitQuantity = 1
-                });
+                country.activeContracts.RemoveAll(c => c.id == "CON_CAESAR" || c.id == "CON_C130" || c.id == "CON_RADAR");
             }
         }
 
@@ -1666,9 +1677,10 @@ namespace StateCraft.UI
                 condDot.style.marginRight = 4;
                 
                 Color condColor;
-                if      (condition == "Good") condColor = new Color(0.14f, 0.93f, 0.34f);
-                else if (condition == "Fair") condColor = new Color(255/255f, 180/255f, 0);
-                else                          condColor = new Color(255/255f, 82/255f,  82/255f);
+                if      (condition == "Excellent") condColor = new Color(0f, 0.9f, 0.6f);
+                else if (condition == "Good")      condColor = new Color(0.14f, 0.93f, 0.34f);
+                else if (condition == "Fair")      condColor = new Color(255/255f, 180/255f, 0);
+                else                               condColor = new Color(255/255f, 82/255f,  82/255f);
                 
                 condDot.style.backgroundColor = condColor;
                 condCol.Add(condDot);
@@ -1952,6 +1964,7 @@ namespace StateCraft.UI
                 card.Add(row);
 
                 var iconLbl = new Label(icon);
+                iconLbl.AddToClassList("fa-icon");
                 iconLbl.style.fontSize = 18;
                 iconLbl.style.color = cDim;
                 iconLbl.style.marginRight = 12;
@@ -1995,11 +2008,11 @@ namespace StateCraft.UI
             }
             float avgDelivery = pendingDeliveries > 0 ? totalDeliveryMonths / pendingDeliveries : 0f;
 
-            AddKpi("PROCUREMENT BUDGET", "₦412.6B", "Available for spending", "🗄");
-            AddKpi("ACTIVE NEGOTIATIONS", country.activeContracts.Count.ToString(), "In progress", "🤝");
-            AddKpi("PENDING DELIVERIES", pendingDeliveries.ToString(), "Scheduled shipments", "📦");
-            AddKpi("TOTAL COMMITMENTS", $"₦{totalCommitments:F1}B", "Value of all contracts", "📄");
-            AddKpi("AVERAGE DELIVERY TIME", $"{avgDelivery:F1}", "Months", "🕒");
+            AddKpi("PROCUREMENT BUDGET", "₦412.6B", "Available for spending", "\uf155");
+            AddKpi("ACTIVE NEGOTIATIONS", country.activeContracts.Count.ToString(), "In progress", "\uf2b5");
+            AddKpi("PENDING DELIVERIES", pendingDeliveries.ToString(), "Scheduled shipments", "\uf0d1");
+            AddKpi("TOTAL COMMITMENTS", $"₦{totalCommitments:F1}B", "Value of all contracts", "\uf15c");
+            AddKpi("AVERAGE DELIVERY TIME", $"{avgDelivery:F1}", "Months", "\uf017");
 
             // ── 3 COLUMN LAYOUT ─────────────────────────────────────────────
             var columns = new VisualElement();
@@ -2043,6 +2056,10 @@ namespace StateCraft.UI
             var resetLbl = new Label("Reset");
             resetLbl.style.color = cDim;
             resetLbl.style.fontSize = 8;
+            resetLbl.RegisterCallback<ClickEvent>(e => {
+                _procurementCategoryFilter = "All Categories";
+                PopulateProcurement(country);
+            });
             filterHeader.Add(resetLbl);
 
             void AddFilterSection(string title)
@@ -2057,7 +2074,7 @@ namespace StateCraft.UI
             }
 
             AddFilterSection("CATEGORY");
-            string[] categories = { "All Categories", "Army Equipment", "Air Force Equipment", "Naval Equipment", "Missile Systems", "Defense Systems", "Ammunition" };
+            string[] categories = { "All Categories", "Army Equipment", "Air Force Equipment", "Naval Equipment" };
             foreach(var c in categories) {
                 var row = new VisualElement();
                 row.style.flexDirection = FlexDirection.Row;
@@ -2067,47 +2084,38 @@ namespace StateCraft.UI
                 box.style.width = 12; box.style.height = 12;
                 box.style.borderTopLeftRadius = box.style.borderTopRightRadius = 
                 box.style.borderBottomLeftRadius = box.style.borderBottomRightRadius = 2;
+                box.style.alignItems = Align.Center;
+                box.style.justifyContent = Justify.Center;
                 SetBorderWidth(box.style, 1);
-                SetBorderColor(box.style, c == "All Categories" ? cGreen : cDim);
-                if (c == "All Categories") box.style.backgroundColor = new Color(0f, 210/255f, 130/255f, 0.2f);
+                SetBorderColor(box.style, c == _procurementCategoryFilter ? cGreen : cDim);
+                
+                if (c == _procurementCategoryFilter)
+                {
+                    box.style.backgroundColor = new Color(0f, 210/255f, 130/255f, 0.15f);
+                    var checkLbl = new Label("\uf00c");
+                    checkLbl.AddToClassList("fa-icon");
+                    checkLbl.style.fontSize = 9;
+                    checkLbl.style.color = cGreen;
+                    checkLbl.style.marginTop = 1;
+                    box.Add(checkLbl);
+                }
                 row.Add(box);
                 var l = new Label(c);
-                l.style.color = c == "All Categories" ? Color.white : cDim;
+                l.style.color = c == _procurementCategoryFilter ? Color.white : cDim;
                 l.style.fontSize = 8;
                 l.style.marginLeft = 6;
                 row.Add(l);
+                
+                string loopCat = c;
+                row.RegisterCallback<ClickEvent>(e => {
+                    _procurementCategoryFilter = loopCat;
+                    PopulateProcurement(country);
+                });
+                
                 leftCol.Add(row);
             }
 
-            void AddFilterDropdown(string title, string selected)
-            {
-                AddFilterSection(title);
-                var btn = new Button() { text = selected + "  ▼" };
-                btn.style.backgroundColor = cPanel;
-                btn.style.color = cDim;
-                btn.style.fontSize = 8;
-                btn.style.height = 24;
-                btn.style.unityTextAlign = TextAnchor.MiddleLeft;
-                SetBorderWidth(btn.style, 1);
-                SetBorderColor(btn.style, cBorder);
-                btn.style.borderTopLeftRadius = btn.style.borderTopRightRadius = 
-                btn.style.borderBottomLeftRadius = btn.style.borderBottomRightRadius = 3;
-                leftCol.Add(btn);
-            }
 
-            AddFilterDropdown("SUPPLIER REGION", "All Regions");
-            AddFilterDropdown("DELIVERY TIME", "Any");
-            AddFilterDropdown("SORT BY", "Recommended");
-
-            var refreshBtn = new Button() { text = "↻ REFRESH OFFERS" };
-            refreshBtn.style.marginTop = 20;
-            refreshBtn.style.backgroundColor = new Color(0, 210/255f, 255/255f, 0.05f);
-            refreshBtn.style.color = cCyan;
-            refreshBtn.style.fontSize = 8;
-            refreshBtn.style.height = 26;
-            SetBorderWidth(refreshBtn.style, 1);
-            SetBorderColor(refreshBtn.style, new Color(0, 210/255f, 255/255f, 0.3f));
-            leftCol.Add(refreshBtn);
 
             // ── MID COL (Available Offers) ──────────────────────────────────
             var offersHeader = new Label("AVAILABLE OFFERS");
@@ -2180,13 +2188,13 @@ namespace StateCraft.UI
 
                 var titleLbl = new Label(title);
                 titleLbl.style.color = Color.white;
-                titleLbl.style.fontSize = 13;
+                titleLbl.style.fontSize = 20;
                 titleLbl.style.unityFontStyleAndWeight = FontStyle.Bold;
                 infoCol.Add(titleLbl);
 
                 var subLblText = new Label(sub);
                 subLblText.style.color = cDim;
-                subLblText.style.fontSize = 10;
+                subLblText.style.fontSize = 14;
                 subLblText.style.marginBottom = 6;
                 infoCol.Add(subLblText);
 
@@ -2196,7 +2204,7 @@ namespace StateCraft.UI
                 foreach(var t in tags) {
                     var tl = new Label(t);
                     tl.style.color = cGreen;
-                    tl.style.fontSize = 10;
+                    tl.style.fontSize = 13;
                     tl.style.backgroundColor = new Color(0, 210/255f, 130/255f, 0.1f);
                     SetBorderWidth(tl.style, 1);
                     SetBorderColor(tl.style, new Color(0, 210/255f, 130/255f, 0.3f));
@@ -2211,42 +2219,42 @@ namespace StateCraft.UI
 
                 var supRow = new VisualElement();
                 supRow.style.flexDirection = FlexDirection.Row;
-                var supL1 = new Label("Supplier:"); supL1.style.color = cDim; supL1.style.fontSize = 10; supL1.style.width = 45;
-                var supL2 = new Label(sup); supL2.style.color = Color.white; supL2.style.fontSize = 10;
+                var supL1 = new Label("Supplier:"); supL1.style.color = cDim; supL1.style.fontSize = 14; supL1.style.width = 65;
+                var supL2 = new Label(sup); supL2.style.color = Color.white; supL2.style.fontSize = 14;
                 supRow.Add(supL1); supRow.Add(supL2);
                 infoCol.Add(supRow);
 
                 var ctryRow = new VisualElement();
                 ctryRow.style.flexDirection = FlexDirection.Row;
-                var ctryL1 = new Label("Country:"); ctryL1.style.color = cDim; ctryL1.style.fontSize = 10; ctryL1.style.width = 45;
-                var ctryL2 = new Label(ctry); ctryL2.style.color = Color.white; ctryL2.style.fontSize = 10;
+                var ctryL1 = new Label("Country:"); ctryL1.style.color = cDim; ctryL1.style.fontSize = 14; ctryL1.style.width = 65;
+                var ctryL2 = new Label(ctry); ctryL2.style.color = Color.white; ctryL2.style.fontSize = 14;
                 ctryRow.Add(ctryL1); ctryRow.Add(ctryL2);
                 infoCol.Add(ctryRow);
 
                 // Stats Col
                 var statsCol = new VisualElement();
-                statsCol.style.width = 160;
-                statsCol.style.marginLeft = 12;
+                statsCol.style.width = 240;
+                statsCol.style.marginLeft = 20;
                 statsCol.style.justifyContent = Justify.SpaceBetween;
                 card.Add(statsCol);
 
                 var sRow1 = new VisualElement(); sRow1.style.flexDirection = FlexDirection.Row; sRow1.style.justifyContent = Justify.SpaceBetween;
                 var sCol1 = new VisualElement();
-                var sc1l1 = new Label("UNIT COST"); sc1l1.style.color = cDim; sc1l1.style.fontSize = 9; sCol1.Add(sc1l1);
-                var sc1l2 = new Label(unitC); sc1l2.style.color = Color.white; sc1l2.style.fontSize = 13; sc1l2.style.unityFontStyleAndWeight = FontStyle.Bold; sCol1.Add(sc1l2);
+                var sc1l1 = new Label("UNIT COST"); sc1l1.style.color = cDim; sc1l1.style.fontSize = 12; sCol1.Add(sc1l1);
+                var sc1l2 = new Label(unitC); sc1l2.style.color = Color.white; sc1l2.style.fontSize = 18; sc1l2.style.unityFontStyleAndWeight = FontStyle.Bold; sCol1.Add(sc1l2);
                 var sCol2 = new VisualElement();
-                var sc2l1 = new Label("QUANTITY"); sc2l1.style.color = cDim; sc2l1.style.fontSize = 9; sCol2.Add(sc2l1);
-                var sc2l2 = new Label(qty); sc2l2.style.color = Color.white; sc2l2.style.fontSize = 13; sc2l2.style.unityFontStyleAndWeight = FontStyle.Bold; sCol2.Add(sc2l2);
+                var sc2l1 = new Label("QUANTITY"); sc2l1.style.color = cDim; sc2l1.style.fontSize = 12; sCol2.Add(sc2l1);
+                var sc2l2 = new Label(qty); sc2l2.style.color = Color.white; sc2l2.style.fontSize = 18; sc2l2.style.unityFontStyleAndWeight = FontStyle.Bold; sCol2.Add(sc2l2);
                 sRow1.Add(sCol1); sRow1.Add(sCol2);
                 statsCol.Add(sRow1);
 
                 var sRow2 = new VisualElement(); sRow2.style.flexDirection = FlexDirection.Row; sRow2.style.justifyContent = Justify.SpaceBetween;
                 var sCol3 = new VisualElement();
-                var sc3l1 = new Label("TOTAL COST"); sc3l1.style.color = cDim; sc3l1.style.fontSize = 9; sCol3.Add(sc3l1);
-                var sc3l2 = new Label(totC); sc3l2.style.color = Color.white; sc3l2.style.fontSize = 15; sc3l2.style.unityFontStyleAndWeight = FontStyle.Bold; sCol3.Add(sc3l2);
+                var sc3l1 = new Label("TOTAL COST"); sc3l1.style.color = cDim; sc3l1.style.fontSize = 12; sCol3.Add(sc3l1);
+                var sc3l2 = new Label(totC); sc3l2.style.color = Color.white; sc3l2.style.fontSize = 22; sc3l2.style.unityFontStyleAndWeight = FontStyle.Bold; sCol3.Add(sc3l2);
                 var sCol4 = new VisualElement();
-                var sc4l1 = new Label("DELIVERY TIME"); sc4l1.style.color = cDim; sc4l1.style.fontSize = 9; sCol4.Add(sc4l1);
-                var sc4l2 = new Label(deliv); sc4l2.style.color = Color.white; sc4l2.style.fontSize = 12; sc4l2.style.unityFontStyleAndWeight = FontStyle.Bold; sCol4.Add(sc4l2);
+                var sc4l1 = new Label("DELIVERY TIME"); sc4l1.style.color = cDim; sc4l1.style.fontSize = 12; sCol4.Add(sc4l1);
+                var sc4l2 = new Label(deliv); sc4l2.style.color = Color.white; sc4l2.style.fontSize = 18; sc4l2.style.unityFontStyleAndWeight = FontStyle.Bold; sCol4.Add(sc4l2);
                 sRow2.Add(sCol3); sRow2.Add(sCol4);
                 statsCol.Add(sRow2);
 
@@ -2298,14 +2306,7 @@ namespace StateCraft.UI
                     });
                 };
 
-                var starBtn = new Button() { text = "☆" };
-                starBtn.style.width = 22;
-                starBtn.style.height = 22;
-                starBtn.style.backgroundColor = cPanel;
-                starBtn.style.color = cDim;
-                SetBorderWidth(starBtn.style, 1);
-                SetBorderColor(starBtn.style, cBorder);
-                btnRow.Add(negBtn); btnRow.Add(starBtn);
+                btnRow.Add(negBtn);
                 statsCol.Add(btnRow);
 
                 offersList.Add(card);
@@ -2313,14 +2314,24 @@ namespace StateCraft.UI
 
             foreach(var offer in country.availableOffers.ToArray())
             {
-                AddOffer(offer, GetImageNameForUnit(offer.title));
+                bool pass = true;
+                if (_procurementCategoryFilter != "All Categories")
+                {
+                    if (_procurementCategoryFilter == "Army Equipment" && offer.produceType != "APC" && offer.produceType != "TNK" && offer.produceType != "RIFLE" && offer.produceType != "ARTILLERY") pass = false;
+                    if (_procurementCategoryFilter == "Air Force Equipment" && offer.produceType != "FTR" && offer.produceType != "BOMBER" && offer.produceType != "HEL" && offer.produceType != "UAV") pass = false;
+                    if (_procurementCategoryFilter == "Naval Equipment" && offer.produceType != "PATROL_BOAT" && offer.produceType != "FRG" && offer.produceType != "SUB" && offer.produceType != "DESTROYER") pass = false;
+                }
+                
+                if (pass)
+                {
+                    AddOffer(offer, GetImageNameForUnit(offer.title + " " + offer.subtitle));
+                }
             }
 
             // ── RIGHT COL (Negotiations & Summary) ──────────────────────────
             var rightTopRow = new VisualElement(); rightTopRow.style.flexDirection = FlexDirection.Row; rightTopRow.style.justifyContent = Justify.SpaceBetween; rightTopRow.style.marginBottom = 10;
             var anLbl = new Label("ACTIVE NEGOTIATIONS"); anLbl.style.color = Color.white; anLbl.style.fontSize = 12; anLbl.style.unityFontStyleAndWeight = FontStyle.Bold;
-            var vaLbl = new Label("View All"); vaLbl.style.color = cGreen; vaLbl.style.fontSize = 11;
-            rightTopRow.Add(anLbl); rightTopRow.Add(vaLbl);
+            rightTopRow.Add(anLbl);
             rightCol.Add(rightTopRow);
 
             var anList = new VisualElement();
@@ -2338,19 +2349,19 @@ namespace StateCraft.UI
             {
                 var row = new VisualElement();
                 row.style.flexDirection = FlexDirection.Row;
-                row.style.marginBottom = 8;
-                var flg = new Label(flag); flg.style.fontSize = 12; flg.style.marginRight = 8; row.Add(flg);
+                row.style.marginBottom = 16;
+                var flg = new Label(flag); flg.AddToClassList("fa-icon"); flg.style.color = cDim; flg.style.fontSize = 18; flg.style.marginRight = 12; row.Add(flg);
                 var c1 = new VisualElement();
                 c1.style.flexGrow = 1;
-                var t = new Label(title); t.style.color = Color.white; t.style.fontSize = 9; t.style.unityFontStyleAndWeight = FontStyle.Bold; c1.Add(t);
-                var s = new Label(sub); s.style.color = cDim; s.style.fontSize = 7; c1.Add(s);
+                var t = new Label(title); t.style.color = Color.white; t.style.fontSize = 12; t.style.unityFontStyleAndWeight = FontStyle.Bold; t.style.marginBottom = 4; c1.Add(t);
+                var s = new Label(sub); s.style.color = cDim; s.style.fontSize = 10; s.style.marginBottom = 8; c1.Add(s);
                 var vRow = new VisualElement(); vRow.style.flexDirection = FlexDirection.Row; vRow.style.marginTop = 4;
-                var vL1 = new Label("Value: "); vL1.style.color = cDim; vL1.style.fontSize = 7; vL1.style.width = 35;
-                var vL2 = new Label(val); vL2.style.color = Color.white; vL2.style.fontSize = 7; vL2.style.unityFontStyleAndWeight = FontStyle.Bold;
+                var vL1 = new Label("Value: "); vL1.style.color = cDim; vL1.style.fontSize = 10; vL1.style.width = 45;
+                var vL2 = new Label(val); vL2.style.color = Color.white; vL2.style.fontSize = 10; vL2.style.unityFontStyleAndWeight = FontStyle.Bold;
                 vRow.Add(vL1); vRow.Add(vL2); c1.Add(vRow);
-                var sRow = new VisualElement(); sRow.style.flexDirection = FlexDirection.Row;
-                var sL1 = new Label("Status: "); sL1.style.color = cDim; sL1.style.fontSize = 7; sL1.style.width = 35;
-                var sL2 = new Label(status); sL2.style.color = statColor; sL2.style.fontSize = 7;
+                var sRow = new VisualElement(); sRow.style.flexDirection = FlexDirection.Row; sRow.style.marginTop = 4;
+                var sL1 = new Label("Status: "); sL1.style.color = cDim; sL1.style.fontSize = 10; sL1.style.width = 45;
+                var sL2 = new Label(status); sL2.style.color = statColor; sL2.style.fontSize = 10;
                 sRow.Add(sL1); sRow.Add(sL2); c1.Add(sRow);
                 row.Add(c1);
                 anList.Add(row);
@@ -2363,17 +2374,18 @@ namespace StateCraft.UI
                 else if (contract.status == "Contract Drafting") statColor = new Color(200/255f, 100/255f, 255/255f);
                 else if (contract.status == "In Transit") statColor = cGreen;
 
-                string flag = "🌍";
-                if (contract.supplier.Contains("France")) flag = "🇫🇷";
-                else if (contract.supplier.Contains("USA")) flag = "🇺🇸";
-                else if (contract.supplier.Contains("Israel")) flag = "🇮🇱";
+                string icon = "\uf013"; // default gear
+                if (contract.produceType == "RIFLE" || contract.produceType == "APC" || contract.produceType == "TNK") icon = "\uf51e"; // crosshairs
+                else if (contract.produceType == "ARTILLERY") icon = "\uf1e2"; // bomb
+                else if (contract.produceType == "FTR" || contract.produceType == "BOMBER" || contract.produceType == "HEL" || contract.produceType == "UAV") icon = "\uf0fb"; // fighter jet
+                else if (contract.produceType == "PATROL_BOAT" || contract.produceType == "FRG" || contract.produceType == "SUB" || contract.produceType == "DESTROYER") icon = "\uf21a"; // ship
 
-                AddNegItem(flag, contract.unitLabel, contract.supplier, $"₦{contract.totalCostB:F1}B", contract.status, statColor);
+                AddNegItem(icon, contract.unitLabel, contract.supplier, $"₦{contract.totalCostB:F1}B", contract.status, statColor);
             }
 
             var sumLbl = new Label("PROCUREMENT SUMMARY");
             sumLbl.style.color = Color.white;
-            sumLbl.style.fontSize = 9;
+            sumLbl.style.fontSize = 14;
             sumLbl.style.unityFontStyleAndWeight = FontStyle.Bold;
             sumLbl.style.marginBottom = 10;
             rightCol.Add(sumLbl);
@@ -2390,7 +2402,7 @@ namespace StateCraft.UI
             rightCol.Add(sumBox);
 
             // Placeholder for donut chart: A stacked horizontal bar chart
-            var chartRow = new VisualElement(); chartRow.style.flexDirection = FlexDirection.Row; chartRow.style.height = 12; chartRow.style.marginBottom = 10;
+            var chartRow = new VisualElement(); chartRow.style.flexDirection = FlexDirection.Row; chartRow.style.height = 18; chartRow.style.marginBottom = 16;
             chartRow.style.borderTopLeftRadius = chartRow.style.borderTopRightRadius = chartRow.style.borderBottomLeftRadius = chartRow.style.borderBottomRightRadius = 6;
             chartRow.style.overflow = Overflow.Hidden;
             
@@ -2402,11 +2414,11 @@ namespace StateCraft.UI
 
             void AddLegend(string title, string pct, string val, Color col)
             {
-                var row = new VisualElement(); row.style.flexDirection = FlexDirection.Row; row.style.alignItems = Align.Center; row.style.marginBottom = 4;
-                var dot = new VisualElement(); dot.style.width = 8; dot.style.height = 8; dot.style.backgroundColor = col; dot.style.marginRight = 8; dot.style.borderTopLeftRadius = dot.style.borderTopRightRadius = dot.style.borderBottomLeftRadius = dot.style.borderBottomRightRadius = 4; row.Add(dot);
-                var t = new Label(title); t.style.color = Color.white; t.style.fontSize = 8; t.style.width = 80; row.Add(t);
-                var p = new Label(pct); p.style.color = cDim; p.style.fontSize = 8; p.style.width = 30; row.Add(p);
-                var v = new Label(val); v.style.color = cDim; v.style.fontSize = 8; row.Add(v);
+                var row = new VisualElement(); row.style.flexDirection = FlexDirection.Row; row.style.alignItems = Align.Center; row.style.marginBottom = 10;
+                var dot = new VisualElement(); dot.style.width = 12; dot.style.height = 12; dot.style.backgroundColor = col; dot.style.marginRight = 10; dot.style.borderTopLeftRadius = dot.style.borderTopRightRadius = dot.style.borderBottomLeftRadius = dot.style.borderBottomRightRadius = 6; row.Add(dot);
+                var t = new Label(title); t.style.color = Color.white; t.style.fontSize = 12; t.style.width = 100; row.Add(t);
+                var p = new Label(pct); p.style.color = cDim; p.style.fontSize = 12; p.style.width = 40; row.Add(p);
+                var v = new Label(val); v.style.color = cDim; v.style.fontSize = 12; row.Add(v);
                 sumBox.Add(row);
             }
 
@@ -2415,16 +2427,7 @@ namespace StateCraft.UI
             AddLegend("Navy", "15%", "(₦134.4B)", new Color(0, 150/255f, 255/255f));
             AddLegend("Defense Systems", "10%", "(₦90.3B)", cOrange);
 
-            var histBtn = new Button() { text = "📄 PROCUREMENT HISTORY" };
-            histBtn.style.backgroundColor = cPanel;
-            histBtn.style.color = cDim;
-            histBtn.style.fontSize = 9;
-            histBtn.style.height = 30;
-            SetBorderWidth(histBtn.style, 1);
-            SetBorderColor(histBtn.style, cBorder);
-            histBtn.style.borderTopLeftRadius = histBtn.style.borderTopRightRadius = 
-            histBtn.style.borderBottomLeftRadius = histBtn.style.borderBottomRightRadius = 3;
-            rightCol.Add(histBtn);
+
         }
         private void PopulateResearch(CountryDataSO country)
         {

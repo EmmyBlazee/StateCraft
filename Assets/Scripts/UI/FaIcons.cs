@@ -66,6 +66,12 @@ namespace StateCraft.UI
         public const string Scroll           = "\uf70e"; // fa-scroll (policy)
         public const string Fire             = "\uf06d"; // fa-fire (alert)
 
+        // ── Military / Bases ──────────────────────────────────────────────
+        public const string Plane            = "\uf072"; // fa-plane
+        public const string Anchor           = "\uf13d"; // fa-anchor
+        public const string Tower            = "\uf519"; // fa-broadcast-tower
+        public const string Tint             = "\uf043"; // fa-tint
+
         // ── Helper: icon for each budget ministry, in order ───────────────
         public static readonly string[] BudgetMinistryIcons =
         {

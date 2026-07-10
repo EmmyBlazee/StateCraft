@@ -32,6 +32,7 @@ namespace StateCraft.Data
             if (researchProjects == null) researchProjects = new List<ResearchProject>();
             if (activeInsurgentCamps == null) activeInsurgentCamps = new List<StateCraft.Systems.InsurgentCamp>();
             if (defenseFactories == null) defenseFactories = new List<DefenseFactory>();
+            if (militaryBases == null) militaryBases = new List<MilitaryBase>();
 
             // Populate new personnel from existing legacy stats for backwards compatibility
             if (militaryState.army.infantry == 0 && unitInfantry > 0)
@@ -273,6 +274,20 @@ namespace StateCraft.Data
         public int unitSubmarines = 1;
         public int unitPatrolBoats = 12;
 
+        [Header("Out of Service Units")]
+        public int oosRifles = 0;
+        public int oosTanks = 0;
+        public int oosAPCs = 0;
+        public int oosArtillery = 0;
+        public int oosFighters = 0;
+        public int oosBombers = 0;
+        public int oosAttackHelis = 0;
+        public int oosUAVs = 0;
+        public int oosFrigates = 0;
+        public int oosDestroyers = 0;
+        public int oosSubmarines = 0;
+        public int oosPatrolBoats = 0;
+
         [Header("Strategic Bases")]
         public int baseArmyCount = 5;
         public int baseNavyCount = 2;
@@ -316,6 +331,7 @@ namespace StateCraft.Data
         public List<ProcurementContract> activeContracts = new List<ProcurementContract>();
         public List<ResearchProject> researchProjects = new List<ResearchProject>();
         public List<DefenseFactory> defenseFactories = new List<DefenseFactory>();
+        public List<MilitaryBase> militaryBases = new List<MilitaryBase>();
 
         // War Stamina Tracking
         public string warEnemyName = "";      // Name of the country we are at war with
@@ -647,6 +663,61 @@ namespace StateCraft.Data
         public float monthlyCostB;      // Billions USD / month
         public float monthlyOutput;     // Units produced per month
         public float progressPct => monthsTotal > 0 ? ((monthsTotal - monthsRemaining) / (float)monthsTotal) * 100f : 0f;
+    }
+
+    [System.Serializable]
+    public class BaseCapability
+    {
+        public string name;
+        public int level;
+        public string icon;
+        public BaseCapability(string n, int l, string i) { name = n; level = l; icon = i; }
+    }
+
+    [System.Serializable]
+    public class AssignedUnit
+    {
+        public string unitName;
+        public int personnel;
+        public string icon;
+        public AssignedUnit(string n, int p, string i) { unitName = n; personnel = p; icon = i; }
+    }
+
+    [System.Serializable]
+    public class MilitaryBase
+    {
+        public string id;
+        public string baseName;
+        public string regionName;   // matches RegionDataSO.regionName (e.g. "Lagos", "Kano")
+        public string branch;       // ARMY, NAVY, AIR, JOINT
+        public string status;       // OPERATIONAL, UNDER CONSTRUCTION
+        public int capacity;
+        public int currentPersonnel;
+        public float upkeepCost;
+        public string role;
+        
+        public int establishedYear;
+        public int sizeHa;
+        public List<BaseCapability> capabilities;
+        public List<AssignedUnit> assignedUnits;
+        // NOTE: threatLevel is computed live from the linked RegionDataSO, not stored here
+        
+        public MilitaryBase(string id, string name, string regionName, string branch, int cap, string role)
+        {
+            this.id = id;
+            this.baseName = name;
+            this.regionName = regionName;
+            this.branch = branch;
+            this.status = "OPERATIONAL";
+            this.capacity = cap;
+            this.currentPersonnel = (int)(cap * 0.8f);
+            this.upkeepCost = cap * 0.005f;
+            this.role = role;
+            this.establishedYear = 2010 + UnityEngine.Random.Range(0, 10);
+            this.sizeHa = cap / 6;
+            this.capabilities = new List<BaseCapability>();
+            this.assignedUnits = new List<AssignedUnit>();
+        }
     }
 
     [System.Serializable]

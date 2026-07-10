@@ -1,5 +1,12 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/Styles/Global.uss" />
+    <Style>
+        .overview-bar .unity-progress-bar__background { background-color: rgba(0,0,0,0.6) !important; border-width: 0 !important; border-radius: 3px !important; }
+        .overview-bar-army .unity-progress-bar__progress { background-color: rgb(25, 127, 229) !important; border-radius: 3px !important; }
+        .overview-bar-navy .unity-progress-bar__progress { background-color: rgb(25, 127, 229) !important; border-radius: 3px !important; }
+        .overview-bar-af .unity-progress-bar__progress { background-color: rgb(186,104,200) !important; border-radius: 3px !important; }
+        .overview-bar-rdf .unity-progress-bar__progress { background-color: rgb(229, 153, 0) !important; border-radius: 3px !important; }
+    </Style>
             <ui:VisualElement name="PanelForces" style="display: flex; height: 100%;">
                 <ui:ScrollView style="flex-grow: 1; padding: 8px;">
 
@@ -28,33 +35,45 @@
 
                                     <!-- ARMY -->
                                     <ui:VisualElement name="ReadinessArmy" class="readiness-branch-card" style="flex-grow: 1; align-items: center; margin-right: 8px; justify-content: center;">
-                                        <ui:Label text="ARMY" style="font-size: 12px; color: rgb(140,140,140); letter-spacing: 1px; margin-bottom: 4px;" />
+                                        <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 4px;">
+                                            <ui:Label text="&#xf6de;" class="fa-icon" style="font-size: 12px; color: rgb(25, 127, 229); margin-right: 6px;" />
+                                            <ui:Label text="ARMY" style="font-size: 12px; color: rgb(140,140,140); letter-spacing: 1px;" />
+                                        </ui:VisualElement>
                                         <ui:Label name="ReadinessArmyPct" text="86%" style="font-size: 29px; color: white; -unity-font-style: bold; margin-bottom: 4px;" />
-                                        <ui:ProgressBar name="ReadinessArmyBar" value="86" style="width: 100%; height: 4px; margin-bottom: 4px;" />
+                                        <ui:ProgressBar name="ReadinessArmyBar" value="86" class="overview-bar overview-bar-army" style="width: 100%; height: 6px; margin-bottom: 4px;" />
                                         <ui:Label name="ReadinessArmyDelta" text="+3%" style="font-size: 12px; color: rgb(0,230,118);" />
                                     </ui:VisualElement>
 
                                     <!-- NAVY -->
                                     <ui:VisualElement name="ReadinessNavy" class="readiness-branch-card" style="flex-grow: 1; align-items: center; margin-right: 8px; justify-content: center;">
-                                        <ui:Label text="NAVY" style="font-size: 12px; color: rgb(140,140,140); letter-spacing: 1px; margin-bottom: 4px;" />
+                                        <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 4px;">
+                                            <ui:Label text="&#xf21a;" class="fa-icon" style="font-size: 12px; color: rgb(25, 127, 229); margin-right: 6px;" />
+                                            <ui:Label text="NAVY" style="font-size: 12px; color: rgb(140,140,140); letter-spacing: 1px;" />
+                                        </ui:VisualElement>
                                         <ui:Label name="ReadinessNavyPct" text="92%" style="font-size: 29px; color: white; -unity-font-style: bold; margin-bottom: 4px;" />
-                                        <ui:ProgressBar name="ReadinessNavyBar" value="92" style="width: 100%; height: 4px; margin-bottom: 4px;" />
+                                        <ui:ProgressBar name="ReadinessNavyBar" value="92" class="overview-bar overview-bar-navy" style="width: 100%; height: 6px; margin-bottom: 4px;" />
                                         <ui:Label name="ReadinessNavyDelta" text="+2%" style="font-size: 12px; color: rgb(0,230,118);" />
                                     </ui:VisualElement>
 
                                     <!-- AIR FORCE -->
                                     <ui:VisualElement name="ReadinessAF" class="readiness-branch-card" style="flex-grow: 1; align-items: center; margin-right: 8px; justify-content: center;">
-                                        <ui:Label text="AIR FORCE" style="font-size: 12px; color: rgb(140,140,140); letter-spacing: 1px; margin-bottom: 4px;" />
+                                        <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 4px;">
+                                            <ui:Label text="&#xf072;" class="fa-icon" style="font-size: 12px; color: rgb(186,104,200); margin-right: 6px;" />
+                                            <ui:Label text="AIR FORCE" style="font-size: 12px; color: rgb(140,140,140); letter-spacing: 1px;" />
+                                        </ui:VisualElement>
                                         <ui:Label name="ReadinessAFPct" text="65%" style="font-size: 29px; color: rgb(255, 180, 0); -unity-font-style: bold; margin-bottom: 4px;" />
-                                        <ui:ProgressBar name="ReadinessAFBar" value="65" style="width: 100%; height: 4px; margin-bottom: 4px;" />
+                                        <ui:ProgressBar name="ReadinessAFBar" value="65" class="overview-bar overview-bar-af" style="width: 100%; height: 6px; margin-bottom: 4px;" />
                                         <ui:Label name="ReadinessAFDelta" text="-2%" style="font-size: 12px; color: rgb(255,82,82);" />
                                     </ui:VisualElement>
 
                                     <!-- RAPID DEPLOYMENT -->
                                     <ui:VisualElement name="ReadinessRDF" class="readiness-branch-card" style="flex-grow: 1; align-items: center; justify-content: center;">
-                                        <ui:Label text="RAPID DEPLOYMENT" style="font-size: 12px; color: rgb(140,140,140); letter-spacing: 1px; margin-bottom: 4px;" />
+                                        <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 4px;">
+                                            <ui:Label text="&#xf0e7;" class="fa-icon" style="font-size: 12px; color: rgb(229, 153, 0); margin-right: 6px;" />
+                                            <ui:Label text="RAPID DEPLOYMENT" style="font-size: 12px; color: rgb(140,140,140); letter-spacing: 1px;" />
+                                        </ui:VisualElement>
                                         <ui:Label name="ReadinessRDFPct" text="88%" style="font-size: 29px; color: white; -unity-font-style: bold; margin-bottom: 4px;" />
-                                        <ui:ProgressBar name="ReadinessRDFBar" value="88" style="width: 100%; height: 4px; margin-bottom: 4px;" />
+                                        <ui:ProgressBar name="ReadinessRDFBar" value="88" class="overview-bar overview-bar-rdf" style="width: 100%; height: 6px; margin-bottom: 4px;" />
                                         <ui:Label name="ReadinessRDFDelta" text="+4%" style="font-size: 12px; color: rgb(0,230,118);" />
                                     </ui:VisualElement>
 

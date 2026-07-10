@@ -79,7 +79,7 @@
 
             <!-- OVERALL READINESS LEVEL card -->
             <ui:VisualElement class="sub-panel"
-                style="padding: 10px; margin-bottom: 8px; flex-direction: column;">
+                style="padding: 12px; margin-bottom: 8px; flex-direction: column;">
                 <ui:Label text="OVERALL READINESS LEVEL"
                     style="font-size: 10px; color: rgb(120,120,120); letter-spacing: 1px; margin-bottom: 8px;" />
 
@@ -98,7 +98,7 @@
             </ui:VisualElement>
 
             <!-- MAINTENANCE STATUS card -->
-            <ui:VisualElement class="sub-panel" style="padding: 10px; flex-direction: column;">
+            <ui:VisualElement class="sub-panel" style="padding: 12px; flex-direction: column;">
                 <ui:Label text="MAINTENANCE STATUS" style="font-size: 10px; color: rgb(120,120,120); letter-spacing: 1px; margin-bottom: 8px;" />
 
                 <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px;">
@@ -107,7 +107,7 @@
                     <ui:Label name="WArsMaintPct" text="82%" style="font-size: 18px; color: rgb(35, 237, 86); -unity-font-style: bold;" />
                 </ui:VisualElement>
 
-                <ui:Label text="Average readiness of all equipment" style="font-size: 10px; color: rgb(100,100,100); margin-bottom: 6px;" />
+                <ui:Label text="Average readiness of all equipment" style="font-size: 10px; color: rgb(100,100,100); margin-bottom: 6px; white-space: normal;" />
                 <ui:ProgressBar name="WArsMaintBar" value="82" style="height: 5px;" />
             </ui:VisualElement>
         </ui:VisualElement>

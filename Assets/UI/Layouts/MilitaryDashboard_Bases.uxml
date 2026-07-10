@@ -1,7 +1,7 @@
-﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/Styles/Global.uss" />
     
-    <ui:VisualElement name="PanelBases" style="display: none; height: 100%; flex-direction: column; padding: 12px; background-color: rgb(10, 14, 20);">
+    <ui:VisualElement name="PanelBases" style="display: none; height: 100%; flex-direction: column; padding: 16px; background-color: rgb(10, 14, 20);">
         
         <!-- HEADER ROW -->
         <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 12px;">
@@ -41,25 +41,37 @@
             </ui:VisualElement>
 
             <!-- Top Stats -->
-            <ui:VisualElement style="flex-direction: row; height: 36px;">
-                <ui:VisualElement style="flex-direction: column; justify-content: center; padding-left: 12px; padding-right: 12px; border-right-width: 1px; border-right-color: rgba(255,255,255,0.05); background-color: rgba(255,255,255,0.02);">
-                    <ui:Label text="TOTAL BASES" style="font-size: 11px; color: rgb(164, 176, 187);" />
-                    <ui:Label name="BasesStatTotal" text="12" style="font-size: 14px; color: white; -unity-font-style: bold;" />
-                </ui:VisualElement>
-                <ui:VisualElement style="flex-direction: column; justify-content: center; padding-left: 12px; padding-right: 12px; border-right-width: 1px; border-right-color: rgba(255,255,255,0.05); background-color: rgba(255,255,255,0.02);">
-                    <ui:Label text="TOTAL CAPACITY" style="font-size: 11px; color: rgb(164, 176, 187);" />
-                    <ui:Label name="BasesStatCapacity" text="38,000" style="font-size: 14px; color: white; -unity-font-style: bold;" />
-                </ui:VisualElement>
-                <ui:VisualElement style="flex-direction: column; justify-content: center; padding-left: 12px; padding-right: 12px; border-right-width: 1px; border-right-color: rgba(255,255,255,0.05); background-color: rgba(255,255,255,0.02);">
-                    <ui:Label text="OCCUPIED CAPACITY" style="font-size: 11px; color: rgb(164, 176, 187);" />
-                    <ui:VisualElement style="flex-direction: row; align-items: baseline;">
-                        <ui:Label name="BasesStatOccupied" text="24,780" style="font-size: 14px; color: white; -unity-font-style: bold; margin-right: 4px;" />
-                        <ui:Label text="(65%)" style="font-size: 12px; color: rgb(164, 176, 187);" />
+            <ui:VisualElement style="flex-direction: row; height: 52px; justify-content: flex-end; flex-grow: 1;">
+                <ui:VisualElement style="flex-direction: row; align-items: center; padding-left: 16px; padding-right: 16px; padding-top: 8px; padding-bottom: 8px; margin-left: 8px; border-radius: 4px; background-color: rgba(255,255,255,0.03); border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                    <ui:Label text="&#xf1ad;" class="fa-icon" style="font-size: 14px; color: rgb(36, 238, 87); margin-right: 8px;" />
+                    <ui:VisualElement style="flex-direction: column; justify-content: center;">
+                        <ui:Label name="BasesStatTotal" text="12" style="font-size: 14px; color: white; -unity-font-style: bold; margin-bottom: -2px;" />
+                        <ui:Label text="Total Bases" style="font-size: 9px; color: rgb(164, 176, 187);" />
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:VisualElement style="flex-direction: column; justify-content: center; padding-left: 12px; padding-right: 12px; background-color: rgba(255,255,255,0.02);">
-                    <ui:Label text="MONTHLY UPKEEP" style="font-size: 11px; color: rgb(164, 176, 187);" />
-                    <ui:Label name="BasesStatUpkeep" text="â‚¦12.4B" style="font-size: 14px; color: white; -unity-font-style: bold;" />
+                <ui:VisualElement style="flex-direction: row; align-items: center; padding-left: 16px; padding-right: 16px; padding-top: 8px; padding-bottom: 8px; margin-left: 8px; border-radius: 4px; background-color: rgba(255,255,255,0.03); border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                    <ui:Label text="&#xf0c0;" class="fa-icon" style="font-size: 14px; color: rgb(255, 179, 0); margin-right: 8px;" />
+                    <ui:VisualElement style="flex-direction: column; justify-content: center;">
+                        <ui:Label name="BasesStatCapacity" text="38,000" style="font-size: 14px; color: white; -unity-font-style: bold; margin-bottom: -2px;" />
+                        <ui:Label text="Total Capacity" style="font-size: 9px; color: rgb(164, 176, 187);" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; align-items: center; padding-left: 16px; padding-right: 16px; padding-top: 8px; padding-bottom: 8px; margin-left: 8px; border-radius: 4px; background-color: rgba(255,255,255,0.03); border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                    <ui:Label text="&#xf00c;" class="fa-icon" style="font-size: 14px; color: rgb(36, 238, 87); margin-right: 8px;" />
+                    <ui:VisualElement style="flex-direction: column; justify-content: center;">
+                        <ui:VisualElement style="flex-direction: row; align-items: baseline;">
+                            <ui:Label name="BasesStatOccupied" text="24,780" style="font-size: 14px; color: white; -unity-font-style: bold; margin-right: 4px; margin-bottom: -2px;" />
+                            <ui:Label text="(65%)" style="font-size: 10px; color: rgb(164, 176, 187);" />
+                        </ui:VisualElement>
+                        <ui:Label text="Occupied Capacity" style="font-size: 9px; color: rgb(164, 176, 187);" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; align-items: center; padding-left: 16px; padding-right: 16px; padding-top: 8px; padding-bottom: 8px; margin-left: 8px; border-radius: 4px; background-color: rgba(255,255,255,0.03); border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                    <ui:Label text="&#xf153;" class="fa-icon" style="font-size: 14px; color: rgb(255, 82, 82); margin-right: 8px;" />
+                    <ui:VisualElement style="flex-direction: column; justify-content: center;">
+                        <ui:Label name="BasesStatUpkeep" text="â‚¦12.4B" style="font-size: 14px; color: white; -unity-font-style: bold; margin-bottom: -2px;" />
+                        <ui:Label text="Monthly Upkeep" style="font-size: 9px; color: rgb(164, 176, 187);" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -71,129 +83,251 @@
             <ui:VisualElement style="width: 28%; margin-right: 12px; flex-direction: column;">
 
                 
-                <ui:ScrollView name="BasesListContainer" style="flex-grow: 1; margin-bottom: 8px;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" />
+                <ui:ScrollView name="BasesListContainer" style="flex-grow: 1; margin-bottom: 8px;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
                 
-                <ui:Button name="BtnConstructNewBase" text="+ CONSTRUCT NEW BASE" class="nav-button" style="height: 36px; font-size: 13px; border-width: 1px; border-color: rgba(255,255,255,0.1); border-radius: 4px;" />
+                <ui:Button name="BtnConstructNewBase" class="nav-button" style="flex-direction: row; justify-content: center; align-items: center; height: 44px; background-color: rgba(36, 238, 87, 0.15); border-width: 1px; border-color: rgb(36, 238, 87); border-radius: 4px;">
+                    <ui:Label text="&#xf067;" class="fa-icon" style="font-size: 16px; color: rgb(36, 238, 87); margin-right: 8px;" />
+                    <ui:Label text="CONSTRUCT NEW BASE" style="font-size: 13px; color: rgb(36, 238, 87); -unity-font-style: bold; letter-spacing: 1px;" />
+                </ui:Button>
             </ui:VisualElement>
 
-            <!-- MIDDLE COLUMN: Base Details -->
-            <ui:VisualElement name="BaseDetailsPanel" style="flex-grow: 1; flex-direction: column; margin-right: 12px;">
-                <!-- Header -->
-                <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; padding: 12px; background-color: rgba(255,255,255,0.02); border-radius: 4px; margin-bottom: 8px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                    <ui:Label name="DetailBaseName" text="LAGOS JOINT BASE" style="font-size: 16px; color: white; -unity-font-style: bold; letter-spacing: 1px;" />
-                    <ui:VisualElement style="flex-direction: row; align-items: center;">
-                        <ui:VisualElement style="width: 6px; height: 6px; border-radius: 3px; background-color: rgb(36, 238, 87); margin-right: 6px;" />
-                        <ui:Label name="DetailBaseStatus" text="OPERATIONAL" style="font-size: 13px; color: rgb(36, 238, 87);" />
-                    </ui:VisualElement>
+            <!-- MIDDLE COLUMN: Base Details and Empty State -->
+            <ui:VisualElement style="flex-grow: 1; flex-direction: column; margin-right: 12px;">
+                
+                <!-- EMPTY STATE -->
+                <ui:VisualElement name="BaseDetailsEmptyState" style="flex-grow: 1; justify-content: center; align-items: center; background-color: rgba(255,255,255,0.02); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05); display: none;">
+                    <ui:Label text="&#xf1ad;" class="fa-icon" style="font-size: 48px; color: rgba(255,255,255,0.2); margin-bottom: 16px;" />
+                    <ui:Label text="Select a base from the left" style="font-size: 16px; color: rgba(255,255,255,0.6); -unity-font-style: bold; margin-bottom: 4px;" />
+                    <ui:Label text="to view its facilities, capabilities and assigned units." style="font-size: 13px; color: rgba(255,255,255,0.4);" />
                 </ui:VisualElement>
 
-                <!-- Quick Stats -->
-                <ui:VisualElement style="flex-direction: row; justify-content: space-between; padding: 12px; background-color: rgba(255,255,255,0.02); border-radius: 4px; margin-bottom: 8px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                    <ui:VisualElement style="flex-direction: row; align-items: center;">
-                        <ui:Label text="&#xf133;" class="fa-icon" style="font-size: 16px; color: rgb(164, 176, 187); margin-right: 8px;" />
-                        <ui:VisualElement>
-                            <ui:Label text="Established" style="font-size: 11px; color: rgb(164, 176, 187);" />
-                            <ui:Label name="DetailBaseEstablished" text="2018" style="font-size: 14px; color: white; -unity-font-style: bold;" />
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement style="flex-direction: row; align-items: center;">
-                        <ui:Label text="&#xf1ad;" class="fa-icon" style="font-size: 16px; color: rgb(164, 176, 187); margin-right: 8px;" />
-                        <ui:VisualElement>
-                            <ui:Label text="Garrison Capacity" style="font-size: 11px; color: rgb(164, 176, 187);" />
-                            <ui:Label name="DetailBaseGarrison" text="3,000" style="font-size: 14px; color: white; -unity-font-style: bold;" />
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement style="flex-direction: row; align-items: center;">
-                        <ui:Label text="&#xf0c0;" class="fa-icon" style="font-size: 16px; color: rgb(164, 176, 187); margin-right: 8px;" />
-                        <ui:VisualElement>
-                            <ui:Label text="Current Personnel" style="font-size: 11px; color: rgb(164, 176, 187);" />
-                            <ui:Label name="DetailBasePersonnel" text="2,450 (82%)" style="font-size: 14px; color: rgb(255, 179, 0); -unity-font-style: bold;" />
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement style="flex-direction: row; align-items: center;">
-                        <ui:Label text="&#xf54b;" class="fa-icon" style="font-size: 16px; color: rgb(164, 176, 187); margin-right: 8px;" />
-                        <ui:VisualElement>
-                            <ui:Label text="Base Size" style="font-size: 11px; color: rgb(164, 176, 187);" />
-                            <ui:Label name="DetailBaseSize" text="520 ha" style="font-size: 14px; color: white; -unity-font-style: bold;" />
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement style="flex-direction: row; align-items: center;">
-                        <ui:Label text="&#xf132;" class="fa-icon" style="font-size: 16px; color: rgb(164, 176, 187); margin-right: 8px;" />
-                        <ui:VisualElement>
-                            <ui:Label text="Threat Level" style="font-size: 11px; color: rgb(164, 176, 187);" />
-                            <ui:Label name="DetailBaseThreat" text="LOW" style="font-size: 14px; color: rgb(36, 238, 87); -unity-font-style: bold;" />
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                </ui:VisualElement>
-
-
-
-                <!-- Overview Tab Content -->
-                <ui:ScrollView style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden">
+                <!-- BASE DETAILS PANEL -->
+                <ui:VisualElement name="BaseDetailsPanel" style="flex-grow: 1; flex-direction: column;">
                     
-                    <ui:VisualElement style="flex-direction: row; margin-bottom: 12px;">
-                        
-                        <!-- Base Info -->
-                        <ui:VisualElement style="width: 32%; background-color: rgba(255,255,255,0.015); border-radius: 4px; padding: 12px; margin-right: 8px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                            <ui:Label text="BASE INFORMATION" style="font-size: 12px; color: rgb(164, 176, 187); margin-bottom: 12px;" />
-                            <ui:VisualElement name="BaseInfoListContainer" style="flex-direction: column;" />
-                        </ui:VisualElement>
-                        
-                        <!-- Capabilities -->
-                        <ui:VisualElement style="width: 32%; background-color: rgba(255,255,255,0.015); border-radius: 4px; padding: 12px; margin-right: 8px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                            <ui:Label text="CAPABILITIES" style="font-size: 12px; color: rgb(164, 176, 187); margin-bottom: 12px;" />
-                            <ui:VisualElement name="BaseCapabilitiesContainer" style="flex-direction: column;" />
-                        </ui:VisualElement>
-                        
-                        <!-- Assigned Units -->
-                        <ui:VisualElement style="flex-grow: 1; background-color: rgba(255,255,255,0.015); border-radius: 4px; padding: 12px; border-width: 1px; border-color: rgba(255,255,255,0.05); justify-content: space-between;">
+                    <!-- Header Card -->
+                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; padding-left: 16px; padding-right: 16px; padding-top: 18px; padding-bottom: 18px; background-color: rgba(32,45,58,0.98); margin-bottom: 0; border-top-width: 2px; border-left-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-top-color: rgb(36,238,87); border-left-color: rgba(36,238,87,0.3); border-right-color: rgba(36,238,87,0.3); border-bottom-color: rgba(36,238,87,0.15); border-radius: 6px 6px 0 0;">
+                        <ui:VisualElement style="flex-direction: row; align-items: center;">
+                            <ui:Label name="DetailBaseIcon" text="&#xf1ad;" class="fa-icon" style="font-size: 22px; color: rgb(36,238,87); margin-right: 14px;" />
                             <ui:VisualElement>
-                                <ui:Label text="ASSIGNED UNITS" style="font-size: 12px; color: rgb(164, 176, 187); margin-bottom: 12px;" />
-                                <ui:VisualElement name="AssignedUnitsContainer" style="flex-direction: column; margin-bottom: 12px;" />
+                                <ui:Label name="DetailBaseName" text="LAGOS JOINT BASE" style="font-size: 18px; color: white; -unity-font-style: bold; letter-spacing: 1.5px; margin-bottom: 2px;" />
+                                <ui:Label name="DetailBaseLocation" text="Lagos State, Nigeria" style="font-size: 11px; color: rgb(164,176,187);" />
                             </ui:VisualElement>
-                            <ui:Button text="MANAGE ASSIGNMENTS" class="nav-button" style="height: 28px; font-size: 12px; background-color: rgba(255,255,255,0.05); border-width: 1px; border-color: rgba(255,255,255,0.1); border-radius: 2px;" />
                         </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row; align-items: center;">
+                            <ui:VisualElement style="flex-direction: row; align-items: center; background-color: rgba(36,238,87,0.12); padding-left: 14px; padding-right: 14px; padding-top: 6px; padding-bottom: 6px; border-radius: 20px; border-width: 1px; border-color: rgba(36,238,87,0.3); margin-right: 12px;">
+                                <ui:VisualElement style="width: 7px; height: 7px; border-radius: 4px; background-color: rgb(36,238,87); margin-right: 8px;" />
+                                <ui:Label name="DetailBaseStatus" text="OPERATIONAL" style="font-size: 12px; color: rgb(36,238,87); -unity-font-style: bold; letter-spacing: 0.5px;" />
+                            </ui:VisualElement>
+                            <ui:Button name="BtnDetailUpgrade" class="nav-button" style="flex-direction: row; align-items: center; background-color: rgba(255, 179, 0, 0.15); border-width: 1px; border-color: rgb(255, 179, 0); border-radius: 4px; padding-left: 12px; padding-right: 12px; height: 28px;">
+                                <ui:Label text="&#xf0aa;" class="fa-icon" style="font-size: 12px; color: rgb(255, 179, 0); margin-right: 6px;" />
+                                <ui:Label text="UPGRADE" style="font-size: 11px; color: rgb(255, 179, 0); -unity-font-style: bold; letter-spacing: 1px;" />
+                            </ui:Button>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- Quick Stats Bar -->
+                    <ui:VisualElement style="flex-direction: row; margin-bottom: 10px; border-bottom-width: 1px; border-left-width: 1px; border-right-width: 1px; border-bottom-color: rgba(255,255,255,0.1); border-left-color: rgba(255,255,255,0.1); border-right-color: rgba(255,255,255,0.1); border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; background-color: rgba(255,255,255,0.02); overflow: hidden;">
+                        <!-- Stat Cell -->
+                        <ui:VisualElement style="flex-grow: 1; flex-direction: column; align-items: center; padding-top: 10px; padding-bottom: 10px; border-right-width: 1px; border-right-color: rgba(255,255,255,0.07);">
+                            <ui:Label text="&#xf133;" class="fa-icon" style="font-size: 13px; color: rgb(164,176,187); margin-bottom: 4px;" />
+                            <ui:Label name="TitleBaseEstablished" text="Established" style="font-size: 9px; color: rgb(120,130,140); margin-bottom: 2px;" />
+                            <ui:Label name="DetailBaseEstablished" text="2018" style="font-size: 15px; color: white; -unity-font-style: bold;" />
+                        </ui:VisualElement>
+                        <!-- Stat Cell -->
+                        <ui:VisualElement style="flex-grow: 1; flex-direction: column; align-items: center; padding-top: 10px; padding-bottom: 10px; border-right-width: 1px; border-right-color: rgba(255,255,255,0.07);">
+                            <ui:Label text="&#xf1ad;" class="fa-icon" style="font-size: 13px; color: rgb(164,176,187); margin-bottom: 4px;" />
+                            <ui:Label name="TitleBaseGarrison" text="Garrison Capacity" style="font-size: 9px; color: rgb(120,130,140); margin-bottom: 2px;" />
+                            <ui:Label name="DetailBaseGarrison" text="3,000" style="font-size: 15px; color: white; -unity-font-style: bold;" />
+                        </ui:VisualElement>
+                        <!-- Stat Cell -->
+                        <ui:VisualElement style="flex-grow: 1; flex-direction: column; align-items: center; padding-top: 10px; padding-bottom: 10px; border-right-width: 1px; border-right-color: rgba(255,255,255,0.07);">
+                            <ui:Label text="&#xf0c0;" class="fa-icon" style="font-size: 13px; color: rgb(255,179,0); margin-bottom: 4px;" />
+                            <ui:Label name="TitleBasePersonnel" text="Current Personnel" style="font-size: 9px; color: rgb(120,130,140); margin-bottom: 2px;" />
+                            <ui:Label name="DetailBasePersonnel" text="2,450 (82%)" style="font-size: 15px; color: rgb(255,179,0); -unity-font-style: bold;" />
+                        </ui:VisualElement>
+                        <!-- Stat Cell -->
+                        <ui:VisualElement style="flex-grow: 1; flex-direction: column; align-items: center; padding-top: 10px; padding-bottom: 10px; border-right-width: 1px; border-right-color: rgba(255,255,255,0.07);">
+                            <ui:Label text="&#xf54b;" class="fa-icon" style="font-size: 13px; color: rgb(164,176,187); margin-bottom: 4px;" />
+                            <ui:Label name="TitleBaseSize" text="Base Size" style="font-size: 9px; color: rgb(120,130,140); margin-bottom: 2px;" />
+                            <ui:Label name="DetailBaseSize" text="520 ha" style="font-size: 15px; color: white; -unity-font-style: bold;" />
+                        </ui:VisualElement>
+                        <!-- Stat Cell -->
+                        <ui:VisualElement style="flex-grow: 1; flex-direction: column; align-items: center; padding-top: 10px; padding-bottom: 10px;">
+                            <ui:Label text="&#xf132;" class="fa-icon" style="font-size: 13px; color: rgb(36,238,87); margin-bottom: 4px;" />
+                            <ui:Label name="TitleBaseThreat" text="Threat Level" style="font-size: 9px; color: rgb(120,130,140); margin-bottom: 2px;" />
+                            <ui:Label name="DetailBaseThreat" text="LOW" style="font-size: 15px; color: rgb(36,238,87); -unity-font-style: bold;" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- Overview Tab Content -->
+                    <ui:ScrollView style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto">
                         
-                    </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row; margin-bottom: 10px; min-height: 0;">
+                            
+                            <!-- Base Info (narrower - text labels) -->
+                            <ui:VisualElement style="width: 30%; background-color: rgba(255,255,255,0.015); border-radius: 4px; padding: 12px; margin-right: 8px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                                <ui:Label text="BASE INFORMATION" style="font-size: 10px; color: rgb(100,110,120); letter-spacing: 1px; margin-bottom: 10px;" />
+                                <ui:VisualElement name="BaseInfoListContainer" style="flex-direction: column;" />
+                            </ui:VisualElement>
+                            
+                            <!-- Capabilities (wider - has progress bars) -->
+                            <ui:VisualElement style="width: 35%; background-color: rgba(255,255,255,0.015); border-radius: 4px; padding: 12px; margin-right: 8px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                                <ui:Label text="CAPABILITIES" style="font-size: 10px; color: rgb(100,110,120); letter-spacing: 1px; margin-bottom: 10px;" />
+                                <ui:VisualElement name="BaseCapabilitiesContainer" style="flex-direction: column;" />
+                            </ui:VisualElement>
+                            
+                            <!-- Assigned Units -->
+                            <ui:VisualElement style="flex-grow: 1; background-color: rgba(255,255,255,0.015); border-radius: 4px; padding: 12px; border-width: 1px; border-color: rgba(255,255,255,0.05); justify-content: space-between;">
+                                <ui:VisualElement>
+                                    <ui:Label text="ASSIGNED UNITS" style="font-size: 10px; color: rgb(100,110,120); letter-spacing: 1px; margin-bottom: 10px;" />
+                                    <ui:VisualElement name="AssignedUnitsContainer" style="flex-direction: column; margin-bottom: 12px;" />
+                                </ui:VisualElement>
+                                <ui:Button text="MANAGE ASSIGNMENTS" class="nav-button" style="height: 28px; font-size: 11px; background-color: rgba(255,255,255,0.05); border-width: 1px; border-color: rgba(255,255,255,0.1); border-radius: 3px; letter-spacing: 0.5px;" />
+                            </ui:VisualElement>
+                            
+                        </ui:VisualElement>
 
-                    <!-- Base Activity -->
-                    <ui:VisualElement style="background-color: rgba(255,255,255,0.015); border-radius: 4px; padding: 12px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:Label text="BASE ACTIVITY (Last 7 Days)" style="font-size: 12px; color: rgb(164, 176, 187); margin-bottom: 12px;" />
-                        <ui:VisualElement name="BaseActivityContainer" style="flex-direction: row; justify-content: space-around;" />
-                    </ui:VisualElement>
+                        <!-- Base Activity -->
+                        <ui:VisualElement style="background-color: rgba(255,255,255,0.015); border-radius: 4px; padding: 12px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                            <ui:Label text="BASE ACTIVITY (Last 7 Days)" style="font-size: 10px; color: rgb(100,110,120); letter-spacing: 1px; margin-bottom: 12px;" />
+                            <ui:VisualElement name="BaseActivityContainer" style="flex-direction: row; justify-content: space-around;" />
+                        </ui:VisualElement>
 
-                </ui:ScrollView>
+                    </ui:ScrollView>
+                </ui:VisualElement>
             </ui:VisualElement>
 
             <!-- RIGHT COLUMN: Queues & Stats -->
-            <ui:VisualElement style="width: 22%; flex-direction: column;">
+            <ui:ScrollView style="width: 22%;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto">
                 
                 <!-- Overview Stats -->
-                <ui:VisualElement style="margin-bottom: 12px; padding: 12px; background-color: rgba(255,255,255,0.02); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                    <ui:Label text="BASES OVERVIEW" style="font-size: 13px; color: rgb(36, 238, 87); margin-bottom: 12px;" />
+                <ui:VisualElement style="margin-bottom: 12px; padding: 16px; background-color: rgba(255,255,255,0.02); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                    <ui:Label text="BASES OVERVIEW" style="font-size: 11px; color: rgb(36, 238, 87); letter-spacing: 1px; margin-bottom: 14px;" />
                     <ui:VisualElement name="GlobalBasesOverviewContainer" style="flex-direction: column;" />
                 </ui:VisualElement>
 
                 <!-- Construction Queue -->
-                <ui:VisualElement style="flex-grow: 1; margin-bottom: 12px; padding: 12px; background-color: rgba(255,255,255,0.02); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <ui:Label text="CONSTRUCTION QUEUE" style="font-size: 13px; color: rgb(36, 238, 87);" />
-                        <ui:Label text="View All" style="font-size: 12px; color: rgb(36, 238, 87); cursor: link;" />
+                <ui:VisualElement style="margin-bottom: 12px; padding: 16px; background-color: rgba(255,255,255,0.02); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                        <ui:Label text="CONSTRUCTION QUEUE" style="font-size: 11px; color: rgb(36, 238, 87); letter-spacing: 1px;" />
+                        <ui:Label text="View All" style="font-size: 11px; color: rgb(36, 238, 87); cursor: link;" />
                     </ui:VisualElement>
-                    <ui:ScrollView name="ConstructionQueueContainer" style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" />
+                    <ui:ScrollView name="ConstructionQueueContainer" style="max-height: 120px;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
                 </ui:VisualElement>
 
                 <!-- Upgrade Queue -->
-                <ui:VisualElement style="flex-grow: 1; padding: 12px; background-color: rgba(255,255,255,0.02); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <ui:Label text="UPGRADE QUEUE" style="font-size: 13px; color: rgb(36, 238, 87);" />
-                        <ui:Label text="View All" style="font-size: 12px; color: rgb(36, 238, 87); cursor: link;" />
+                <ui:VisualElement style="margin-bottom: 12px; padding: 16px; background-color: rgba(255,255,255,0.02); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                        <ui:Label text="UPGRADE QUEUE" style="font-size: 11px; color: rgb(36, 238, 87); letter-spacing: 1px;" />
+                        <ui:Label text="View All" style="font-size: 11px; color: rgb(36, 238, 87); cursor: link;" />
                     </ui:VisualElement>
-                    <ui:ScrollView name="UpgradeQueueContainer" style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" />
+                    <ui:ScrollView name="UpgradeQueueContainer" style="max-height: 120px;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
                 </ui:VisualElement>
 
+
+
+            </ui:ScrollView>
+        </ui:VisualElement>
+    <!-- Construct Modal Overlay -->
+    <ui:VisualElement name="ConstructModalOverlay" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100;">
+        <ui:VisualElement style="width: 700px; background-color: rgb(15, 20, 25); border-radius: 8px; border-width: 1px; border-color: rgba(255,255,255,0.1); padding: 24px;">
+            <!-- Header -->
+            <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom-width: 1px; border-bottom-color: rgba(255,255,255,0.1); padding-bottom: 12px;">
+                <ui:Label text="CONSTRUCT MILITARY FACILITY" style="font-size: 14px; color: rgb(36, 238, 87); -unity-font-style: bold; letter-spacing: 1px;" />
+                <ui:Button name="BtnCloseConstructModal" text="&#xf00d;" class="fa-icon" style="background-color: transparent; border-width: 0; color: grey; font-size: 16px; cursor: link;" />
+            </ui:VisualElement>
+            
+            <!-- Facility Type -->
+            <ui:Label text="FACILITY TYPE" style="font-size: 10px; color: grey; margin-bottom: 8px;" />
+            <ui:VisualElement style="flex-direction: row; margin-bottom: 20px;">
+                <ui:Button name="BtnTypeBase" text="Military Base" style="flex-grow: 1; height: 36px; background-color: rgba(36, 238, 87, 0.2); border-color: rgb(36, 238, 87); border-width: 1px; color: white; -unity-font-style: bold; margin-right: 4px; border-radius: 4px;" />
+                <ui:Button name="BtnTypeFactory" text="Defense Factory" style="flex-grow: 1; height: 36px; background-color: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); border-width: 1px; color: grey; margin-left: 4px; margin-right: 4px; border-radius: 4px;" />
+                <ui:Button name="BtnTypeTraining" text="Training Academy" style="flex-grow: 1; height: 36px; background-color: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); border-width: 1px; color: grey; margin-left: 4px; border-radius: 4px;" />
+            </ui:VisualElement>
+
+            <!-- Region -->
+            <ui:Label text="TARGET REGION" style="font-size: 10px; color: grey; margin-bottom: 8px;" />
+            <ui:VisualElement style="background-color: rgba(0,0,0,0.5); border-width: 1px; border-color: rgba(255,255,255,0.1); border-radius: 4px; padding: 4px; margin-bottom: 20px;">
+                <ui:DropdownField name="DropdownConstructRegion" style="color: black;" />
+            </ui:VisualElement>
+
+            <!-- Branch Assignment -->
+            <ui:Label name="LabelConstructBranch" text="BRANCH ASSIGNMENT" style="font-size: 10px; color: grey; margin-bottom: 8px;" />
+            <ui:VisualElement style="background-color: rgba(0,0,0,0.5); border-width: 1px; border-color: rgba(255,255,255,0.1); border-radius: 4px; padding: 4px; margin-bottom: 20px;">
+                <ui:DropdownField name="DropdownConstructBranch" style="color: black;" />
+            </ui:VisualElement>
+
+            <!-- Specialization -->
+            <ui:VisualElement name="ContainerConstructSpecialization" style="display: none;">
+                <ui:Label name="LabelConstructSpecialization" text="FACILITY SPECIALIZATION" style="font-size: 10px; color: grey; margin-bottom: 8px;" />
+                <ui:VisualElement style="background-color: rgba(0,0,0,0.5); border-width: 1px; border-color: rgba(255,255,255,0.1); border-radius: 4px; padding: 4px; margin-bottom: 20px;">
+                    <ui:DropdownField name="DropdownConstructSpecialization" style="color: black;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Base Name Input -->
+            <ui:Label text="FACILITY DESIGNATION" style="font-size: 10px; color: grey; margin-bottom: 8px;" />
+            <ui:TextField name="InputConstructName" value="New Forward Base" style="background-color: rgba(0,0,0,0.5); border-width: 1px; border-color: rgba(255,255,255,0.1); border-radius: 4px; color: white; margin-bottom: 20px;" />
+
+            <!-- Construction Details -->
+            <ui:VisualElement style="flex-direction: row; justify-content: space-between; background-color: rgba(255,255,255,0.02); border-width: 1px; border-color: rgba(255,255,255,0.05); border-radius: 4px; padding: 12px; margin-bottom: 30px;">
+                <ui:VisualElement style="flex-direction: column; align-items: center; flex-grow: 1;">
+                    <ui:Label text="CONSTRUCTION COST" style="font-size: 9px; color: grey; margin-bottom: 4px;" />
+                    <ui:Label name="LabelConstructCost" text="₦50.0B" style="font-size: 14px; color: white; -unity-font-style: bold;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="width: 1px; background-color: rgba(255,255,255,0.1); margin-left: 10px; margin-right: 10px;" />
+                <ui:VisualElement style="flex-direction: column; align-items: center; flex-grow: 1;">
+                    <ui:Label name="LabelConstructCapacityTitle" text="EXPECTED CAPACITY" style="font-size: 9px; color: grey; margin-bottom: 4px;" />
+                    <ui:Label name="LabelConstructCapacity" text="+1,000" style="font-size: 14px; color: rgb(36, 238, 87); -unity-font-style: bold;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="width: 1px; background-color: rgba(255,255,255,0.1); margin-left: 10px; margin-right: 10px;" />
+                <ui:VisualElement style="flex-direction: column; align-items: center; flex-grow: 1;">
+                    <ui:Label text="EST. BUILD TIME" style="font-size: 9px; color: grey; margin-bottom: 4px;" />
+                    <ui:Label name="LabelConstructTime" text="~180 Days" style="font-size: 14px; color: white; -unity-font-style: bold;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Footer Buttons -->
+            <ui:VisualElement style="flex-direction: row; justify-content: flex-end;">
+                <ui:Button name="BtnCancelConstruct" text="CANCEL" style="width: 100px; height: 36px; background-color: transparent; border-width: 1px; border-color: grey; color: grey; margin-right: 12px; border-radius: 4px;" />
+                <ui:Button name="BtnConfirmConstruct" text="🔨 COMMENCE CONSTRUCTION" style="height: 36px; padding-left: 16px; padding-right: 16px; background-color: rgb(0, 255, 100); border-width: 0; color: black; -unity-font-style: bold; border-radius: 4px;" />
             </ui:VisualElement>
         </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Upgrade Modal Overlay -->
+    <ui:VisualElement name="UpgradeModalOverlay" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100;">
+        <ui:VisualElement style="width: 500px; background-color: rgb(15, 20, 25); border-radius: 8px; border-width: 1px; border-color: rgba(255,255,255,0.1); padding: 24px;">
+            <!-- Header -->
+            <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom-width: 1px; border-bottom-color: rgba(255,255,255,0.1); padding-bottom: 12px;">
+                <ui:Label name="LabelUpgradeTitle" text="UPGRADE FACILITY" style="font-size: 14px; color: rgb(0, 210, 255); -unity-font-style: bold; letter-spacing: 1px;" />
+                <ui:Button name="BtnCloseUpgradeModal" text="&#xf00d;" class="fa-icon" style="background-color: transparent; border-width: 0; color: grey; font-size: 16px; cursor: link;" />
+            </ui:VisualElement>
+            
+            <ui:Label name="LabelUpgradeName" text="Tank Factory" style="font-size: 16px; color: white; -unity-font-style: bold; margin-bottom: 8px;" />
+            <ui:Label name="LabelUpgradeDesc" text="Upgrading this facility will increase its production output." style="font-size: 12px; color: grey; margin-bottom: 20px; white-space: normal;" />
+            
+            <!-- Upgrade Details -->
+            <ui:VisualElement style="flex-direction: row; justify-content: space-between; background-color: rgba(255,255,255,0.02); border-width: 1px; border-color: rgba(255,255,255,0.05); border-radius: 4px; padding: 12px; margin-bottom: 30px;">
+                <ui:VisualElement style="flex-direction: column; align-items: center; flex-grow: 1;">
+                    <ui:Label text="UPGRADE COST" style="font-size: 9px; color: grey; margin-bottom: 4px;" />
+                    <ui:Label name="LabelUpgradeCost" text="₦35.0B" style="font-size: 14px; color: white; -unity-font-style: bold;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="width: 1px; background-color: rgba(255,255,255,0.1); margin-left: 10px; margin-right: 10px;" />
+                <ui:VisualElement style="flex-direction: column; align-items: center; flex-grow: 1;">
+                    <ui:Label name="LabelUpgradeBenefitTitle" text="NEW CAPACITY" style="font-size: 9px; color: grey; margin-bottom: 4px;" />
+                    <ui:Label name="LabelUpgradeBenefit" text="Level 2" style="font-size: 14px; color: rgb(0, 210, 255); -unity-font-style: bold;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Footer Buttons -->
+            <ui:VisualElement style="flex-direction: row; justify-content: flex-end;">
+                <ui:Button name="BtnCancelUpgrade" text="CANCEL" style="width: 100px; height: 36px; background-color: transparent; border-width: 1px; border-color: grey; color: grey; margin-right: 12px; border-radius: 4px;" />
+                <ui:Button name="BtnConfirmUpgrade" text="AUTHORIZE UPGRADE" style="height: 36px; padding-left: 16px; padding-right: 16px; background-color: rgb(0, 210, 255); border-width: 0; color: black; -unity-font-style: bold; border-radius: 4px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
 
     </ui:VisualElement>
+
 </ui:UXML>

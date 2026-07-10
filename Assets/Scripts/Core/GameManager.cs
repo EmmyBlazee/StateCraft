@@ -210,6 +210,12 @@ foreach (var country in allCountries)
                 // 0. New Military System Tick
                 StateCraft.Systems.MilitaryManager.Instance?.ProcessMonthlyTick(country);
 
+                // 0.1 Dynamic Procurement Market (Refreshes every 3 months)
+                if (TurnSystem != null && TurnSystem.CurrentTurn % 3 == 0)
+                {
+                    StateCraft.Systems.ProcurementMarketSystem.RefreshMarket(country);
+                }
+
                 // 1. Core Economic Update (monthly — GDP growth, income, spending)
                 EconomySystem?.UpdateEconomy(country);
 
@@ -435,6 +441,7 @@ foreach (var country in allCountries)
                     if (country == playerCountry)
                     {
                         UI.NotificationManager.Instance?.AddNotification($"PRODUCTION COMPLETE: {order.quantity:N0} {order.unitLabel} delivered to Arsenal!", UnityEngine.Color.green);
+                        UnityEngine.Debug.LogWarning($"[Arsenal Math - Production] Added {order.quantity:N0} {order.unitLabel} to Arsenal.");
                     }
                     if (NewsSystem != null)
                     {
@@ -487,6 +494,7 @@ foreach (var country in allCountries)
                     if (country == playerCountry)
                     {
                         UI.NotificationManager.Instance?.AddNotification($"PROCUREMENT DELIVERED: {contract.unitLabel} from {contract.supplier} has arrived!", UnityEngine.Color.green);
+                        UnityEngine.Debug.LogWarning($"[Arsenal Math - Procurement] Added {contract.unitQuantity:N0} {contract.unitLabel} to Arsenal from {contract.supplier}.");
                     }
                     if (NewsSystem != null)
                     {

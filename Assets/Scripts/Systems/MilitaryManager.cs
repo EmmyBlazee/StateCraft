@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using StateCraft.Data;
+using StateCraft.UI;
 
 namespace StateCraft.Systems
 {
@@ -29,6 +30,7 @@ namespace StateCraft.Systems
             if (config == null) return; // Wait until config is hooked up
 
             TickRecruitment(country);
+            ProcessWeaponDegradation(country);
             RecalculateReadiness(country);
 
             float fleetR = NavyCalculator.FleetReadiness(
@@ -216,6 +218,19 @@ namespace StateCraft.Systems
                 OnBattleReport?.Invoke(report);
             }
 
+            // Combat Decay: 5% of involved units go Out of Service, 10% if op failed
+            float combatDecay = success ? 0.05f : 0.10f;
+            if (op.usedRDF)
+            {
+                int brokenRifles = Mathf.FloorToInt(country.unitRifles * combatDecay * 0.1f); // just a fraction
+                if (brokenRifles > 0)
+                {
+                    country.unitRifles -= brokenRifles;
+                    country.oosRifles += brokenRifles;
+                    NotificationManager.Instance?.AddNotification($"Combat Wear: {brokenRifles} rifles went Out of Service during {op.operationName}.", Color.yellow);
+                }
+            }
+
             OnOperationComplete?.Invoke(op.operationName);
         }
 
@@ -245,6 +260,57 @@ namespace StateCraft.Systems
             float annualCost = GetMonthlyCost(type) * 12f * count;
             float annualIncome = country.income * 1_000_000_000f;
             return annualCost < annualIncome * 0.02f;
+        }
+
+        private void ProcessWeaponDegradation(CountryDataSO country)
+        {
+            // Base wear and tear
+            float baseDecayRate = 0.015f; 
+            
+            // Repair offsets wear and tear. Max budget (100%) = 10% repair per month
+            float repairRate = (country.militaryBudgetPercent / 100f) * 0.10f; 
+            
+            int totalRepaired = 0;
+            int totalBroken = 0;
+
+            void DegradeAndRepair(ref int active, ref int oos)
+            {
+                int broken = Mathf.FloorToInt(active * baseDecayRate);
+                if (broken > 0)
+                {
+                    active -= broken;
+                    oos += broken;
+                    totalBroken += broken;
+                }
+
+                int repaired = Mathf.FloorToInt(oos * repairRate);
+                if (repaired > 0 && oos > 0)
+                {
+                    int actualRepair = Mathf.Min(oos, repaired);
+                    oos -= actualRepair;
+                    active += actualRepair;
+                    totalRepaired += actualRepair;
+                }
+            }
+
+            DegradeAndRepair(ref country.unitRifles, ref country.oosRifles);
+            DegradeAndRepair(ref country.unitAPCs, ref country.oosAPCs);
+            DegradeAndRepair(ref country.unitTanks, ref country.oosTanks);
+            DegradeAndRepair(ref country.unitArtillery, ref country.oosArtillery);
+            DegradeAndRepair(ref country.unitFighters, ref country.oosFighters);
+            DegradeAndRepair(ref country.unitBombers, ref country.oosBombers);
+            DegradeAndRepair(ref country.unitAttackHelis, ref country.oosAttackHelis);
+            DegradeAndRepair(ref country.unitUAVs, ref country.oosUAVs);
+            DegradeAndRepair(ref country.unitFrigates, ref country.oosFrigates);
+            DegradeAndRepair(ref country.unitDestroyers, ref country.oosDestroyers);
+            DegradeAndRepair(ref country.unitSubmarines, ref country.oosSubmarines);
+            DegradeAndRepair(ref country.unitPatrolBoats, ref country.oosPatrolBoats);
+
+            if (totalBroken > 1000 && UnityEngine.Random.value < 0.2f)
+                NotificationManager.Instance?.AddNotification($"Wear & Tear: {totalBroken} weapons became unserviceable this month.", Color.yellow);
+                
+            if (totalRepaired > 500 && UnityEngine.Random.value < 0.2f)
+                NotificationManager.Instance?.AddNotification($"Maintenance: Engineering corps repaired {totalRepaired} weapons.", new Color(0f, 210/255f, 130/255f));
         }
     }
 }
