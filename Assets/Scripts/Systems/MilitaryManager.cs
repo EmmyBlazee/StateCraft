@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using StateCraft.Data;
 using StateCraft.UI;
+using StateCraft.Core;
 
 namespace StateCraft.Systems
 {
@@ -43,8 +44,42 @@ namespace StateCraft.Systems
                     country.invOilBarrels * mil.navalMissions.offshoreRevenueBonus);
 
             ProcessOperationTicks(country);
+            ProcessProactiveOperations(country);
+            ProcessSupplyContracts(country);
 
             if (country.rdfCooldownMonths > 0) country.rdfCooldownMonths--;
+        }
+
+        private void ProcessSupplyContracts(CountryDataSO country)
+        {
+            if (country.activeSupplyContracts == null || country.activeSupplyContracts.Count == 0) return;
+
+            var done = new List<StateCraft.Data.SupplyContract>();
+
+            foreach (var sc in country.activeSupplyContracts)
+            {
+                // Resources supplied per turn
+                switch (sc.resourceType)
+                {
+                    case "FUEL": country.reserveFuel = Mathf.Min(100f, country.reserveFuel + sc.amountPerTurn); break;
+                    case "AMMO": country.reserveAmmo = Mathf.Min(100f, country.reserveAmmo + sc.amountPerTurn); break;
+                    case "MEDICAL": country.reserveMedical = Mathf.Min(100f, country.reserveMedical + sc.amountPerTurn); break;
+                    case "FOOD": country.reserveFood = Mathf.Min(100f, country.reserveFood + sc.amountPerTurn); break;
+                }
+
+                sc.turnsRemaining--;
+
+                if (sc.turnsRemaining <= 0)
+                {
+                    done.Add(sc);
+                }
+            }
+
+            foreach (var sc in done)
+            {
+                country.activeSupplyContracts.Remove(sc);
+                NotificationManager.Instance?.AddNotification($"Supply Contract Completed: {sc.label} has expired.", Color.yellow);
+            }
         }
 
         public void RecruitPersonnel(CountryDataSO country, string type, int count)
@@ -199,6 +234,422 @@ namespace StateCraft.Systems
             {
                 ResolveOperation(country, op, turn);
                 country.militaryState.activeOperations.Remove(op);
+            }
+        }
+
+        public void ProcessProactiveOperations(CountryDataSO country)
+        {
+            if (country.activeOperations == null || country.activeOperations.Count == 0) return;
+
+            string dateStr = GameManager.Instance?.TurnSystem != null ? GameManager.Instance.TurnSystem.CurrentDate : "Unknown";
+            bool isPlayer = country == GameManager.Instance?.playerCountry;
+
+            foreach (var op in country.activeOperations)
+            {
+                if (string.IsNullOrEmpty(op.commander))
+                    op.commander = "Unassigned";
+            }
+
+            for (int i = country.activeOperations.Count - 1; i >= 0; i--)
+            {
+                var op = country.activeOperations[i];
+
+                if (op.turnsToDeploy > 0)
+                {
+                    op.turnsToDeploy--;
+                    UnityEngine.Debug.Log($"[DEPLOYMENT TIMER TICK] {op.opName} ({op.regionName}): {op.turnsToDeploy} month(s) remaining until full combat readiness.");
+
+                    if (isPlayer)
+                    {
+                        NotificationManager.Instance?.AddNotification($"DEPLOYMENT TRANSIT [{op.opName.ToUpper()}]: {op.turnsToDeploy} month(s) remaining.", Color.cyan);
+                        StateCraft.Systems.NewsSystem.Instance?.PublishNews($"OPERATIONAL TRANSIT: {country.countryName} forces en route to {op.regionName}. Deployment ETA: {op.turnsToDeploy} month(s).", false);
+                    }
+
+                    if (op.turnsToDeploy == 0)
+                    {
+                        op.phase = "Advancing";
+                        op.status = "Active";
+                        UnityEngine.Debug.Log($"[DEPLOYMENT COMPLETE] {op.opName} in {op.regionName}: All units reached forward positions! Status set to ACTIVE.");
+                        if (isPlayer)
+                        {
+                            NotificationManager.Instance?.AddNotification($"DEPLOYMENT COMPLETE: {op.opName} in {op.regionName} is now ACTIVE!", new Color(0.14f, 0.93f, 0.34f));
+                            StateCraft.Systems.NewsSystem.Instance?.PublishNews($"DEPLOYMENT COMPLETE: {country.countryName} forces have fully arrived in {op.regionName}. Operation {op.opName} is now in the ADVANCING phase.", true);
+                            InboxSystem.Instance?.SendMessage(country, "FIELD COMMAND",
+                                $"DEPLOYMENT COMPLETE: {op.opName}",
+                                $"{op.commander} reports all units have reached their forward positions in {op.regionName}. Operation is now in the Advancing phase.",
+                                "Important");
+                        }
+                    }
+                    continue;
+                }
+
+                op.turnsActive++;
+
+                if (op.cooldownAirstrike > 0) op.cooldownAirstrike--;
+                if (op.cooldownRecon > 0) op.cooldownRecon--;
+                if (op.cooldownIntel > 0) op.cooldownIntel--;
+
+                string prevPhase = op.phase;
+
+                if (op.turnsActive == 2 && op.phase == "Advancing")
+                {
+                    op.phase = "Engaged";
+                    op.enemyStrengthEst = Mathf.Clamp(op.enemyStrengthEst + UnityEngine.Random.Range(-10f, 15f), 10f, 100f);
+                }
+
+                if (op.phase == "Engaged" || op.phase == "Securing")
+                {
+                    float enemyPressure = op.enemyStrengthEst / 100f;
+                    var contrList = op.GetContributionsMigrated();
+
+                    foreach (var c in contrList)
+                    {
+                        float monthlyAttrition = c.personnelAssigned * UnityEngine.Random.Range(0.005f, 0.02f) * (1f + enemyPressure);
+                        int troopLoss = Mathf.RoundToInt(monthlyAttrition);
+                        if (c.personnelAssigned > 10)
+                        {
+                            troopLoss = Mathf.Min(troopLoss, c.personnelAssigned - 10);
+                        }
+                        else
+                        {
+                            troopLoss = 0;
+                        }
+
+                        if (troopLoss > 0)
+                        {
+                            c.personnelAssigned -= troopLoss;
+                            op.attritionTroops += troopLoss;
+                            op.casualtiesSustained += troopLoss;
+                            c.casualtiesSuffered += troopLoss;
+
+                            int enemyLoss = Mathf.RoundToInt(troopLoss * UnityEngine.Random.Range(1.2f, 2.8f));
+                            op.enemyCasualtiesInflicted += enemyLoss;
+                        }
+
+                        var dict = c.GetUnitCountsDict();
+                        var keys = new List<string>(dict.Keys);
+                        List<string> equipLostNames = new List<string>();
+
+                        foreach (var key in keys)
+                        {
+                            int count = dict[key];
+                            if (count > 0)
+                            {
+                                float wearChance = key == "Tanks" ? 0.3f : (key == "APCs" ? 0.2f : 0.15f);
+                                if (UnityEngine.Random.value < wearChance)
+                                {
+                                    c.SetUnitCount(key, count - 1);
+                                    op.attritionEquipment++;
+                                    c.equipmentLost++;
+                                    equipLostNames.Add($"1 {key}");
+
+                                    if (key == "Tanks") country.oosTanks++;
+                                    else if (key == "APCs") country.oosAPCs++;
+                                    else if (key == "Fighters") country.oosFighters++;
+                                    else if (key == "Bombers") country.oosBombers++;
+                                    else if (key == "Helis") country.oosAttackHelis++;
+                                    else if (key == "UAVs") country.oosUAVs++;
+                                    else if (key == "Frigates") country.oosFrigates++;
+                                    else if (key == "Submarines") country.oosSubmarines++;
+                                    else if (key == "Destroyers") country.oosDestroyers++;
+                                    else if (key == "PatrolBoats") country.oosPatrolBoats++;
+                                    else if (key == "Artillery") country.oosArtillery++;
+                                    else if (key == "Rifles") country.oosRifles++;
+                                }
+                            }
+                        }
+
+                        if (troopLoss > 0 || equipLostNames.Count > 0)
+                        {
+                            string myEqStr = equipLostNames.Count > 0 ? $", {string.Join(", ", equipLostNames)} Lost" : "";
+                            NewsSystem.Instance?.PublishNews(
+                                $"WAR CASUALTY REPORT [{op.opName.ToUpper()} - {op.regionName.ToUpper()}]: " +
+                                $"{country.countryName}: {troopLoss:N0} Personnel KIA{myEqStr} | Hostile Forces: {op.enemyCasualtiesInflicted:N0} Total Enemy KIA.", true);
+                        }
+                    }
+
+                    op.SyncFlatFields();
+
+                    int originalTroops = op.deployedTroops + op.attritionTroops;
+                    op.effectiveTroopStrength = originalTroops > 0
+                        ? Mathf.Clamp((float)op.deployedTroops / originalTroops * 100f, 0f, 100f)
+                        : 0f;
+
+                    if (op.effectiveTroopStrength < 60f && !op.needsReinforcement)
+                    {
+                        op.needsReinforcement = true;
+                        op.needsReinforcementBranches.Clear();
+                        foreach (var c in contrList)
+                        {
+                            if (c.casualtiesSuffered > 0 && !op.needsReinforcementBranches.Contains(c.branch))
+                            {
+                                op.needsReinforcementBranches.Add(c.branch);
+                            }
+                        }
+                        if (op.needsReinforcementBranches.Count == 0)
+                        {
+                            foreach (var c in contrList)
+                            {
+                                op.needsReinforcementBranches.Add(c.branch);
+                            }
+                        }
+
+                        if (isPlayer)
+                        {
+                            string branchListStr = string.Join(", ", op.needsReinforcementBranches);
+                            InboxSystem.Instance?.SendMessage(country, "FIELD COMMAND",
+                                $"REINFORCEMENTS NEEDED: {op.opName}",
+                                $"{op.commander} reports that {op.opName} effective strength has fallen to {op.effectiveTroopStrength:F0}% due to combat attrition. " +
+                                $"Branches needing reinforcements: {branchListStr}. " +
+                                $"{op.attritionTroops:N0} troops lost to date. Use the REINFORCE button to send additional forces.",
+                                "Critical");
+                        }
+                    }
+
+                    if (op.effectiveTroopStrength < 25f)
+                    {
+                        op.status = "Stalled";
+                        if (isPlayer && op.lastNotification != "STALLED")
+                        {
+                            op.lastNotification = "STALLED";
+                            InboxSystem.Instance?.SendMessage(country, "FIELD COMMAND",
+                                $"OP STALLED: {op.opName}",
+                                $"{op.opName} has stalled. Effective troop strength is at only {op.effectiveTroopStrength:F0}%. " +
+                                $"The enemy is regaining ground. Reinforce immediately or consider withdrawing to avoid further losses.",
+                                "Critical");
+                        }
+                    }
+                    else if (op.status == "Stalled" && op.effectiveTroopStrength >= 40f)
+                    {
+                        op.status = "Active";
+                        op.needsReinforcement = false;
+                        op.needsReinforcementBranches.Clear();
+                        op.lastNotification = "";
+                    }
+                }
+
+                if (op.phase == "Engaged" || op.phase == "Securing")
+                {
+                    var opRegion = country.regions.Find(r => r.regionName == op.regionName);
+                    float strengthFactor = op.effectiveTroopStrength / 100f;
+                    float rdfBonus = op.deployedRDF > 0 ? (op.deployedRDF / 500f) * 0.5f : 0f;
+                    float enemyResistance = opRegion != null ? opRegion.insurgencyLevel / 100f : 0.5f;
+
+                    float progressGain = UnityEngine.Random.Range(1f, 5f) * strengthFactor * (1f - enemyResistance * 0.6f);
+                    progressGain += rdfBonus * 2f;
+                    if (op.status == "Stalled") progressGain = Mathf.Min(progressGain, 0f);
+                    op.objectiveProgress = Mathf.Clamp(op.objectiveProgress + progressGain, 0f, 100f);
+
+                    if (op.objectiveProgress >= 50f && op.phase == "Engaged")
+                    {
+                        op.phase = "Securing";
+                        op.territoryCaptured = Mathf.Clamp(op.territoryCaptured + UnityEngine.Random.Range(15f, 35f), 0f, 100f);
+                    }
+
+                    if (opRegion != null && op.phase != "Stalled")
+                    {
+                        float insurgencyReduction = strengthFactor * UnityEngine.Random.Range(0.3f, 1.2f);
+                        opRegion.insurgencyLevel = Mathf.Max(0f, opRegion.insurgencyLevel - insurgencyReduction);
+                        opRegion.security = Mathf.Clamp(opRegion.security + strengthFactor * 0.5f, 0f, 100f);
+                    }
+                }
+
+                op.friendlyCasualtyHistory.Add(op.casualtiesSustained);
+                op.enemyCasualtyHistory.Add(op.enemyCasualtiesInflicted);
+                
+                float dynamicStrength = 1.0f + (op.deployedTroops / 1000f) * 0.5f + op.deployedTanks * 0.8f
+                               + op.deployedAPCs * 0.4f + op.deployedFighters * 2.0f + op.deployedHelis * 1.0f
+                               + op.deployedFrigates * 1.5f + op.deployedSubmarines * 2.0f
+                               + (op.deployedRDF / 1000f) * 3.5f + op.deployedBombers * 3.0f + op.deployedUAVs * 1.2f;
+                float baseRate = Mathf.Clamp(40f + dynamicStrength * 1.8f, 10f, 95f);
+                baseRate += (op.morale - 70f) * 0.1f;
+                baseRate -= (op.enemyStrengthEst - 50f) * 0.15f;
+                if (country.unitRifles < country.armyStats.personnel) baseRate *= 0.85f;
+                op.successChanceHistory.Add(Mathf.Clamp(baseRate, 5f, 95f));
+
+                if (op.objectiveProgress >= 100f)
+                {
+                    var contrList = op.GetContributionsMigrated();
+                    foreach (var c in contrList)
+                    {
+                        MilitaryOperation.ReturnToReserves(country, c.branch, c.GetUnitCountsDict(), c.personnelAssigned);
+                    }
+
+                    string outcome = op.attritionTroops > op.casualtiesSustained / 2 ? "Pyrrhic Victory" : "Victory";
+                    var completedOp = new StateCraft.Data.CompletedMilitaryOperation
+                    {
+                        opName = op.opName,
+                        regionName = op.regionName,
+                        type = op.type,
+                        outcome = outcome,
+                        durationMonths = op.turnsActive,
+                        casualtiesSustained = op.casualtiesSustained,
+                        equipmentLost = op.attritionEquipment,
+                        territoryCaptured = op.territoryCaptured,
+                        politicalImpact = 5,
+                        dateCompleted = GameManager.Instance?.TurnSystem != null ? GameManager.Instance.TurnSystem.CurrentDate : "Unknown",
+                        rewards = "Increased Regional Stability"
+                    };
+
+                    country.completedOperations.Add(completedOp);
+                    while (country.completedOperations.Count > 20)
+                        country.completedOperations.RemoveAt(0);
+
+                    // Resolve recommendations when completed successfully!
+                    country.activeRecommendations.RemoveAll(r => r.regionName == op.regionName);
+
+                    country.activeOperations.RemoveAt(i);
+
+                    if (isPlayer)
+                    {
+                        InboxSystem.Instance?.SendMessage(country, "FIELD COMMAND",
+                            $"OP COMPLETE: {op.opName}",
+                            $"Operation {op.opName} has achieved its objectives in {op.regionName} after {op.turnsActive} months. " +
+                            $"Total casualties: {op.casualtiesSustained:N0}. Equipment lost: {op.attritionEquipment}. " +
+                            $"All surviving forces have returned to reserve.",
+                            "Success");
+                        NewsSystem.Instance?.PublishNews($"MILITARY: {country.countryName} declares {outcome} in {op.opName}, securing {op.regionName} after {op.turnsActive} months.");
+                    }
+                    continue;
+                }
+
+                float moraleDrift = op.phase == "Engaged" ? UnityEngine.Random.Range(-3f, 1f) : UnityEngine.Random.Range(-1f, 2f);
+                op.morale = Mathf.Clamp(op.morale + moraleDrift, 20f, 100f);
+
+                if (isPlayer && op.phase != prevPhase)
+                {
+                    string msg = op.phase switch {
+                        "Engaged"  => $"SITREP: {op.opName} has entered active combat in {op.regionName}. Enemy resistance is {(op.enemyStrengthEst > 60f ? "strong" : "moderate")}.",
+                        "Securing" => $"SITREP: {op.opName} is now securing {op.regionName}. Objective progress: {op.objectiveProgress:F0}%. {op.commander} recommends maintaining pressure and reinforcing if needed.",
+                        _          => $"SITREP: {op.opName} has transitioned to {op.phase} phase."
+                    };
+                    InboxSystem.Instance?.SendMessage(country, "FIELD COMMAND", $"OP STATUS: {op.opName} — {op.phase.ToUpper()}", msg, "Important");
+                    NewsSystem.Instance?.PublishNews($"MILITARY: {country.countryName}'s {op.opName} has entered the {op.phase} phase in {op.regionName}.");
+                }
+
+                if (isPlayer && op.turnsActive > 0 && op.turnsActive % 6 == 0)
+                {
+                    InboxSystem.Instance?.SendMessage(country, "FIELD COMMAND",
+                        $"6-MONTH SITREP: {op.opName}",
+                        $"{op.opName} has been running for {op.turnsActive} months. " +
+                        $"Objective progress: {op.objectiveProgress:F0}%. Effective strength: {op.effectiveTroopStrength:F0}%. " +
+                        $"Total casualties: {op.casualtiesSustained:N0}. Morale: {op.morale:F0}%. " +
+                        (op.needsReinforcement ? "⚠ REINFORCEMENTS REQUIRED." : "Force is holding."),
+                        "Important");
+                }
+
+                if (isPlayer && country.reserveAmmo < 30f && op.lastNotification != "SUPPLY_AMMO")
+                {
+                    op.lastNotification = "SUPPLY_AMMO";
+                    InboxSystem.Instance?.SendMessage(country, "LOGISTICS COMMAND",
+                        $"SUPPLY CRITICAL: {op.opName}",
+                        $"Ammunition reserves have dropped below 30 units. {op.opName} may lose effectiveness. Resupply via the Logistics tab immediately.",
+                        "Critical");
+                }
+                if (isPlayer && country.reserveFuel < 20f && op.lastNotification != "SUPPLY_FUEL")
+                {
+                    op.lastNotification = "SUPPLY_FUEL";
+                    InboxSystem.Instance?.SendMessage(country, "LOGISTICS COMMAND",
+                        $"FUEL CRITICAL: {op.opName}",
+                        $"Fuel reserves have dropped below 20 units. Air assets and armoured units in {op.opName} may be grounded. Resupply via the Logistics tab.",
+                        "Critical");
+                }
+
+                if (op.phase == "Engaged" && UnityEngine.Random.value < 0.20f && isPlayer)
+                {
+                    int counterCasualties = UnityEngine.Random.Range(50, 300);
+                    op.casualtiesSustained += counterCasualties;
+                    foreach (var c in op.GetContributionsMigrated())
+                    {
+                        if (op.deployedTroops > 0)
+                        {
+                            int branchLoss = Mathf.RoundToInt(counterCasualties * ((float)c.personnelAssigned / op.deployedTroops));
+                            branchLoss = Mathf.Clamp(branchLoss, 0, c.personnelAssigned);
+                            c.personnelAssigned -= branchLoss;
+                            c.casualtiesSuffered += branchLoss;
+                        }
+                    }
+                    op.morale = Mathf.Max(20f, op.morale - UnityEngine.Random.Range(5f, 15f));
+                    InboxSystem.Instance?.SendMessage(country, "FIELD COMMAND",
+                        $"COUNTERATTACK: {op.opName} under fire",
+                        $"Enemy forces launched a coordinated counterattack on {op.opName} positions in {op.regionName}. {counterCasualties} casualties reported. {op.commander} has requested reinforcements.",
+                        "Critical");
+                }
+
+                bool isReconOp = op.type.Contains("RECON") || op.type == "AirRecon" || op.type == "AirStrike";
+                if (isReconOp)
+                {
+                    var targetRegion = country.regions.Find(r => r.regionName == op.regionName);
+                    if (targetRegion != null)
+                    {
+                        float intelGain = (op.deployedUAVs * 3f) + (op.deployedFighters * 1.5f) + (op.deployedAirForce / 100f * 2f);
+                        intelGain = Mathf.Clamp(intelGain, 2f, 15f);
+                        targetRegion.intelCoverage = Mathf.Clamp(targetRegion.intelCoverage + intelGain, 0f, 100f);
+
+                        float actualStrength = targetRegion.insurgencyLevel;
+                        float noise = Mathf.Max(0f, (100f - targetRegion.intelCoverage) / 100f) * 30f;
+                        op.enemyStrengthEst = Mathf.Clamp(actualStrength + UnityEngine.Random.Range(-noise, noise), 5f, 100f);
+
+                        if (targetRegion.intelCoverage > 50f && country.activeInsurgentCamps != null)
+                        {
+                            foreach (var camp in country.activeInsurgentCamps)
+                            {
+                                if (camp.regionName == op.regionName && !camp.isDetected)
+                                {
+                                    camp.isDetected = true;
+                                    InboxSystem.Instance?.SendMessage(country, "INTELLIGENCE COMMAND",
+                                        $"BOMBABLE TARGET IDENTIFIED: {camp.campType}",
+                                        $"Reconnaissance has localized an insurgent {camp.campType} in {op.regionName}. Air assets can now perform targeted precision strikes.",
+                                        "Important");
+                                }
+                            }
+                        }
+
+                        if (isPlayer && op.turnsActive % 2 == 0)
+                        {
+                            string intelQuality = targetRegion.intelCoverage >= 80f ? "HIGH CONFIDENCE"
+                                                : targetRegion.intelCoverage >= 50f ? "MODERATE CONFIDENCE"
+                                                : "LOW CONFIDENCE";
+                            InboxSystem.Instance?.SendMessage(country, "INTELLIGENCE COMMAND",
+                                $"INTEL UPDATE: {op.regionName}",
+                                $"Air reconnaissance assets have updated the threat picture for {op.regionName}. " +
+                                $"Intel coverage is now {targetRegion.intelCoverage:F0}% ({intelQuality}). " +
+                                $"Estimated enemy strength: {op.enemyStrengthEst:F0}%.",
+                                "Important");
+                        }
+                    }
+                }
+
+                if (op.deployedRDF > 0)
+                {
+                    var rdfRegion = country.regions.Find(r => r.regionName == op.regionName);
+                    if (rdfRegion != null)
+                    {
+                        float supplyLineDamage = (op.deployedRDF / 500f) * UnityEngine.Random.Range(2f, 6f);
+                        rdfRegion.insurgentSupplyLines = Mathf.Max(0f, rdfRegion.insurgentSupplyLines - supplyLineDamage);
+
+                        float heartsBonus = (op.deployedRDF / 2000f) * UnityEngine.Random.Range(0.5f, 2f);
+                        rdfRegion.heartsAndMinds = Mathf.Clamp(rdfRegion.heartsAndMinds + heartsBonus, 0f, 100f);
+
+                        if (rdfRegion.insurgentSupplyLines < 30f)
+                        {
+                            float insurgencyHit = (op.deployedRDF / 1000f) * UnityEngine.Random.Range(1f, 3f);
+                            rdfRegion.insurgencyLevel = Mathf.Max(0f, rdfRegion.insurgencyLevel - insurgencyHit);
+                        }
+
+                        if (isPlayer && rdfRegion.insurgentSupplyLines < 20f && op.turnsActive % 3 == 0)
+                        {
+                            InboxSystem.Instance?.SendMessage(country, "RDF COMMAND",
+                                $"SUPPLY LINES DISRUPTED: {op.regionName}",
+                                $"RDF units in {op.regionName} have cut insurgent supply lines to {rdfRegion.insurgentSupplyLines:F0}%. " +
+                                $"Enemy resupply is critically impaired. Insurgency level: {rdfRegion.insurgencyLevel:F0}%.",
+                                "Important");
+                        }
+                    }
+
+                    float rdfMoraleBonus = (op.deployedRDF / 500f) * 0.5f;
+                    op.morale = Mathf.Clamp(op.morale + rdfMoraleBonus, 0f, 100f);
+                }
             }
         }
 

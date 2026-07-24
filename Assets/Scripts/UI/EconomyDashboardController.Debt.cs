@@ -46,7 +46,8 @@ namespace StateCraft.UI
             var country = gm?.playerCountry;
             if (country == null) return;
 
-            float borrowAmt = AdviserEngine.GetDynamicBorrowAmount(country);
+            float borrowAmt = _sliderDebtTransaction != null ? _sliderDebtTransaction.value : 50f;
+
             // Convert to USD equivalent for the debt principal pools
             float usdEquiv = borrowAmt / country.exchangeRate;
             
@@ -71,7 +72,7 @@ namespace StateCraft.UI
             var country = gm?.playerCountry;
             if (country == null) return;
 
-            float repayAmt = AdviserEngine.GetDynamicRepayAmount(country);
+            float repayAmt = _sliderDebtTransaction != null ? _sliderDebtTransaction.value : 50f;
             if (gm.playerBudget < repayAmt)
             {
                 NotificationManager.Instance?.AddNotification("Insufficient treasury funds to repay debt.", Color.red);

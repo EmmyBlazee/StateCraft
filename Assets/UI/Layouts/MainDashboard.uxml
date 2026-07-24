@@ -1,5 +1,8 @@
-﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/Styles/Global.uss?fileID=7433441132597879392&amp;guid=f18ee3d1960f75747bcbb641ec70876e&amp;type=3#Global" />
+    <ui:Template name="SystemMenu" src="project://database/Assets/UI/Layouts/SystemMenu.uxml" />
+    <ui:Template name="HowToPlay" src="project://database/Assets/UI/Layouts/HowToPlay.uxml" />
+    <ui:Template name="GameOverScreen" src="project://database/Assets/UI/Layouts/GameOverScreen.uxml" />
     <ui:VisualElement name="MainDashboard" picking-mode="Ignore" style="width: 100%; height: 100%; position: absolute; display: flex; pointer-events: none;">
         <ui:VisualElement name="TopBar" picking-mode="Ignore" class="econ-topbar" style="position: absolute; top: 0; width: 100%; pointer-events: auto; z-index: 10;">
             <ui:VisualElement class="econ-country-block" style="width: 250px;">
@@ -30,6 +33,7 @@
                     <ui:Button name="Time1x" text="1x" class="time-btn time-btn-active" />
                     <ui:Button name="Time2x" text="2x" class="time-btn" />
                     <ui:Button name="Time3x" text="3x" class="time-btn" />
+                    <ui:Button name="BtnSystemMenu" text="⚙" class="time-btn" style="margin-left: 10px; font-size: 20px; background-color: rgba(0, 150, 255, 0.2);" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -52,13 +56,19 @@
                 <ui:Label text="DIPLOMACY" class="modern-nav-label" />
             </ui:Button>
             <ui:Button name="NavEvents" class="modern-nav-btn" style="background-image: none; -unity-background-scale-mode: scale-to-fit; height: 67px;">
-                <ui:Label text="📰" class="modern-nav-icon" style="height: 46px; background-image: url(&quot;project://database/Assets/icons/EVENT.png?fileID=2800000&amp;guid=7b6feb2de27a2a6459f46aeb6bf4ef53&amp;type=3#EVENT&quot;); -unity-background-scale-mode: scale-to-fit; width: 76px;" />
+                <ui:Label text="" class="modern-nav-icon" style="height: 46px; background-image: url(&quot;project://database/Assets/icons/EVENT.png?fileID=2800000&amp;guid=7b6feb2de27a2a6459f46aeb6bf4ef53&amp;type=3#EVENT&quot;); -unity-background-scale-mode: scale-to-fit; width: 76px;" />
                 <ui:Label text="EVENTS" class="modern-nav-label" />
+                <ui:Label name="EventBadge" text="0" style="display: none; position: absolute; right: 0px; top: 0px; width: 20px; height: 20px; background-color: rgb(255, 50, 50); border-radius: 10px; color: white; font-size: 10px; -unity-font-style: bold; -unity-text-align: middle-center; border-width: 1px; border-color: rgba(255,255,255,0.5);" />
             </ui:Button>
             <ui:Button name="NavSearch" class="modern-nav-btn">
                 <ui:Label class="modern-nav-icon" style="background-image: url(&quot;project://database/Assets/icons/Global.png?fileID=2800000&amp;guid=80a83b8d287064a4ba7e6cfbd8df2284&amp;type=3#Global&quot;); -unity-background-scale-mode: scale-to-fit; width: 83px;" />
                 <ui:Label text="GLOBAL" class="modern-nav-label" />
             </ui:Button>
         </ui:VisualElement>
+        
+        <ui:Instance template="SystemMenu" name="SystemMenuInstance" picking-mode="Ignore" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 100;" />
+        <ui:Instance template="HowToPlay" name="HowToPlayInstance" picking-mode="Ignore" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 300;" />
+        <ui:Instance template="GameOverScreen" name="GameOverInstance" picking-mode="Ignore" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 400;" />
+        
     </ui:VisualElement>
 </ui:UXML>

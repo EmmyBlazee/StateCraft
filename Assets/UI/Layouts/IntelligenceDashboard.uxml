@@ -1,4 +1,4 @@
-﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/Styles/Global.uss" />
     <ui:VisualElement name="IntelligenceDashboard" class="standard-dashboard hologram-border" style="display: none; padding: 12px;">
 
@@ -15,12 +15,12 @@
             </ui:VisualElement>
 
             <ui:VisualElement class="econ-kpi-strip">
-                <ui:VisualElement class="econ-kpi"><ui:Label text="TREASURY" class="econ-kpi-label" /><ui:Label name="ValTreasury" text="—" class="econ-kpi-value" /><ui:Label name="HeaderIncomeLabel" text="+₦0B" class="econ-kpi-delta positive" /></ui:VisualElement>
-                <ui:VisualElement class="econ-kpi"><ui:Label text="GDP" class="econ-kpi-label" /><ui:Label name="ValGDP" text="—" class="econ-kpi-value" /><ui:Label name="ValGDPGrowth" text="—" class="econ-kpi-delta positive" /></ui:VisualElement>
-                <ui:VisualElement class="econ-kpi"><ui:Label text="INFLATION" class="econ-kpi-label" /><ui:Label name="ValInflation" text="—" class="econ-kpi-value" /><ui:Label name="ValInflationDelta" text="+0.7% MoM" class="econ-kpi-delta negative" /></ui:VisualElement>
-                <ui:VisualElement class="econ-kpi"><ui:Label text="NATIONAL DEBT" class="econ-kpi-label" /><ui:Label name="ValTotalDebt" text="—" class="econ-kpi-value" /><ui:Label name="ValDebtRatio" text="Debt / GDP" class="econ-kpi-delta warning" /></ui:VisualElement>
-                <ui:VisualElement class="econ-kpi"><ui:Label text="FX RATE" class="econ-kpi-label" /><ui:Label name="ValExchange" text="—" class="econ-kpi-value" /><ui:Label name="HeaderExpenseLabel" text="-₦0B" class="econ-kpi-delta negative" /></ui:VisualElement>
-                <ui:VisualElement class="econ-kpi"><ui:Label text="APPROVAL" class="econ-kpi-label" /><ui:Label name="ValApproval" text="65%" class="econ-kpi-value" /><ui:Label name="ValApprovalDelta" text="+2% MoM" class="econ-kpi-delta positive" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="INTEL COVERAGE" class="econ-kpi-label" /><ui:Label name="HdrIntelCoverage" text="—" class="econ-kpi-value" /><ui:Label name="HdrIntelCoverageRating" text="Global" class="econ-kpi-delta neutral" style="color: rgb(150,150,150);" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="OPERATIVES" class="econ-kpi-label" /><ui:Label name="HdrOperatives" text="—" class="econ-kpi-value" /><ui:Label text="Active Agents" class="econ-kpi-delta neutral" style="color: rgb(150,150,150);" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="COVERT OPS" class="econ-kpi-label" /><ui:Label name="HdrCovertOps" text="—" class="econ-kpi-value" /><ui:Label name="HdrCovertOpsSub" text="Active" class="econ-kpi-delta warning" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="SATELLITES" class="econ-kpi-label" /><ui:Label name="HdrSatellites" text="—" class="econ-kpi-value" /><ui:Label text="Orbital Assets" class="econ-kpi-delta neutral" style="color: rgb(150,150,150);" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="EXPOSURE RISK" class="econ-kpi-label" /><ui:Label name="HdrExposureRisk" text="—" class="econ-kpi-value" /><ui:Label name="HdrExposureRiskSub" text="Network Safe" class="econ-kpi-delta positive" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="INTEL BUDGET" class="econ-kpi-label" /><ui:Label name="HdrIntelBudgetTop" text="—" class="econ-kpi-value" /><ui:Label text="Per Turn" class="econ-kpi-delta neutral" style="color: rgb(150,150,150);" /></ui:VisualElement>
             </ui:VisualElement>
 
             <ui:VisualElement class="econ-date-box">
@@ -31,12 +31,12 @@
         </ui:VisualElement>
 
         <!-- SUB-TAB NAVIGATION -->
-        <ui:VisualElement name="SubTabs" style="flex-direction: row; margin-bottom: 12px;">
+        <ui:VisualElement name="SubTabs" style="flex-direction: row; margin-top: 15px; margin-bottom: 12px;">
             <ui:Button name="TabOverview" text="OVERVIEW" class="nav-button active-tab" style="flex-grow: 1; height: 32px; font-size: 13px; margin-right: 2px;" />
-            <ui:Button name="TabIntelNetwork" text="INTELLIGENCE NETWORK" class="nav-button" style="flex-grow: 1; height: 32px; font-size: 13px; margin-right: 2px;" />
-            <ui:Button name="TabRecon" text="RECON &amp; SURVEILLANCE" class="nav-button" style="flex-grow: 1; height: 32px; font-size: 13px; margin-right: 2px;" />
+            <ui:Button name="TabIntelNetwork" text="INTELLIGENCE NETWORK" class="nav-button" style="display: none; flex-grow: 1; height: 32px; font-size: 13px; margin-right: 2px;" />
+            <ui:Button name="TabRecon" text="RECON &amp; SURVEILLANCE" class="nav-button" style="display: none; flex-grow: 1; height: 32px; font-size: 13px; margin-right: 2px;" />
             <ui:Button name="TabCovertOps" text="COVERT OPERATIONS" class="nav-button" style="flex-grow: 1; height: 32px; font-size: 13px; margin-right: 2px;" />
-            <ui:Button name="TabDataAnalysis" text="DATA &amp; ANALYSIS" class="nav-button" style="flex-grow: 1; height: 32px; font-size: 13px; margin-right: 2px;" />
+            <ui:Button name="TabDataAnalysis" text="DATA &amp; ANALYSIS" class="nav-button" style="display: none; flex-grow: 1; height: 32px; font-size: 13px; margin-right: 2px;" />
             <ui:Button name="TabThreats" text="THREAT ASSESSMENT" class="nav-button" style="flex-grow: 1; height: 32px; font-size: 13px;" />
         </ui:VisualElement>
 
@@ -46,58 +46,55 @@
             <!-- 1. OVERVIEW TAB (NEW) -->
             <ui:VisualElement name="PanelOverview" style="display: flex; height: 100%; flex-direction: row;">
                 
-                <!-- LEFT COLUMN -->
-                <ui:VisualElement style="width: 25%; min-width: 280px; margin-right: 12px; flex-direction: column;">
-                    <!-- INTEL SUMMARY -->
-                    <ui:VisualElement class="sub-panel" style="padding: 12px; margin-bottom: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:Label text="INTEL SUMMARY" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
-                        <ui:VisualElement name="OverviewIntelSummaryContainer" style="flex-direction: column;" />
+                <!-- LEFT COLUMN: THREAT MATRIX -->
+                <ui:VisualElement style="width: 30%; min-width: 300px; margin-right: 12px; flex-direction: column;">
+                    
+                    <!-- OVERALL THREAT LEVEL -->
+                    <ui:VisualElement name="OverviewThreatCard" class="sub-panel" style="padding: 16px; margin-bottom: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255, 50, 50, 0.3);">
+                        <ui:Label name="OverviewThreatTitle" text="NATIONAL THREAT LEVEL" style="font-size: 11px; color: rgba(255, 100, 100, 0.8); -unity-font-style: bold; margin-bottom: 8px; letter-spacing: 2px;" />
+                        <ui:VisualElement style="flex-direction: row; align-items: center;">
+                            <ui:Label name="OverviewThreatIcon" text="&#xf071;" class="fa-icon" style="font-size: 32px; color: rgb(255, 50, 50); margin-right: 12px;" />
+                            <ui:VisualElement>
+                                <ui:Label name="OverviewThreatLevel" text="CRITICAL" style="font-size: 24px; color: rgb(255, 50, 50); -unity-font-style: bold;" />
+                                <ui:Label name="OverviewThreatSubtext" text="Immediate Action Required" style="font-size: 10px; color: rgba(255, 50, 50, 0.6);" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- THREAT MATRIX LIST -->
+                    <ui:VisualElement class="sub-panel" style="flex-grow: 1; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05); min-height: 0;">
+                        <ui:Label text="ACTIVE THREATS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
+                        <ui:ScrollView name="OverviewThreatMatrixList" style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
                     </ui:VisualElement>
                     
-                    <!-- ACTIVE OPERATIONS -->
+                </ui:VisualElement>
+                
+                <!-- MIDDLE COLUMN: INTEL FEED -->
+                <ui:VisualElement style="flex-grow: 1; margin-right: 12px; flex-direction: column; min-width: 350px;">
                     <ui:VisualElement class="sub-panel" style="flex-grow: 1; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05); min-height: 0;">
                         <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <ui:Label text="ACTIVE OPERATIONS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px;" />
-                            <ui:Label text="View All" style="font-size: 13px; color: rgb(36, 238, 87); cursor: link;" />
+                            <ui:Label text="INTERCEPTED INTEL FEED" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px;" />
+                            <ui:VisualElement style="flex-direction: row; align-items: center;">
+                                <ui:VisualElement style="width: 8px; height: 8px; border-radius: 4px; background-color: rgb(36, 238, 87); margin-right: 6px;" />
+                                <ui:Label text="LIVE" style="font-size: 10px; color: rgb(36, 238, 87); -unity-font-style: bold; letter-spacing: 1px;" />
+                            </ui:VisualElement>
                         </ui:VisualElement>
-                        <ui:ScrollView name="OverviewActiveOpsList" style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" />
+                        <ui:ScrollView name="OverviewIntelFeedList" style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
                     </ui:VisualElement>
                 </ui:VisualElement>
                 
-                <!-- MIDDLE COLUMN -->
-                <ui:VisualElement style="flex-grow: 1; margin-right: 12px; flex-direction: column; min-width: 400px;">
-                    <!-- RECENT REPORTS -->
-                    <ui:VisualElement class="sub-panel" style="flex-grow: 1; margin-bottom: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05); min-height: 0;">
-                        <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <ui:Label text="RECENT INTELLIGENCE REPORTS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px;" />
-                            <ui:Label text="View All" style="font-size: 13px; color: rgb(36, 238, 87); cursor: link;" />
-                        </ui:VisualElement>
-                        <ui:ScrollView name="OverviewRecentReportsList" style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" />
-                    </ui:VisualElement>
+                <!-- RIGHT COLUMN: BLINDSPOTS -->
+                <ui:VisualElement style="width: 30%; min-width: 300px; flex-direction: column;">
                     
-                    <!-- COVERAGE GRID -->
-                    <ui:VisualElement class="sub-panel" style="height: 140px; margin-bottom: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:Label text="INTELLIGENCE COVERAGE" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
-                        <ui:VisualElement name="OverviewCoverageGrid" style="flex-direction: row; justify-content: space-between; height: 100px;" />
-                    </ui:VisualElement>
-                    
-                    <!-- FOOTER METRICS -->
-                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:VisualElement name="OverviewFooterContainer" style="flex-direction: row; justify-content: space-between; flex-grow: 1;" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                
-                <!-- RIGHT COLUMN -->
-                <ui:VisualElement style="width: 25%; min-width: 280px; flex-direction: column;">
                     <ui:VisualElement class="sub-panel" style="flex-grow: 1; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05); min-height: 0;">
                         <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <ui:Label text="THREAT ALERTS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px;" />
-                            <ui:Label text="View All" style="font-size: 13px; color: rgb(36, 238, 87); cursor: link;" />
+                            <ui:Label text="CRITICAL BLINDSPOTS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px;" />
+                            <ui:Label text="Deploy Recon" style="font-size: 11px; color: rgb(36, 238, 87); cursor: link;" />
                         </ui:VisualElement>
                         
-                        <ui:ScrollView name="OverviewThreatsList" style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" />
-                        
-                        <ui:Button name="BtnViewAllThreats" text="VIEW ALL THREATS" class="nav-button" style="margin-top: 12px; height: 32px; font-size: 13px; background-color: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); border-width: 1px; border-radius: 2px;" />
+                        <ui:Label text="These regions lack sufficient intelligence coverage. Unknown threats may be developing undetected." style="font-size: 10px; color: rgba(214, 223, 230, 0.5); white-space: normal; margin-bottom: 12px;" />
+
+                        <ui:ScrollView name="OverviewBlindspotsList" style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -150,11 +147,17 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
 
-                <!-- MIDDLE GRID (3 COLUMNS) -->
-                <ui:VisualElement style="flex-direction: row; flex-grow: 1; min-height: 0; margin-bottom: 12px;">
+                <!-- 2-COLUMN LAYOUT -->
+                <ui:VisualElement style="flex-direction: row; flex-grow: 1;">
                     
-                    <!-- COL 1: SURVEILLANCE ASSETS -->
-                    <ui:VisualElement style="width: 28%; margin-right: 12px; flex-direction: column;">
+                    <!-- LEFT COLUMN (Main Content - 75%) -->
+                    <ui:VisualElement style="width: 75%; padding-right: 12px; flex-direction: column;">
+                        
+                        <!-- ROW 1 -->
+                        <ui:VisualElement style="flex-direction: row; min-height: 200px; margin-bottom: 12px; justify-content: space-between;">
+                            <!-- COL 1: SURVEILLANCE ASSETS -->
+
+                    <ui:VisualElement style="width: 48%; margin-right: 12px; flex-direction: column;">
                         <ui:VisualElement class="sub-panel" style="flex-grow: 1; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05); min-height: 0;">
                             <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                                 <ui:Label text="SURVEILLANCE ASSETS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px;" />
@@ -167,13 +170,13 @@
                                 <ui:Label text="COVERAGE" style="font-size: 11px; color: grey; width: 60px;" />
                                 <ui:Label text="USE" style="font-size: 11px; color: grey; flex-grow: 1; unity-text-align: middle-right;" />
                             </ui:VisualElement>
-                            <ui:ScrollView name="RS_AssetsList" style="flex-grow: 1; margin-bottom: 8px;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" />
+                            <ui:ScrollView name="RS_AssetsList" style="flex-grow: 1; margin-bottom: 8px;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
                             <ui:Button text="VIEW ALL ASSETS" style="background-color: rgba(255,255,255,0.05); border-width: 0; padding: 6px; color: grey; font-size: 12px;" />
                         </ui:VisualElement>
                     </ui:VisualElement>
+                            <!-- COL 2: ACTIVE RECON MISSIONS -->
 
-                    <!-- COL 2: ACTIVE RECON MISSIONS -->
-                    <ui:VisualElement style="width: 46%; margin-right: 12px; flex-direction: column;">
+                    <ui:VisualElement style="width: 48%; margin-right: 0; margin-right: 12px; flex-direction: column;">
                         <ui:VisualElement class="sub-panel" style="flex-grow: 1; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05); min-height: 0;">
                             <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                                 <ui:Label name="RS_MissionsHeaderTitle" text="ACTIVE RECON MISSIONS (7)" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px;" />
@@ -187,92 +190,98 @@
                                 <ui:Label text="STATUS" style="font-size: 11px; color: grey; width: 70px;" />
                                 <ui:Label text="ETA" style="font-size: 11px; color: grey; width: 50px; unity-text-align: middle-right;" />
                             </ui:VisualElement>
-                            <ui:ScrollView name="RS_MissionsList" style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" />
+                            <ui:ScrollView name="RS_MissionsList" style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
                         </ui:VisualElement>
                     </ui:VisualElement>
-
-                    <!-- COL 3: LIVE INTELLIGENCE FEED -->
-                    <ui:VisualElement style="flex-grow: 1; flex-direction: column;">
-                        <ui:VisualElement class="sub-panel" style="flex-grow: 1; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05); min-height: 0;">
-                            <ui:Label text="LIVE INTELLIGENCE FEED" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 12px;" />
-                            <ui:ScrollView name="RS_LiveFeedList" style="flex-grow: 1; margin-bottom: 8px;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" />
-                            <ui:Button text="VIEW FULL FEED" style="background-color: rgba(255,255,255,0.05); border-width: 0; padding: 6px; color: grey; font-size: 12px;" />
                         </ui:VisualElement>
-                    </ui:VisualElement>
-                </ui:VisualElement>
 
-                <!-- BOTTOM GRID -->
-                <ui:VisualElement style="flex-direction: row; height: 180px; margin-bottom: 12px;">
-                    <!-- SENSOR COVERAGE -->
-                    <ui:VisualElement class="sub-panel" style="width: 22%; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:Label text="SENSOR COVERAGE" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 12px;" />
-                        <ui:VisualElement name="RS_SensorCoverageList" style="flex-grow: 1; justify-content: space-around; margin-bottom: 8px;" />
-                        <ui:Button text="VIEW COVERAGE MAP" style="background-color: rgba(255,255,255,0.05); border-width: 0; padding: 6px; color: grey; font-size: 12px;" />
-                    </ui:VisualElement>
+                        <!-- ROW 2 -->
+                        <ui:VisualElement style="flex-direction: row; min-height: 280px; margin-bottom: 12px; justify-content: space-between;">
+                            <!-- TASK NEW RECON MISSION -->
 
-                    <!-- INTEL COLLECTION BREAKDOWN -->
-                    <ui:VisualElement class="sub-panel" style="width: 32%; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                    <ui:VisualElement class="sub-panel" style="width: 38%; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                        <ui:Label text="TASK NEW RECON MISSION" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 8px;" />
+                        
+                        <ui:ScrollView style="flex-grow: 1;" vertical-scroller-visibility="Auto" horizontal-scroller-visibility="Hidden">
+                            <ui:Label text="Mission Type" style="font-size: 11px; color: grey; margin-bottom: 4px;" />
+                            <ui:DropdownField choices="Aerial Recon,Satellite Scan,SIGINT Intercept,HUMINT Network,Cyber Probe" value="Aerial Recon" style="min-height: 24px; background-color: rgba(1,1,1,0.2); border-width: 1px; border-color: rgba(255,255,255,0.1); margin-bottom: 12px; border-radius: 2px; font-size: 12px; color: grey;" class="custom-dropdown" />
+
+                            <ui:Label text="Objective" style="font-size: 11px; color: grey; margin-bottom: 4px;" />
+                            <ui:TextField value="Enter objective..." style="font-size: 12px; margin-bottom: 12px; min-height: 24px;" class="custom-textfield" />
+
+                            <ui:Label text="Area of Interest" style="font-size: 11px; color: grey; margin-bottom: 4px;" />
+                            <ui:DropdownField choices="Eastern Border,Capital City,Naval Base Alpha,Industrial Sector,Global Network" value="Eastern Border" style="min-height: 24px; background-color: rgba(1,1,1,0.2); border-width: 1px; border-color: rgba(255,255,255,0.1); margin-bottom: 12px; border-radius: 2px; font-size: 12px; color: grey;" class="custom-dropdown" />
+
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 8px;">
+                                <ui:VisualElement style="width: 48%;">
+                                    <ui:Label text="Priority" style="font-size: 11px; color: grey; margin-bottom: 2px;" />
+                                    <ui:DropdownField name="DrpReconPriority" choices="Low,Medium,High,Critical" value="Medium" style="min-height: 24px; background-color: rgba(1,1,1,0.2); border-width: 1px; border-color: rgba(255,255,255,0.1); border-radius: 2px; font-size: 12px; color: rgb(237, 180, 35);" class="custom-dropdown" />
+                                </ui:VisualElement>
+                                <ui:VisualElement style="width: 48%;">
+                                    <ui:Label text="Assigned Asset" style="font-size: 11px; color: grey; margin-bottom: 2px;" />
+                                    <ui:DropdownField choices="Auto Assign,Drone Sqn 1,Agent 'Viper',Satellite K-9" value="Auto Assign" style="min-height: 24px; background-color: rgba(1,1,1,0.2); border-width: 1px; border-color: rgba(255,255,255,0.1); border-radius: 2px; font-size: 12px; color: grey;" class="custom-dropdown" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                            
+                            <ui:Button name="BtnLaunchReconMission" text="LAUNCH MISSION" style="margin-top: 12px; background-color: rgba(35, 237, 86, 0.1); border-color: rgba(35, 237, 86, 0.3); border-width: 1px; border-radius: 4px; color: rgb(35, 237, 86); font-size: 13px; padding: 6px; -unity-font-style: bold;" />
+                        </ui:ScrollView>
+                    </ui:VisualElement>
+                            <!-- INTEL COLLECTION BREAKDOWN -->
+
+                    <ui:VisualElement class="sub-panel" style="width: 58%; margin-right: 0; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
                         <ui:Label text="INTELLIGENCE COLLECTION BREAKDOWN (This Month)" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 12px;" />
                         <ui:VisualElement style="flex-direction: row; flex-grow: 1; align-items: center;">
                             <ui:VisualElement style="width: 100px; height: 100px; margin-right: 16px; justify-content: center; align-items: center;">
                                 <!-- Donut chart dynamically drawn -->
                                 <ui:VisualElement name="RS_DonutChartCenter" style="position: absolute; width: 64px; height: 64px; border-radius: 32px; background-color: rgba(10, 14, 20, 1); align-items: center; justify-content: center;">
-                                    <ui:Label name="RS_DonutTotalValue" text="₦588M" style="font-size: 16px; color: white; -unity-font-style: bold;" />
+                                    <ui:Label name="RS_DonutTotalValue" text="$588M" style="font-size: 16px; color: white; -unity-font-style: bold;" />
                                     <ui:Label text="TOTAL SPENT" style="font-size: 10px; color: grey;" />
                                 </ui:VisualElement>
                             </ui:VisualElement>
                             <ui:VisualElement name="RS_DonutBreakdownList" style="flex-grow: 1; justify-content: center;" />
                         </ui:VisualElement>
-                        <ui:Button text="ADJUST BUDGET" style="background-color: rgba(255,255,255,0.05); border-width: 0; padding: 6px; color: grey; font-size: 12px; margin-top: 8px;" />
+                        <!-- Budget adjusted in Economy Tab -->
                     </ui:VisualElement>
-
-                    <!-- TASK NEW RECON MISSION -->
-                    <ui:VisualElement class="sub-panel" style="width: 22%; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:Label text="TASK NEW RECON MISSION" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 8px;" />
-                        
-                        <ui:Label text="Mission Type" style="font-size: 11px; color: grey; margin-bottom: 2px;" />
-                        <ui:VisualElement style="background-color: rgba(1,1,1,0.2); border-width: 1px; border-color: rgba(255,255,255,0.1); padding: 4px; margin-bottom: 6px; border-radius: 2px; flex-direction: row; justify-content: space-between;">
-                            <ui:Label text="Select Mission Type" style="font-size: 12px; color: grey;" />
-                            <ui:Label text="▼" style="font-size: 11px; color: grey;" />
                         </ui:VisualElement>
 
-                        <ui:Label text="Objective" style="font-size: 11px; color: grey; margin-bottom: 2px;" />
-                        <ui:TextField value="Enter objective..." style="font-size: 12px; margin-bottom: 6px;" class="custom-textfield" />
-
-                        <ui:Label text="Area of Interest" style="font-size: 11px; color: grey; margin-bottom: 2px;" />
-                        <ui:VisualElement style="background-color: rgba(1,1,1,0.2); border-width: 1px; border-color: rgba(255,255,255,0.1); padding: 4px; margin-bottom: 6px; border-radius: 2px; flex-direction: row; justify-content: space-between;">
-                            <ui:Label text="Select Area" style="font-size: 12px; color: grey;" />
-                            <ui:Label text="▼" style="font-size: 11px; color: grey;" />
-                        </ui:VisualElement>
-
-                        <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 8px;">
-                            <ui:VisualElement style="width: 48%;">
-                                <ui:Label text="Priority" style="font-size: 11px; color: grey; margin-bottom: 2px;" />
-                                <ui:Label text="Medium ▼" style="font-size: 12px; color: rgb(237, 180, 35);" />
-                            </ui:VisualElement>
-                            <ui:VisualElement style="width: 48%;">
-                                <ui:Label text="Assigned Asset" style="font-size: 11px; color: grey; margin-bottom: 2px;" />
-                                <ui:Label text="Auto Assign ▼" style="font-size: 12px; color: grey;" />
-                            </ui:VisualElement>
-                        </ui:VisualElement>
-                        
-                        <ui:Button text="LAUNCH MISSION" style="background-color: rgba(35, 237, 86, 0.1); border-color: rgba(35, 237, 86, 0.3); border-width: 1px; border-radius: 4px; color: rgb(35, 237, 86); font-size: 13px; padding: 4px; -unity-font-style: bold;" />
-                    </ui:VisualElement>
-
-                    <!-- RECON ANALYTICS -->
-                    <ui:VisualElement class="sub-panel" style="flex-grow: 1; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:Label text="RECON ANALYTICS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 12px;" />
-                        <ui:VisualElement name="RS_AnalyticsList" style="flex-grow: 1; justify-content: space-around; margin-bottom: 8px;" />
-                        <ui:Button text="VIEW ANALYTICS DASHBOARD" style="background-color: rgba(255,255,255,0.05); border-width: 0; padding: 6px; color: grey; font-size: 12px;" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
-
-                <!-- BOTTOM STRIP: RECENT RECON ACTIVITY -->
+                        <!-- ROW 3 -->
+                        <ui:VisualElement class="sub-panel" style="padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+<!-- RECENT RECON ACTIVITY -->
                 <ui:VisualElement class="sub-panel" style="padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
                     <ui:Label text="RECENT RECON ACTIVITY" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 12px;" />
                     <ui:VisualElement name="RS_RecentActivityContainer" style="flex-direction: row; flex-wrap: wrap; justify-content: space-between;" />
                 </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
 
+                    <!-- RIGHT COLUMN (Sidebar - 25%) -->
+                    <ui:VisualElement style="width: 25%; flex-direction: column;">
+                        <!-- LIVE INTELLIGENCE FEED -->
+
+                    <ui:VisualElement style="width: 100%; margin-bottom: 12px; flex-direction: column;">
+                        <ui:VisualElement class="sub-panel" style="flex-grow: 1; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05); min-height: 0;">
+                            <ui:Label text="LIVE INTELLIGENCE FEED" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 12px;" />
+                            <ui:ScrollView name="RS_LiveFeedList" style="flex-grow: 1; margin-bottom: 8px;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
+                            <ui:Button text="VIEW FULL FEED" style="background-color: rgba(255,255,255,0.05); border-width: 0; padding: 6px; color: grey; font-size: 12px;" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                        <!-- RECON ANALYTICS -->
+
+                    <ui:VisualElement class="sub-panel" style="width: 100%; margin-bottom: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                        <ui:Label text="RECON ANALYTICS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 12px;" />
+                        <ui:VisualElement name="RS_AnalyticsList" style="flex-grow: 1; justify-content: space-around; margin-bottom: 8px;" />
+                        <ui:Button text="VIEW ANALYTICS DASHBOARD" style="background-color: rgba(255,255,255,0.05); border-width: 0; padding: 6px; color: grey; font-size: 12px;" />
+                    </ui:VisualElement>
+                        <!-- SENSOR COVERAGE -->
+
+                    <ui:VisualElement class="sub-panel" style="width: 100%; margin-right: 0; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                        <ui:Label text="SENSOR COVERAGE" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 12px;" />
+                        <ui:VisualElement name="RS_SensorCoverageList" style="flex-grow: 1; justify-content: space-around; margin-bottom: 8px;" />
+                        <ui:Button text="VIEW COVERAGE MAP" style="background-color: rgba(255,255,255,0.05); border-width: 0; padding: 6px; color: grey; font-size: 12px;" />
+                    </ui:VisualElement>
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
             </ui:VisualElement>
 
 
@@ -313,8 +322,8 @@
                         </ui:VisualElement>
                         <ui:VisualElement class="econ-kpi" style="border-right-width: 1px; border-color: rgba(255,255,255,0.1); padding-right: 15px; margin-right: 15px;">
                             <ui:Label text="COVERT BUDGET" class="econ-kpi-label" />
-                            <ui:Label name="IN_CovertBudget" text="₦0.8B / month" class="econ-kpi-value" style="font-size: 18px;" />
-                            <ui:Label name="IN_BudgetRemaining" text="₦168M remaining" class="econ-kpi-delta positive" />
+                            <ui:Label name="IN_CovertBudget" text="$0.8B / month" class="econ-kpi-value" style="font-size: 18px;" />
+                            <ui:Label name="IN_BudgetRemaining" text="$168M remaining" class="econ-kpi-delta positive" />
                         </ui:VisualElement>
                         <ui:VisualElement class="econ-kpi">
                             <ui:Label text="NETWORK EXPOSURE" class="econ-kpi-label" />
@@ -336,7 +345,7 @@
                                 <ui:Label name="IN_ActiveAgentsTitle" text="ACTIVE AGENTS (12)" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px;" />
                                 <ui:Label text="VIEW ALL" style="font-size: 12px; color: rgba(255, 255, 255, 0.5); letter-spacing: 1px; padding: 4px 8px; background-color: rgba(255,255,255,0.05); border-radius: 2px; cursor: link;" />
                             </ui:VisualElement>
-                            <ui:ScrollView name="IN_ActiveAgentsList" style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" />
+                            <ui:ScrollView name="IN_ActiveAgentsList" style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
                         </ui:VisualElement>
                         
                         <!-- RECENT NETWORK EVENTS -->
@@ -345,7 +354,7 @@
                                 <ui:Label text="RECENT NETWORK EVENTS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px;" />
                                 <ui:Label text="VIEW ALL" style="font-size: 12px; color: rgba(255, 255, 255, 0.5); letter-spacing: 1px; padding: 4px 8px; background-color: rgba(255,255,255,0.05); border-radius: 2px; cursor: link;" />
                             </ui:VisualElement>
-                            <ui:ScrollView name="IN_RecentEventsList" style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" />
+                            <ui:ScrollView name="IN_RecentEventsList" style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
                         </ui:VisualElement>
 
                     </ui:VisualElement>
@@ -378,7 +387,7 @@
                                 <ui:VisualElement name="IN_DonutChartContainer" style="width: 100px; height: 100px; margin-right: 20px; justify-content: center; align-items: center;">
                                     <!-- We will dynamically draw a donut chart via UI Toolkit in code or use multiple overlapping rings -->
                                     <ui:VisualElement name="IN_DonutChartCenter" style="position: absolute; width: 60px; height: 60px; border-radius: 30px; background-color: rgba(10, 14, 20, 1); align-items: center; justify-content: center;">
-                                        <ui:Label name="IN_DonutTotalLbl" text="₦0.8B" style="font-size: 16px; color: white; -unity-font-style: bold;" />
+                                        <ui:Label name="IN_DonutTotalLbl" text="$0.8B" style="font-size: 16px; color: white; -unity-font-style: bold;" />
                                         <ui:Label text="TOTAL" style="font-size: 11px; color: grey;" />
                                     </ui:VisualElement>
                                 </ui:VisualElement>
@@ -394,7 +403,7 @@
                         <!-- RECRUIT NEW ASSET -->
                         <ui:VisualElement class="sub-panel" style="flex-grow: 1; margin-bottom: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05); min-height: 0;">
                             <ui:Label text="RECRUIT NEW ASSET" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 12px;" />
-                            <ui:ScrollView name="IN_RecruitList" style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" />
+                            <ui:ScrollView name="IN_RecruitList" style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
                         </ui:VisualElement>
 
                         <!-- AGENCY HQ -->
@@ -417,7 +426,7 @@
                                     
                                     <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 2px;">
                                         <ui:Label text="Cost" style="font-size: 12px; color: white;" />
-                                        <ui:Label text="₦650M" style="font-size: 12px; color: white;" />
+                                        <ui:Label text="$650M" style="font-size: 12px; color: white;" />
                                     </ui:VisualElement>
                                     <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: flex-start;">
                                         <ui:Label text="Benefits" style="font-size: 12px; color: white;" />
@@ -449,9 +458,10 @@
             
             <!-- COVERT OPERATIONS TAB -->
             <ui:VisualElement name="PanelCovertOperations" style="display: none; height: 100%; flex-direction: column;">
+                <ui:ScrollView style="flex-grow: 1;">
                 
                 <!-- TOP KPI STRIP -->
-                <ui:VisualElement style="flex-direction: row; margin-bottom: 12px;">
+                <ui:VisualElement style="flex-direction: row; margin-bottom: 12px; flex-shrink: 0;">
                     <!-- Title block -->
                     <ui:VisualElement class="sub-panel" style="width: 28%; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05); flex-direction: row; align-items: center;">
                         <ui:VisualElement style="width: 40px; height: 40px; border-radius: 20px; background-color: rgba(255,255,255,0.05); align-items: center; justify-content: center; margin-right: 12px;">
@@ -480,8 +490,8 @@
                     <!-- KPI Budget -->
                     <ui:VisualElement class="sub-panel" style="flex-grow: 1; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
                         <ui:Label text="COVERT BUDGET (MONTHLY)" style="font-size: 11px; color: grey; margin-bottom: 4px;" />
-                        <ui:Label name="CO_Budget" text="₦0M" style="font-size: 19px; -unity-font-style: bold; color: white;" />
-                        <ui:Label name="CO_BudgetRemaining" text="₦0M remaining" style="font-size: 12px; color: rgb(35, 237, 86); margin-top: 2px;" />
+                        <ui:Label name="CO_Budget" text="$0M" style="font-size: 19px; -unity-font-style: bold; color: white;" />
+                        <ui:Label name="CO_BudgetRemaining" text="$0M remaining" style="font-size: 12px; color: rgb(35, 237, 86); margin-top: 2px;" />
                     </ui:VisualElement>
 
                     <!-- KPI Detection Risk -->
@@ -493,12 +503,12 @@
                                 <ui:Label name="CO_RiskLabel" text="MEDIUM" style="font-size: 16px; -unity-font-style: bold; color: rgb(241, 196, 15);" />
                             </ui:VisualElement>
                         </ui:VisualElement>
-                        <ui:Button text="&#xf0b1;  COVERT BUDGET" class="fa-icon" style="height: 28px; padding-left: 12px; padding-right: 12px; font-size: 13px; background-color: rgba(35, 237, 86, 0.1); border-color: rgba(35, 237, 86, 0.3); border-width: 1px; border-radius: 2px; color: rgb(35, 237, 86);" />
+                        <!-- Budget adjusted in Economy Tab -->
                     </ui:VisualElement>
                 </ui:VisualElement>
 
                 <!-- MIDDLE GRID -->
-                <ui:VisualElement style="flex-grow: 1; flex-direction: row; min-height: 0; margin-bottom: 12px;">
+                <ui:VisualElement style="flex-grow: 1; flex-direction: row; flex-shrink: 0; margin-bottom: 12px;">
                     <!-- LEFT COLUMN -->
                     <ui:VisualElement style="width: 22%; margin-right: 12px; flex-direction: column;">
                         <!-- Status -->
@@ -532,7 +542,10 @@
                         <ui:VisualElement class="sub-panel" style="flex-grow: 1; margin-bottom: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05); min-height: 0;">
                             <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                                 <ui:Label name="CO_ActiveTitle" text="ACTIVE COVERT OPERATIONS (0)" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px;" />
-                                <ui:Label text="VIEW ALL" style="font-size: 12px; color: rgb(35, 237, 86); -unity-font-style: bold;" />
+                                <ui:VisualElement style="flex-direction: row; align-items: center;">
+                                    <ui:Button name="BtnLaunchCovertOp" text="LAUNCH OPERATION" style="height: 24px; font-size: 10px; background-color: rgba(35, 237, 86, 0.2); color: rgb(35, 237, 86); border-width: 1px; border-color: rgba(35, 237, 86, 0.5); border-radius: 2px; margin-right: 12px; padding-left: 12px; padding-right: 12px;" />
+                                    <ui:Label text="VIEW ALL" style="font-size: 12px; color: rgb(35, 237, 86); -unity-font-style: bold;" />
+                                </ui:VisualElement>
                             </ui:VisualElement>
                             <ui:VisualElement style="flex-direction: row; border-bottom-width: 1px; border-color: rgba(255,255,255,0.1); padding-bottom: 6px; margin-bottom: 6px;">
                                 <ui:Label text="OPERATION" style="font-size: 11px; color: grey; width: 140px;" />
@@ -547,7 +560,7 @@
                         </ui:VisualElement>
 
                         <!-- Operation Details -->
-                        <ui:VisualElement class="sub-panel" style="height: 180px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                        <ui:VisualElement class="sub-panel" style="min-height: 240px; flex-shrink: 0; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
                             <ui:Label text="OPERATION DETAILS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
                             <ui:VisualElement name="CO_OpDetailsContainer" style="flex-grow: 1;" />
                         </ui:VisualElement>
@@ -564,37 +577,64 @@
                             <ui:ScrollView name="CO_UpcomingOpsList" style="flex-grow: 1;" />
                         </ui:VisualElement>
 
-                        <!-- Safe Houses -->
-                        <ui:VisualElement class="sub-panel" style="height: 180px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                            <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                <ui:Label text="SAFE HOUSES" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px;" />
-                                <ui:Label text="VIEW ALL" style="font-size: 12px; color: rgb(35, 237, 86); -unity-font-style: bold;" />
-                            </ui:VisualElement>
-                            <ui:ScrollView name="CO_SafeHousesList" style="flex-grow: 1;" />
-                        </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
 
                 <!-- BOTTOM STRIP -->
-                <ui:VisualElement style="flex-direction: row; height: 120px;">
+                <ui:VisualElement style="flex-direction: row; height: 220px; flex-shrink: 0;">
                     <!-- Recent Activity -->
                     <ui:VisualElement class="sub-panel" style="width: 33%; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
                         <ui:Label text="RECENT ACTIVITY" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
                         <ui:ScrollView name="CO_RecentActivityList" style="flex-grow: 1;" />
                     </ui:VisualElement>
 
-                    <!-- Recent Outcomes -->
+                    <!-- Asset Roster -->
                     <ui:VisualElement class="sub-panel" style="width: 33%; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:Label text="RECENT OUTCOMES" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
-                        <ui:ScrollView name="CO_RecentOutcomesList" style="flex-grow: 1;" />
+                        <ui:Label text="ASSET ROSTER" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
+                        <ui:ScrollView name="CO_AssetRosterList" style="flex-grow: 1;" />
                     </ui:VisualElement>
 
-                    <!-- Quick Actions -->
+                    <!-- Quick Actions / Procurement -->
                     <ui:VisualElement class="sub-panel" style="flex-grow: 1; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:Label text="QUICK ACTIONS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
-                        <ui:VisualElement name="CO_QuickActionsContainer" style="flex-grow: 1; flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-content: space-between;" />
+                        <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                            <ui:Label text="ASSET PROCUREMENT" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
+                            <ui:Label name="CO_IntelFundsLabel" text="FUNDS: $0M" style="font-size: 13px; color: rgb(35, 237, 86); -unity-font-style: bold;" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="CO_QuickActionsContainer" style="flex-grow: 1; flex-direction: row; justify-content: space-between; min-height: 120px;">
+                            <!-- Satellite Card -->
+                            <ui:VisualElement style="flex-grow: 1; margin-right: 8px; padding: 8px; background-color: rgba(186, 104, 200, 0.1); border-color: rgba(186, 104, 200, 0.3); border-width: 1px; border-radius: 6px; flex-direction: column; justify-content: space-between;">
+                                <ui:VisualElement style="flex-direction: row; flex-grow: 1; margin-bottom: 4px;">
+                                    <ui:VisualElement name="ProcurementSatImage" style="width: 50px; height: 50px; border-radius: 4px; background-color: rgba(0,0,0,0.3); margin-right: 8px;" />
+                                    <ui:VisualElement style="flex-grow: 1; flex-direction: column;">
+                                        <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                                            <ui:Label text="SPY SATELLITE" style="color: white; font-size: 11px; -unity-font-style: bold;" />
+                                            <ui:Label name="LblSatCost" text="$500M" style="color: rgb(186, 104, 200); font-size: 11px; -unity-font-style: bold;" />
+                                        </ui:VisualElement>
+                                        <ui:Label text="Permanent +Global Coverage" style="color: rgba(255,255,255,0.5); font-size: 9px; white-space: normal; margin-top: 4px;" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:Button name="BtnBuySatellite" text="PROCURE" style="height: 26px; background-color: rgba(186, 104, 200, 0.3); border-color: rgba(186, 104, 200, 0.8); border-width: 1px; border-radius: 4px; color: white; -unity-font-style: bold;" />
+                            </ui:VisualElement>
+
+                            <!-- Drones Card -->
+                            <ui:VisualElement style="flex-grow: 1; padding: 8px; background-color: rgba(35, 237, 86, 0.1); border-color: rgba(35, 237, 86, 0.3); border-width: 1px; border-radius: 6px; flex-direction: column; justify-content: space-between;">
+                                <ui:VisualElement style="flex-direction: row; flex-grow: 1; margin-bottom: 4px;">
+                                    <ui:VisualElement name="ProcurementDroneImage" style="width: 50px; height: 50px; border-radius: 4px; background-color: rgba(0,0,0,0.3); margin-right: 8px;" />
+                                    <ui:VisualElement style="flex-grow: 1; flex-direction: column;">
+                                        <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                                            <ui:Label text="RECON DRONES" style="color: white; font-size: 11px; -unity-font-style: bold;" />
+                                            <ui:Label name="LblDroneCost" text="$150M" style="color: rgb(35, 237, 86); font-size: 11px; -unity-font-style: bold;" />
+                                        </ui:VisualElement>
+                                        <ui:Label text="Temporary +Local Intel" style="color: rgba(255,255,255,0.5); font-size: 9px; white-space: normal; margin-top: 4px;" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:Button name="BtnBuyDrones" text="PROCURE" style="height: 26px; background-color: rgba(35, 237, 86, 0.3); border-color: rgba(35, 237, 86, 0.8); border-width: 1px; border-radius: 4px; color: white; -unity-font-style: bold;" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
+                </ui:ScrollView>
             </ui:VisualElement>
 
             <!-- DATA AND ANALYSIS TAB -->
@@ -647,9 +687,9 @@
                             <ui:Label text="ANALYSIS BUDGET" style="font-size: 11px; color: grey; margin-bottom: 4px;" />
                             <ui:VisualElement style="flex-direction: row; align-items: center;">
                                 <ui:Label text="&#xf073;" class="fa-icon" style="color: white; font-size: 14px; margin-right: 6px;" />
-                                <ui:Label name="DA_Budget" text="₦0M / month" style="font-size: 16px; -unity-font-style: bold; color: white;" />
+                                <ui:Label name="DA_Budget" text="$0M / month" style="font-size: 16px; -unity-font-style: bold; color: white;" />
                             </ui:VisualElement>
-                            <ui:Label name="DA_BudgetRem" text="₦0M remaining" style="font-size: 12px; color: rgb(35, 237, 86); margin-top: 4px;" />
+                            <ui:Label name="DA_BudgetRem" text="$0M remaining" style="font-size: 12px; color: rgb(35, 237, 86); margin-top: 4px;" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -770,142 +810,148 @@
 <!-- THREAT BOARD -->
             <ui:VisualElement name="PanelThreatBoard" style="display: none; height: 100%; flex-direction: column;">
                 
-                <!-- TOP KPI STRIP -->
-                <ui:VisualElement style="flex-direction: row; margin-bottom: 12px;">
-                    <!-- Title block -->
-                    <ui:VisualElement class="sub-panel" style="width: 28%; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05); flex-direction: row; align-items: center;">
-                        <ui:VisualElement style="width: 40px; height: 40px; border-radius: 20px; background-color: rgba(255,255,255,0.05); align-items: center; justify-content: center; margin-right: 12px;">
-                            <ui:Label text="&#xf132;" class="fa-icon" style="color: white; font-size: 21px;" />
-                        </ui:VisualElement>
-                        <ui:VisualElement>
-                            <ui:Label text="THREAT ASSESSMENT" style="font-size: 16px; -unity-font-style: bold; color: white;" />
-                            <ui:Label text="Evaluate and prioritize threats to national security." style="font-size: 11px; color: grey; white-space: normal; margin-top: 2px;" />
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    
-                    <!-- KPI Overall Threat -->
-                    <ui:VisualElement class="sub-panel" style="flex-grow: 1; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:Label text="OVERALL THREAT LEVEL" style="font-size: 11px; color: grey; margin-bottom: 4px;" />
-                        <ui:Label name="TA_OverallLevel" text="HIGH" style="font-size: 19px; -unity-font-style: bold; color: rgb(255, 82, 82);" />
-                        <ui:Label name="TA_OverallTrend" text="↗ vs last month" style="font-size: 12px; color: rgb(255, 82, 82); margin-top: 2px;" />
-                    </ui:VisualElement>
+                <ui:ScrollView style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto">
+                    <ui:VisualElement style="flex-direction: column; padding-right: 6px;">
 
-                    <!-- KPI Active Threats -->
-                    <ui:VisualElement class="sub-panel" style="flex-grow: 1; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:Label text="ACTIVE THREATS" style="font-size: 11px; color: grey; margin-bottom: 4px;" />
-                        <ui:Label name="TA_ActiveThreats" text="0" style="font-size: 19px; -unity-font-style: bold; color: white;" />
-                        <ui:Label name="TA_ActiveTrend" text="↗ 0 new" style="font-size: 12px; color: rgb(255, 82, 82); margin-top: 2px;" />
-                    </ui:VisualElement>
-
-                    <!-- KPI Critical Threats -->
-                    <ui:VisualElement class="sub-panel" style="flex-grow: 1; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:Label text="CRITICAL THREATS" style="font-size: 11px; color: grey; margin-bottom: 4px;" />
-                        <ui:Label name="TA_CriticalThreats" text="0" style="font-size: 19px; -unity-font-style: bold; color: white;" />
-                        <ui:Label name="TA_CriticalTrend" text="No change" style="font-size: 12px; color: rgb(241, 196, 15); margin-top: 2px;" />
-                    </ui:VisualElement>
-
-                    <!-- KPI Countries of Concern -->
-                    <ui:VisualElement class="sub-panel" style="flex-grow: 1; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:Label text="COUNTRIES OF CONCERN" style="font-size: 11px; color: grey; margin-bottom: 4px;" />
-                        <ui:Label name="TA_CountriesConcern" text="0" style="font-size: 19px; -unity-font-style: bold; color: white;" />
-                        <ui:Label name="TA_CountriesTrend" text="↗ 0 new" style="font-size: 12px; color: rgb(255, 82, 82); margin-top: 2px;" />
-                    </ui:VisualElement>
-
-                    <!-- Report -->
-                    <ui:VisualElement class="sub-panel" style="flex-grow: 1; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05); flex-direction: row; align-items: center; justify-content: space-between;">
-                        <ui:VisualElement>
-                            <ui:Label text="THREAT TREND (30 DAYS)" style="font-size: 11px; color: grey; margin-bottom: 4px;" />
-                            <ui:Label name="TA_Trend30" text="RISING" style="font-size: 16px; -unity-font-style: bold; color: rgb(255, 82, 82);" />
-                        </ui:VisualElement>
-                        <ui:Button text="&#xf15c;  REPORT" class="fa-icon" style="height: 28px; padding-left: 12px; padding-right: 12px; font-size: 13px; background-color: rgba(255, 255, 255, 0.05); border-color: rgba(255,255,255,0.1); border-width: 1px; border-radius: 2px; color: white;" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
-
-                <!-- ROW 1 (TOP) -->
-                <ui:VisualElement style="flex-grow: 1; flex-direction: row; min-height: 0; margin-bottom: 12px;">
-                    <!-- Threat Matrix -->
-                    <ui:VisualElement class="sub-panel" style="width: 28%; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:Label text="THREAT MATRIX" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
-                        <ui:VisualElement name="TA_MatrixGrid" style="flex-grow: 1; flex-direction: row; flex-wrap: wrap;" />
-                    </ui:VisualElement>
-
-                    <!-- Top Threats -->
-                    <ui:VisualElement class="sub-panel" style="flex-grow: 1; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:Label text="TOP THREATS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
-                        <ui:VisualElement style="flex-direction: row; border-bottom-width: 1px; border-color: rgba(255,255,255,0.1); padding-bottom: 6px; margin-bottom: 6px;">
-                            <ui:Label text="THREAT" style="font-size: 11px; color: grey; width: 140px;" />
-                            <ui:Label text="CATEGORY" style="font-size: 11px; color: grey; flex-grow: 1;" />
-                            <ui:Label text="IMPACT" style="font-size: 11px; color: grey; width: 60px;" />
-                            <ui:Label text="LIKELIHOOD" style="font-size: 11px; color: grey; width: 60px;" />
-                            <ui:Label text="TREND" style="font-size: 11px; color: grey; width: 40px; -unity-text-align: middle-center;" />
-                            <ui:Label text="RISK LEVEL" style="font-size: 11px; color: grey; width: 60px; -unity-text-align: middle-right;" />
-                        </ui:VisualElement>
-                        <ui:ScrollView name="TA_TopThreatsList" style="flex-grow: 1;" />
-                    </ui:VisualElement>
-
-                    <!-- Threat Categories -->
-                    <ui:VisualElement class="sub-panel" style="width: 25%; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:Label text="THREAT CATEGORIES" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
-                        <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: space-between; flex-grow: 1;">
-                            <ui:VisualElement style="width: 80px; height: 80px; border-radius: 40px; border-width: 8px; border-color: rgba(255,255,255,0.1); align-items: center; justify-content: center;">
-                                <ui:Label name="TA_CatDonut" text="0" style="font-size: 18px; color: white; -unity-font-style: bold;" />
-                                <ui:Label text="TOTAL" style="font-size: 10px; color: grey;" />
+                        <!-- TOP KPI STRIP -->
+                        <ui:VisualElement style="flex-direction: row; margin-bottom: 12px; flex-shrink: 0;">
+                            <!-- Title block -->
+                            <ui:VisualElement class="sub-panel" style="width: 28%; margin-right: 12px; padding: 16px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05); flex-direction: row; align-items: center;">
+                                <ui:VisualElement style="width: 44px; height: 44px; border-radius: 22px; background-color: rgba(255,255,255,0.05); align-items: center; justify-content: center; margin-right: 12px;">
+                                    <ui:Label text="&#xf132;" class="fa-icon" style="color: white; font-size: 22px;" />
+                                </ui:VisualElement>
+                                <ui:VisualElement>
+                                    <ui:Label text="THREAT ASSESSMENT" style="font-size: 16px; -unity-font-style: bold; color: white;" />
+                                    <ui:Label text="Evaluate and prioritize threats to national security." style="font-size: 11px; color: grey; white-space: normal; margin-top: 2px;" />
+                                </ui:VisualElement>
                             </ui:VisualElement>
-                            <ui:VisualElement name="TA_CategoryList" style="flex-grow: 1; margin-left: 16px;" />
+                            
+                            <!-- KPI Overall Threat -->
+                            <ui:VisualElement class="sub-panel" style="flex-grow: 1; margin-right: 12px; padding: 16px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                                <ui:Label text="OVERALL THREAT LEVEL" style="font-size: 11px; color: grey; margin-bottom: 6px;" />
+                                <ui:Label name="TA_OverallLevel" text="HIGH" style="font-size: 22px; -unity-font-style: bold; color: rgb(255, 82, 82);" />
+                                <ui:Label name="TA_OverallTrend" text="↗ vs last month" style="font-size: 11px; color: rgb(255, 82, 82); margin-top: 4px;" />
+                            </ui:VisualElement>
+
+                            <!-- KPI Active Threats -->
+                            <ui:VisualElement class="sub-panel" style="flex-grow: 1; margin-right: 12px; padding: 16px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                                <ui:Label text="ACTIVE THREATS" style="font-size: 11px; color: grey; margin-bottom: 6px;" />
+                                <ui:Label name="TA_ActiveThreats" text="0" style="font-size: 22px; -unity-font-style: bold; color: white;" />
+                                <ui:Label name="TA_ActiveTrend" text="↗ 0 new" style="font-size: 11px; color: rgb(255, 82, 82); margin-top: 4px;" />
+                            </ui:VisualElement>
+
+                            <!-- KPI Critical Threats -->
+                            <ui:VisualElement class="sub-panel" style="flex-grow: 1; margin-right: 12px; padding: 16px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                                <ui:Label text="CRITICAL THREATS" style="font-size: 11px; color: grey; margin-bottom: 6px;" />
+                                <ui:Label name="TA_CriticalThreats" text="0" style="font-size: 22px; -unity-font-style: bold; color: white;" />
+                                <ui:Label name="TA_CriticalTrend" text="No change" style="font-size: 11px; color: rgb(241, 196, 15); margin-top: 4px;" />
+                            </ui:VisualElement>
+
+                            <!-- KPI Countries of Concern -->
+                            <ui:VisualElement class="sub-panel" style="flex-grow: 1; margin-right: 12px; padding: 16px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                                <ui:Label text="COUNTRIES OF CONCERN" style="font-size: 11px; color: grey; margin-bottom: 6px;" />
+                                <ui:Label name="TA_CountriesConcern" text="0" style="font-size: 22px; -unity-font-style: bold; color: white;" />
+                                <ui:Label name="TA_CountriesTrend" text="↗ 0 new" style="font-size: 11px; color: rgb(255, 82, 82); margin-top: 4px;" />
+                            </ui:VisualElement>
+
+                            <!-- Report / Trend -->
+                            <ui:VisualElement class="sub-panel" style="flex-grow: 1; padding: 16px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05); flex-direction: row; align-items: center; justify-content: space-between;">
+                                <ui:VisualElement>
+                                    <ui:Label text="THREAT TREND (30 DAYS)" style="font-size: 11px; color: grey; margin-bottom: 6px;" />
+                                    <ui:Label name="TA_Trend30" text="RISING" style="font-size: 18px; -unity-font-style: bold; color: rgb(255, 82, 82);" />
+                                </ui:VisualElement>
+                                <ui:Button text="&#xf15c;  REPORT" class="fa-icon" style="height: 32px; padding-left: 14px; padding-right: 14px; font-size: 13px; background-color: rgba(255, 255, 255, 0.05); border-color: rgba(255,255,255,0.1); border-width: 1px; border-radius: 2px; color: white;" />
+                            </ui:VisualElement>
                         </ui:VisualElement>
-                    </ui:VisualElement>
-                </ui:VisualElement>
 
-                <!-- ROW 2 (MIDDLE) -->
-                <ui:VisualElement style="flex-grow: 1; flex-direction: row; min-height: 0; margin-bottom: 12px;">
-                    <!-- Regional Overview -->
-                    <ui:VisualElement class="sub-panel" style="width: 28%; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:Label text="REGIONAL THREAT OVERVIEW" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
-                        <ui:VisualElement name="TA_RegionList" style="flex-grow: 1;" />
-                    </ui:VisualElement>
+                        <!-- ROW 1: Threat Matrix | Top Threats | Categories -->
+                        <ui:VisualElement style="flex-direction: row; margin-bottom: 12px; flex-shrink: 0; min-height: 260px;">
+                            <!-- Threat Matrix -->
+                            <ui:VisualElement class="sub-panel" style="width: 28%; margin-right: 12px; padding: 16px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                                <ui:Label text="THREAT MATRIX" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
+                                <ui:VisualElement name="TA_MatrixGrid" style="flex-grow: 1; flex-direction: column;" />
+                            </ui:VisualElement>
 
-                    <!-- Threat Level Over Time -->
-                    <ui:VisualElement class="sub-panel" style="flex-grow: 1; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 12px;">
-                            <ui:Label text="THREAT LEVEL OVER TIME" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px;" />
-                            <ui:Label text="Last 90 Days" style="font-size: 12px; color: grey; background-color: rgba(255,255,255,0.05); padding-left: 6px; padding-right: 6px; border-radius: 2px;" />
+                            <!-- Top Threats -->
+                            <ui:VisualElement class="sub-panel" style="flex-grow: 1; margin-right: 12px; padding: 16px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                                <ui:Label text="TOP THREATS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
+                                <ui:VisualElement style="flex-direction: row; border-bottom-width: 1px; border-color: rgba(255,255,255,0.1); padding-bottom: 6px; margin-bottom: 6px;">
+                                    <ui:Label text="THREAT" style="font-size: 11px; color: grey; width: 140px;" />
+                                    <ui:Label text="CATEGORY" style="font-size: 11px; color: grey; flex-grow: 1;" />
+                                    <ui:Label text="IMPACT" style="font-size: 11px; color: grey; width: 60px;" />
+                                    <ui:Label text="LIKELIHOOD" style="font-size: 11px; color: grey; width: 60px;" />
+                                    <ui:Label text="TREND" style="font-size: 11px; color: grey; width: 40px; -unity-text-align: middle-center;" />
+                                    <ui:Label text="RISK LEVEL" style="font-size: 11px; color: grey; width: 60px; -unity-text-align: middle-right;" />
+                                </ui:VisualElement>
+                                <ui:ScrollView name="TA_TopThreatsList" style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
+                            </ui:VisualElement>
+
+                            <!-- Threat Categories -->
+                            <ui:VisualElement class="sub-panel" style="width: 25%; padding: 16px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                                <ui:Label text="THREAT CATEGORIES" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
+                                <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: space-between; flex-grow: 1;">
+                                    <ui:VisualElement style="width: 80px; height: 80px; border-radius: 40px; border-width: 8px; border-color: rgba(255,255,255,0.1); align-items: center; justify-content: center;">
+                                        <ui:Label name="TA_CatDonut" text="0" style="font-size: 18px; color: white; -unity-font-style: bold;" />
+                                        <ui:Label text="TOTAL" style="font-size: 10px; color: grey;" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement name="TA_CategoryList" style="flex-grow: 1; margin-left: 16px;" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
                         </ui:VisualElement>
-                        <ui:VisualElement name="TA_TrendChart" style="flex-grow: 1; flex-direction: row; align-items: flex-end; justify-content: space-between; padding-top: 20px;" />
-                    </ui:VisualElement>
 
-                    <!-- Countries of Concern -->
-                    <ui:VisualElement class="sub-panel" style="width: 32%; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:Label text="COUNTRIES OF CONCERN" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
-                        <ui:VisualElement style="flex-direction: row; border-bottom-width: 1px; border-color: rgba(255,255,255,0.1); padding-bottom: 6px; margin-bottom: 6px;">
-                            <ui:Label text="COUNTRY" style="font-size: 11px; color: grey; width: 70px;" />
-                            <ui:Label text="CONCERN LEVEL" style="font-size: 11px; color: grey; width: 80px; -unity-text-align: middle-center;" />
-                            <ui:Label text="REASON" style="font-size: 11px; color: grey; flex-grow: 1;" />
-                            <ui:Label text="TREND" style="font-size: 11px; color: grey; width: 30px; -unity-text-align: middle-center;" />
+                        <!-- ROW 2: Regional Overview | Trend Chart | Countries of Concern -->
+                        <ui:VisualElement style="flex-direction: row; margin-bottom: 12px; flex-shrink: 0; min-height: 280px;">
+                            <!-- Regional Overview -->
+                            <ui:VisualElement class="sub-panel" style="width: 28%; margin-right: 12px; padding: 16px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                                <ui:Label text="REGIONAL THREAT OVERVIEW" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
+                                <ui:VisualElement name="TA_RegionList" style="flex-grow: 1;" />
+                            </ui:VisualElement>
+
+                            <!-- Threat Level Over Time -->
+                            <ui:VisualElement class="sub-panel" style="flex-grow: 1; margin-right: 12px; padding: 16px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 12px;">
+                                    <ui:Label text="THREAT LEVEL OVER TIME" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px;" />
+                                    <ui:Label text="Last 90 Days" style="font-size: 12px; color: grey; background-color: rgba(255,255,255,0.05); padding-left: 6px; padding-right: 6px; border-radius: 2px;" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="TA_TrendChart" style="flex-grow: 1; flex-direction: row; align-items: flex-end; justify-content: space-between; padding-top: 20px;" />
+                            </ui:VisualElement>
+
+                            <!-- Countries of Concern -->
+                            <ui:VisualElement class="sub-panel" style="width: 32%; padding: 16px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                                <ui:Label text="COUNTRIES OF CONCERN" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
+                                <ui:VisualElement style="flex-direction: row; border-bottom-width: 1px; border-color: rgba(255,255,255,0.1); padding-bottom: 6px; margin-bottom: 6px;">
+                                    <ui:Label text="COUNTRY" style="font-size: 11px; color: grey; width: 70px;" />
+                                    <ui:Label text="CONCERN LEVEL" style="font-size: 11px; color: grey; width: 80px; -unity-text-align: middle-center;" />
+                                    <ui:Label text="REASON" style="font-size: 11px; color: grey; flex-grow: 1;" />
+                                    <ui:Label text="TREND" style="font-size: 11px; color: grey; width: 30px; -unity-text-align: middle-center;" />
+                                </ui:VisualElement>
+                                <ui:ScrollView name="TA_CountriesList" style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
+                            </ui:VisualElement>
                         </ui:VisualElement>
-                        <ui:ScrollView name="TA_CountriesList" style="flex-grow: 1;" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
 
-                <!-- ROW 3 (BOTTOM) -->
-                <ui:VisualElement style="flex-grow: 1; flex-direction: row; min-height: 0;">
-                    <!-- Critical Threats -->
-                    <ui:VisualElement class="sub-panel" style="width: 45%; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:Label text="CRITICAL THREATS (REQUIRING IMMEDIATE ATTENTION)" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
-                        <ui:VisualElement name="TA_CriticalCards" style="flex-grow: 1; flex-direction: row; flex-wrap: wrap; justify-content: space-between;" />
-                    </ui:VisualElement>
+                        <!-- ROW 3: Critical Threats | Mitigation | Recommendations -->
+                        <ui:VisualElement style="flex-direction: row; flex-shrink: 0; min-height: 200px; margin-bottom: 12px;">
+                            <!-- Critical Threats -->
+                            <ui:VisualElement class="sub-panel" style="width: 45%; margin-right: 12px; padding: 16px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                                <ui:Label text="CRITICAL THREATS (REQUIRING IMMEDIATE ATTENTION)" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px; white-space: normal;" />
+                                <ui:VisualElement name="TA_CriticalCards" style="flex-grow: 1; flex-direction: row; flex-wrap: wrap; justify-content: space-between;" />
+                            </ui:VisualElement>
 
-                    <!-- Mitigation Progress -->
-                    <ui:VisualElement class="sub-panel" style="flex-grow: 1; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:Label text="MITIGATION PROGRESS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
-                        <ui:ScrollView name="TA_MitigationList" style="flex-grow: 1;" />
-                    </ui:VisualElement>
+                            <!-- Mitigation Progress -->
+                            <ui:VisualElement class="sub-panel" style="flex-grow: 1; margin-right: 12px; padding: 16px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                                <ui:Label text="MITIGATION PROGRESS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
+                                <ui:ScrollView name="TA_MitigationList" style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
+                            </ui:VisualElement>
 
-                    <!-- Recommendations -->
-                    <ui:VisualElement class="sub-panel" style="width: 25%; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                        <ui:Label text="RECOMMENDATIONS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
-                        <ui:ScrollView name="TA_RecommendationsList" style="flex-grow: 1;" />
+                            <!-- Recommendations -->
+                            <ui:VisualElement class="sub-panel" style="width: 25%; padding: 16px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                                <ui:Label text="RECOMMENDATIONS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
+                                <ui:ScrollView name="TA_RecommendationsList" style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
                     </ui:VisualElement>
-                </ui:VisualElement>
+                </ui:ScrollView>
             </ui:VisualElement>
 
         </ui:VisualElement>

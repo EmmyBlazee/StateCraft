@@ -26,35 +26,34 @@ namespace StateCraft.UI
         /// <summary>True once filter tab click events have been wired.</summary>
         private bool _constructionTabWired = false;
 
+        private void SyncProjectsSidePanel()
+        {
+            if (_panelConstruction == null) return;
+            var wrapper = _panelConstruction.Q<VisualElement>("ProjectsSideWrapper");
+            if (wrapper == null) return;
+
+            var projCard = _panelConstruction.Q<VisualElement>("SelectedProjectCard");
+            var advCard  = _panelConstruction.Q<VisualElement>("ProjectsAdviserCard");
+
+            bool showProj = projCard != null && projCard.style.display == DisplayStyle.Flex;
+            bool showAdv  = advCard != null && advCard.style.display == DisplayStyle.Flex;
+
+            wrapper.style.display = (showProj || showAdv) ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
         // ── Initialisation ────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Wire up every interactive element in PanelConstruction.
-        /// Called from InitializeElements() — _panelConstruction is already resolved at
-        /// that point, so Q() succeeds even though the panel is display:none.
-        /// </summary>
         internal void InitConstructionTab()
         {
-            // Use _panelConstruction, NOT _root — _root.Q() skips display:none subtrees
-            // in Unity 2022. _panelConstruction itself is found from _root before it is
-            // hidden, so querying children from it works regardless of display state.
-            if (_panelConstruction == null)
-            {
-                Debug.LogWarning("[Construction] InitConstructionTab: _panelConstruction is null — cannot wire tab.");
-                return;
-            }
+            // Use _panelConstruction, NOT _root
+            if (_panelConstruction == null) return;
 
-            // Resolve the blueprint grid from the panel (not from _root)
             _liveBlueprintGrid = _panelConstruction.Q<VisualElement>("LiveBlueprintGrid");
-            Debug.Log($"[Construction] InitConstructionTab | _liveBlueprintGrid: {_liveBlueprintGrid != null}");
 
             if (_constructionTabWired) return;
             _constructionTabWired = true;
 
-            // Filter tabs
             _blueprintTabBar = _panelConstruction.Q<VisualElement>("BlueprintFilterTabs");
-            Debug.Log($"[Construction] BlueprintFilterTabs: {_blueprintTabBar != null}");
-
             if (_blueprintTabBar != null)
             {
                 foreach (var tab in _blueprintTabBar.Children().OfType<Label>())
@@ -70,8 +69,9 @@ namespace StateCraft.UI
             {
                 closeBtn.clicked += () =>
                 {
-                    var sideCard = _panelConstruction.Q<VisualElement>(className: "projects-side-card");
+                    var sideCard = _panelConstruction.Q<VisualElement>("SelectedProjectCard");
                     if (sideCard != null) sideCard.style.display = DisplayStyle.None;
+                    SyncProjectsSidePanel();
                 };
             }
         }
@@ -115,8 +115,17 @@ namespace StateCraft.UI
             PanelSetLabel("ProjectsActiveHeading",     $"ACTIVE PROJECTS ({pipelineCount})");
 
             // Adviser
+            var advCard = _panelConstruction?.Q<VisualElement>("ProjectsAdviserCard");
             if (_currentAdviserRec.HasValue)
+            {
                 PanelSetLabel("ProjectsAdviserBody", _currentAdviserRec.Value.Rationale);
+                if (advCard != null) advCard.style.display = DisplayStyle.Flex;
+            }
+            else
+            {
+                if (advCard != null) advCard.style.display = DisplayStyle.None;
+            }
+            SyncProjectsSidePanel();
 
             // Legacy hidden summary element
             if (_constructionSummary != null)
@@ -191,7 +200,7 @@ namespace StateCraft.UI
 
             var img = new VisualElement();
             img.AddToClassList("project-image");
-            img.AddToClassList(GetImageClassForType(p.projectType));
+            img.AddToClassList(GetImageClass(p.projectName, p.projectType));
             card.Add(img);
 
             card.Add(new Label(p.projectName)
@@ -222,8 +231,9 @@ namespace StateCraft.UI
 
             card.RegisterCallback<ClickEvent>(_ =>
             {
-                var sideCard = _panelConstruction?.Q<VisualElement>(className: "projects-side-card");
+                var sideCard = _panelConstruction?.Q<VisualElement>("SelectedProjectCard");
                 if (sideCard != null) sideCard.style.display = DisplayStyle.Flex;
+                SyncProjectsSidePanel();
 
                 PanelSetLabel("SideProject_Title",    capturedP.projectName.ToUpper());
                 PanelSetLabel("SideProject_Overview", capturedDesc);
@@ -318,7 +328,7 @@ namespace StateCraft.UI
 
                 var bpImg = new VisualElement();
                 bpImg.AddToClassList("blueprint-image");
-                bpImg.AddToClassList(GetImageClassForType(bp.type));
+                bpImg.AddToClassList(GetImageClass(bp.blueprintName, bp.type));
                 card.Add(bpImg);
 
                 card.Add(new Label(bp.blueprintName.ToUpper())
@@ -565,6 +575,27 @@ namespace StateCraft.UI
 
         private static bool IsInfraType(string type)
             => type?.IndexOf("Infra", System.StringComparison.OrdinalIgnoreCase) >= 0;
+
+        private static string GetImageClass(string name, string type)
+        {
+            if (string.IsNullOrEmpty(name)) return GetImageClassForType(type);
+            string n = name.ToLowerInvariant();
+
+            if (n.Contains("highway") || n.Contains("road"))                      return "highway";
+            if (n.Contains("rail"))                                              return "rail";
+            if (n.Contains("port") || n.Contains("sea"))                         return "port";
+            if (n.Contains("gas"))                                               return "gas";
+            if (n.Contains("hydroelectric") || n.Contains("dam"))                return "dam";
+            if (n.Contains("nuclear"))                                           return "nuclear";
+            if (n.Contains("solar"))                                             return "solar";
+            if (n.Contains("rice"))                                              return "rice";
+            if (n.Contains("cocoa"))                                             return "cocoa";
+            if (n.Contains("data") || n.Contains("centre") || n.Contains("datacenter")) return "datacenter";
+            if (n.Contains("space") || n.Contains("satellite") || n.Contains("comms"))  return "comms";
+            if (n.Contains("defence") || n.Contains("defense") || n.Contains("military")) return "defence";
+
+            return GetImageClassForType(type);
+        }
 
         private static string GetImageClassForType(string type)
         {

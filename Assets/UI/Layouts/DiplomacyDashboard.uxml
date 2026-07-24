@@ -1,4 +1,5 @@
-﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Template name="TradeTemplate" src="project://database/Assets/UI/Layouts/TradeAgreementPanel.uxml" />
     <Style src="project://database/Assets/UI/Styles/Global.uss" />
     <ui:VisualElement name="DiplomacyDashboard" class="standard-dashboard hologram-border" style="display: none;">
 
@@ -29,12 +30,13 @@
         </ui:VisualElement>
 
         <!-- SUB-TAB NAVIGATION -->
-        <ui:VisualElement name="SubTabs" style="flex-direction: row; margin-bottom: 8px; background-color: rgba(0,0,0,0.4); border-radius: 8px; padding: 5px;">
-            <ui:Button name="TabOverview" text="OVERVIEW" class="nav-button active-tab" style="flex-grow: 1;" />
-            <ui:Button name="TabBilateral" text="BILATERAL RELATIONS" class="nav-button" style="flex-grow: 1;" />
-            <ui:Button name="TabTreaties" text="TREATIES &amp; AGREEMENTS" class="nav-button" style="flex-grow: 1;" />
-            <ui:Button name="TabOrganizations" text="INTERNATIONAL ORGANIZATIONS" class="nav-button" style="flex-grow: 1;" />
-            <ui:Button name="TabEmbassies" text="EMBASSIES" class="nav-button" style="flex-grow: 1;" />
+        <ui:VisualElement name="SubTabs" class="econ-tabs">
+            <ui:Button name="TabOverview" text="OVERVIEW" class="econ-tab active-tab" />
+            <ui:Button name="TabBilateral" text="BILATERAL RELATIONS" class="econ-tab" />
+            <ui:Button name="TabTreaties" text="TREATIES &amp; AGREEMENTS" class="econ-tab" />
+            <ui:Button name="TabOrganizations" text="INTERNATIONAL ORGANIZATIONS" class="econ-tab" />
+            <ui:Button name="TabEmbassies" text="EMBASSIES" class="econ-tab" />
+            <ui:Button name="TabTrade" text="TRADE &amp; RESOURCES" class="econ-tab" />
         </ui:VisualElement>
 
         <!-- CONTENT PANELS -->
@@ -80,11 +82,58 @@
             <ui:VisualElement name="PanelBilateral" style="display: none; height: 100%; flex-direction: column;">
                 <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                     <ui:Label text="BILATERAL RELATIONS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px;" />
-                    <!-- Placeholder for search/filter if needed -->
+                    <ui:VisualElement style="flex-direction: row; background-color: rgba(0,0,0,0.4); border-radius: 4px; padding: 2px;">
+                        <ui:Button name="BtnFilterActive" text="ACTIONABLE" class="econ-tab active-tab" style="font-size: 9px; height: 20px; padding-left: 8px; padding-right: 8px;" />
+                        <ui:Button name="BtnFilterAllies" text="ALLIES" class="econ-tab" style="font-size: 9px; height: 20px; padding-left: 8px; padding-right: 8px;" />
+                        <ui:Button name="BtnFilterRivals" text="RIVALS" class="econ-tab" style="font-size: 9px; height: 20px; padding-left: 8px; padding-right: 8px;" />
+                        <ui:Button name="BtnFilterNeutral" text="NEUTRAL" class="econ-tab" style="font-size: 9px; height: 20px; padding-left: 8px; padding-right: 8px;" />
+                        <ui:Button name="BtnFilterAll" text="ALL" class="econ-tab" style="font-size: 9px; height: 20px; padding-left: 8px; padding-right: 8px;" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:ScrollView style="flex-grow: 1;">
                     <ui:VisualElement name="BilateralCardsGrid" style="flex-direction: row; flex-wrap: wrap; justify-content: flex-start;" />
                 </ui:ScrollView>
+            </ui:VisualElement>
+
+            <!-- 2.5 BILATERAL DETAIL VIEW -->
+            <ui:VisualElement name="PanelBilateralDetail" style="display: none; height: 100%; flex-direction: column;">
+                <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 15px;">
+                    <ui:Button name="BtnBackToCountries" text="&lt; BACK TO LIST" class="econ-tab" style="width: 120px; margin-right: 15px;" />
+                    <ui:Label name="DetailCountryTitle" text="COUNTRY NAME" style="font-size: 18px; color: white; -unity-font-style: bold; letter-spacing: 2px;" />
+                    <ui:Label name="DetailWarStage" text="PEACE" style="font-size: 14px; -unity-font-style: bold; margin-left: 15px; padding: 4px 8px; border-radius: 4px; background-color: rgba(0,0,0,0.5);" />
+                </ui:VisualElement>
+                
+                <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 20px; background-color: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; border-color: rgba(255,255,255,0.1); border-width: 1px;">
+                    <ui:ProgressBar name="DetailRelationsBar" high-value="100" style="flex-grow: 1; height: 10px; margin-right: 15px;" />
+                    <ui:Label name="DetailRelationsScore" text="Relations: 50/100" style="font-size: 14px; color: white; -unity-font-style: bold; margin-right: 10px;" />
+                    <ui:Label name="DetailRelationsLabel" text="Neutral" style="font-size: 14px; -unity-font-style: bold;" />
+                </ui:VisualElement>
+
+                <ui:VisualElement style="flex-direction: row; flex-grow: 1;">
+                    <!-- Left: Stats -->
+                    <ui:VisualElement style="width: 30%; margin-right: 15px; background-color: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; border-color: rgba(255,255,255,0.1); border-width: 1px;">
+                        <ui:Label text="COUNTRY STATS" style="font-size: 12px; color: grey; margin-bottom: 10px; -unity-font-style: bold;" />
+                        <ui:ScrollView style="flex-grow: 1;">
+                            <ui:VisualElement name="DetailStatsList" style="flex-direction: column;" />
+                        </ui:ScrollView>
+                    </ui:VisualElement>
+
+                    <!-- Middle: Treaties -->
+                    <ui:VisualElement style="width: 35%; margin-right: 15px; background-color: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; border-color: rgba(255,255,255,0.1); border-width: 1px;">
+                        <ui:Label text="ACTIVE TREATIES" style="font-size: 12px; color: grey; margin-bottom: 10px; -unity-font-style: bold;" />
+                        <ui:ScrollView style="flex-grow: 1;">
+                            <ui:VisualElement name="DetailTreatiesList" style="flex-direction: column;" />
+                        </ui:ScrollView>
+                    </ui:VisualElement>
+
+                    <!-- Right: Actions -->
+                    <ui:VisualElement style="width: 35%; background-color: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; border-color: rgba(255,255,255,0.1); border-width: 1px;">
+                        <ui:Label text="DIPLOMATIC ACTIONS" style="font-size: 12px; color: grey; margin-bottom: 10px; -unity-font-style: bold;" />
+                        <ui:ScrollView style="flex-grow: 1;">
+                            <ui:VisualElement name="DetailActionsList" style="flex-direction: column;" />
+                        </ui:ScrollView>
+                    </ui:VisualElement>
+                </ui:VisualElement>
             </ui:VisualElement>
 
             <!-- 3. TREATIES & AGREEMENTS TAB -->
@@ -94,7 +143,7 @@
                     <ui:VisualElement name="TreatiesCardsList" style="flex-direction: column;" />
                 </ui:ScrollView>
                 <ui:VisualElement style="flex-direction: row; justify-content: center;">
-                    <ui:Button name="BtnProposeTreaty" text="PROPOSE TREATY" class="button-premium" style="width: 250px; height: 36px; font-size: 14px; background-color: rgba(35, 140, 237, 0.3); border-color: rgb(35, 140, 237);" />
+                    <ui:Button name="BtnProposeTreaty" text="PROPOSE TREATY" class="econ-small-button" style="width: 250px; height: 36px; font-size: 14px; background-color: rgba(35, 140, 237, 0.3); border-color: rgb(35, 140, 237);" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
@@ -133,6 +182,11 @@
                     <ui:VisualElement name="EmbassiesCardsGrid" style="flex-direction: row; flex-wrap: wrap; justify-content: flex-start;" />
                 </ui:ScrollView>
 
+            </ui:VisualElement>
+
+            <!-- 6. TRADE TAB -->
+            <ui:VisualElement name="PanelTrade" style="display: none; height: 100%; flex-direction: column;">
+                <ui:Instance template="TradeTemplate" name="TradeAgreementPanel" style="flex-grow: 1;" />
             </ui:VisualElement>
 
         </ui:VisualElement>

@@ -23,21 +23,18 @@ namespace StateCraft.UI
             var gm = GameManager.Instance;
             if (gm == null) return;
 
-            // 1. Supply Status & Daily Consumption
+            // 1. Supply Reserves & Consumption
             var supplyContainer = _panelLogistics.Q<VisualElement>("SupplyStatusContainer");
-            var consumptionContainer = _panelLogistics.Q<VisualElement>("ConsumptionContainer");
-            if (supplyContainer != null && consumptionContainer != null)
+
+            if (supplyContainer != null)
             {
                 supplyContainer.Clear();
-                consumptionContainer.Clear();
-                
-                // Mocks to match screenshot
-                AddSupplyRow(supplyContainer, consumptionContainer, "Fuel", country.reserveFuel, "-2,800 L");
-                AddSupplyRow(supplyContainer, consumptionContainer, "Ammunition", country.reserveAmmo, "-340 Crates");
-                AddSupplyRow(supplyContainer, consumptionContainer, "Food", country.reserveFood, "-120 Tons");
-                AddSupplyRow(supplyContainer, consumptionContainer, "Medical Supplies", country.reserveMedical, "-15 Crates");
-                AddSupplyRow(supplyContainer, consumptionContainer, "Spare Parts", 46f, "-85 Units");
-                AddSupplyRow(supplyContainer, consumptionContainer, "Uniforms", 73f, "-25 Units");
+                AddSupplyRow(supplyContainer, "Fuel", country.reserveFuel, "-2,800 L");
+                AddSupplyRow(supplyContainer, "Ammunition", country.reserveAmmo, "-340 Crates");
+                AddSupplyRow(supplyContainer, "Food", country.reserveFood, "-120 Tons");
+                AddSupplyRow(supplyContainer, "Medical Supplies", country.reserveMedical, "-15 Crates");
+                AddSupplyRow(supplyContainer, "Spare Parts", 46f, "-85 Units");
+                AddSupplyRow(supplyContainer, "Uniforms", 73f, "-25 Units");
             }
 
             // 2. Storage & Depots
@@ -75,43 +72,76 @@ namespace StateCraft.UI
                 AddConvoyRow(convoysScroll, "Kaduna → Jos", "Medical Supplies", "1 Day", "On Time");
             }
 
-            // 5. Procurement & Purchases
-            var procurementScroll = _panelLogistics.Q<ScrollView>("ProcurementScroll");
-            if (procurementScroll != null)
+            // 5. Supply Contracts
+            var contractsScroll = _panelLogistics.Q<ScrollView>("ContractsScroll");
+            var activeContractsScroll = _panelLogistics.Q<ScrollView>("ActiveContractsScroll");
+            if (contractsScroll != null && activeContractsScroll != null)
             {
-                procurementScroll.Clear();
-                AddProcurementRow(procurementScroll, "Fuel (Per 100,000 L)", "₦120M", "3 Days", "FUEL", 0.12f);
-                AddProcurementRow(procurementScroll, "Ammunition (Per Crate)", "₦85M", "5 Days", "AMMO", 0.085f);
-                AddProcurementRow(procurementScroll, "Medical Supplies (Per Crate)", "₦65M", "4 Days", "MEDICAL", 0.065f);
-                AddProcurementRow(procurementScroll, "Spare Parts (Per Unit)", "₦40M", "6 Days", "SPARE", 0.040f);
-                AddProcurementRow(procurementScroll, "Trucks (Per Unit)", "₦95M", "7 Days", "TRUCK", 0.095f);
-                AddProcurementRow(procurementScroll, "Transport Aircraft (Per Unit)", "₦6.2B", "20 Days", "AIRCRAFT", 6.2f);
+                contractsScroll.Clear();
+                activeContractsScroll.Clear();
+
+                // Populate Available Offers
+                AddSupplyContractOffer(contractsScroll, "Fuel Resupply (6 Mo)", "FUEL", 20f, 0.05f, 6);
+                AddSupplyContractOffer(contractsScroll, "Fuel Strategic Reserve (12 Mo)", "FUEL", 40f, 0.09f, 12);
+                AddSupplyContractOffer(contractsScroll, "Ammo Production Run (6 Mo)", "AMMO", 15f, 0.04f, 6);
+                AddSupplyContractOffer(contractsScroll, "NATO Standard Ammo (12 Mo)", "AMMO", 30f, 0.07f, 12);
+                AddSupplyContractOffer(contractsScroll, "Medical Supplies (6 Mo)", "MEDICAL", 10f, 0.02f, 6);
+                AddSupplyContractOffer(contractsScroll, "Rations Pipeline (6 Mo)", "FOOD", 25f, 0.03f, 6);
+
+                // Populate Active Contracts
+                if (country.activeSupplyContracts != null)
+                {
+                    foreach (var contract in country.activeSupplyContracts)
+                    {
+                        AddActiveSupplyContract(activeContractsScroll, contract);
+                    }
+                }
             }
 
-            // 6. Emergency Actions
-            var emergencyContainer = _panelLogistics.Q<VisualElement>("EmergencyActionsContainer");
-            if (emergencyContainer != null)
-            {
-                emergencyContainer.Clear();
-                AddEmergencyAction(emergencyContainer, "Resupply All Active Operations");
-                AddEmergencyAction(emergencyContainer, "Prioritize Army");
-                AddEmergencyAction(emergencyContainer, "Prioritize Air Force");
-                AddEmergencyAction(emergencyContainer, "Release Strategic Reserve");
-                AddEmergencyAction(emergencyContainer, "Suspend Training & Non-Essential Use");
-                AddEmergencyAction(emergencyContainer, "Emergency Foreign Purchase");
-            }
+            // (Emergency Actions removed as per request)
 
             // 7. Alerts
             var alertsContainer = _panelLogistics.Q<VisualElement>("AlertsContainer");
             if (alertsContainer != null)
             {
+                alertsContainer.style.flexDirection = FlexDirection.Column;
                 alertsContainer.Clear();
-                AddAlert(alertsContainer, "Fuel reserve\nbelow 20%", Color.red);
-                AddAlert(alertsContainer, "Air Force spare parts\nrunning low", Color.yellow);
-                AddAlert(alertsContainer, "Medical supplies\nsufficient for only 9 days", Color.yellow);
-                AddAlert(alertsContainer, "Northern depot at\nmaximum capacity", Color.red);
-                AddAlert(alertsContainer, "Ammunition production\nbelow consumption", Color.yellow);
-                AddAlert(alertsContainer, "3 convoys\ncurrently delayed", Color.yellow);
+                int alertCount = 0;
+
+                if (country.reserveFuel < 30f) {
+                    AddAlert(alertsContainer, $"Fuel reserve\ncritical ({country.reserveFuel:F0}%)", Color.red);
+                    alertCount++;
+                }
+                else if (country.reserveFuel < 60f) {
+                    AddAlert(alertsContainer, "Fuel reserve\nrunning low", Color.yellow);
+                    alertCount++;
+                }
+
+                if (country.reserveAmmo < 30f) {
+                    AddAlert(alertsContainer, $"Ammo reserve\ncritical ({country.reserveAmmo:F0}%)", Color.red);
+                    alertCount++;
+                }
+
+                if (country.reserveFood < 30f) {
+                    AddAlert(alertsContainer, "Food rations\nrunning dangerously low", Color.red);
+                    alertCount++;
+                }
+
+                if (country.reserveMedical < 30f) {
+                    AddAlert(alertsContainer, "Medical supplies\ncritical", Color.red);
+                    alertCount++;
+                }
+
+                if (country.activeSupplyContracts == null || country.activeSupplyContracts.Count == 0) {
+                    AddAlert(alertsContainer, "No active\nsupply contracts", Color.yellow);
+                    alertCount++;
+                }
+
+                if (alertCount == 0) {
+                    AddAlert(alertsContainer, "All supply lines\nstable and secure", new Color(0.14f, 0.93f, 0.34f));
+                    AddAlert(alertsContainer, "Convoy routes operating\nat optimal capacity", new Color(0.14f, 0.93f, 0.34f));
+                    AddAlert(alertsContainer, "No insurgent activity\nalong supply corridors", new Color(0.14f, 0.93f, 0.34f));
+                }
             }
 
             // 8. Summary
@@ -119,45 +149,55 @@ namespace StateCraft.UI
             if (summaryContainer != null)
             {
                 summaryContainer.Clear();
-                AddSummaryStat(summaryContainer, "Overall Logistics Rating", "92%", "Excellent", new Color(0.1f, 0.8f, 0.3f), true);
-                AddSummaryStat(summaryContainer, "Daily Operating Cost", "₦1.8B", "/ day", Color.white, false);
-                AddSummaryStat(summaryContainer, "Supply Efficiency", "95%", "High", new Color(0.1f, 0.8f, 0.3f), false);
-                AddSummaryStat(summaryContainer, "Storage Utilization", "74%", "Good", new Color(0.1f, 0.8f, 0.3f), false);
-                AddSummaryStat(summaryContainer, "Transport Fleet", "163", "Vehicles", Color.white, false);
+                
+                float avgReserve = (country.reserveFuel + country.reserveAmmo + country.reserveFood + country.reserveMedical) / 4f;
+                string overallStatus = avgReserve >= 80f ? "Excellent" : (avgReserve >= 50f ? "Good" : "Poor");
+                Color overallColor = avgReserve >= 80f ? new Color(0.1f, 0.8f, 0.3f) : (avgReserve >= 50f ? Color.yellow : Color.red);
+                AddSummaryStat(summaryContainer, "Overall Logistics Rating", $"{avgReserve:F0}%", overallStatus, overallColor, true);
+                
+                float upkeep = country.CalculateMilitaryUpkeep();
+                string sym = string.IsNullOrEmpty(country.currencySymbol) ? "₦" : country.currencySymbol;
+                float upkeepLocal = upkeep * country.exchangeRate;
+                AddSummaryStat(summaryContainer, "Monthly Operating Cost", $"{sym}{upkeepLocal:F2}B", "/ month", Color.white, false);
+                
+                float efficiency = Mathf.Clamp(avgReserve + (country.activeSupplyContracts != null ? country.activeSupplyContracts.Count * 5f : 0f), 0, 100);
+                string effStatus = efficiency >= 80f ? "High" : (efficiency >= 50f ? "Average" : "Low");
+                Color effColor = efficiency >= 80f ? new Color(0.1f, 0.8f, 0.3f) : (efficiency >= 50f ? Color.yellow : Color.red);
+                AddSummaryStat(summaryContainer, "Supply Efficiency", $"{efficiency:F0}%", effStatus, effColor, false);
+                
+                float storage = Mathf.Clamp(100f - avgReserve + 20f, 10f, 95f);
+                string storageStatus = storage < 85f ? "Good" : "Full";
+                Color storageColor = storage < 85f ? new Color(0.1f, 0.8f, 0.3f) : Color.yellow;
+                AddSummaryStat(summaryContainer, "Storage Utilization", $"{storage:F0}%", storageStatus, storageColor, false);
+                
+                int transportVehicles = country.unitAPCs + 120; // Approximation for logistics vehicles
+                AddSummaryStat(summaryContainer, "Transport Fleet", $"{transportVehicles}", "Vehicles", Color.white, false);
             }
         }
 
-        // --- HELPER METHODS ---
-        
-        private void AddSupplyRow(VisualElement supplyParent, VisualElement consumptionParent, string name, float pct, string consumeRate)
+        // --- HELPER METHODS ---        
+        private void AddSupplyRow(VisualElement supplyParent, string name, float pct, string consumeRate)
         {
-            // Status Row
             var sRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 4, height = 20 } };
-            sRow.Add(new Label(name) { style = { color = Color.white, fontSize = 10, width = 90 } });
+            sRow.Add(new Label(name) { style = { color = Color.white, fontSize = 10, width = 110 } });
             
-            var barBg = new VisualElement() { style = { height = 4, backgroundColor = new Color(1,1,1,0.1f), flexGrow = 1, marginRight = 10 } };
+            var barBg = new VisualElement() { style = { height = 4, backgroundColor = new Color(1,1,1,0.1f), flexGrow = 1, marginRight = 15 } };
             var barFill = new VisualElement() { style = { height = 4, backgroundColor = new Color(0.14f, 0.93f, 0.34f), width = Length.Percent(pct) } };
             if (pct < 60) barFill.style.backgroundColor = Color.yellow;
             if (pct < 30) barFill.style.backgroundColor = Color.red;
             barBg.Add(barFill);
             sRow.Add(barBg);
             
-            sRow.Add(new Label($"{pct:F0}%") { style = { color = Color.white, fontSize = 10, width = 30, unityTextAlign = TextAnchor.MiddleRight } });
+            sRow.Add(new Label($"{pct:F0}%") { style = { color = Color.white, fontSize = 10, width = 35, unityTextAlign = TextAnchor.MiddleRight, marginRight = 15 } });
             
-            var dot = new VisualElement() { style = { width = 6, height = 6, borderTopLeftRadius = 3, borderTopRightRadius = 3, borderBottomLeftRadius = 3, borderBottomRightRadius = 3, marginLeft = 10, backgroundColor = barFill.style.backgroundColor } };
-            sRow.Add(dot);
+            sRow.Add(new Label(consumeRate) { style = { color = Color.white, fontSize = 10, width = 80, unityTextAlign = TextAnchor.MiddleRight, unityFontStyleAndWeight = FontStyle.Bold } });
+            
             supplyParent.Add(sRow);
-
-            // Consumption Row
-            var cRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, justifyContent = Justify.SpaceBetween, marginBottom = 4, height = 20 } };
-            cRow.Add(new Label(name) { style = { color = Color.white, fontSize = 10 } });
-            cRow.Add(new Label(consumeRate) { style = { color = Color.white, fontSize = 10, unityTextAlign = TextAnchor.MiddleRight } });
-            consumptionParent.Add(cRow);
         }
 
         private void AddDepotRow(VisualElement parent, string name, float pct)
         {
-            var row = new VisualElement() { style = { marginBottom = 6 } };
+            var row = new VisualElement() { style = { marginBottom = 6, flexShrink = 0 } };
             var top = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween } };
             top.Add(new Label(name) { style = { color = Color.white, fontSize = 10 } });
             
@@ -216,51 +256,140 @@ namespace StateCraft.UI
             parent.Add(row);
         }
 
-        private void AddProcurementRow(VisualElement parent, string item, string costStr, string eta, string resourceKey, float costB)
+        private void AddSupplyContractOffer(VisualElement parent, string label, string resourceKey, float amountPerTurn, float costB, int durationMonths)
         {
-            var row = new VisualElement() { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 8, paddingBottom = 8, borderBottomWidth = 1, borderBottomColor = new Color(1,1,1,0.05f) } };
-            row.Add(new Label(item) { style = { color = Color.white, fontSize = 10, width = 140 } });
-            row.Add(new Label(costStr) { style = { color = Color.white, fontSize = 10, width = 50, unityFontStyleAndWeight = FontStyle.Bold } });
-            row.Add(new Label($"ETA: {eta}") { style = { color = Color.grey, fontSize = 9, width = 60 } });
+            var country = GameManager.Instance?.playerCountry;
+            string sym = country != null && !string.IsNullOrEmpty(country.currencySymbol) ? country.currencySymbol : "₦";
+            float localCost = costB * (country != null ? country.exchangeRate : 1f);
+
+            var row = new VisualElement() { style = { 
+                flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 8, 
+                paddingTop = 8, paddingBottom = 8, paddingLeft = 8, paddingRight = 8, 
+                backgroundColor = new Color(1,1,1,0.03f), 
+                borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4,
+                borderLeftWidth = 2, borderLeftColor = new Color(0.3f, 0.6f, 1f, 0.6f) 
+            } };
             
-            var btn = new Button(() => BuyLogistics(resourceKey, costB)) { text = "PURCHASE" };
-            btn.style.width = 70; btn.style.height = 20; btn.style.fontSize = 8;
-            btn.style.backgroundColor = new Color(0, 0.3f, 0.1f); btn.style.color = Color.white;
+            var left = new VisualElement() { style = { flexGrow = 1 } };
+            left.Add(new Label(label) { style = { color = Color.white, fontSize = 11, unityFontStyleAndWeight = FontStyle.Bold } });
+            left.Add(new Label($"+{amountPerTurn:F0} {resourceKey} / month") { style = { color = new Color(0.7f, 0.7f, 0.7f), fontSize = 9, marginTop = 2 } });
+            row.Add(left);
+            
+            var costBadge = new VisualElement() { style = { 
+                backgroundColor = new Color(1f, 0.3f, 0.3f, 0.15f), 
+                paddingTop = 3, paddingBottom = 3, paddingLeft = 6, paddingRight = 6, 
+                borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4,
+                marginRight = 10 
+            } };
+            costBadge.Add(new Label($"{StateCraft.UI.UiFormat.Money(localCost, sym)}/mo") { style = { color = new Color(1f, 0.4f, 0.4f), fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
+            row.Add(costBadge);
+            
+            var btn = new Button(() => SignSupplyContract(label, resourceKey, amountPerTurn, costB, durationMonths)) { text = "SIGN" };
+            btn.style.width = 50; btn.style.height = 22; btn.style.fontSize = 10; btn.style.unityFontStyleAndWeight = FontStyle.Bold;
+            btn.style.backgroundColor = new Color(0.14f, 0.93f, 0.34f, 0.2f); btn.style.color = new Color(0.14f, 0.93f, 0.34f);
             btn.style.borderTopWidth = 1; btn.style.borderBottomWidth = 1; btn.style.borderLeftWidth = 1; btn.style.borderRightWidth = 1;
-            btn.style.borderTopColor = new Color(0, 0.5f, 0.2f); btn.style.borderBottomColor = new Color(0, 0.5f, 0.2f); btn.style.borderLeftColor = new Color(0, 0.5f, 0.2f); btn.style.borderRightColor = new Color(0, 0.5f, 0.2f);
+            btn.style.borderTopColor = new Color(0.14f, 0.93f, 0.34f, 0.5f); btn.style.borderBottomColor = new Color(0.14f, 0.93f, 0.34f, 0.5f); btn.style.borderLeftColor = new Color(0.14f, 0.93f, 0.34f, 0.5f); btn.style.borderRightColor = new Color(0.14f, 0.93f, 0.34f, 0.5f);
+            btn.style.borderTopLeftRadius = 4; btn.style.borderTopRightRadius = 4; btn.style.borderBottomLeftRadius = 4; btn.style.borderBottomRightRadius = 4;
+            btn.RegisterCallback<MouseEnterEvent>(e => btn.style.backgroundColor = new Color(0.14f, 0.93f, 0.34f, 0.4f));
+            btn.RegisterCallback<MouseLeaveEvent>(e => btn.style.backgroundColor = new Color(0.14f, 0.93f, 0.34f, 0.2f));
             row.Add(btn);
 
             parent.Add(row);
         }
 
-        private void AddEmergencyAction(VisualElement parent, string actionName)
+        private void AddActiveSupplyContract(VisualElement parent, SupplyContract contract)
         {
-            var btn = new Button() { text = actionName };
-            btn.style.height = 24; btn.style.fontSize = 9; btn.style.color = Color.white;
-            btn.style.backgroundColor = new Color(1,1,1,0.05f);
-            btn.style.borderTopWidth = 1; btn.style.borderBottomWidth = 1; btn.style.borderLeftWidth = 1; btn.style.borderRightWidth = 1;
-            btn.style.borderTopColor = new Color(1,1,1,0.1f); btn.style.borderBottomColor = new Color(1,1,1,0.1f); btn.style.borderLeftColor = new Color(1,1,1,0.1f); btn.style.borderRightColor = new Color(1,1,1,0.1f);
-            btn.style.unityTextAlign = TextAnchor.MiddleLeft;
-            parent.Add(btn);
+            var country = GameManager.Instance?.playerCountry;
+            string sym = country != null && !string.IsNullOrEmpty(country.currencySymbol) ? country.currencySymbol : "₦";
+            float localCost = contract.costPerTurn * (country != null ? country.exchangeRate : 1f);
+
+            var row = new VisualElement() { style = { 
+                flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 8, 
+                paddingTop = 8, paddingBottom = 8, paddingLeft = 8, paddingRight = 8, 
+                backgroundColor = new Color(0.14f, 0.93f, 0.34f, 0.05f), 
+                borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4,
+                borderLeftWidth = 2, borderLeftColor = new Color(0.14f, 0.93f, 0.34f)
+            } };
+            
+            var left = new VisualElement() { style = { flexGrow = 1 } };
+            left.Add(new Label(contract.label) { style = { color = new Color(0.14f, 0.93f, 0.34f), fontSize = 11, unityFontStyleAndWeight = FontStyle.Bold } });
+            
+            var statusRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginTop = 4 } };
+            var activeDot = new VisualElement() { style = { width = 6, height = 6, backgroundColor = new Color(0.14f, 0.93f, 0.34f), borderTopLeftRadius = 3, borderTopRightRadius = 3, borderBottomLeftRadius = 3, borderBottomRightRadius = 3, marginRight = 6 } };
+            statusRow.Add(activeDot);
+            statusRow.Add(new Label($"{contract.turnsRemaining} months remaining") { style = { color = new Color(0.7f, 0.7f, 0.7f), fontSize = 9 } });
+            left.Add(statusRow);
+            row.Add(left);
+            
+            var costBadge = new VisualElement() { style = { 
+                backgroundColor = new Color(1f, 0.3f, 0.3f, 0.15f), 
+                paddingTop = 3, paddingBottom = 3, paddingLeft = 6, paddingRight = 6, 
+                borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4
+            } };
+            costBadge.Add(new Label($"{StateCraft.UI.UiFormat.Money(localCost, sym)}/mo") { style = { color = new Color(1f, 0.4f, 0.4f), fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
+            row.Add(costBadge);
+            
+            parent.Add(row);
         }
+
+        private void SignSupplyContract(string label, string resourceKey, float amountPerTurn, float costB, int durationMonths)
+        {
+            var country = GameManager.Instance?.playerCountry;
+            if (country == null) return;
+
+            var contract = new SupplyContract()
+            {
+                id = System.Guid.NewGuid().ToString(),
+                label = label,
+                resourceType = resourceKey,
+                amountPerTurn = amountPerTurn,
+                costPerTurn = costB,
+                turnsTotal = durationMonths,
+                turnsRemaining = durationMonths
+            };
+
+            country.activeSupplyContracts.Add(contract);
+            NotificationManager.Instance?.AddNotification($"Signed Contract: {label}. Cost will be added to military upkeep.", Color.green);
+            
+            RefreshLogisticsTab(country);
+        }
+
+
 
         private void AddAlert(VisualElement parent, string msg, Color col)
         {
-            var box = new VisualElement() { style = { flexGrow = 1, marginRight = 8, paddingTop = 4, paddingBottom = 4, paddingLeft = 4, paddingRight = 4, backgroundColor = new Color(col.r, col.g, col.b, 0.1f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = col, borderBottomColor = col, borderLeftColor = col, borderRightColor = col } };
-            box.Add(new Label(msg) { style = { color = Color.white, fontSize = 8, whiteSpace = WhiteSpace.Normal } });
+            var box = new VisualElement() { style = { 
+                flexDirection = FlexDirection.Row, alignItems = Align.Center,
+                marginRight = 8, marginBottom = 8, paddingTop = 8, paddingBottom = 8, paddingLeft = 12, paddingRight = 12, 
+                backgroundColor = new Color(col.r, col.g, col.b, 0.1f), 
+                borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4,
+                borderLeftWidth = 3, borderLeftColor = col 
+            } };
+            
+            var icon = new VisualElement() { style = { width = 6, height = 6, borderTopLeftRadius = 3, borderTopRightRadius = 3, borderBottomLeftRadius = 3, borderBottomRightRadius = 3, backgroundColor = col, marginRight = 8 } };
+            box.Add(icon);
+
+            // Strip newline for single-line display
+            msg = msg.Replace("\n", " ");
+            box.Add(new Label(msg) { style = { color = Color.white, fontSize = 10, whiteSpace = WhiteSpace.Normal, unityFontStyleAndWeight = FontStyle.Bold } });
             parent.Add(box);
         }
 
         private void AddSummaryStat(VisualElement parent, string title, string val, string sub, Color valCol, bool large)
         {
-            var box = new VisualElement() { style = { alignItems = Align.Center } };
-            box.Add(new Label(title) { style = { color = Color.grey, fontSize = 8, marginBottom = 4 } });
+            var box = new VisualElement() { style = { 
+                alignItems = Align.FlexStart, 
+                backgroundColor = new Color(1, 1, 1, 0.03f),
+                paddingTop = 6, paddingBottom = 6, paddingLeft = 12, paddingRight = 12,
+                borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4
+            } };
+            box.Add(new Label(title) { style = { color = new Color(0.6f, 0.65f, 0.7f), fontSize = 9, marginBottom = 4, unityFontStyleAndWeight = FontStyle.Bold } });
             
             var valRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, alignItems = Align.FlexEnd } };
-            valRow.Add(new Label(val) { style = { color = valCol, fontSize = large ? 16 : 12, unityFontStyleAndWeight = FontStyle.Bold } });
+            valRow.Add(new Label(val) { style = { color = valCol, fontSize = large ? 16 : 13, unityFontStyleAndWeight = FontStyle.Bold } });
             if (!string.IsNullOrEmpty(sub))
             {
-                valRow.Add(new Label(sub) { style = { color = large ? valCol : Color.grey, fontSize = 8, marginLeft = 4 } });
+                valRow.Add(new Label(sub) { style = { color = large ? valCol : new Color(0.5f, 0.5f, 0.5f), fontSize = 9, marginLeft = 4, paddingBottom = 2 } });
             }
             box.Add(valRow);
             parent.Add(box);

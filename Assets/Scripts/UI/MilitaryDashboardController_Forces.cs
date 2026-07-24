@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
+using System.Linq;
 using StateCraft.Core;
 using StateCraft.Data;
 using StateCraft.Systems;
@@ -267,31 +268,63 @@ namespace StateCraft.UI
             {
                 var activeOps = country.activeOperations ?? new List<MilitaryOperation>();
                 
-                for (int i = 1; i <= 3; i++)
+                Debug.Log($"[Military Dashboard] FORCES Tab -> PopulateBottomSection -> ActiveOps Count: {activeOps.Count}");
+
+                // Get ALL direct children of RecentOpsList — one per op row
+                var rows = opsList.Children().ToList();
+
+                for (int i = 0; i < 3; i++)
                 {
-                    var opName = _root.Q<Label>($"RecentOp{i}Name");
-                    var opDesc = _root.Q<Label>($"RecentOp{i}Desc");
-                    var opDate = _root.Q<Label>($"RecentOp{i}Date");
-                    var opStatus = _root.Q<Label>($"RecentOp{i}Status");
-                    
-                    if (opName == null) continue; // safety check
-                    
-                    if (i <= activeOps.Count)
+                    // The row container is the i-th child of RecentOpsList
+                    VisualElement row = i < rows.Count ? rows[i] : null;
+
+                    var opName   = _root.Q<Label>($"RecentOp{i + 1}Name");
+                    var opDesc   = _root.Q<Label>($"RecentOp{i + 1}Desc");
+                    var opDate   = _root.Q<Label>($"RecentOp{i + 1}Date");
+                    var opStatus = _root.Q<Label>($"RecentOp{i + 1}Status");
+
+                    if (opName == null) continue;
+
+                    if (i < activeOps.Count)
                     {
-                        var op = activeOps[i - 1];
+                        var op = activeOps[i];
                         opName.text = op.opName;
-                        if (opDesc != null) opDesc.text = $"{op.type} operation in {op.regionName}";
-                        if (opDate != null) opDate.text = "ONGOING"; // Can use start turn if we had it
-                        if (opStatus != null) opStatus.text = op.status;
-                        
-                        // Make the parent row visible
-                        opName.parent.parent.style.display = DisplayStyle.Flex;
+                        if (opDesc   != null) opDesc.text   = $"{op.type} · {op.regionName}";
+                        if (opDate   != null) opDate.text   = $"Turn {op.turnsActive}";
+                        if (opStatus != null) { opStatus.text = "ONGOING"; opStatus.style.color = new Color(0f, 0.9f, 0.46f); }
+                        if (row != null) row.style.display = DisplayStyle.Flex;
                     }
                     else
                     {
-                        // Hide empty rows
-                        opName.parent.parent.style.display = DisplayStyle.None;
+                        // Blank AND hide the entire row so UXML placeholders don't show
+                        opName.text = "";
+                        if (opDesc   != null) opDesc.text   = "";
+                        if (opDate   != null) opDate.text   = "";
+                        if (opStatus != null) opStatus.text = "";
+                        if (row != null) row.style.display = DisplayStyle.None;
                     }
+                }
+
+                // If no ops at all, show a small "No active operations" message
+                if (activeOps.Count == 0)
+                {
+                    var noOpsMsg = opsList.Q<Label>("NoOpsMessage");
+                    if (noOpsMsg == null)
+                    {
+                        noOpsMsg = new Label("No active operations — launch one from the OPERATIONS tab.");
+                        noOpsMsg.name = "NoOpsMessage";
+                        noOpsMsg.style.color = new Color(0.42f, 0.50f, 0.60f);
+                        noOpsMsg.style.fontSize = 10;
+                        noOpsMsg.style.marginTop = 6;
+                        noOpsMsg.style.unityTextAlign = TextAnchor.MiddleCenter;
+                        opsList.Add(noOpsMsg);
+                    }
+                    noOpsMsg.style.display = DisplayStyle.Flex;
+                }
+                else
+                {
+                    var noOpsMsg = opsList.Q<Label>("NoOpsMessage");
+                    if (noOpsMsg != null) noOpsMsg.style.display = DisplayStyle.None;
                 }
             }
 
@@ -342,7 +375,8 @@ namespace StateCraft.UI
         private void UpdateBranchUI(string prefix, BranchStats stats)
         {
             var personnelLbl = _root.Q<Label>($"{prefix}Personnel");
-            if (personnelLbl != null) personnelLbl.text = stats.personnel.ToString("N0");
+            Debug.Log($"[UpdateBranchUI] Prefix={prefix}, Found PersonnelLabel? {personnelLbl != null}. Setting to {stats.personnel}");
+            if (personnelLbl != null) { personnelLbl.text = stats.personnel.ToString("N0"); }
 
             var equipmentLbl = _root.Q<Label>($"{prefix}Equipment");
             if (equipmentLbl != null) equipmentLbl.text = stats.equipment.ToString("N0");
@@ -437,60 +471,7 @@ namespace StateCraft.UI
             }
         }
 
-        private void PopulateThreatList(CountryDataSO country)
-        {
-            if (_threatList == null) return;
-            _threatList.Clear();
-            foreach (var r in country.regions)
-            {
-                var row = new VisualElement();
-                row.AddToClassList("threat-row");
 
-                string threatType = "Stable";
-                ThreatLevel lvl = ThreatLevel.Low;
-
-                if (r.security < 50f)
-                {
-                    threatType = "Terrorist Presence";
-                    lvl = ThreatLevel.High;
-                }
-                else if (r.security < 75f)
-                {
-                    threatType = "Civil Unrest";
-                    lvl = ThreatLevel.Medium;
-                }
-
-                var icon = new VisualElement();
-                icon.AddToClassList("threat-row__icon");
-                icon.AddToClassList(ThreatIconClass(lvl));
-                var glyph = new Label(ThreatGlyph(lvl));
-                glyph.AddToClassList("threat-row__icon-glyph");
-                glyph.style.color = ThreatColour(lvl);
-                icon.Add(glyph);
-                row.Add(icon);
-
-                var info = new VisualElement();
-                info.AddToClassList("threat-row__info");
-                var name = new Label(r.regionName);
-                name.AddToClassList("threat-row__name");
-                var sub = new Label(threatType);
-                sub.AddToClassList("threat-row__sub");
-                info.Add(name); info.Add(sub);
-                row.Add(info);
-
-                var badge = new VisualElement();
-                badge.AddToClassList("threat-row__badge-col");
-                var lvlLabel = new Label("THREAT LEVEL");
-                lvlLabel.AddToClassList("threat-row__level-label");
-                var lvlObj = new Label(lvl.ToString().ToUpper());
-                lvlObj.AddToClassList("threat-row__level");
-                lvlObj.AddToClassList(ThreatLevelClass(lvl));
-                badge.Add(lvlLabel); badge.Add(lvlObj);
-                row.Add(badge);
-
-                _threatList.Add(row);
-            }
-        }
 
         private void UpdateIntelAssessment(CountryDataSO country)
         {

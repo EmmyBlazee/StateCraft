@@ -273,6 +273,10 @@ namespace StateCraft.Systems
 
                 float net = country.income - country.spending - debtInt - corruptLeak - opsCost;
 
+                if (country.budgetHistory == null) country.budgetHistory = new System.Collections.Generic.List<float>();
+                country.budgetHistory.Add(net);
+                if (country.budgetHistory.Count > 6) country.budgetHistory.RemoveAt(0);
+
                 float monthlyGDP = country.gdp / 12f;
                 float regionalDisruption = 1f;
                 if (country.regions != null)

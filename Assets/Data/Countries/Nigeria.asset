@@ -67,51 +67,82 @@ MonoBehaviour:
   capitalCity: Abuja
   currencyName: Naira
   currencySymbol: "\u20A6"
-  scenarioTitle: 
-  scenarioContext: 
-  scenarioPriorities: 
-  hasShownBriefing: 0
+  scenarioTitle: 'Nigeria: Oil, Power & the Long Game'
+  scenarioContext: "Africa's most populous nation teeters on a knife's edge. Oil
+    revenues fund the federal budget, but global prices are volatile and domestic
+    refining is weak. Tension on the Ghana border is rising \u2014 your generals
+    want authorisation to mobilise, but an election is only three years away and
+    the people are watching."
+  scenarioPriorities: "\u2022 Secure the treasury \u2014 military mobilisation is
+    expensive and the deficit is widening\n\u2022 Decide your posture on Ghana \u2014
+    de-escalate diplomatically or prepare for war\n\u2022 Keep approval above 50%
+    \u2014 an unpopular president doesn't survive election night"
+  hasShownBriefing: 1
   countryFlag: {fileID: 0}
   mapColor: {r: 0.37807375, g: 0.8165946, b: 0.7795663, a: 1}
-  population: 214572290
+  population: 230785205
   populationGrowthRate: 0.025
-  populationChangeLastTurn: 2601157
-  invRiceTonnes: 0
+  populationChangeLastTurn: 479802
+  invRiceTonnes: 380631.34
   invCassavaTonnes: 0
-  invCocoaTonnes: 960000
-  invMineralsTonnes: 0
-  invOilBarrels: 999000000
+  invCocoaTonnes: 1660000
+  invMineralsTonnes: 1900000
+  invOilBarrels: 1.699e+9
   invTechGoods: 0
-  intelligenceLevel: 5
-  intelligenceBudget: 58
-  satelliteCount: 1
+  intelligenceLevel: 74.11604
+  cyberDefenseLevel: 100
+  signalInterceptCapability: 100
+  intelligenceBudget: 0.3513129
+  intelligenceFunds: 2005.2698
+  satelliteCount: 2
   satellitesUnderConstruction: 0
   satelliteBuildMonthsRemaining: 0
-  operativeCount: 12
-  globalIntelCoverage: 22.5
+  droneCount: 1
+  dronesUnderConstruction: 0
+  droneBuildMonthsRemaining: 0
+  operativeCount: 5
+  globalIntelCoverage: 100
   foreignAgentsDetected: 0
-  agencyIntegrity: 82
+  agencyIntegrity: 35.5
   activeCovertOps: []
+  recentReconReports: []
   detectedThreats: []
-  gdp: 252.8
-  income: 10.04347
-  spending: 0.1
-  treasury: 19.24705
-  inflationRate: 0.0062364046
-  gdpGrowthRate: 0.034
+  safeHouses: []
+  covertResources:
+  - resourceName: Field Agents
+    allocatedAmount: 65
+    maxAmount: 100
+  - resourceName: Technical Assets
+    allocatedAmount: 55
+    maxAmount: 100
+  - resourceName: Safe Houses
+    allocatedAmount: 40
+    maxAmount: 100
+  - resourceName: Logistics
+    allocatedAmount: 60
+    maxAmount: 100
+  - resourceName: Cyber Tools
+    allocatedAmount: 70
+    maxAmount: 100
+  gdp: 190.92024
+  income: 4.9420295
+  spending: 5.5206313
+  treasury: 999.4
+  inflationRate: 0
+  gdpGrowthRate: 0.040000003
   playerBudget: 0
   exchangeRate: 1550
   baseExchangeRate: 1550
-  debt: 115.20698
-  domesticDebt: 4.7763997e+10
-  foreignDebt: 3.1842664e+10
-  taxRate: 12.8
+  debt: 167.98642
+  domesticDebt: 87.42777
+  foreignDebt: 81.33905
+  taxRate: 19.35
   subsidyLevel: 0
   importTariffRate: 19.6
   incomeTaxRate: 12
-  corporateTaxRate: 18
+  corporateTaxRate: 26.7
   vatRate: 7.5
-  exportDutyRate: 2
+  exportDutyRate: 22.9
   draftIncomeTaxRate: 0
   draftCorporateTaxRate: 0
   draftVatRate: 0
@@ -123,69 +154,77 @@ MonoBehaviour:
     title: MILITARY
     description: Defense, operations, equipment and personnel.
     faIcon: '&#xf0e4;'
-    sharePercentage: 23
+    sharePercentage: 27.272728
   - id: INTELLIGENCE
     title: INTELLIGENCE
     description: Surveillance and counter operations.
     faIcon: '&#xf8d9;'
-    sharePercentage: 7
+    sharePercentage: 6.3636365
   - id: EDUCATION
     title: EDUCATION
     description: Schools, universities and education programs.
     faIcon: '&#xf549;'
-    sharePercentage: 14
+    sharePercentage: 14.545455
   - id: HEALTH
     title: HEALTH
     description: Hospitals, healthcare programs and research.
     faIcon: '&#xf0fe;'
-    sharePercentage: 12
+    sharePercentage: 12.727273
   - id: INFRASTRUCTURE
     title: INFRASTRUCTURE
     description: Roads, rail, ports, airports and public works.
     faIcon: '&#xf6fc;'
-    sharePercentage: 18
+    sharePercentage: 18.181818
   - id: AGRICULTURE
     title: AGRICULTURE
     description: Farming, irrigation, food security and rural development.
     faIcon: '&#xf4d8;'
-    sharePercentage: 9
+    sharePercentage: 9.090909
   - id: ENERGY
     title: ENERGY
     description: Power generation, distribution and renewable energy.
     faIcon: '&#xf0e7;'
-    sharePercentage: 8
+    sharePercentage: 8.181818
   - id: WELFARE
     title: SOCIAL WELFARE
     description: Pensions, welfare schemes and social support.
     faIcon: '&#xf4c8;'
-    sharePercentage: 5
+    sharePercentage: 3.6363637
   lastTaxReformSummary: 
-  lastBudgetApprovalTurn: -3
-  lastBudgetDraftSummary: 
-  lastAdviserDecision: 
+  lastBudgetApprovalTurn: 10
+  lastBudgetDraftSummary: '[Turn 10] Balanced budget approved: military 27%.'
+  lastAdviserDecision: 'Declined: _refresh_'
+  latestElectionResult: 
   taxReformLog: []
-  dismissedAdviserTitles: []
-  adviserDismissTurn: 0
-  adviserNextRecommendationTurn: 0
+  dismissedAdviserTitles:
+  - _refresh_
+  adviserDismissTurn: 10
+  adviserNextRecommendationTurn: 13
   corruptionIndex: 30
   povertyRate: 45
   unemploymentRate: 12
-  foreignInvestment: 615999940
+  foreignInvestment: 725999940
   resourceSovereignty: 100
   foodSecurity: 72
   environmentScore: 50
   debtServiceRatio: 0
   centralBankInterestRate: 20
-  publicApproval: 20
+  publicApproval: 0
   creditRating: D
   foreignAidReceived: 0
   tradeVolumeUSD: 0
   prevInflationRate: 0
   prevPublicApproval: 0
-  prevMonthlyTaxRevenue: 0
+  prevMonthlyTaxRevenue: 5.2591376
   prevMonthBalance: 0
-  taxArrears: 0
-  budgetHistory: []
+  taxArrears: 34.47585
+  budgetHistory:
+  - -1357.9548
+  - -1974.6678
+  - -1730.7404
+  - -1885.7811
+  - -1705.8695
+  - -2097.6008
   resources:
   - type: 0
     abundance: 85
@@ -214,75 +253,87 @@ MonoBehaviour:
   hasNuclearPower: 0
   isImportingUranium: 0
   powerGasPlants: 3
-  powerHydroPlants: 4
+  powerHydroPlants: 5
   powerNuclearPlants: 0
-  powerSolarPlants: 0
+  powerSolarPlants: 1
   powerWindPlants: 0
   gridTransmissionEfficiency: 0.85
   currentBlackoutRisk: 0
   indAgriRice: 2
   indAgriCassava: 0
   indAgriCocoa: 1
-  indMiningLocal: 0
+  indMiningLocal: 1
   indMiningOil: 10
   indTechIT: 0
   indTechFintech: 0
   indManufacturing: 0
   techIndustryOutput: 100
   workforceOil: 30000
-  workforceMining: 25000
+  workforceMining: 30000
   workforceAgri: 150000
   workforceManufacturing: 5000
-  stability: 64.46847
-  security: 58.348576
+  stability: 56.166664
+  security: 40.718105
   nationalPoliceSize: 55000
-  militaryStrength: 2.5044074
-  armyStrength: 5
+  militaryStrength: 3.0044074
+  armyStrength: 6
   navyStrength: 0.014441828
   airForceStrength: 0.0050632954
-  unitInfantry: 3874
-  unitTanks: 503
-  unitAPCs: 1475
+  unitInfantry: 0
+  unitTanks: 0
+  unitAPCs: 0
   unitArtillery: 0
-  unitRifles: 4000
-  unitFighters: 22
-  unitBombers: 5
-  unitAttackHelis: 46
-  unitUAVs: 1
+  unitRifles: 24000
+  unitFighters: 0
+  unitBombers: 0
+  unitAttackHelis: 0
+  unitUAVs: 0
   unitFrigates: 1
   unitDestroyers: 0
   unitSubmarines: 0
   unitPatrolBoats: 0
-  baseArmyCount: 0
+  oosRifles: 0
+  oosTanks: 0
+  oosAPCs: 0
+  oosArtillery: 0
+  oosFighters: 0
+  oosBombers: 0
+  oosAttackHelis: 0
+  oosUAVs: 0
+  oosFrigates: 0
+  oosDestroyers: 0
+  oosSubmarines: 0
+  oosPatrolBoats: 0
+  baseArmyCount: 2
   baseNavyCount: 0
   baseAirForceCount: 0
-  baseRDFCount: 0
+  baseRDFCount: 2
   baseDefenseFactoryCount: 0
   importsThisTurn: 0
   rdfReadiness: 100
   militaryBudgetPercent: 2.5
-  militaryDoctrine: 1
-  securitySpending: 0
+  militaryDoctrine: 2
+  securitySpending: 0.39633968
   militaryProjects: []
-  militaryBudgetUSD: 0.1
-  militaryUpkeepUSD: 0
-  militaryReadiness: 100
+  militaryBudgetUSD: 1.5056268
+  militaryUpkeepUSD: 2.2773275
+  militaryReadiness: 78
   armyStats:
     branchName: Army
-    personnel: 3874
-    equipment: 1978
+    personnel: 0
+    equipment: 0
     readiness: 95
     morale: 80
   navyStats:
     branchName: Navy
-    personnel: 4250
+    personnel: 450
     equipment: 1
     readiness: 92
     morale: 75
   airForceStats:
     branchName: Air Force
-    personnel: 1550
-    equipment: 74
+    personnel: 0
+    equipment: 0
     readiness: 65
     morale: 85
   rdfStats:
@@ -291,17 +342,847 @@ MonoBehaviour:
     equipment: 80
     readiness: 100
     morale: 95
-  reserveFuel: 100
+  reserveFuel: 50
   reserveAmmo: 76
   reserveMedical: 100
   reserveFood: 84
-  activeOperations: []
+  activeOperations:
+  - operationId: ca90f6b3-4238-4d50-8b31-0747dfeb58de
+    missionId: theater_strike
+    contributions:
+    - branch: 0
+      unitCounts:
+      - unitName: Tanks
+        count: 193
+      - unitName: APCs
+        count: 565
+      personnelAssigned: 20000
+      casualtiesSuffered: 0
+      equipmentLost: 0
+    - branch: 1
+      unitCounts:
+      - unitName: Fighters
+        count: 0
+      - unitName: Bombers
+        count: 9
+      - unitName: Helicopters
+        count: 0
+      - unitName: Drones
+        count: 0
+      personnelAssigned: 1551
+      casualtiesSuffered: 0
+      equipmentLost: 0
+    - branch: 2
+      unitCounts:
+      - unitName: Frigates
+        count: 0
+      - unitName: Submarines
+        count: 0
+      - unitName: Patrol Boats
+        count: 8
+      personnelAssigned: 3800
+      casualtiesSuffered: 0
+      equipmentLost: 0
+    - branch: 3
+      unitCounts: []
+      personnelAssigned: 0
+      casualtiesSuffered: 0
+      equipmentLost: 0
+    opName: OPERATION MOZAMBIQUE SHIELD
+    regionName: Mozambique
+    type: theater_strike
+    status: Active
+    costPerMonth: 2743.5103
+    deployedTroops: 20000
+    deployedHelis: 0
+    deployedTanks: 193
+    deployedAPCs: 565
+    deployedFighters: 0
+    deployedFrigates: 0
+    deployedSubmarines: 0
+    deployedRDF: 0
+    deployedUAVs: 0
+    deployedBombers: 9
+    deployedAirForce: 1551
+    deployedNavy: 3800
+    deployedPatrolBoats: 8
+    deployedArtillery: 0
+    deployedDestroyers: 0
+    casualtyRisk: 
+    civilianRisk: 
+    securityBoostRate: 96
+    isDecommissioning: 0
+    turnsToDeploy: 1
+    phase: Preparing
+    commander: 
+    objective: Establish security presence in Mozambique
+    turnsActive: 0
+    morale: 80
+    territoryCaptured: 0
+    enemyStrengthEst: 60
+    casualtiesSustained: 0
+    enemyCasualtiesInflicted: 0
+    equipmentLost: 0
+    cooldownAirstrike: 0
+    cooldownRecon: 0
+    cooldownIntel: 0
+    lastNotification: 
+    attritionTroops: 0
+    attritionEquipment: 0
+    effectiveTroopStrength: 100
+    needsReinforcement: 0
+    needsReinforcementBranches: 
+    friendlyCasualtyHistory: 
+    enemyCasualtyHistory: 
+    successChanceHistory: []
+    lastReinforcementTurn: 0
+    reinforcementCount: 0
+    objectiveProgress: 0
+  completedOperations:
+  - opName: OPERATION LAGOS SHIELD
+    type: ground_assault
+    regionName: Abuja (FCT)
+    outcome: Aborted
+    casualtiesSustained: 0
+    equipmentLost: 0
+    territoryCaptured: 0
+    politicalImpact: -3
+    dateCompleted: 09 JAN 2026
+    durationMonths: 0
+    rewards: None
+  operationalLogs: []
+  activeRecommendations: []
   activeInsurgentCamps: []
   trainingPipelines: []
+  productionOrders: []
+  completedProductions: []
+  availableOffers:
+  - id: OFF_ART_2_457
+    title: 30 Caesar Howitzers
+    subtitle: Self-Propelled Howitzer
+    tags:
+    - 155mm
+    - Wheeled
+    supplier: Nexter
+    country: France
+    unitCost: "\u20A61.6B"
+    totalCost: "\u20A647.4B"
+    quantity: 30 Units
+    deliveryTime: 7 Months
+    flagEmoji: "\U0001F1EB\U0001F1F7"
+    produceType: ARTILLERY
+    unitQuantity: 30
+    deliveryMonths: 7
+    totalCostB: 47.442165
+  - id: OFF_PATROL_1_677
+    title: 8 Offshore Patrol Boats
+    subtitle: Offshore Patrol Vessel
+    tags:
+    - Coastal Ops
+    - Fast
+    supplier: ASFAT
+    country: Turkey
+    unitCost: "\u20A611.8B"
+    totalCost: "\u20A694.7B"
+    quantity: 8 Units
+    deliveryTime: 6 Months
+    flagEmoji: "\U0001F1F9\U0001F1F7"
+    produceType: PATROL_BOAT
+    unitQuantity: 8
+    deliveryMonths: 6
+    totalCostB: 94.66843
+  - id: OFF_TNK_1_496
+    title: 50 Main Battle Tanks (T-90)
+    subtitle: Main Battle Tank
+    tags:
+    - 125mm Gun
+    - ERA Armor
+    supplier: Uralvagonzavod
+    country: Russia
+    unitCost: "\u20A61.4B"
+    totalCost: "\u20A668.3B"
+    quantity: 50 Units
+    deliveryTime: 6 Months
+    flagEmoji: "\U0001F1F7\U0001F1FA"
+    produceType: TNK
+    unitQuantity: 50
+    deliveryMonths: 6
+    totalCostB: 68.2518
+  - id: OFF_FRG_1_817
+    title: 2 Multi-Role Frigates
+    subtitle: Frigate
+    tags:
+    - ASW
+    - AAW
+    supplier: Naval Group
+    country: France
+    unitCost: "\u20A6239.3B"
+    totalCost: "\u20A6478.6B"
+    quantity: 2 Units
+    deliveryTime: 25 Months
+    flagEmoji: "\U0001F1EB\U0001F1F7"
+    produceType: FRG
+    unitQuantity: 2
+    deliveryMonths: 25
+    totalCostB: 478.58728
+  - id: OFF_FTR_2_398
+    title: 10 F-16 Block 70/72
+    subtitle: Multi-Role Combat Aircraft
+    tags:
+    - 4.5 Gen
+    - AESA Radar
+    supplier: Lockheed Martin
+    country: USA
+    unitCost: "\u20A628.6B"
+    totalCost: "\u20A6285.9B"
+    quantity: 10 Units
+    deliveryTime: 13 Months
+    flagEmoji: "\U0001F1FA\U0001F1F8"
+    produceType: FTR
+    unitQuantity: 10
+    deliveryMonths: 13
+    totalCostB: 285.85
+  - id: OFF_RIFLE_1_423
+    title: 10,000 Assault Rifles
+    subtitle: Infantry Weapons
+    tags:
+    - 5.56mm
+    - Standard Issue
+    supplier: FN Herstal
+    country: Belgium
+    unitCost: "\u20A64.6M"
+    totalCost: "\u20A645.8B"
+    quantity: 10k Units
+    deliveryTime: 2 Months
+    flagEmoji: "\U0001F1E7\U0001F1EA"
+    produceType: RIFLE
+    unitQuantity: 10000
+    deliveryMonths: 2
+    totalCostB: 45.773727
+  - id: OFF_FTR_1_960
+    title: 12 Fighter Jets (JF-17)
+    subtitle: Multi-Role Combat Aircraft
+    tags:
+    - 4.5 Gen
+    - Avionics
+    supplier: PAC
+    country: Pakistan
+    unitCost: "\u20A614.4B"
+    totalCost: "\u20A6172.7B"
+    quantity: 12 Units
+    deliveryTime: 7 Months
+    flagEmoji: "\U0001F1F5\U0001F1F0"
+    produceType: FTR
+    unitQuantity: 12
+    deliveryMonths: 7
+    totalCostB: 172.73804
+  - id: OFF_ART_1_735
+    title: 24 Mobile Artillery (M109)
+    subtitle: Self-Propelled Howitzer
+    tags:
+    - 155mm
+    - Tracked
+    supplier: BAE Systems
+    country: USA
+    unitCost: "\u20A62.2B"
+    totalCost: "\u20A653.9B"
+    quantity: 24 Units
+    deliveryTime: 6 Months
+    flagEmoji: "\U0001F1FA\U0001F1F8"
+    produceType: ARTILLERY
+    unitQuantity: 24
+    deliveryMonths: 6
+    totalCostB: 53.945698
+  - id: OFF_BOMBER_1_484
+    title: 4 Strategic Bombers (H-6K)
+    subtitle: Strategic Bomber
+    tags:
+    - Long Range
+    - Payload
+    supplier: Xian Aircraft
+    country: China
+    unitCost: "\u20A630.3B"
+    totalCost: "\u20A6121.3B"
+    quantity: 4 Units
+    deliveryTime: 11 Months
+    flagEmoji: "\U0001F1E8\U0001F1F3"
+    produceType: BOMBER
+    unitQuantity: 4
+    deliveryMonths: 11
+    totalCostB: 121.34924
+  - id: OFF_SUB_1_172
+    title: 1 Attack Submarine
+    subtitle: Diesel-Electric Submarine
+    tags:
+    - Stealth
+    - Torpedoes
+    supplier: ThyssenKrupp
+    country: Germany
+    unitCost: "\u20A6300.3B"
+    totalCost: "\u20A6300.3B"
+    quantity: 1 Unit
+    deliveryTime: 37 Months
+    flagEmoji: "\U0001F1E9\U0001F1EA"
+    produceType: SUB
+    unitQuantity: 1
+    deliveryMonths: 37
+    totalCostB: 300.3321
+  activeContracts: []
+  activeSupplyContracts:
+  - id: 48a23dcd-063f-4785-8a5b-931b9ac044ea
+    resourceType: FUEL
+    label: Fuel Resupply (6 Mo)
+    amountPerTurn: 20
+    costPerTurn: 0.05
+    turnsTotal: 6
+    turnsRemaining: 6
+  - id: c3e19c98-aa31-4146-adf6-bde514b3ff87
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: 19a58d2d-7298-4f1b-8a33-b6e5c5a9dbe7
+    resourceType: FOOD
+    label: Rations Pipeline (6 Mo)
+    amountPerTurn: 25
+    costPerTurn: 0.03
+    turnsTotal: 6
+    turnsRemaining: 6
+  - id: 9aea67dd-c9ad-4382-b6d7-981054d46c4d
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: bde8014a-a4e7-4700-a167-8731bf7b9a9e
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: b1f7ea28-2a13-4cbc-9ef8-b3d24c60355a
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: cb0d911e-a5d0-4f79-b2ae-2bffe721b862
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: 0c90f1e1-979e-4218-87df-990f95b590ba
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: 1aa9bd36-4104-4e85-a465-b39450b83b63
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: 4d27464b-3f2d-471d-bb8a-1d3c68196072
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: 54c7cb82-ba2f-42d3-a8e1-316575715e65
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: a5fc643a-6b2a-4f1d-be80-96e44717a37f
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: 9c586344-6716-4d6e-8759-3820645d3617
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: 68e2c7a1-b222-4e7d-802a-8e87e131b5cc
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: d7bfdff2-d176-4bf0-a8e8-971f43ca7f27
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: ad21bc8e-6631-48f3-9f79-90442fca9453
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: 2ad75801-1ddf-4d30-9737-35f028ca687d
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: 4d0ef95f-79b2-4e65-afb9-f8153165f2f7
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: 29257ac9-8152-4550-8f44-a6f1b15e35a8
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: 77f33a7d-b904-4d3e-b246-cfb75ac7f5d6
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: 2f906993-3d9f-4f9a-a0d4-f4ccf3533dfe
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: 4edb2744-ee69-476e-8251-8bddeae97a3e
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: b2f5ddc7-e41e-4d71-8cc0-c1bfe3398523
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: 13a28353-5d2e-4eaa-8606-82ef4388834d
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  - id: c7b71b7f-4031-46af-930e-6a27c76e05c9
+    resourceType: FUEL
+    label: Fuel Strategic Reserve (12 Mo)
+    amountPerTurn: 40
+    costPerTurn: 0.09
+    turnsTotal: 12
+    turnsRemaining: 12
+  researchProjects: []
+  defenseFactories: []
+  militaryBases:
+  - id: BASE_1
+    baseName: Lagos Defense HQ
+    regionName: Lagos
+    branch: JOINT
+    status: OPERATIONAL
+    capacity: 3000
+    currentPersonnel: 2400
+    upkeepCost: 15
+    role: National Defense HQ
+    establishedYear: 2018
+    sizeHa: 500
+    capabilities:
+    - name: Command & Control
+      level: 93
+      icon: "\uF519"
+    - name: Logistics Support
+      level: 43
+      icon: "\uF018"
+    - name: Maintenance
+      level: 44
+      icon: "\uF0AD"
+    - name: Power Supply
+      level: 62
+      icon: "\uF0E7"
+    - name: Defenses
+      level: 64
+      icon: "\uF132"
+    assignedUnits:
+    - unitName: JOINT Command Group
+      personnel: 960
+      icon: "\uF132"
+    - unitName: Support Battalion
+      personnel: 720
+      icon: "\uF0AD"
+    - unitName: Logistics Unit
+      personnel: 720
+      icon: "\uF018"
+  - id: BASE_2
+    baseName: Kano Army Garrison
+    regionName: Kano
+    branch: ARMY
+    status: OPERATIONAL
+    capacity: 2018
+    currentPersonnel: 1614
+    upkeepCost: 10.09
+    role: Training & Logistics
+    establishedYear: 2013
+    sizeHa: 336
+    capabilities:
+    - name: Command & Control
+      level: 98
+      icon: "\uF519"
+    - name: Logistics Support
+      level: 61
+      icon: "\uF018"
+    - name: Maintenance
+      level: 97
+      icon: "\uF0AD"
+    - name: Power Supply
+      level: 99
+      icon: "\uF0E7"
+    - name: Defenses
+      level: 52
+      icon: "\uF132"
+    assignedUnits:
+    - unitName: ARMY Command Group
+      personnel: 645
+      icon: "\uF132"
+    - unitName: Support Battalion
+      personnel: 484
+      icon: "\uF0AD"
+    - unitName: Logistics Unit
+      personnel: 484
+      icon: "\uF018"
+  - id: BASE_3
+    baseName: Rivers Air Base
+    regionName: Rivers
+    branch: AIR
+    status: OPERATIONAL
+    capacity: 1608
+    currentPersonnel: 1286
+    upkeepCost: 8.04
+    role: Air Superiority
+    establishedYear: 2017
+    sizeHa: 268
+    capabilities:
+    - name: Command & Control
+      level: 94
+      icon: "\uF519"
+    - name: Logistics Support
+      level: 58
+      icon: "\uF018"
+    - name: Maintenance
+      level: 84
+      icon: "\uF0AD"
+    - name: Power Supply
+      level: 83
+      icon: "\uF0E7"
+    - name: Defenses
+      level: 56
+      icon: "\uF132"
+    assignedUnits:
+    - unitName: AIR Command Group
+      personnel: 514
+      icon: "\uF132"
+    - unitName: Support Battalion
+      personnel: 385
+      icon: "\uF0AD"
+    - unitName: Logistics Unit
+      personnel: 385
+      icon: "\uF018"
+  - id: BASE_4
+    baseName: Borno Naval Base
+    regionName: Borno
+    branch: NAVY
+    status: OPERATIONAL
+    capacity: 2369
+    currentPersonnel: 1895
+    upkeepCost: 11.844999
+    role: Maritime Operations
+    establishedYear: 2014
+    sizeHa: 394
+    capabilities:
+    - name: Command & Control
+      level: 52
+      icon: "\uF519"
+    - name: Logistics Support
+      level: 73
+      icon: "\uF018"
+    - name: Maintenance
+      level: 42
+      icon: "\uF0AD"
+    - name: Power Supply
+      level: 90
+      icon: "\uF0E7"
+    - name: Defenses
+      level: 31
+      icon: "\uF132"
+    assignedUnits:
+    - unitName: NAVY Command Group
+      personnel: 758
+      icon: "\uF132"
+    - unitName: Support Battalion
+      personnel: 568
+      icon: "\uF0AD"
+    - unitName: Logistics Unit
+      personnel: 568
+      icon: "\uF018"
+  - id: BASE_5
+    baseName: Abuja (FCT) Army Garrison
+    regionName: Abuja (FCT)
+    branch: ARMY
+    status: OPERATIONAL
+    capacity: 2090
+    currentPersonnel: 1672
+    upkeepCost: 10.45
+    role: Armored Division
+    establishedYear: 2012
+    sizeHa: 348
+    capabilities:
+    - name: Command & Control
+      level: 61
+      icon: "\uF519"
+    - name: Logistics Support
+      level: 64
+      icon: "\uF018"
+    - name: Maintenance
+      level: 56
+      icon: "\uF0AD"
+    - name: Power Supply
+      level: 64
+      icon: "\uF0E7"
+    - name: Defenses
+      level: 55
+      icon: "\uF132"
+    assignedUnits:
+    - unitName: ARMY Command Group
+      personnel: 668
+      icon: "\uF132"
+    - unitName: Support Battalion
+      personnel: 501
+      icon: "\uF0AD"
+    - unitName: Logistics Unit
+      personnel: 501
+      icon: "\uF018"
+  - id: BASE_6
+    baseName: Enugu Army Garrison
+    regionName: Enugu
+    branch: ARMY
+    status: OPERATIONAL
+    capacity: 1516
+    currentPersonnel: 1212
+    upkeepCost: 7.58
+    role: Training & Logistics
+    establishedYear: 2013
+    sizeHa: 252
+    capabilities:
+    - name: Command & Control
+      level: 95
+      icon: "\uF519"
+    - name: Logistics Support
+      level: 66
+      icon: "\uF018"
+    - name: Maintenance
+      level: 94
+      icon: "\uF0AD"
+    - name: Power Supply
+      level: 68
+      icon: "\uF0E7"
+    - name: Defenses
+      level: 45
+      icon: "\uF132"
+    assignedUnits:
+    - unitName: ARMY Command Group
+      personnel: 484
+      icon: "\uF132"
+    - unitName: Support Battalion
+      personnel: 363
+      icon: "\uF0AD"
+    - unitName: Logistics Unit
+      personnel: 363
+      icon: "\uF018"
+  - id: BASE_7
+    baseName: Enugu Forward Op Base
+    regionName: Enugu
+    branch: ARMY
+    status: UNDER CONSTRUCTION
+    capacity: 1300
+    currentPersonnel: 640
+    upkeepCost: 6.5
+    role: Border Security
+    establishedYear: 2012
+    sizeHa: 133
+    capabilities:
+    - name: Command & Control
+      level: 70
+      icon: "\uF519"
+    - name: Logistics Support
+      level: 41
+      icon: "\uF018"
+    - name: Maintenance
+      level: 49
+      icon: "\uF0AD"
+    - name: Power Supply
+      level: 69
+      icon: "\uF0E7"
+    - name: Defenses
+      level: 48
+      icon: "\uF132"
+    assignedUnits:
+    - unitName: ARMY Command Group
+      personnel: 256
+      icon: "\uF132"
+    - unitName: Support Battalion
+      personnel: 192
+      icon: "\uF0AD"
+    - unitName: Logistics Unit
+      personnel: 192
+      icon: "\uF018"
+  - id: CON_e92f7
+    baseName: New Training Academy
+    regionName: Lagos
+    branch: ARMY
+    status: OPERATIONAL
+    capacity: 500
+    currentPersonnel: 400
+    upkeepCost: 2.5
+    role: Training
+    establishedYear: 2014
+    sizeHa: 83
+    capabilities:
+    - name: Command & Control
+      level: 99
+      icon: "\uF519"
+    - name: Logistics Support
+      level: 72
+      icon: "\uF018"
+    - name: Maintenance
+      level: 92
+      icon: "\uF0AD"
+    - name: Power Supply
+      level: 81
+      icon: "\uF0E7"
+    - name: Defenses
+      level: 51
+      icon: "\uF132"
+    assignedUnits:
+    - unitName: ARMY Command Group
+      personnel: 160
+      icon: "\uF132"
+    - unitName: Support Battalion
+      personnel: 120
+      icon: "\uF0AD"
+    - unitName: Logistics Unit
+      personnel: 120
+      icon: "\uF018"
+  - id: CON_3ff0d
+    baseName: New Training Academy
+    regionName: Lagos
+    branch: RDF
+    status: OPERATIONAL
+    capacity: 150
+    currentPersonnel: 120
+    upkeepCost: 0.75
+    role: Training
+    establishedYear: 2013
+    sizeHa: 25
+    capabilities:
+    - name: Command & Control
+      level: 88
+      icon: "\uF519"
+    - name: Logistics Support
+      level: 73
+      icon: "\uF018"
+    - name: Maintenance
+      level: 46
+      icon: "\uF0AD"
+    - name: Power Supply
+      level: 91
+      icon: "\uF0E7"
+    - name: Defenses
+      level: 85
+      icon: "\uF132"
+    assignedUnits:
+    - unitName: RDF Command Group
+      personnel: 48
+      icon: "\uF132"
+    - unitName: Support Battalion
+      personnel: 36
+      icon: "\uF0AD"
+    - unitName: Logistics Unit
+      personnel: 36
+      icon: "\uF018"
+  - id: CON_f0850
+    baseName: New Forward Base
+    regionName: Lagos
+    branch: RDF
+    status: OPERATIONAL
+    capacity: 300
+    currentPersonnel: 240
+    upkeepCost: 1.5
+    role: Combat
+    establishedYear: 2013
+    sizeHa: 50
+    capabilities:
+    - name: Command & Control
+      level: 76
+      icon: "\uF519"
+    - name: Logistics Support
+      level: 94
+      icon: "\uF018"
+    - name: Maintenance
+      level: 44
+      icon: "\uF0AD"
+    - name: Power Supply
+      level: 65
+      icon: "\uF0E7"
+    - name: Defenses
+      level: 44
+      icon: "\uF132"
+    assignedUnits:
+    - unitName: RDF Command Group
+      personnel: 96
+      icon: "\uF132"
+    - unitName: Support Battalion
+      personnel: 72
+      icon: "\uF0AD"
+    - unitName: Logistics Unit
+      personnel: 72
+      icon: "\uF018"
+  facilityConstructionOrders: []
+  facilityUpgradeOrders: []
   warEnemyName: 
-  warTurnsActive: 1
-  warExhaustion: 2
-  warWillToFight: 98.5
+  warTurnsActive: 0
+  warExhaustion: 0
+  warWillToFight: 100
   totalKIA: 0
   totalWounded: 0
   warFatigueStabilityDrain: 0
@@ -315,11 +1196,87 @@ MonoBehaviour:
   rdfCooldownMonths: 0
   lastRDFTurn: -100
   lastRDFRegionIndex: -1
-  globalPrestige: 16
+  globalPrestige: 6
   allianceCount: 0
   sanctionIssuedCount: 1
   sanctionReceivedCount: 0
-  inboxMessages: []
+  inboxMessages:
+  - id: 54f99102-fe7a-4ca0-ba07-08a5e04d3e34
+    sender: CHIEF OF DEFENCE STAFF
+    subject: "\u2694\uFE0F WAR DECLARED \u2014 COMMAND YOUR FORCES"
+    body: "Sir,\n\nWe have declared war on Mozambique. Our forces are on standby.\n\n\u2014\u2014\u2014
+      IMMEDIATE ORDERS \u2014\u2014\u2014\n\u2192 MILITARY \u2192 OPERATIONS \u2192
+      Deploy troops to Mozambique front NOW\n  (Standard infantry: 20,000 available
+      \xB7 Transit: ~2 months)\n  (RDF operators: faster deployment, higher battlefield
+      effectiveness)\n\n\u2192 MILITARY \u2192 LOGISTICS \u2192 Top up ammo and fuel
+      before advance\n\u2192 EVENTS \u2192 DECISIONS \u2192 Watch for field reports
+      and respond\n\n\u2014\u2014\u2014 CURRENT STATUS \u2014\u2014\u2014\nInfantry
+      available: 20,000\nTanks: 193 \xB7 Fighters: 0\nTreasury: \u20A6999B \xB7 Mobilisation
+      cost: $0.5B\nWorld Tension: 50/100\n\nNOTE: Troops not deployed within 2 months
+      will leave your border undefended."
+    dateReceived: 08 JAN 2026
+    isRead: 0
+    turnReceived: 1
+    urgency: Critical
+  - id: 10e5e888-a211-49fa-946f-5a5086b7e2a9
+    sender: SITUATION ROOM
+    subject: "\U0001F480 GOVERNMENT COLLAPSED"
+    body: "Sovereign default and credit collapse have paralysed the state. International
+      creditors have seized assets. Your government has fallen.\n\nFINAL STATISTICS:\n\u2022
+      Prestige: 16\n\u2022 Stability: 64%\n\u2022 Treasury: $-159.8B\n\nA caretaker
+      government has been established. The people demand change."
+    dateReceived: 01 FEB 2026
+    isRead: 0
+    turnReceived: 2
+    urgency: Critical
+  - id: 231c84e9-647e-4016-940c-3e7a3b92a0a1
+    sender: "FOREIGN MINISTRY \u2014 ALGERIA"
+    subject: "Treaty Proposal Submitted \u2014 Military Access Rights"
+    body: 'Your proposal for a Military Access Rights has been formally submitted
+      to the Government of Algeria.
+
+
+      Current bilateral relations: 0.
+
+      The
+      response is expected within 1-2 months. You can track the status in the TREATIES
+      tab.'
+    dateReceived: 07 JAN 2026
+    isRead: 0
+    turnReceived: 1
+    urgency: Important
+  - id: 38a8c4d6-9767-489b-ad1b-f7e3f486686e
+    sender: "FOREIGN MINISTRY \u2014 BENIN"
+    subject: "Treaty Proposal Submitted \u2014 Free Trade Agreement"
+    body: 'Your proposal for a Free Trade Agreement has been formally submitted to
+      the Government of Benin.
+
+
+      Current bilateral relations: 0.
+
+      The
+      response is expected within 2-3 months. You can track the status in the TREATIES
+      tab.'
+    dateReceived: 14 JAN 2026
+    isRead: 0
+    turnReceived: 1
+    urgency: Important
+  - id: 9e53f26c-6937-4cea-bcd9-5b73c7cda0f9
+    sender: "FOREIGN MINISTRY \u2014 ANGOLA"
+    subject: "Treaty Proposal Submitted \u2014 Military Access Rights"
+    body: 'Your proposal for a Military Access Rights has been formally submitted
+      to the Government of Angola.
+
+
+      Current bilateral relations: 0.
+
+      The
+      response is expected within 2-3 months. You can track the status in the TREATIES
+      tab.'
+    dateReceived: 09 JAN 2026
+    isRead: 0
+    turnReceived: 1
+    urgency: Important
   activeCrises:
   - crisisName: 'Diplomatic Ultimatum: Broken Contract'
     affectedRegion: Algeria
@@ -462,8 +1419,8 @@ MonoBehaviour:
     partnerCountry: Central African Republic
     resource: 2
     monthlyPaymentUSD: 46620230
-    durationMonths: 7
-    status: 2
+    durationMonths: 0
+    status: 4
     resourceQuantity: 1000
     isBulkTransfer: 0
     isSeller: 0
@@ -471,11 +1428,385 @@ MonoBehaviour:
     originalDurationMonths: 11
     counterReason: 
   activeTreaties: []
+  diplomacyEvents:
+  - eventName: Trade Agreement Signed
+    description: New trade corridors opened with Ghana.
+    turnOccurred: 1
+  - eventName: Relations Improved
+    description: Diplomatic mission to Niger successful.
+    turnOccurred: 1
+  - eventName: UN Vote Scheduled
+    description: Resolution on regional security pending.
+    turnOccurred: 2
+  - eventName: Border Dispute
+    description: Tensions rising along the Cameroon border.
+    turnOccurred: 2
+  embassies:
+  - countryName: Algeria
+    isOperational: 1
+    staffCount: 24
+    influencePercentage: 47.939873
+    economicReportQuality: Excellent
+    politicalReportQuality: High
+  - countryName: Angola
+    isOperational: 1
+    staffCount: 29
+    influencePercentage: 54.701202
+    economicReportQuality: Excellent
+    politicalReportQuality: Poor
+  - countryName: Benin
+    isOperational: 1
+    staffCount: 46
+    influencePercentage: 69.30577
+    economicReportQuality: High
+    politicalReportQuality: Poor
+  - countryName: Botswana
+    isOperational: 1
+    staffCount: 43
+    influencePercentage: 52.446785
+    economicReportQuality: Average
+    politicalReportQuality: Average
+  - countryName: Burkina Faso
+    isOperational: 1
+    staffCount: 45
+    influencePercentage: 37.56369
+    economicReportQuality: Excellent
+    politicalReportQuality: Excellent
+  - countryName: Burundi
+    isOperational: 1
+    staffCount: 39
+    influencePercentage: 30.760914
+    economicReportQuality: Excellent
+    politicalReportQuality: High
+  - countryName: Cabo Verde
+    isOperational: 1
+    staffCount: 34
+    influencePercentage: 89.73901
+    economicReportQuality: Excellent
+    politicalReportQuality: Average
+  - countryName: Cameroon
+    isOperational: 1
+    staffCount: 48
+    influencePercentage: 31.467827
+    economicReportQuality: Poor
+    politicalReportQuality: Average
+  - countryName: Central African Republic
+    isOperational: 1
+    staffCount: 44
+    influencePercentage: 48.721756
+    economicReportQuality: Average
+    politicalReportQuality: Poor
+  - countryName: Chad
+    isOperational: 1
+    staffCount: 45
+    influencePercentage: 34.06256
+    economicReportQuality: Poor
+    politicalReportQuality: High
+  - countryName: Comoros
+    isOperational: 1
+    staffCount: 46
+    influencePercentage: 46.047684
+    economicReportQuality: Excellent
+    politicalReportQuality: Average
+  - countryName: Cote d'Ivoire
+    isOperational: 1
+    staffCount: 47
+    influencePercentage: 52.076015
+    economicReportQuality: Poor
+    politicalReportQuality: Poor
+  - countryName: Djibouti
+    isOperational: 0
+    staffCount: 42
+    influencePercentage: 49.076756
+    economicReportQuality: High
+    politicalReportQuality: High
+  - countryName: DR Congo
+    isOperational: 1
+    staffCount: 37
+    influencePercentage: 94.01749
+    economicReportQuality: Excellent
+    politicalReportQuality: Poor
+  - countryName: Egypt
+    isOperational: 1
+    staffCount: 25
+    influencePercentage: 80.9935
+    economicReportQuality: Excellent
+    politicalReportQuality: High
+  - countryName: Equatorial Guinea
+    isOperational: 1
+    staffCount: 41
+    influencePercentage: 41.7405
+    economicReportQuality: Average
+    politicalReportQuality: Excellent
+  - countryName: Eritrea
+    isOperational: 0
+    staffCount: 30
+    influencePercentage: 93.09409
+    economicReportQuality: Poor
+    politicalReportQuality: Excellent
+  - countryName: Eswatini
+    isOperational: 0
+    staffCount: 47
+    influencePercentage: 65.16414
+    economicReportQuality: Poor
+    politicalReportQuality: High
+  - countryName: Ethiopia
+    isOperational: 1
+    staffCount: 33
+    influencePercentage: 56.15349
+    economicReportQuality: High
+    politicalReportQuality: High
+  - countryName: Gabon
+    isOperational: 1
+    staffCount: 15
+    influencePercentage: 46.80481
+    economicReportQuality: Average
+    politicalReportQuality: Average
+  - countryName: Gambia
+    isOperational: 1
+    staffCount: 37
+    influencePercentage: 68.2477
+    economicReportQuality: Average
+    politicalReportQuality: Average
+  - countryName: Ghana
+    isOperational: 0
+    staffCount: 10
+    influencePercentage: 54.104584
+    economicReportQuality: Poor
+    politicalReportQuality: Poor
+  - countryName: Guinea
+    isOperational: 1
+    staffCount: 44
+    influencePercentage: 65.89905
+    economicReportQuality: High
+    politicalReportQuality: Average
+  - countryName: Guinea-Bissau
+    isOperational: 0
+    staffCount: 36
+    influencePercentage: 85.315346
+    economicReportQuality: Excellent
+    politicalReportQuality: Excellent
+  - countryName: Kenya
+    isOperational: 1
+    staffCount: 39
+    influencePercentage: 61.08427
+    economicReportQuality: Excellent
+    politicalReportQuality: Poor
+  - countryName: Lesotho
+    isOperational: 1
+    staffCount: 29
+    influencePercentage: 82.42107
+    economicReportQuality: Poor
+    politicalReportQuality: Poor
+  - countryName: Liberia
+    isOperational: 0
+    staffCount: 43
+    influencePercentage: 85.22112
+    economicReportQuality: Excellent
+    politicalReportQuality: Poor
+  - countryName: Libya
+    isOperational: 1
+    staffCount: 18
+    influencePercentage: 64.17533
+    economicReportQuality: Excellent
+    politicalReportQuality: Poor
+  - countryName: Madagascar
+    isOperational: 1
+    staffCount: 49
+    influencePercentage: 32.89428
+    economicReportQuality: Excellent
+    politicalReportQuality: High
+  - countryName: Malawi
+    isOperational: 0
+    staffCount: 12
+    influencePercentage: 76.2008
+    economicReportQuality: High
+    politicalReportQuality: Poor
+  - countryName: Mali
+    isOperational: 1
+    staffCount: 22
+    influencePercentage: 86.52569
+    economicReportQuality: Average
+    politicalReportQuality: Average
+  - countryName: Mauritania
+    isOperational: 1
+    staffCount: 29
+    influencePercentage: 36.062313
+    economicReportQuality: Excellent
+    politicalReportQuality: High
+  - countryName: Mauritius
+    isOperational: 1
+    staffCount: 17
+    influencePercentage: 62.07425
+    economicReportQuality: Average
+    politicalReportQuality: Average
+  - countryName: Morocco
+    isOperational: 1
+    staffCount: 17
+    influencePercentage: 78.378105
+    economicReportQuality: Excellent
+    politicalReportQuality: Average
+  - countryName: Mozambique
+    isOperational: 1
+    staffCount: 39
+    influencePercentage: 76.65228
+    economicReportQuality: Average
+    politicalReportQuality: Excellent
+  - countryName: Namibia
+    isOperational: 1
+    staffCount: 40
+    influencePercentage: 65.99952
+    economicReportQuality: High
+    politicalReportQuality: High
+  - countryName: Niger
+    isOperational: 1
+    staffCount: 17
+    influencePercentage: 66.56917
+    economicReportQuality: High
+    politicalReportQuality: Excellent
+  - countryName: Republic of the Congo
+    isOperational: 1
+    staffCount: 42
+    influencePercentage: 94.34457
+    economicReportQuality: Excellent
+    politicalReportQuality: High
+  - countryName: Rwanda
+    isOperational: 0
+    staffCount: 24
+    influencePercentage: 67.56074
+    economicReportQuality: High
+    politicalReportQuality: High
+  - countryName: Sao Tome and Principe
+    isOperational: 0
+    staffCount: 15
+    influencePercentage: 58.43567
+    economicReportQuality: High
+    politicalReportQuality: Excellent
+  - countryName: Senegal
+    isOperational: 0
+    staffCount: 32
+    influencePercentage: 67.95664
+    economicReportQuality: High
+    politicalReportQuality: Average
+  - countryName: Seychelles
+    isOperational: 1
+    staffCount: 45
+    influencePercentage: 38.402927
+    economicReportQuality: Poor
+    politicalReportQuality: Poor
+  - countryName: Sierra Leone
+    isOperational: 1
+    staffCount: 33
+    influencePercentage: 83.759285
+    economicReportQuality: High
+    politicalReportQuality: High
+  - countryName: Somalia
+    isOperational: 1
+    staffCount: 40
+    influencePercentage: 86.30499
+    economicReportQuality: Excellent
+    politicalReportQuality: Average
+  - countryName: South Africa
+    isOperational: 1
+    staffCount: 18
+    influencePercentage: 47.481712
+    economicReportQuality: Excellent
+    politicalReportQuality: Average
+  - countryName: South Sudan
+    isOperational: 1
+    staffCount: 14
+    influencePercentage: 74.064285
+    economicReportQuality: Average
+    politicalReportQuality: Average
+  - countryName: Sudan
+    isOperational: 1
+    staffCount: 41
+    influencePercentage: 48.83938
+    economicReportQuality: Excellent
+    politicalReportQuality: High
+  - countryName: Tanzania
+    isOperational: 1
+    staffCount: 21
+    influencePercentage: 59.324013
+    economicReportQuality: Poor
+    politicalReportQuality: High
+  - countryName: Togo
+    isOperational: 1
+    staffCount: 19
+    influencePercentage: 68.35144
+    economicReportQuality: Excellent
+    politicalReportQuality: Excellent
+  - countryName: Tunisia
+    isOperational: 1
+    staffCount: 37
+    influencePercentage: 83.373726
+    economicReportQuality: Excellent
+    politicalReportQuality: Average
+  - countryName: Uganda
+    isOperational: 1
+    staffCount: 47
+    influencePercentage: 69.2628
+    economicReportQuality: Average
+    politicalReportQuality: High
+  - countryName: Zambia
+    isOperational: 1
+    staffCount: 17
+    influencePercentage: 32.71932
+    economicReportQuality: Excellent
+    politicalReportQuality: Excellent
+  - countryName: Zimbabwe
+    isOperational: 1
+    staffCount: 33
+    influencePercentage: 89.9579
+    economicReportQuality: Excellent
+    politicalReportQuality: High
+  - countryName: Western Sahara
+    isOperational: 0
+    staffCount: 39
+    influencePercentage: 38.55851
+    economicReportQuality: High
+    politicalReportQuality: Poor
+  internationalOrgs:
+  - orgName: United Nations
+    membershipStatus: Member
+    votingPower: Low
+    currentResolution: Global Sanctions
+    voteStatus: Pending
+  - orgName: African Union
+    membershipStatus: Member
+    votingPower: Medium
+    currentResolution: Regional Security
+    voteStatus: Pending
+  - orgName: ECOWAS
+    membershipStatus: Member
+    votingPower: High
+    currentResolution: Trade Integration
+    voteStatus: Approve
+  - orgName: World Bank
+    membershipStatus: Observer
+    votingPower: None
+    currentResolution: Infrastructure Loans
+    voteStatus: Abstain
+  diplomacyInfluence: 71
+  embassyBudget: 1.2
   battleResults: []
   covertBudget: 0
-  counterIntelligence: 46.7
-  exposureRisk: 0
+  counterIntelligence: 38.453938
+  exposureRisk: 30.225
   recruitedAssets: []
+  intelHardware:
+  - id: 9b33c488-3f09-4cf9-ae6e-1751d0e5bd9b
+    assetName: Reaper-Sq-6
+    type: Drone
+    status: Active
+    monthsTotal: 2
+    monthsRemaining: 0
+  - id: 1c24be88-abc9-41ae-a57c-92d10bc110b2
+    assetName: Argus-40
+    type: Satellite
+    status: Active
+    monthsTotal: 6
+    monthsRemaining: 0
   regions:
   - {fileID: 11400000, guid: da348be1548a3f9499a296c0ed2d508b, type: 2}
   - {fileID: 11400000, guid: 961a7012e8bc8db45a9e406774928d18, type: 2}
@@ -491,7 +1822,7 @@ MonoBehaviour:
     regionName: Abuja
     targetID: PowerHydro
     totalCost: 55
-    monthsRemaining: 111
+    monthsRemaining: 76
     totalMonths: 30
     stage: 3
     description: 
@@ -500,7 +1831,34 @@ MonoBehaviour:
     regionName: Abuja
     targetID: PowerHydro
     totalCost: 55
-    monthsRemaining: 111
+    monthsRemaining: 76
     totalMonths: 30
+    stage: 3
+    description: 
+  - projectName: Hydroelectric Dam
+    projectType: Energy
+    regionName: Abuja
+    targetID: PowerHydro
+    totalCost: 55
+    monthsRemaining: 120
+    totalMonths: 30
+    stage: 3
+    description: 
+  - projectName: Coastal Highway Phase II
+    projectType: Infra
+    regionName: Abuja
+    targetID: Roads
+    totalCost: 45
+    monthsRemaining: 107
+    totalMonths: 18
+    stage: 3
+    description: 
+  - projectName: Solar Belt Programme
+    projectType: Energy
+    regionName: Abuja
+    targetID: PowerSolar
+    totalCost: 22
+    monthsRemaining: 120
+    totalMonths: 10
     stage: 3
     description: 

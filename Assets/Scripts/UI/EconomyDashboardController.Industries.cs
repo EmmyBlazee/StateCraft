@@ -85,6 +85,14 @@ namespace StateCraft.UI
             if (_lblIndOverviewOutput != null) _lblIndOverviewOutput.text = UiFormat.Money(totalRev, sym) + " / mo";
             float pctGDP = country.gdp > 0 ? (totalRev / (country.gdp * country.exchangeRate / 12f)) * 100f : 0f;
             if (_lblIndOverviewGDPPct != null) _lblIndOverviewGDPPct.text = $"Total Contribution to GDP: {pctGDP:F1}%";
+            
+            var powerLabel = panel.Q<Label>("IndustryOverview_Power");
+            if (powerLabel != null)
+            {
+                float cap = GetTotalPowerCapacity(country);
+                powerLabel.text = $"GRID CAPACITY: {cap:N0} MW ({country.electricityLevel:F0}% Coverage)";
+            }
+
             if (_lblIndOverviewMeter  != null) _lblIndOverviewMeter.text  = $"{pctGDP:F1}% of GDP";
             if (_pbIndOverview        != null) _pbIndOverview.value       = pctGDP;
 
@@ -164,9 +172,52 @@ namespace StateCraft.UI
                 }
 
                 if (refs.Pressure != null) {
-                    refs.Pressure.text = bullish ? "▲ TRENDING WELL\nOptimal conditions." : "▼ PRESSURE: HIGH\nSuboptimal synergy.";
-                    refs.Pressure.EnableInClassList("warning", !bullish);
-                    refs.Pressure.EnableInClassList("negative", false);
+                    if (bullish)
+                    {
+                        refs.Pressure.text = "▲ TRENDING WELL\nOptimal conditions.";
+                        refs.Pressure.EnableInClassList("warning", false);
+                        refs.Pressure.EnableInClassList("negative", false);
+                    }
+                    else
+                    {
+                        var constraints = new List<string>();
+                        if (ind.id == "Oil")
+                        {
+                            if (country.electricityLevel <= 50f) constraints.Add($"Power Grid ({country.electricityLevel:F0}%/50%)");
+                            if (country.portLevel <= 1) constraints.Add($"Ports (Lv.{country.portLevel}/2)");
+                        }
+                        else if (ind.id == "Mining")
+                        {
+                            if (country.railLevel <= 2) constraints.Add($"Rail Network (Lv.{country.railLevel}/3)");
+                            if (country.resourceSovereignty <= 60f) constraints.Add($"Sovereignty ({country.resourceSovereignty:F0}%/60%)");
+                        }
+                        else if (ind.id == "Agri")
+                        {
+                            if (country.foodSecurity <= 55f) constraints.Add($"Food Security ({country.foodSecurity:F0}%/55%)");
+                            if (country.roadLevel <= 2) constraints.Add($"Road Network (Lv.{country.roadLevel}/3)");
+                        }
+                        else if (ind.id == "Mfg")
+                        {
+                            if (country.electricityLevel <= 55f) constraints.Add($"Power Grid ({country.electricityLevel:F0}%/55%)");
+                            if (country.roadLevel <= 3) constraints.Add($"Road Network (Lv.{country.roadLevel}/4)");
+                        }
+                        else if (ind.id == "Tech")
+                        {
+                            if (country.telecomLevel <= 3) constraints.Add($"Telecom (Lv.{country.telecomLevel}/4)");
+                            if (country.educationLevel <= 2) constraints.Add($"Education (Lv.{country.educationLevel}/3)");
+                        }
+
+                        if (constraints.Count > 0)
+                        {
+                            refs.Pressure.text = $"▼ CONSTRAINED BY:\n{string.Join(", ", constraints)}";
+                        }
+                        else
+                        {
+                            refs.Pressure.text = "▼ PRESSURE: HIGH\nSuboptimal synergy.";
+                        }
+                        refs.Pressure.EnableInClassList("warning", true);
+                        refs.Pressure.EnableInClassList("negative", false);
+                    }
                 }
 
                 if (refs.Benefits != null) refs.Benefits.text = $"Benefits: +1 Tier, increased workforce & capacity.";
@@ -197,7 +248,6 @@ namespace StateCraft.UI
                     var title = new Label(a.Category); title.AddToClassList("industry-card-title"); info.Add(title);
                     var copy = new Label(a.Message); copy.AddToClassList("industry-copy"); info.Add(copy);
                     row.Add(info);
-                    var view = new Label("VIEW"); view.AddToClassList("market"); row.Add(view);
                     alertsCont.Add(row);
                     ct++;
                 }

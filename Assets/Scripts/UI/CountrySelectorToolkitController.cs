@@ -78,6 +78,7 @@ namespace StateCraft.UI
         {
             if (_selectorRoot == null) return;
             
+            _selectorRoot.style.display = DisplayStyle.Flex;
             _selectorRoot.style.opacity = 1;
             _selectorRoot.pickingMode = PickingMode.Position; // BLOCK MAP
             _selectorRoot.style.visibility = Visibility.Visible;
@@ -85,17 +86,18 @@ namespace StateCraft.UI
             if (_searchInput != null) _searchInput.Focus();
             RefreshList("");
             
-}
+        }
 
         public void Hide()
         {
             if (_selectorRoot == null) return;
             
+            _selectorRoot.style.display = DisplayStyle.None;
             _selectorRoot.style.opacity = 0;
             _selectorRoot.pickingMode = PickingMode.Ignore; // UNBLOCK MAP
             _selectorRoot.style.visibility = Visibility.Hidden;
             
-}
+        }
 
         private void RefreshList(string filter)
         {

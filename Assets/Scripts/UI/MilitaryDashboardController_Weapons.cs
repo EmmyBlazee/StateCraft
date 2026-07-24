@@ -1730,21 +1730,46 @@ namespace StateCraft.UI
             
             if (isPersonnel)
             {
-                int capacity = 0;
+                int trainingCapacity = 0;
+                int currentTrainees = GetTotalInTraining(country, id);
+                int housingCapacity = 0;
                 int currentTotal = 0;
-                int inTraining = GetTotalInTraining(country, id);
 
                 switch (id)
                 {
-                    case "INF":       capacity = 5000 + (country.baseArmyCount * 15000);     currentTotal = country.armyStats.personnel + inTraining;       break;
-                    case "POLICE":    capacity = 5000 + (country.baseArmyCount * 5000);      currentTotal = country.nationalPoliceSize + inTraining;         break;
-                    case "NAVY_PERS": capacity = 1000 + (country.baseNavyCount * 3000);      currentTotal = country.navyStats.personnel + inTraining;        break;
-                    case "AIR_PERS":  capacity = 500  + (country.baseAirForceCount * 2000);  currentTotal = country.airForceStats.personnel + inTraining;    break;
-                    case "RDF_PERS":  capacity = 200  + (country.baseRDFCount * 1000);       currentTotal = country.rdfStats.personnel + inTraining;         break;
+                    case "INF":
+                        trainingCapacity = 5000 + (country.baseArmyCount * 15000);
+                        currentTotal = country.armyStats.personnel;
+                        foreach (var b in country.militaryBases) if (b.branch == "ARMY") housingCapacity += b.capacity;
+                        break;
+                    case "POLICE":
+                        trainingCapacity = 5000 + (country.baseArmyCount * 5000);
+                        currentTotal = country.nationalPoliceSize;
+                        foreach (var b in country.militaryBases) if (b.branch == "ARMY") housingCapacity += b.capacity;
+                        break;
+                    case "NAVY_PERS":
+                        trainingCapacity = 1000 + (country.baseNavyCount * 3000);
+                        currentTotal = country.navyStats.personnel;
+                        foreach (var b in country.militaryBases) if (b.branch == "NAVY") housingCapacity += b.capacity;
+                        break;
+                    case "AIR_PERS":
+                        trainingCapacity = 500 + (country.baseAirForceCount * 2000);
+                        currentTotal = country.airForceStats.personnel;
+                        foreach (var b in country.militaryBases) if (b.branch == "AIR" || b.branch == "AIR FORCE") housingCapacity += b.capacity;
+                        break;
+                    case "RDF_PERS":
+                        trainingCapacity = 200 + (country.baseRDFCount * 1000);
+                        currentTotal = country.rdfStats.personnel;
+                        foreach (var b in country.militaryBases) if (b.branch == "RDF") housingCapacity += b.capacity;
+                        break;
                 }
                 
-                int availableSpace = Mathf.Max(0, capacity - currentTotal);
+                int availableSpace = Mathf.Max(0, trainingCapacity - currentTrainees);
                 maxBatches = Mathf.Max(1, availableSpace / batchSize);
+
+                var housingLabel = new Label($"Base Housing Capacity: {currentTotal:N0} active / {housingCapacity:N0} limit") { style = { color = new Color(0.8f, 0.8f, 0.8f, 1f), fontSize = 10, marginTop = -5, marginBottom = 15 } };
+                if (currentTotal > housingCapacity) housingLabel.style.color = new Color(1f, 0.3f, 0.3f);
+                content.Add(housingLabel);
             }
 
             SliderInt amountSlider = new SliderInt(1, maxBatches) { style = { marginBottom = 20 } };
@@ -1762,17 +1787,22 @@ namespace StateCraft.UI
 
             string sym = string.IsNullOrEmpty(country.currencySymbol) ? "$" : country.currencySymbol;
 
-            amountSlider.RegisterValueChangedCallback(evt => {
-                int totalUnits = evt.newValue * batchSize;
-                float totalCost = evt.newValue * baseCostB;
-                float totalMinerals = evt.newValue * baseMineralsCost;
-                sliderLabel.text = $"QUANTITY: {totalUnits:N0} UNITS ({evt.newValue} BATCHES OF {batchSize})";
-                string costText = $"Total Cost: {UiFormat.Money(totalCost * country.exchangeRate, sym)}";
-                if (isProduce && totalMinerals > 0) costText += $"  |  Minerals: {totalMinerals:N0} T";
+            // Local helper — also invoked immediately so quantity/cost show on open
+            System.Action<int> updateLabels = batches => {
+                int totalUnits = batches * batchSize;
+                float totalCost = batches * baseCostB;
+                float totalMinerals = batches * baseMineralsCost;
+                sliderLabel.text = $"QUANTITY: {totalUnits:N0} units  ({batches} batch{(batches == 1 ? "" : "es")} × {batchSize:N0} per batch)";
+                string costText = $"Total Cost:  {UiFormat.Money(totalCost * country.exchangeRate, sym)}";
+                if (isProduce && totalMinerals > 0) costText += $"   |   Minerals: {totalMinerals:N0} T";
                 totalCostLabel.text = costText;
-            });
+            };
+
+            amountSlider.RegisterValueChangedCallback(evt => updateLabels(evt.newValue));
             amountSlider.value = 1;
+            updateLabels(1); // populate immediately — setting value=1 won't fire callback
             content.Insert(1, amountSlider);
+
 
             var actionRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.FlexEnd, marginTop = 10 } };
             
@@ -1787,9 +1817,16 @@ namespace StateCraft.UI
             cancelBtn.style.unityFontStyleAndWeight = FontStyle.Bold;
             actionRow.Add(cancelBtn);
 
-            var confirmBtn = new Button() { text = "CONFIRM ORDER" };
+            // Button label: RECRUIT for personnel, PRODUCE for local, IMPORT ORDER for weapons
+            string confirmLabel = isPersonnel ? "RECRUIT" : (isProduce ? "PRODUCE" : "IMPORT ORDER");
+            Color confirmColor = isPersonnel
+                ? new Color(36/255f, 174/255f, 96/255f)   // green for recruit
+                : isProduce
+                ? new Color(0f, 140/255f, 220/255f)       // blue for produce
+                : new Color(25/255f, 127/255f, 229/255f); // blue for import
+            var confirmBtn = new Button() { text = confirmLabel };
             confirmBtn.AddToClassList("button-premium");
-            confirmBtn.style.backgroundColor = new Color(25/255f, 127/255f, 229/255f, 1f);
+            confirmBtn.style.backgroundColor = confirmColor;
             confirmBtn.style.color = Color.white;
             confirmBtn.style.width = 160;
             confirmBtn.style.height = 36;
@@ -1804,8 +1841,11 @@ namespace StateCraft.UI
             };
             
             // Hover effect for Confirm Button
-            confirmBtn.RegisterCallback<MouseEnterEvent>(e => confirmBtn.style.backgroundColor = new Color(35/255f, 147/255f, 249/255f, 1f));
-            confirmBtn.RegisterCallback<MouseLeaveEvent>(e => confirmBtn.style.backgroundColor = new Color(25/255f, 127/255f, 229/255f, 1f));
+            Color confirmHover = isPersonnel
+                ? new Color(46/255f, 194/255f, 116/255f)
+                : new Color(35/255f, 147/255f, 249/255f);
+            confirmBtn.RegisterCallback<MouseEnterEvent>(e => confirmBtn.style.backgroundColor = confirmHover);
+            confirmBtn.RegisterCallback<MouseLeaveEvent>(e => confirmBtn.style.backgroundColor = confirmColor);
             
             // Hover effect for Cancel Button
             cancelBtn.RegisterCallback<MouseEnterEvent>(e => cancelBtn.style.backgroundColor = new Color(0.3f, 0.3f, 0.3f, 1f));

@@ -1,4 +1,4 @@
-﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/Styles/Global.uss" />
     <ui:Style>
         .tax-donut { position: relative; width: 90px; height: 90px; align-items: center; justify-content: center; border-width: 0; }
@@ -36,9 +36,9 @@
         <ui:VisualElement name="SubTabs" class="econ-tabs">
             <ui:Button name="TabDashboard" text="⌂  OVERVIEW" class="econ-tab active-tab" />
             <ui:Button name="TabProduction" text="▣  TAXATION" class="econ-tab" />
-            <ui:Button name="TabIndustry" text="▦  INDUSTRIES" class="econ-tab" />
-            <ui:Button name="TabInfrastructure" text="▤  BUDGET" class="econ-tab" />
-            <ui:Button name="TabConstruction" text="⌁  PROJECTS" class="econ-tab" />
+            <ui:Button name="TabIndustry" text="◆  INDUSTRIES" class="econ-tab" />
+            <ui:Button name="TabInfrastructure" text="≡  BUDGET" class="econ-tab" />
+            <ui:Button name="TabConstruction" text="►  PROJECTS" class="econ-tab" />
         </ui:VisualElement>
 
         <ui:VisualElement name="PanelContainer" class="economy-tab-panel">
@@ -68,7 +68,7 @@
                         </ui:VisualElement>
 
                         <ui:VisualElement class="econ-sector-panel">
-                            <ui:VisualElement class="econ-panel-header"><ui:Label text="ECONOMIC SECTORS" class="econ-panel-title" /><ui:Label name="BtnViewAllSectors" text="VIEW ALL SECTORS ›" class="market" /></ui:VisualElement>
+                            <ui:VisualElement class="econ-panel-header"><ui:Label text="ECONOMIC SECTORS" class="econ-panel-title" /></ui:VisualElement>
                             <ui:VisualElement name="EconSectorsGrid" class="econ-sector-grid">
                             </ui:VisualElement>
                         </ui:VisualElement>
@@ -79,7 +79,7 @@
                         <ui:Label text="CHIEF ECONOMIC ADVISER" class="econ-panel-title" />
                         <ui:VisualElement class="econ-adviser-main">
                             <ui:VisualElement class="econ-adviser-portrait"><ui:Label text="EA" class="econ-adviser-initials" /></ui:VisualElement>
-                            <ui:VisualElement class="econ-adviser-copy">
+                            <ui:VisualElement class="econ-adviser-copy adviser-copy-container">
                                 <ui:Label name="OverviewAdviserName" text="Dr. Adekunle Okafor" class="econ-report-title" />
                                 <ui:Label text="Chief Economic Adviser" class="econ-muted" />
                                 <ui:Label text="RECOMMENDATION" class="positive" />
@@ -120,8 +120,10 @@
                         <ui:ProgressBar name="DebtRatioBar" value="0" high-value="100" class="econ-progress" />
                         <ui:VisualElement class="metric-row"><ui:Label text="DEBT SERVICE" class="metric-label" /><ui:Label name="LabelDebtService" text="100%" class="metric-value" /></ui:VisualElement>
                         <ui:Slider name="SliderDebtService" low-value="0" high-value="200" value="100" />
-                        <ui:Label name="LblDebtServiceCost" text="Monthly payment: —" class="econ-muted" />
-                        <ui:VisualElement class="econ-action-row"><ui:Button name="BtnBorrowDebt" text="BORROW ₦50B" class="econ-small-button" /><ui:Button name="BtnRepayDebt" text="REPAY ₦50B" class="econ-small-button" /></ui:VisualElement>
+                        <ui:Label name="LblDebtServiceCost" text="Monthly payment: —" class="econ-muted" style="margin-bottom: 10px;" />
+                        <ui:VisualElement class="metric-row"><ui:Label text="TRANSACTION SIZE" class="metric-label" /><ui:Label name="LabelDebtTransaction" text="50B" class="metric-value" /></ui:VisualElement>
+                        <ui:Slider name="SliderDebtTransaction" low-value="10" high-value="1000" value="50" />
+                        <ui:VisualElement class="econ-action-row" style="margin-top: 10px;"><ui:Button name="BtnBorrowDebt" text="BORROW" class="econ-small-button" /><ui:Button name="BtnRepayDebt" text="REPAY" class="econ-small-button" /></ui:VisualElement>
                     </ui:VisualElement>
 
                     <ui:VisualElement name="OverviewProjectsPanel" class="econ-panel econ-projects">
@@ -153,40 +155,75 @@
                                 <ui:VisualElement class="tax-category-row good">
                                     <ui:Label text="●" class="tax-category-icon" />
                                     <ui:VisualElement class="tax-category-info"><ui:Label text="INCOME TAX" class="tax-row-title" /><ui:Label text="Tax on individuals' income" class="tax-row-copy" /><ui:Label name="TaxIncome_Base" text="Base: 12%" class="positive" /></ui:VisualElement>
-                                    <ui:VisualElement class="tax-rate-cell"><ui:Button name="TaxIncome_Minus" text="−" class="tax-step-btn" /><ui:Label text="CURRENT RATE" class="tax-mini-label" /><ui:Label name="TaxIncome_Rate" text="12%" class="tax-rate-value" /><ui:Slider name="TaxIncome_Bar" low-value="0" high-value="50" value="12" class="tax-slider" /></ui:VisualElement>
-                                    <ui:Button name="TaxIncome_Plus" text="+" class="tax-step-btn" />
+                                    <ui:VisualElement class="tax-rate-cell">
+                                        <ui:Label text="CURRENT RATE" class="tax-mini-label" />
+                                        <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: center;">
+                                            <ui:Button name="TaxIncome_Minus" text="−" class="tax-step-btn" />
+                                            <ui:Label name="TaxIncome_Rate" text="12%" class="tax-rate-value" />
+                                            <ui:Button name="TaxIncome_Plus" text="+" class="tax-step-btn" />
+                                        </ui:VisualElement>
+                                        <ui:Slider name="TaxIncome_Bar" low-value="0" high-value="50" value="12" class="tax-slider" />
+                                    </ui:VisualElement>
                                     <ui:VisualElement class="tax-revenue-cell"><ui:Label text="EST. MONTHLY REVENUE" class="tax-mini-label" /><ui:Label name="TaxIncome_Revenue" text="₦120B" class="tax-revenue-value" /><ui:Label name="TaxIncome_Share" text="18.2% of Total Revenue" class="tax-row-copy" /></ui:VisualElement>
                                 </ui:VisualElement>
 
                                 <ui:VisualElement class="tax-category-row good selected">
                                     <ui:Label text="▥" class="tax-category-icon" />
                                     <ui:VisualElement class="tax-category-info"><ui:Label text="CORPORATE TAX" class="tax-row-title" /><ui:Label text="Tax on company profits" class="tax-row-copy" /><ui:Label name="TaxCorporate_Base" text="Base: 18%" class="positive" /></ui:VisualElement>
-                                    <ui:VisualElement class="tax-rate-cell"><ui:Button name="TaxCorporate_Minus" text="−" class="tax-step-btn" /><ui:Label text="CURRENT RATE" class="tax-mini-label" /><ui:Label name="TaxCorporate_Rate" text="18%" class="tax-rate-value" /><ui:Slider name="TaxCorporate_Bar" low-value="0" high-value="50" value="18" class="tax-slider" /></ui:VisualElement>
-                                    <ui:Button name="TaxCorporate_Plus" text="+" class="tax-step-btn" />
+                                    <ui:VisualElement class="tax-rate-cell">
+                                        <ui:Label text="CURRENT RATE" class="tax-mini-label" />
+                                        <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: center;">
+                                            <ui:Button name="TaxCorporate_Minus" text="−" class="tax-step-btn" />
+                                            <ui:Label name="TaxCorporate_Rate" text="18%" class="tax-rate-value" />
+                                            <ui:Button name="TaxCorporate_Plus" text="+" class="tax-step-btn" />
+                                        </ui:VisualElement>
+                                        <ui:Slider name="TaxCorporate_Bar" low-value="0" high-value="50" value="18" class="tax-slider" />
+                                    </ui:VisualElement>
                                     <ui:VisualElement class="tax-revenue-cell"><ui:Label text="EST. MONTHLY REVENUE" class="tax-mini-label" /><ui:Label name="TaxCorporate_Revenue" text="₦85B" class="tax-revenue-value" /><ui:Label name="TaxCorporate_Share" text="12.8% of Total Revenue" class="tax-row-copy" /></ui:VisualElement>
                                 </ui:VisualElement>
 
                                 <ui:VisualElement class="tax-category-row good">
                                     <ui:Label text="▣" class="tax-category-icon" />
                                     <ui:VisualElement class="tax-category-info"><ui:Label text="VALUE ADDED TAX (VAT)" class="tax-row-title" /><ui:Label text="Tax on goods and services" class="tax-row-copy" /><ui:Label name="TaxVAT_Base" text="Base: 7.5%" class="positive" /></ui:VisualElement>
-                                    <ui:VisualElement class="tax-rate-cell"><ui:Button name="TaxVAT_Minus" text="−" class="tax-step-btn" /><ui:Label text="CURRENT RATE" class="tax-mini-label" /><ui:Label name="TaxVAT_Rate" text="7.5%" class="tax-rate-value" /><ui:Slider name="TaxVAT_Bar" low-value="0" high-value="50" value="7.5" class="tax-slider" /></ui:VisualElement>
-                                    <ui:Button name="TaxVAT_Plus" text="+" class="tax-step-btn" />
+                                    <ui:VisualElement class="tax-rate-cell">
+                                        <ui:Label text="CURRENT RATE" class="tax-mini-label" />
+                                        <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: center;">
+                                            <ui:Button name="TaxVAT_Minus" text="−" class="tax-step-btn" />
+                                            <ui:Label name="TaxVAT_Rate" text="7.5%" class="tax-rate-value" />
+                                            <ui:Button name="TaxVAT_Plus" text="+" class="tax-step-btn" />
+                                        </ui:VisualElement>
+                                        <ui:Slider name="TaxVAT_Bar" low-value="0" high-value="50" value="7.5" class="tax-slider" />
+                                    </ui:VisualElement>
                                     <ui:VisualElement class="tax-revenue-cell"><ui:Label text="EST. MONTHLY REVENUE" class="tax-mini-label" /><ui:Label name="TaxVAT_Revenue" text="₦95B" class="tax-revenue-value" /><ui:Label name="TaxVAT_Share" text="14.4% of Total Revenue" class="tax-row-copy" /></ui:VisualElement>
                                 </ui:VisualElement>
 
                                 <ui:VisualElement class="tax-category-row warning">
-                                    <ui:Label text="⚓" class="tax-category-icon" />
+                                    <ui:Label text="↙" class="tax-category-icon" />
                                     <ui:VisualElement class="tax-category-info"><ui:Label text="IMPORT DUTY" class="tax-row-title" /><ui:Label text="Tax on imported goods" class="tax-row-copy" /><ui:Label name="TaxImport_Base" text="Base: 5%" class="warning" /></ui:VisualElement>
-                                    <ui:VisualElement class="tax-rate-cell"><ui:Button name="TaxImport_Minus" text="−" class="tax-step-btn" /><ui:Label text="CURRENT RATE" class="tax-mini-label" /><ui:Label name="TaxImport_Rate" text="5%" class="tax-rate-value" /><ui:Slider name="TaxImport_Bar" low-value="0" high-value="50" value="5" class="tax-slider warning-slider" /></ui:VisualElement>
-                                    <ui:Button name="TaxImport_Plus" text="+" class="tax-step-btn" />
+                                    <ui:VisualElement class="tax-rate-cell">
+                                        <ui:Label text="CURRENT RATE" class="tax-mini-label" />
+                                        <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: center;">
+                                            <ui:Button name="TaxImport_Minus" text="−" class="tax-step-btn" />
+                                            <ui:Label name="TaxImport_Rate" text="5%" class="tax-rate-value" />
+                                            <ui:Button name="TaxImport_Plus" text="+" class="tax-step-btn" />
+                                        </ui:VisualElement>
+                                        <ui:Slider name="TaxImport_Bar" low-value="0" high-value="50" value="5" class="tax-slider warning-slider" />
+                                    </ui:VisualElement>
                                     <ui:VisualElement class="tax-revenue-cell"><ui:Label text="EST. MONTHLY REVENUE" class="tax-mini-label" /><ui:Label name="TaxImport_Revenue" text="₦25B" class="tax-revenue-value warning" /><ui:Label name="TaxImport_Share" text="3.8% of Total Revenue" class="tax-row-copy" /></ui:VisualElement>
                                 </ui:VisualElement>
 
                                 <ui:VisualElement class="tax-category-row warning">
                                     <ui:Label text="↗" class="tax-category-icon" />
                                     <ui:VisualElement class="tax-category-info"><ui:Label text="EXPORT DUTY" class="tax-row-title" /><ui:Label text="Tax on exported goods" class="tax-row-copy" /><ui:Label name="TaxExport_Base" text="Base: 2%" class="warning" /></ui:VisualElement>
-                                    <ui:VisualElement class="tax-rate-cell"><ui:Button name="TaxExport_Minus" text="−" class="tax-step-btn" /><ui:Label text="CURRENT RATE" class="tax-mini-label" /><ui:Label name="TaxExport_Rate" text="2%" class="tax-rate-value" /><ui:Slider name="TaxExport_Bar" low-value="0" high-value="50" value="2" class="tax-slider warning-slider" /></ui:VisualElement>
-                                    <ui:Button name="TaxExport_Plus" text="+" class="tax-step-btn" />
+                                    <ui:VisualElement class="tax-rate-cell">
+                                        <ui:Label text="CURRENT RATE" class="tax-mini-label" />
+                                        <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: center;">
+                                            <ui:Button name="TaxExport_Minus" text="−" class="tax-step-btn" />
+                                            <ui:Label name="TaxExport_Rate" text="2%" class="tax-rate-value" />
+                                            <ui:Button name="TaxExport_Plus" text="+" class="tax-step-btn" />
+                                        </ui:VisualElement>
+                                        <ui:Slider name="TaxExport_Bar" low-value="0" high-value="50" value="2" class="tax-slider warning-slider" />
+                                    </ui:VisualElement>
                                     <ui:VisualElement class="tax-revenue-cell"><ui:Label text="EST. MONTHLY REVENUE" class="tax-mini-label" /><ui:Label name="TaxExport_Revenue" text="₦15B" class="tax-revenue-value warning" /><ui:Label name="TaxExport_Share" text="2.3% of Total Revenue" class="tax-row-copy" /></ui:VisualElement>
                                 </ui:VisualElement>
 
@@ -272,6 +309,7 @@
                             <ui:Label text="INDUSTRIAL OUTPUT" class="industry-mini-label" />
                             <ui:Label name="IndustryOverview_Output" text="₦191.7T / mo" class="industry-output-value" />
                             <ui:Label name="IndustryOverview_GDPPct" text="Total Contribution to GDP: 47.8%" class="industry-copy" />
+                            <ui:Label name="IndustryOverview_Power" text="GRID CAPACITY: —" class="industry-copy" style="color: rgb(255, 202, 40); margin-top: 4px;" />
                         </ui:VisualElement>
                         <ui:VisualElement class="industry-output-meter">
                             <ui:Label name="IndustryOverview_Meter" text="47.8% of GDP" class="industry-meter-label" />
@@ -341,7 +379,7 @@
                         <ui:VisualElement class="industry-side">
                             <ui:VisualElement class="industry-panel adviser">
                                 <ui:Label text="INDUSTRY ADVISER" class="industry-title" />
-                                <ui:VisualElement class="industry-adviser-main"><ui:VisualElement class="industry-adviser-portrait"><ui:Label text="EA" /></ui:VisualElement><ui:VisualElement><ui:Label name="IndustryAdviserName" text="Dr. Adekunle Okafor" class="industry-card-title" /><ui:Label text="Chief Economic Adviser" class="industry-copy" /><ui:Label text="CURRENT RECOMMENDATION" class="market" /><ui:Label name="IndustryAdviserRec" text="Invest in Manufacturing" class="industry-card-title" /><ui:Label name="IndustryAdviserBody" text="High demand, low capacity. Strong potential for growth and job creation." class="industry-copy" /></ui:VisualElement></ui:VisualElement>
+                                <ui:VisualElement class="industry-adviser-main"><ui:VisualElement class="industry-adviser-portrait"><ui:Label text="EA" /></ui:VisualElement><ui:VisualElement class="adviser-copy-container"><ui:Label name="IndustryAdviserName" text="Dr. Adekunle Okafor" class="industry-card-title" /><ui:Label text="Chief Economic Adviser" class="industry-copy" /><ui:Label text="CURRENT RECOMMENDATION" class="market" /><ui:Label name="IndustryAdviserRec" text="Invest in Manufacturing" class="industry-card-title" /><ui:Label name="IndustryAdviserBody" text="High demand, low capacity. Strong potential for growth and job creation." class="industry-copy" /></ui:VisualElement></ui:VisualElement>
                                 <ui:VisualElement class="industry-impact-grid"><ui:Label text="EXPECTED IMPACT (Monthly)" class="market" /><ui:VisualElement class="industry-stat-row"><ui:Label text="Revenue&#10;+ ₦25B" class="positive" /><ui:Label text="Employment&#10;+ 6,000" class="positive" /><ui:Label text="GDP Growth&#10;+ 0.6%" class="positive" /><ui:Label text="Risk Level&#10;LOW" class="positive" /></ui:VisualElement></ui:VisualElement>
                                 <ui:Button text="INVEST NOW  ›" class="industry-invest-btn" />
                             </ui:VisualElement>
@@ -406,7 +444,7 @@
                         <ui:VisualElement class="budget-right">
                             <ui:VisualElement class="budget-panel">
                                 <ui:Label text="BUDGET ADVISER" class="budget-panel-title" />
-                                <ui:VisualElement class="budget-adviser-main"><ui:VisualElement class="budget-adviser-portrait"><ui:Label text="EA" /></ui:VisualElement><ui:VisualElement><ui:Label text="Dr. Adekunle Okafor" class="budget-row-title" /><ui:Label text="Chief Economic Adviser" class="budget-copy" /><ui:Label text="ADVISER NOTE" class="market" /><ui:Label name="BudgetAdviserBody" text="The budget is balanced this month. Consider increasing investment in Infrastructure and Education to boost long-term growth." class="budget-copy" /><ui:Button text="VIEW DETAILED REPORT" class="budget-report-btn" style="display: none;" /></ui:VisualElement></ui:VisualElement>
+                                <ui:VisualElement class="budget-adviser-main"><ui:VisualElement class="budget-adviser-portrait"><ui:Label text="EA" /></ui:VisualElement><ui:VisualElement class="adviser-copy-container"><ui:Label text="Dr. Adekunle Okafor" class="budget-row-title" /><ui:Label text="Chief Economic Adviser" class="budget-copy" /><ui:Label text="ADVISER NOTE" class="market" /><ui:Label name="BudgetAdviserBody" text="The budget is balanced this month. Consider increasing investment in Infrastructure and Education to boost long-term growth." class="budget-copy" /><ui:Button text="VIEW DETAILED REPORT" class="budget-report-btn" style="display: none;" /></ui:VisualElement></ui:VisualElement>
                             </ui:VisualElement>
                             <ui:VisualElement class="budget-panel"><ui:Label text="KEY EFFECTS (Projected This Month)" class="budget-panel-title" /><ui:VisualElement class="budget-effects-grid"><ui:Label name="BudgetEffect_Growth" text="Economic Growth&#10;+0.6%" class="positive" /><ui:Label name="BudgetEffect_Military" text="Military Readiness&#10;78%" /><ui:Label name="BudgetEffect_Inflation" text="Inflation&#10;0%" class="warning" /><ui:Label name="BudgetEffect_Employment" text="Employment&#10;+12,500" class="positive" /><ui:Label name="BudgetEffect_Approval" text="Approval Rating&#10;+1%" class="positive" /><ui:Label name="BudgetEffect_Debt" text="Debt Change&#10;+₦18B" class="negative" /></ui:VisualElement></ui:VisualElement>
                             <ui:VisualElement name="BudgetAlertsContainer" class="budget-panel"><ui:Label text="BUDGET ALERTS" class="budget-panel-title" /></ui:VisualElement>
@@ -427,9 +465,9 @@
                             <ui:VisualElement class="projects-kpi-row">
                                 <ui:VisualElement class="projects-kpi"><ui:Label text="◎" class="projects-kpi-icon" /><ui:VisualElement><ui:Label text="ACTIVE PROJECTS" class="projects-mini-label" /><ui:Label name="ProjectsKPI_Count" text="4" class="projects-kpi-value" /><ui:Label text="Across 6 sectors" class="projects-copy" /></ui:VisualElement></ui:VisualElement>
                                 <ui:VisualElement class="projects-kpi"><ui:Label text="▣" class="projects-kpi-icon green" /><ui:VisualElement><ui:Label text="MONTHLY COST" class="projects-mini-label" /><ui:Label name="ProjectsKPI_MonthlyCost" text="₦350B" class="projects-kpi-value" /><ui:Label text="12.4% of Budget" class="projects-copy" /></ui:VisualElement></ui:VisualElement>
-                                <ui:VisualElement class="projects-kpi"><ui:Label text="▟" class="projects-kpi-icon market" /><ui:VisualElement><ui:Label text="PROJECTED GDP BOOST" class="projects-mini-label" /><ui:Label name="ProjectsKPI_GDPBoost" text="+3.2%" class="projects-kpi-value" /><ui:Label text="Upon Completion" class="projects-copy" /></ui:VisualElement></ui:VisualElement>
+                                <ui:VisualElement class="projects-kpi"><ui:Label text="▲" class="projects-kpi-icon market" /><ui:VisualElement><ui:Label text="PROJECTED GDP BOOST" class="projects-mini-label" /><ui:Label name="ProjectsKPI_GDPBoost" text="+3.2%" class="projects-kpi-value" /><ui:Label text="Upon Completion" class="projects-copy" /></ui:VisualElement></ui:VisualElement>
                                 <ui:VisualElement class="projects-kpi"><ui:Label text="☷" class="projects-kpi-icon blue" /><ui:VisualElement><ui:Label text="JOBS TO BE CREATED" class="projects-mini-label" /><ui:Label name="ProjectsKPI_Jobs" text="85,000" class="projects-kpi-value" /><ui:Label text="Direct &amp; Indirect" class="projects-copy" /></ui:VisualElement></ui:VisualElement>
-                                <ui:VisualElement class="projects-kpi"><ui:Label text="◴" class="projects-kpi-icon market" /><ui:VisualElement><ui:Label text="AVERAGE COMPLETION" class="projects-mini-label" /><ui:Label name="ProjectsKPI_AvgCompletion" text="11.6 Months" class="projects-kpi-value" /><ui:Label text="Across all Projects" class="projects-copy" /></ui:VisualElement></ui:VisualElement>
+                                <ui:VisualElement class="projects-kpi"><ui:Label text="►" class="projects-kpi-icon market" /><ui:VisualElement><ui:Label text="AVERAGE COMPLETION" class="projects-mini-label" /><ui:Label name="ProjectsKPI_AvgCompletion" text="11.6 Months" class="projects-kpi-value" /><ui:Label text="Across all Projects" class="projects-copy" /></ui:VisualElement></ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
 
@@ -453,12 +491,14 @@
                                 </ui:VisualElement>
                             </ui:VisualElement>
                             <!-- Cards are built at runtime by RebuildBlueprintGrid() -->
-                            <ui:VisualElement name="LiveBlueprintGrid" class="blueprint-grid" />
+                            <ui:ScrollView mode="Horizontal" style="flex-grow: 1;">
+                                <ui:VisualElement name="LiveBlueprintGrid" class="blueprint-grid" style="padding-bottom: 20px;" />
+                            </ui:ScrollView>
                         </ui:VisualElement>
                     </ui:VisualElement>
 
-                    <ui:VisualElement class="projects-side">
-                        <ui:VisualElement class="projects-side-card">
+                    <ui:VisualElement name="ProjectsSideWrapper" class="projects-side" style="display: none;">
+                        <ui:VisualElement name="SelectedProjectCard" class="projects-side-card" style="display: none;">
                             <ui:VisualElement class="projects-section-header"><ui:Label text="SELECTED PROJECT" class="market" /><ui:Button text="×" class="projects-close-btn" /></ui:VisualElement>
                             <ui:Label name="SideProject_Title" text="LAGOS DEEP SEA PORT" class="projects-title" />
                             <ui:Label text="PROJECT OVERVIEW" class="projects-side-heading" />
@@ -471,9 +511,9 @@
                             <ui:Button text="VIEW FULL REPORT" class="project-report-btn" style="display: none;" />
                         </ui:VisualElement>
 
-                        <ui:VisualElement class="projects-side-card adviser">
+                        <ui:VisualElement name="ProjectsAdviserCard" class="projects-side-card adviser" style="display: none;">
                             <ui:Label text="PROJECTS ADVISER" class="projects-title" />
-                            <ui:VisualElement class="projects-adviser-main"><ui:VisualElement class="projects-adviser-portrait"><ui:Label text="EA" /></ui:VisualElement><ui:VisualElement><ui:Label text="Dr. Adekunle Okafor" class="project-card-title" /><ui:Label text="Chief Economic Adviser" class="projects-copy" /><ui:Label text="RECOMMENDATION" class="market" /><ui:Label name="ProjectsAdviserBody" text="Focus on Infrastructure and Energy projects to drive economic growth and improve national stability." class="projects-copy" /></ui:VisualElement></ui:VisualElement>
+                            <ui:VisualElement class="projects-adviser-main"><ui:VisualElement class="projects-adviser-portrait"><ui:Label text="EA" /></ui:VisualElement><ui:VisualElement class="adviser-copy-container"><ui:Label text="Dr. Adekunle Okafor" class="project-card-title" /><ui:Label text="Chief Economic Adviser" class="projects-copy" /><ui:Label text="RECOMMENDATION" class="market" /><ui:Label name="ProjectsAdviserBody" text="Focus on Infrastructure and Energy projects to drive economic growth and improve national stability." class="projects-copy" /></ui:VisualElement></ui:VisualElement>
                             <ui:Button text="VIEW ADVISER NOTES" class="project-report-btn" style="display: none;" />
                         </ui:VisualElement>
                     </ui:VisualElement>

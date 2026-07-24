@@ -8,8 +8,60 @@ using System.Linq;
 
 namespace StateCraft.Systems
 {
-    public class EventSystem : IEventSystem
+    public class EventSystem : IEventSystem, ISaveable
     {
+        [System.Serializable]
+        private class SavedPendingEvent
+        {
+            public string countryName;
+            public string eventName;
+            public int daysRemaining;
+        }
+
+        [System.Serializable]
+        private class EventSystemSaveData
+        {
+            public List<SavedPendingEvent> queuedEvents = new List<SavedPendingEvent>();
+        }
+
+        public string ExportState()
+        {
+            var data = new EventSystemSaveData();
+            foreach (var pe in _playerEventQueue)
+            {
+                if (pe.country == null || pe.ev == null) continue;
+                data.queuedEvents.Add(new SavedPendingEvent
+                {
+                    countryName = pe.country.countryName,
+                    eventName = pe.ev.name,
+                    daysRemaining = pe.daysRemaining
+                });
+            }
+            return JsonUtility.ToJson(data);
+        }
+
+        public void ImportState(string json)
+        {
+            var data = JsonUtility.FromJson<EventSystemSaveData>(json);
+            if (data == null) return;
+
+            _playerEventQueue.Clear();
+            foreach (var spe in data.queuedEvents)
+            {
+                var country = GameManager.Instance.GetCountryByName(spe.countryName);
+                var ev = possibleEvents?.Find(e => e.name == spe.eventName);
+                if (country != null && ev != null)
+                {
+                    _playerEventQueue.Enqueue(new PendingEvent
+                    {
+                        country = country,
+                        ev = ev,
+                        daysRemaining = spe.daysRemaining
+                    });
+                }
+            }
+        }
+
         private List<GameEventSO> possibleEvents;
 
         // Queue of events awaiting player choice (displayed on the event dashboard)
@@ -58,7 +110,7 @@ namespace StateCraft.Systems
                 }
 
                 // Queue for UI display — player must make a choice
-                _playerEventQueue.Enqueue(new PendingEvent { country = country, ev = chosen });
+                _playerEventQueue.Enqueue(new PendingEvent { country = country, ev = chosen, daysRemaining = chosen.timeRemainingDays });
 
                 EventBus.Publish(new WorldEvent {
                     eventType = WorldEventType.BreakingNews,
@@ -93,14 +145,60 @@ namespace StateCraft.Systems
         }
 
         // ── Expose Pending Events to the Dashboard ──────────
-        public List<GameEventSO> GetPendingEvents(CountryDataSO country)
+        public List<PendingEvent> GetPendingEvents(CountryDataSO country)
         {
-            var list = new List<GameEventSO>();
+            var list = new List<PendingEvent>();
             foreach (var p in _playerEventQueue)
             {
-                if (p.country == country) list.Add(p.ev);
+                if (p.country == country) list.Add(p);
             }
             return list;
+        }
+
+        public void InjectUrgentEvent(CountryDataSO country, GameEventSO ev)
+        {
+            if (country != GameManager.Instance?.playerCountry) return;
+            
+            _playerEventQueue.Enqueue(new PendingEvent { country = country, ev = ev, daysRemaining = ev.timeRemainingDays });
+
+            EventBus.Publish(new WorldEvent {
+                eventType = WorldEventType.BreakingNews,
+                title = $"URGENT CRISIS: {ev.eventTitle}",
+                description = ev.description,
+                sourceCountry = country
+            });
+        }
+
+        public void TickPendingEvents(CountryDataSO country)
+        {
+            if (_playerEventQueue.Count == 0) return;
+
+            var temp = new Queue<PendingEvent>();
+            while (_playerEventQueue.Count > 0)
+            {
+                var p = _playerEventQueue.Dequeue();
+                if (p.country == country)
+                {
+                    p.daysRemaining--;
+                    if (p.daysRemaining <= 0)
+                    {
+                        // Auto-resolve (Player is penalized for inaction)
+                        if (p.ev.choices != null && p.ev.choices.Count > 0)
+                        {
+                            ApplyEventOutcome(p.country, p.ev, 0);
+                        }
+                        
+                        EventBus.Publish(new WorldEvent {
+                            eventType = WorldEventType.BreakingNews,
+                            title = $"CRISIS UNRESOLVED: {p.ev.eventTitle} worsened due to inaction.",
+                            sourceCountry = p.country
+                        });
+                        continue; // Do not re-queue
+                    }
+                }
+                temp.Enqueue(p);
+            }
+            _playerEventQueue = temp;
         }
 
         public void ResolvePendingEvent(CountryDataSO country, GameEventSO ev, int choiceIndex)
@@ -209,10 +307,6 @@ namespace StateCraft.Systems
             return parts.Count > 0 ? " | " + string.Join(" | ", parts) : "";
         }
 
-        private class PendingEvent
-        {
-            public CountryDataSO country;
-            public GameEventSO   ev;
-        }
+
     }
 }

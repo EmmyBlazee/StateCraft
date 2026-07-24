@@ -82,12 +82,18 @@ namespace StateCraft.Interfaces
     public interface IEventSystem
     {
         void CheckForEvents(Data.CountryDataSO country);
-        System.Collections.Generic.List<Data.GameEventSO> GetPendingEvents(Data.CountryDataSO country);
+        System.Collections.Generic.List<Data.PendingEvent> GetPendingEvents(Data.CountryDataSO country);
         void ResolvePendingEvent(Data.CountryDataSO country, Data.GameEventSO ev, int choiceIndex);
+        void TickPendingEvents(Data.CountryDataSO country);
     }
 
     public interface IElectionSystem
     {
         void CheckForElection(Data.CountryDataSO country);
+    }
+
+    public interface IThreatAssessmentSystem 
+    { 
+        System.Collections.Generic.List<Data.ThreatAlert> GenerateThreats(Data.CountryDataSO country, Core.GameManager gm); 
     }
 }

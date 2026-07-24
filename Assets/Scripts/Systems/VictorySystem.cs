@@ -189,15 +189,14 @@ namespace StateCraft.Systems
             _victoryAnnounced = true;
             VictoryStatus     = "VICTORY";
 
+            string stats = $"• Prestige: {player.globalPrestige:F0}\n" +
+                           $"• Allies: {AllyCount}\n" +
+                           $"• GDP: ${player.gdp:N0}B\n" +
+                           $"• Stability: {player.stability:F0}%";
+
             InboxSystem.Instance?.SendMessage(player, "UNITED AFRICAN COUNCIL",
                 "🏆 VICTORY — YOUR NATION HAS PREVAILED",
-                $"President,\n\n{detail}\n\n" +
-                $"FINAL STATISTICS:\n" +
-                $"• Prestige: {player.globalPrestige:F0}\n" +
-                $"• Allies: {AllyCount}\n" +
-                $"• GDP: ${player.gdp:N0}B\n" +
-                $"• Stability: {player.stability:F0}%\n\n" +
-                $"The history books will record your leadership.",
+                $"President,\n\n{detail}\n\nFINAL STATISTICS:\n{stats}\n\nThe history books will record your leadership.",
                 "Critical");
 
             UI.NotificationManager.Instance?.AddNotification(
@@ -208,8 +207,7 @@ namespace StateCraft.Systems
                 $"HISTORY: {player.countryName} emerges as the undisputed regional power. " +
                 $"A new era begins.");
 
-            // Pause the game
-            if (gm != null) gm.isRealTime = false;
+            if (gm != null) gm.TriggerGameOver(true, "VICTORY", detail, stats);
         }
 
         private void AnnounceDefeat(CountryDataSO player, GameManager gm, string reason)
@@ -218,14 +216,13 @@ namespace StateCraft.Systems
             _defeatAnnounced = true;
             VictoryStatus    = "DEFEATED";
 
+            string stats = $"• Prestige: {player.globalPrestige:F0}\n" +
+                           $"• Stability: {player.stability:F0}%\n" +
+                           $"• Treasury: ${player.treasury:F1}B";
+
             InboxSystem.Instance?.SendMessage(player, "SITUATION ROOM",
                 "💀 GOVERNMENT COLLAPSED",
-                $"{reason}\n\n" +
-                $"FINAL STATISTICS:\n" +
-                $"• Prestige: {player.globalPrestige:F0}\n" +
-                $"• Stability: {player.stability:F0}%\n" +
-                $"• Treasury: ${player.treasury:F1}B\n\n" +
-                $"A caretaker government has been established. The people demand change.",
+                $"{reason}\n\nFINAL STATISTICS:\n{stats}\n\nA caretaker government has been established. The people demand change.",
                 "Critical");
 
             UI.NotificationManager.Instance?.AddNotification(
@@ -235,8 +232,9 @@ namespace StateCraft.Systems
                 $"BREAKING: The government of {player.countryName} has collapsed. " +
                 $"International community calls for emergency elections.");
 
-            if (gm != null) gm.isRealTime = false;
+            if (gm != null) gm.TriggerGameOver(false, "GOVERNMENT COLLAPSED", reason, stats);
         }
+
 
         // ── Public: Prestige adjustments (called from other systems) ──
         /// <summary>

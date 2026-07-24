@@ -22,6 +22,7 @@ namespace StateCraft.UI
 
 
         // Header
+        private Label _headerCountryName;
         private Label _headerBudget, _headerReadiness, _threatLevelBadge, _headerKIA;
 
         // Forces
@@ -72,6 +73,12 @@ namespace StateCraft.UI
                 _dashboardRoot = dashboard;
                 InitializeElements(dashboard);
                 dashboard.style.display = DisplayStyle.None;
+                
+                // IMPORTANT: MainDashboardToolkitController removes 'dashboard' from this UIDocument's hierarchy
+                // and injects it into its own. If we leave _root as the original UIDocument root, all future
+                // _root.Q() queries will fail and return null because the dashboard is no longer a child of it!
+                // Reassign _root to point to the dashboard itself so queries continue to work.
+                _root = dashboard;
             }
         }
 
@@ -107,7 +114,7 @@ namespace StateCraft.UI
             _panelRecruit = root.Q<VisualElement>("PanelRecruit");
             _panelWeapons = root.Q<VisualElement>("PanelWeapons");
             _panelBases = root.Q<VisualElement>("PanelBases");
-            _panelOps = root.Q<VisualElement>("PanelOperations");
+            _panelOps = root.Q<VisualElement>("PanelOperationsInstance") ?? root.Q<VisualElement>("PanelOperations");
             _panelProjects = root.Q<VisualElement>("PanelProjects");
             _panelLogistics = root.Q<VisualElement>("PanelLogistics");
             _panelBudget = root.Q<VisualElement>("PanelBudget");
@@ -131,6 +138,7 @@ namespace StateCraft.UI
 
 
             // Header
+            _headerCountryName = root.Q<Label>("CountryName");
             _headerBudget = root.Q<Label>("HeaderMilBudget");
             _headerReadiness = root.Q<Label>("HeaderReadiness");
             _threatLevelBadge = root.Q<Label>("ThreatLevelBadge");
@@ -161,7 +169,7 @@ namespace StateCraft.UI
             _opTypesGrid = root.Q<VisualElement>("op-types-grid");
             _readinessList = root.Q<VisualElement>("readiness-list");
 
-            _theatreStatusList = root.Q<VisualElement>("TheatreStatusList");
+            _theatreStatusList = root.Q<VisualElement>("theatre-list") ?? root.Q<VisualElement>("TheatreStatusList");
             _activeOpsList = root.Q<ScrollView>("ActiveOpsList");
             _globalPowerList = root.Q<ScrollView>("GlobalPowerList");
             _activeProjectsList = root.Q<ScrollView>("ActiveProjectsList");
@@ -220,18 +228,22 @@ namespace StateCraft.UI
             if (btnLaunchOp == null) btnLaunchOp = root.Q<Button>("BtnLaunchOp"); // fallback
             if (btnLaunchOp != null)
             {
-                btnLaunchOp.clicked += ShowLaunchOpModal;
+                btnLaunchOp.clicked += ShowLaunchOpModalNoArgs;
             }
+
+            // Wire inbox button immediately so it always opens, even with no operations
+            var btnOpsInbox = root.Q<Button>("btn-inbox");
+            if (btnOpsInbox != null) btnOpsInbox.clicked += ShowInboxModal;
 
             // Map layout link buttons to actual game views
             var btnViewForces = root.Q<Button>("btn-view-forces");
             if (btnViewForces != null) btnViewForces.clicked += () => SwitchTab(0); // Switch to Forces tab (index 0)
 
             var btnViewOpTypes = root.Q<Button>("btn-view-op-types");
-            if (btnViewOpTypes != null) btnViewOpTypes.clicked += ShowLaunchOpModal;
+            if (btnViewOpTypes != null) btnViewOpTypes.clicked += ShowLaunchOpModalNoArgs;
 
             var btnViewAllOps = root.Q<Button>("btn-view-all-ops");
-            if (btnViewAllOps != null) btnViewAllOps.clicked += ShowLaunchOpModal;
+            if (btnViewAllOps != null) btnViewAllOps.clicked += ShowLaunchOpModalNoArgs;
 
             var btnViewIntel = root.Q<Button>("btn-view-intel");
             if (btnViewIntel != null) btnViewIntel.clicked += () => {
@@ -247,10 +259,7 @@ namespace StateCraft.UI
             };
 
             var btnViewFeed = root.Q<Button>("btn-view-feed");
-            if (btnViewFeed != null) btnViewFeed.clicked += () => {
-                if (NotificationManager.Instance != null)
-                    NotificationManager.Instance.ShowAlert("ENCRYPTED CHANNEL", "Full terminal feed requires Level 4 clearance.", false);
-            };
+            if (btnViewFeed != null) btnViewFeed.clicked += ShowInboxModal;
 
             var btnInbox = root.Q<Button>("BtnInbox");
             if (btnInbox != null) btnInbox.clicked += ShowInboxModal;
@@ -335,6 +344,21 @@ namespace StateCraft.UI
                 }
             }
 
+            if (index == 4 && _panelOps != null)
+            {
+                if (_panelOps.parent != null)
+                {
+                    _panelOps.parent.style.display = DisplayStyle.Flex;
+                    _panelOps.parent.style.height = Length.Percent(100);
+                }
+                if (GameManager.Instance?.playerCountry != null)
+                {
+                    PopulateBranchReadiness(GameManager.Instance.playerCountry);
+                    CheckOperationAlerts(GameManager.Instance.playerCountry);
+                    PopulateOperationsMasterList(GameManager.Instance.playerCountry, GameManager.Instance);
+                    PopulateThreatList(GameManager.Instance.playerCountry);
+                }
+            }
         }
 
         public void Show()
@@ -360,26 +384,86 @@ namespace StateCraft.UI
             if (GameManager.Instance == null || GameManager.Instance.playerCountry == null) return;
             var gm = GameManager.Instance;
             var country = gm.playerCountry;
+            
+            if (_headerCountryName != null) _headerCountryName.text = country.countryName.ToUpper();
+            
+            // Fix dynamic branch names in tabs
+            var rctArmy = _root?.Q<Label>("RecruitLblArmyName");
+            if (rctArmy != null) rctArmy.text = $"The {country.countryName} Army";
+            var rctAF = _root?.Q<Label>("RecruitLblAirForceName");
+            if (rctAF != null) rctAF.text = $"The {country.countryName} Air Force";
+            var rctNavy = _root?.Q<Label>("RecruitLblNavyName");
+            if (rctNavy != null) rctNavy.text = $"The {country.countryName} Navy";
+            
+            var fcsArmy = _root?.Q<Label>("ForcesLblArmyName");
+            if (fcsArmy != null) fcsArmy.text = $"The {country.countryName} Army";
+            var fcsAF = _root?.Q<Label>("ForcesLblAirForceName");
+            if (fcsAF != null) fcsAF.text = $"The {country.countryName} Air Force";
+            var fcsNavy = _root?.Q<Label>("ForcesLblNavyName");
+            if (fcsNavy != null) fcsNavy.text = $"The {country.countryName} Navy";
+            
+            var basesSub = _root?.Q<Label>("BasesLblSubtitle");
+            if (basesSub != null) basesSub.text = $"Build, manage and upgrade military bases across {country.countryName} and abroad.";
 
             // --- Auto-Sync Healer ---
-            // Corrects legacy save-state discrepancies where old instant-recruit buttons 
-            // did not update the barracks available unit pool.
-            int totalDeployed = 0;
+            // Corrects legacy save-state discrepancies where older bugged code
+            // drained specific units but not the branch stats, or vice versa.
+            int armyDeployed = 0;
+            int rdfDeployed = 0;
+            int afDeployed = 0;
+            int navyDeployed = 0;
+            
+            int tanksDeployed = 0;
+            int apcsDeployed = 0;
+            int helisDeployed = 0;
+            int uavsDeployed = 0;
+            int fightersDeployed = 0;
+            int bombersDeployed = 0;
+            int frigatesDeployed = 0;
+            int subsDeployed = 0;
+
             if (country.activeOperations != null)
             {
                 foreach (var op in country.activeOperations)
-                    totalDeployed += op.deployedTroops;
-            }
-            int correctBarracksPool = country.armyStats.personnel - totalDeployed;
-            if (country.unitInfantry < correctBarracksPool)
-            {
-                country.unitInfantry = correctBarracksPool;
+                {
+                    armyDeployed += op.deployedTroops;
+                    rdfDeployed += op.deployedRDF;
+                    afDeployed += op.deployedAirForce;
+                    navyDeployed += op.deployedNavy;
+                    
+                    tanksDeployed += op.deployedTanks;
+                    apcsDeployed += op.deployedAPCs;
+                    helisDeployed += op.deployedHelis;
+                    uavsDeployed += op.deployedUAVs;
+                    fightersDeployed += op.deployedFighters;
+                    bombersDeployed += op.deployedBombers;
+                    frigatesDeployed += op.deployedFrigates;
+                    subsDeployed += op.deployedSubmarines;
+                }
             }
 
-            // Sync equipment counts so Forces tab perfectly matches actual available units
-            country.armyStats.equipment = country.unitTanks + country.unitAPCs + country.unitArtillery; // Not counting rifles as heavy equipment
-            country.airForceStats.equipment = country.unitFighters + country.unitBombers + country.unitAttackHelis + country.unitUAVs;
-            country.navyStats.equipment = country.unitFrigates + country.unitDestroyers + country.unitSubmarines + country.unitPatrolBoats;
+            // Unify the stats! The actual units + the deployed units = total branch size.
+            country.armyStats.personnel = country.unitInfantry + armyDeployed;
+            country.rdfStats.personnel = Mathf.Max(country.rdfStats.personnel, rdfDeployed);
+
+            // Sync Air Force and Navy personnel from militaryState (set by MilitaryManager on tick)
+            var ms = country.militaryState;
+            if (ms != null)
+            {
+                int afPersonnel = ms.airForce.pilots + ms.airForce.groundCrew + ms.airForce.airControllers + afDeployed;
+                int navyPersonnel = ms.navy.sailors + ms.navy.navalOfficers + ms.navy.marines + ms.navy.technicalCrew + navyDeployed;
+                if (afPersonnel > 0)   country.airForceStats.personnel = afPersonnel;
+                if (navyPersonnel > 0) country.navyStats.personnel     = navyPersonnel;
+            }
+
+            country.armyStats.equipment = country.unitTanks + country.unitAPCs + country.unitArtillery + tanksDeployed + apcsDeployed;
+            country.airForceStats.equipment = country.unitFighters + country.unitBombers + country.unitAttackHelis + country.unitUAVs + fightersDeployed + bombersDeployed + helisDeployed + uavsDeployed;
+            country.navyStats.equipment = country.unitFrigates + country.unitDestroyers + country.unitSubmarines + country.unitPatrolBoats + frigatesDeployed + subsDeployed;
+
+            UnityEngine.Debug.Log($"[Auto-Sync Healer] {country.countryName}: " +
+                $"Army={country.armyStats.personnel}(base={country.unitInfantry}+deployed={armyDeployed}), " +
+                $"AF={country.airForceStats.personnel}, Navy={country.navyStats.personnel}, " +
+                $"ActiveOps={country.activeOperations?.Count ?? 0}");
 
             // Toggle shortage alert badge globally!
             var shortageBadge = _root?.Q<Label>("ShortageAlertBadge");
@@ -465,8 +549,12 @@ namespace StateCraft.UI
             PopulateBases(country);
             PopulateGlobalPower(country);
             PopulateWMD(country);
+            PopulateBranchReadiness(country);
+            CheckOperationAlerts(country);
             PopulateOperationsMasterList(country, gm);
             UpdateIntelAssessment(country);
+            PopulateThreatList(country);
+            PopulateTheatre(country, gm);
             PopulateProjects(country);
             UpdateDoctrineText(_currentPosture);
             UpdatePostureButtonStyles();
@@ -506,6 +594,72 @@ namespace StateCraft.UI
             }
 
             PopulateSupplyRoutes(country);
+
+            // ── Military Top Bar KPIs ──────────────────────────────────────────
+            string currencySym = string.IsNullOrEmpty(country.currencySymbol) ? "₦" : country.currencySymbol;
+
+            // 1. Firepower Score
+            var hdrRank = _root?.Q<Label>("HdrMilRank");
+            if (hdrRank != null)
+            {
+                float fp = country.GetMilitaryFirepowerScore();
+                hdrRank.text = fp >= 1000f ? $"{fp / 1000f:F1}k" : $"{fp:F0}";
+                hdrRank.style.color = fp > 5000 ? new Color(0.14f, 0.93f, 0.34f) : fp > 1000 ? new Color(1f, 0.83f, 0.2f) : Color.white;
+            }
+
+            // 2. Total Personnel
+            var hdrPers = _root?.Q<Label>("HdrPersonnel");
+            if (hdrPers != null)
+            {
+                int totalPers = country.armyStats.personnel + country.navyStats.personnel + country.airForceStats.personnel + country.rdfStats.personnel;
+                hdrPers.text = totalPers >= 1000000 ? $"{totalPers / 1000000f:F2}M" : totalPers >= 1000 ? $"{totalPers / 1000f:F1}k" : $"{totalPers}";
+            }
+
+            // 3. Defence Budget
+            var hdrBudget = _root?.Q<Label>("HdrDefBudget");
+            var hdrBudgetPct = _root?.Q<Label>("HdrDefBudgetPct");
+            if (hdrBudget != null)
+            {
+                float annualBudgetUSD = country.income * (country.budgetMilitaryShare / 100f) * 12f;
+                hdrBudget.text = UiFormat.Money(annualBudgetUSD * country.exchangeRate, currencySym) + " / Yr";
+                if (hdrBudgetPct != null && country.gdp > 0)
+                {
+                    float pct = (annualBudgetUSD / country.gdp) * 100f;
+                    hdrBudgetPct.text = $"{pct:F1}% of GDP";
+                    hdrBudgetPct.style.color = pct > 5f ? new Color(1f, 0.3f, 0.3f) : pct > 3f ? new Color(1f, 0.83f, 0.2f) : new Color(0.14f, 0.93f, 0.34f);
+                }
+            }
+
+            // 4. Bases
+            var hdrBases = _root?.Q<Label>("HdrBases");
+            if (hdrBases != null)
+            {
+                int totalBases = (country.militaryBases != null ? country.militaryBases.Count : 0) + (country.defenseFactories != null ? country.defenseFactories.Count : 0);
+                hdrBases.text = totalBases.ToString();
+            }
+
+            // 5. Active Operations
+            var hdrOps = _root?.Q<Label>("HdrOperations");
+            var hdrOpsSub = _root?.Q<Label>("HdrOperationsSub");
+            if (hdrOps != null)
+            {
+                int activeOps = country.activeOperations?.Count ?? 0;
+                hdrOps.text = activeOps.ToString();
+                hdrOps.style.color = activeOps > 0 ? new Color(1f, 0.83f, 0.2f) : Color.white;
+                if (hdrOpsSub != null)
+                    hdrOpsSub.text = activeOps == 1 ? "Deployed" : "Deployed";
+            }
+
+            // 6. Average Readiness
+            var hdrReady = _root?.Q<Label>("HdrReadiness");
+            var hdrReadySub = _root?.Q<Label>("HdrReadinessSub");
+            if (hdrReady != null)
+            {
+                float avgReady = (country.armyStats.readiness + country.navyStats.readiness + country.airForceStats.readiness + country.rdfStats.readiness) / 4f;
+                hdrReady.text = $"{avgReady:F0}%";
+                hdrReady.style.color = avgReady >= 80f ? new Color(0.14f, 0.93f, 0.34f) : avgReady >= 60f ? new Color(1f, 0.83f, 0.2f) : new Color(1f, 0.3f, 0.3f);
+                if (hdrReadySub != null) hdrReadySub.text = avgReady >= 80f ? "Combat Ready" : avgReady >= 60f ? "Partial Readiness" : "LOW READINESS";
+            }
         }
 
 
@@ -601,7 +755,7 @@ namespace StateCraft.UI
 
         // ── Operations Tab Helpers & Enums ──
         public enum ThreatLevel  { High, Medium, Low }
-        public enum OpType       { CounterTerror, Peacekeeping, BorderPatrol, AirRecon, Maritime, HvtCapture }
+        public enum OpType       { CounterTerror, Peacekeeping, BorderPatrol, AirRecon, AirStrike, Maritime, NavalBombardment, HvtCapture }
         public enum FeedColour   { Green, Yellow, Red }
 
         public class OpTypeEntry {

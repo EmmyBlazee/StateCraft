@@ -4,6 +4,7 @@ using StateCraft.Interfaces;
 namespace StateCraft.Data
 {
     // Internal object while the AI is processing the proposal
+    [System.Serializable]
     public class TradeAgreementProposal
     {
         public string id = Guid.NewGuid().ToString();

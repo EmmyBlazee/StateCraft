@@ -1,6 +1,7 @@
 using UnityEngine;
 using StateCraft.Interfaces;
 using StateCraft.Data;
+using StateCraft.UI;
 
 namespace StateCraft.Systems
 {
@@ -8,36 +9,63 @@ namespace StateCraft.Systems
     {
         public void SimulateIntelligence(CountryDataSO country)
         {
-            // ── Base stats driven by intel budget ──
-            country.counterIntelligence = Mathf.Clamp(30f + (country.covertBudget * 3f) + (country.agencyIntegrity * 0.2f), 10f, 95f);
-            country.intelligenceLevel   = Mathf.Clamp(country.intelligenceLevel * 0.98f + (country.covertBudget * 2f), 5f, 100f);
+            // ── Budget Processing ──
+            // Convert the covertBudget (in Billions) into intelligenceFunds (in Millions)
+            if (country.covertBudget > 0f)
+            {
+                country.treasury -= country.covertBudget;
+                country.intelligenceFunds += (country.covertBudget * 1000f);
+            }
 
-            // ── Intel coverage grows slowly from budget and satellite constellation ──
-            float coverageGrowth = (country.covertBudget * 0.5f) + (country.satelliteCount * 1.5f);
+            // ── Base stats driven by intel budget ──
+            country.counterIntelligence = Mathf.Clamp(30f + (country.intelligenceBudget * 3f) + (country.agencyIntegrity * 0.2f), 10f, 95f);
+            country.intelligenceLevel   = Mathf.Clamp(country.intelligenceLevel * 0.98f + (country.intelligenceBudget * 2f), 5f, 100f);
+            
+            // ── Cyber & SIGINT capabilities ──
+            country.cyberDefenseLevel = Mathf.Clamp(country.cyberDefenseLevel * 0.98f + (country.intelligenceLevel * 0.02f) + (country.intelligenceBudget * 1.5f), 5f, 100f);
+            country.signalInterceptCapability = Mathf.Clamp(country.signalInterceptCapability * 0.98f + (country.intelligenceLevel * 0.02f) + (country.satelliteCount * 4f) + (country.droneCount * 2f) + (country.intelligenceBudget * 1f), 5f, 100f);
+
+            // ── Intel coverage grows slowly from budget and satellite/drone constellation ──
+            float coverageGrowth = (country.intelligenceBudget * 0.5f) + (country.satelliteCount * 1.5f) + (country.droneCount * 0.5f);
             country.globalIntelCoverage = Mathf.Clamp(country.globalIntelCoverage + coverageGrowth - 1f, 5f, 100f);
 
-            // ── Satellite Construction Queue ──
-            if (country.satellitesUnderConstruction > 0)
+            // ── Hardware Construction Queue ──
+            if (country.intelHardware != null)
             {
-                if (country.satelliteBuildMonthsRemaining > 0)
+                foreach (var hw in country.intelHardware)
                 {
-                    country.satelliteBuildMonthsRemaining--;
-                }
-                
-                if (country.satelliteBuildMonthsRemaining <= 0)
-                {
-                    country.satellitesUnderConstruction--;
-                    country.satelliteCount++;
-                    float coverageGain = country.satelliteCount == 1 ? 15f : country.satelliteCount == 2 ? 12f : 8f;
-                    country.globalIntelCoverage = Mathf.Min(100f, country.globalIntelCoverage + coverageGain);
-                    
-                    StateCraft.UI.NotificationManager.Instance?.AddNotification($"SPY SATELLITE LAUNCHED. IMINT coverage +{coverageGain:F0}%. Total constellation: {country.satelliteCount} sat(s).", new Color(186/255f, 104/255f, 200/255f));
-                    StateCraft.Systems.NewsSystem.Instance?.PublishNews($"SPACE COMMAND: {country.countryName} successfully deployed a new reconnaissance satellite into orbit.");
+                    if (hw.status == "Building")
+                    {
+                        if (hw.monthsRemaining > 0)
+                            hw.monthsRemaining--;
+                        
+                        if (hw.monthsRemaining <= 0)
+                        {
+                            hw.status = "Active";
+                            if (hw.type == "Satellite")
+                            {
+                                country.satellitesUnderConstruction = Mathf.Max(0, country.satellitesUnderConstruction - 1);
+                                country.satelliteCount++;
+                                float coverageGain = country.satelliteCount == 1 ? 15f : country.satelliteCount == 2 ? 12f : 8f;
+                                country.globalIntelCoverage = Mathf.Min(100f, country.globalIntelCoverage + coverageGain);
+                                StateCraft.UI.NotificationManager.Instance?.AddNotification($"SPY SATELLITE '{hw.assetName}' LAUNCHED. IMINT coverage +{coverageGain:F0}%.", new Color(186/255f, 104/255f, 200/255f));
+                                StateCraft.Systems.NewsSystem.Instance?.PublishNews($"SPACE COMMAND: {country.countryName} successfully deployed {hw.assetName} into orbit.");
+                            }
+                            else if (hw.type == "Drone")
+                            {
+                                country.dronesUnderConstruction = Mathf.Max(0, country.dronesUnderConstruction - 1);
+                                country.droneCount++;
+                                country.intelligenceLevel = Mathf.Min(100f, country.intelligenceLevel + 5f);
+                                StateCraft.UI.NotificationManager.Instance?.AddNotification($"RECON DRONES '{hw.assetName}' DEPLOYED. Local intel boosted.", new Color(35/255f, 237/255f, 86/255f));
+                                StateCraft.Systems.NewsSystem.Instance?.PublishNews($"MILITARY: {country.countryName} has activated a new drone fleet named {hw.assetName}.");
+                            }
+                        }
+                    }
                 }
             }
 
             // ── Agency integrity slowly decays without investment ──
-            if (country.covertBudget < 0.5f)
+            if (country.intelligenceBudget < 0.5f)
                 country.agencyIntegrity = Mathf.Max(10f, country.agencyIntegrity - 1.5f);
 
             // ── Foreign agent infiltration — rival nations try to plant spies ──
@@ -77,7 +105,7 @@ namespace StateCraft.Systems
                     op.monthsRemaining--;
 
                     // Base risk is dictated by target's Counter-Intel vs attacker's Covert Budget
-                    float riskGain = Random.Range(2f, 8f) + (targetCI * 0.1f) - (country.covertBudget * 0.5f);
+                    float riskGain = Random.Range(2f, 8f) + (targetCI * 0.1f) - (country.intelligenceBudget * 0.5f);
                     if (op.riskLevel == "High") riskGain += 4f;
                     else if (op.riskLevel == "Extreme") riskGain += 8f;
 
@@ -145,6 +173,88 @@ namespace StateCraft.Systems
                         country.activeCrises.Add(new GlobalCrisis { crisisName = $"Diplomatic Blowout: Caught Spying on {op.target}", severity = "Critical", internationalPressure = 90f });
 
                         country.activeCovertOps.RemoveAt(i);
+                    }
+                }
+            }
+
+            // ── Threat Recommendation Ticking & Escalation Logic ──
+            if (country.activeRecommendations != null && country.activeRecommendations.Count > 0)
+            {
+                for (int i_rec = country.activeRecommendations.Count - 1; i_rec >= 0; i_rec--)
+                {
+                    var rec = country.activeRecommendations[i_rec];
+                    
+                    if (rec.isAddressed) continue;
+
+                    rec.turnsActive++;
+
+                    if (rec.urgency == "Low" && rec.turnsActive >= 3)
+                    {
+                        rec.urgency = "Medium";
+                        if (country == Core.GameManager.Instance?.playerCountry)
+                        {
+                            NotificationManager.Instance?.AddNotification(
+                                $"⚠ INTEL WARNING: Threat in {rec.regionName} ({rec.threatType}) has escalated to MEDIUM urgency.",
+                                new Color(1f, 0.6f, 0f));
+                        }
+                    }
+                    else if (rec.urgency == "Medium" && rec.turnsActive >= 6)
+                    {
+                        rec.urgency = "High";
+                        if (country == Core.GameManager.Instance?.playerCountry)
+                        {
+                            NotificationManager.Instance?.AddNotification(
+                                $"🚨 CRITICAL INTEL: Threat in {rec.regionName} ({rec.threatType}) has escalated to HIGH urgency! Immediate intervention required.",
+                                new Color(1f, 0.22f, 0.22f));
+                            NewsSystem.Instance?.PublishNews($"CRISIS: Intelligence reports critical instability in {rec.regionName} due to unaddressed {rec.threatType}!");
+                        }
+                    }
+                }
+            }
+
+            // Dynamically generate threat recommendations based on region security
+            if (country.regions != null)
+            {
+                foreach (var region in country.regions)
+                {
+                    if (region.security < 50f)
+                    {
+                        var existing = country.activeRecommendations.Find(r => r.regionName == region.regionName && r.threatType == "Terrorist Presence");
+                        if (existing == null)
+                        {
+                            country.activeRecommendations.RemoveAll(r => r.regionName == region.regionName);
+                            country.activeRecommendations.Add(new ThreatRecommendation
+                            {
+                                regionName = region.regionName,
+                                threatType = "Terrorist Presence",
+                                urgency = "High",
+                                justification = $"Regional security dropped to {region.security:F0}%. High terrorist cell concentration detected.",
+                                turnsActive = 0,
+                                isAddressed = false
+                            });
+                        }
+                    }
+                    else if (region.security < 75f)
+                    {
+                        string threat = (region.regionName.Contains("Delta") || region.regionName.Contains("Coast")) ? "Piracy" : "Civil Unrest";
+                        var existing = country.activeRecommendations.Find(r => r.regionName == region.regionName && (r.threatType == "Civil Unrest" || r.threatType == "Piracy"));
+                        if (existing == null)
+                        {
+                            country.activeRecommendations.RemoveAll(r => r.regionName == region.regionName);
+                            country.activeRecommendations.Add(new ThreatRecommendation
+                            {
+                                regionName = region.regionName,
+                                threatType = threat,
+                                urgency = "Medium",
+                                justification = threat == "Piracy" ? "Commercial shipping channels report 34% increase in hostile intercepts." : $"Security deterioration detected ({region.security:F0}%). Riot warning active.",
+                                turnsActive = 0,
+                                isAddressed = false
+                            });
+                        }
+                    }
+                    else
+                    {
+                        country.activeRecommendations.RemoveAll(r => r.regionName == region.regionName);
                     }
                 }
             }

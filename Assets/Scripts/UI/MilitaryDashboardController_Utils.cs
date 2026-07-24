@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
 using StateCraft.Core;
@@ -16,6 +16,14 @@ namespace StateCraft.UI
             style.borderBottomWidth = width;
             style.borderLeftWidth = width;
             style.borderRightWidth = width;
+        }
+
+        private void SetBorderRadius(IStyle style, float radius)
+        {
+            style.borderTopLeftRadius = radius;
+            style.borderTopRightRadius = radius;
+            style.borderBottomLeftRadius = radius;
+            style.borderBottomRightRadius = radius;
         }
 
         private void SetBorderColor(IStyle style, Color color)

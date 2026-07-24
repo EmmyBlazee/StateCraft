@@ -69,7 +69,7 @@
                                     <!-- Icon removed -->
                                     <ui:VisualElement>
                                         <ui:Label text="ARMY TRAINING COMMAND" style="font-size: 12px; color: rgb(0,230,118); -unity-font-style: bold; letter-spacing: 1px;" />
-                                        <ui:Label text="The Nigerian Army" style="font-size: 11px; color: rgb(180,180,180);" />
+                                        <ui:Label name="RecruitLblArmyName" text="The National Army" style="font-size: 11px; color: rgb(180,180,180);" />
                                     </ui:VisualElement>
                                 </ui:VisualElement>
                             </ui:VisualElement>
@@ -93,17 +93,8 @@
                                     <ui:ProgressBar name="ArmyAcadGradBar" value="92" style="width: 55%; height: 5px;" />
                                     <ui:Label name="ArmyAcadGradPct" text="92%" style="font-size: 12px; color: rgb(0,230,118); -unity-font-style: bold;" />
                                 </ui:VisualElement>
-                                <!-- recruit buttons -->
-                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
-                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
-                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
-                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
-                                </ui:VisualElement>
-                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
-                                    <ui:Button name="BtnArmyRecruit100"  text="+100"  class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px; margin-right: 3px; color: rgb(0,230,118); border-color: rgba(0,230,118,0.4);" />
-                                    <ui:Button name="BtnArmyRecruit500"  text="+500"  class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px; margin-right: 3px; color: rgb(0,230,118); border-color: rgba(0,230,118,0.4);" />
-                                    <ui:Button name="BtnArmyRecruit1000" text="+1000" class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px;              color: rgb(0,230,118); border-color: rgba(0,230,118,0.4);" />
-                                </ui:VisualElement>
+                                <!-- recruit button -->
+                                <ui:Button name="BtnArmyRecruit" text="RECRUIT" class="button-premium" style="margin-top: 4px; height: 28px; font-size: 13px; color: rgb(0,230,118); border-color: rgba(0,230,118,0.5); background-color: rgba(0,230,118,0.08); letter-spacing: 1px; -unity-font-style: bold;" />
                                 <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
                                     <ui:Label text="Est. Completion" style="font-size: 11px; color: rgb(140,140,140);" />
                                     <ui:Label name="ArmyAcadETA" text="18 - 22 Days" style="font-size: 11px; color: rgb(0,230,118); -unity-font-style: bold;" />
@@ -119,7 +110,7 @@
                                     <!-- Icon removed -->
                                     <ui:VisualElement>
                                         <ui:Label text="AIR FORCE ACADEMY" style="font-size: 12px; color: rgb(25, 127, 229); -unity-font-style: bold; letter-spacing: 1px;" />
-                                        <ui:Label text="The Nigerian Air Force" style="font-size: 11px; color: rgb(180,180,180);" />
+                                        <ui:Label name="RecruitLblAirForceName" text="The National Air Force" style="font-size: 11px; color: rgb(180,180,180);" />
                                     </ui:VisualElement>
                                 </ui:VisualElement>
                             </ui:VisualElement>
@@ -142,16 +133,8 @@
                                     <ui:ProgressBar name="AFAcadGradBar" value="88" style="width: 55%; height: 5px;" />
                                     <ui:Label name="AFAcadGradPct" text="88%" style="font-size: 12px; color: rgb(25, 127, 229); -unity-font-style: bold;" />
                                 </ui:VisualElement>
-                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
-                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
-                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
-                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
-                                </ui:VisualElement>
-                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
-                                    <ui:Button name="BtnAFRecruit25"  text="+25"  class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px; margin-right: 3px; color: rgb(25, 127, 229); border-color: rgba(33,150,243,0.4);" />
-                                    <ui:Button name="BtnAFRecruit50"  text="+50"  class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px; margin-right: 3px; color: rgb(25, 127, 229); border-color: rgba(33,150,243,0.4);" />
-                                    <ui:Button name="BtnAFRecruit150" text="+150" class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px;              color: rgb(25, 127, 229); border-color: rgba(33,150,243,0.4);" />
-                                </ui:VisualElement>
+                                <!-- recruit button -->
+                                <ui:Button name="BtnAFRecruit" text="RECRUIT" class="button-premium" style="margin-top: 4px; height: 28px; font-size: 13px; color: rgb(25,127,229); border-color: rgba(33,150,243,0.5); background-color: rgba(33,150,243,0.08); letter-spacing: 1px; -unity-font-style: bold;" />
                                 <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
                                     <ui:Label text="Est. Completion" style="font-size: 11px; color: rgb(140,140,140);" />
                                     <ui:Label name="AFAcadETA" text="10 - 14 Days" style="font-size: 11px; color: rgb(25, 127, 229); -unity-font-style: bold;" />
@@ -167,7 +150,7 @@
                                     <!-- Icon removed -->
                                     <ui:VisualElement>
                                         <ui:Label text="NAVAL TRAINING COMMAND" style="font-size: 12px; color: rgb(0,188,212); -unity-font-style: bold; letter-spacing: 1px;" />
-                                        <ui:Label text="The Nigerian Navy" style="font-size: 11px; color: rgb(180,180,180);" />
+                                        <ui:Label name="RecruitLblNavyName" text="The National Navy" style="font-size: 11px; color: rgb(180,180,180);" />
                                     </ui:VisualElement>
                                 </ui:VisualElement>
                             </ui:VisualElement>
@@ -190,16 +173,8 @@
                                     <ui:ProgressBar name="NavyAcadGradBar" value="94" style="width: 55%; height: 5px;" />
                                     <ui:Label name="NavyAcadGradPct" text="94%" style="font-size: 12px; color: rgb(0,188,212); -unity-font-style: bold;" />
                                 </ui:VisualElement>
-                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
-                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
-                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
-                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
-                                </ui:VisualElement>
-                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
-                                    <ui:Button name="BtnNavyRecruit50"  text="+50"  class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px; margin-right: 3px; color: rgb(0,188,212); border-color: rgba(0,188,212,0.4);" />
-                                    <ui:Button name="BtnNavyRecruit100" text="+100" class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px; margin-right: 3px; color: rgb(0,188,212); border-color: rgba(0,188,212,0.4);" />
-                                    <ui:Button name="BtnNavyRecruit250" text="+250" class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px;              color: rgb(0,188,212); border-color: rgba(0,188,212,0.4);" />
-                                </ui:VisualElement>
+                                <!-- recruit button -->
+                                <ui:Button name="BtnNavyRecruit" text="RECRUIT" class="button-premium" style="margin-top: 4px; height: 28px; font-size: 13px; color: rgb(0,188,212); border-color: rgba(0,188,212,0.5); background-color: rgba(0,188,212,0.08); letter-spacing: 1px; -unity-font-style: bold;" />
                                 <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
                                     <ui:Label text="Est. Completion" style="font-size: 11px; color: rgb(140,140,140);" />
                                     <ui:Label name="NavyAcadETA" text="15 - 20 Days" style="font-size: 11px; color: rgb(0,188,212); -unity-font-style: bold;" />
@@ -238,16 +213,8 @@
                                     <ui:ProgressBar name="RDFAcadGradBar" value="90" style="width: 55%; height: 5px;" />
                                     <ui:Label name="RDFAcadGradPct" text="90%" style="font-size: 12px; color: rgb(255,180,0); -unity-font-style: bold;" />
                                 </ui:VisualElement>
-                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
-                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
-                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
-                                    <ui:Label text="RECRUIT" style="font-size: 10px; color: rgb(120,120,120); flex-grow: 1; -unity-text-align: middle-center; letter-spacing: 1px;" />
-                                </ui:VisualElement>
-                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
-                                    <ui:Button name="BtnRDFRecruit250"  text="+250"  class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px; margin-right: 3px; color: rgb(255,180,0); border-color: rgba(255,180,0,0.4);" />
-                                    <ui:Button name="BtnRDFRecruit500"  text="+500"  class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px; margin-right: 3px; color: rgb(255,180,0); border-color: rgba(255,180,0,0.4);" />
-                                    <ui:Button name="BtnRDFRecruit1000" text="+1000" class="button-premium" style="background-color: transparent; flex-grow: 1; height: 22px; font-size: 12px;              color: rgb(255,180,0); border-color: rgba(255,180,0,0.4);" />
-                                </ui:VisualElement>
+                                <!-- recruit button -->
+                                <ui:Button name="BtnRDFRecruit" text="RECRUIT" class="button-premium" style="margin-top: 4px; height: 28px; font-size: 13px; color: rgb(255,180,0); border-color: rgba(255,180,0,0.5); background-color: rgba(255,180,0,0.08); letter-spacing: 1px; -unity-font-style: bold;" />
                                 <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
                                     <ui:Label text="Est. Completion" style="font-size: 11px; color: rgb(140,140,140);" />
                                     <ui:Label name="RDFAcadETA" text="20 - 25 Days" style="font-size: 11px; color: rgb(255,180,0); -unity-font-style: bold;" />
@@ -448,13 +415,6 @@
                                     <ui:Label text="Reserve Personnel" style="font-size: 12px; color: rgb(160,160,160);" />
                                 </ui:VisualElement>
                                 <ui:Label name="ResvReservePersonnel" text="125,000" style="font-size: 12px; color: white; -unity-font-style: bold;" />
-                            </ui:VisualElement>
-                            <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 8px;">
-                                <ui:VisualElement style="flex-direction: row; align-items: center;">
-                                    <!-- Icon removed -->
-                                    <ui:Label text="Veterans" style="font-size: 12px; color: rgb(160,160,160);" />
-                                </ui:VisualElement>
-                                <ui:Label name="ResvVeterans" text="87,300" style="font-size: 12px; color: white; -unity-font-style: bold;" />
                             </ui:VisualElement>
                             <ui:VisualElement style="height: 1px; background-color: rgba(255,255,255,0.07); margin-bottom: 8px;" />
                             <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: space-between;">

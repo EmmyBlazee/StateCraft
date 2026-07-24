@@ -45,11 +45,29 @@ namespace StateCraft.Core
         public IElectionSystem ElectionSystem { get; private set; }
         public IDebtSystem DebtSystem { get; private set; }
         public InboxSystem InboxSystem { get; private set; }
+        public VictorySystem VictorySystem { get; private set; }
+        public IThreatAssessmentSystem ThreatAssessmentSystem { get; private set; }
         public Data.RelationsMatrix Relations { get; private set; } = new Data.RelationsMatrix();
         public Systems.EconomyLedger Ledger { get; private set; } = new Systems.EconomyLedger();
-        public VictorySystem VictorySystem { get; private set; }
         
         public NewsSystem NewsSystem { get; private set; }
+
+        public bool hasGameEnded { get; private set; }
+        public event System.Action<bool, string, string, string> OnGameOver; // isVictory, title, summary, stats
+
+        public void TriggerGameOver(bool isVictory, string title, string summary, string stats)
+        {
+            if (hasGameEnded) return;
+            hasGameEnded = true;
+            isRealTime = false;
+            OnGameOver?.Invoke(isVictory, title, summary, stats);
+        }
+
+        private void Start()
+        {
+            // Reset state
+            hasGameEnded = false;
+        }
 
         private void Awake()
         {
@@ -75,7 +93,7 @@ Destroy(gameObject);
                 {
                     if (country != null)
                     {
-                        country.activeOperations?.Clear();
+                        SafeClearActiveOperations(country);
                         country.trainingPipelines?.Clear();
                         country.activeCovertOps?.Clear();
                         country.detectedThreats?.Clear();
@@ -89,7 +107,7 @@ Destroy(gameObject);
 
             if (playerCountry != null)
             {
-                playerCountry.activeOperations?.Clear();
+                SafeClearActiveOperations(playerCountry);
                 playerCountry.trainingPipelines?.Clear();
                 playerCountry.activeCovertOps?.Clear();
                 playerCountry.detectedThreats?.Clear();
@@ -137,6 +155,7 @@ Destroy(gameObject);
             DebtSystem = new DebtSystem();
             InboxSystem = new InboxSystem();
             VictorySystem = new VictorySystem();
+            ThreatAssessmentSystem = new ThreatAssessmentSystem();
 
             TurnSystem.OnTurnEnded  += ProcessTick;   // fires every 3 days — lightweight only
             TurnSystem.OnMonthEnded += ProcessMonth;  // fires once per calendar month — heavy sim
@@ -147,7 +166,23 @@ Destroy(gameObject);
 
             // Cleanly acquire NewsSystem — rely wholly on the Instance since it is a static singleton initialized in Awake.
             NewsSystem = Systems.NewsSystem.Instance;
-}
+        }
+
+        private void SafeClearActiveOperations(CountryDataSO country)
+        {
+            if (country == null || country.activeOperations == null) return;
+            foreach (var op in country.activeOperations)
+            {
+                if (op == null) continue;
+                var contrList = op.GetContributionsMigrated();
+                foreach (var c in contrList)
+                {
+                    MilitaryOperation.ReturnToReserves(country, c.branch, c.GetUnitCountsDict(), c.personnelAssigned);
+                }
+            }
+            country.activeOperations.Clear();
+            country.operationalLogs?.Clear();
+        }
 
         // ── Fires every 3 game-days — lightweight, UI-facing updates only ──
         private void ProcessTick()
@@ -167,6 +202,35 @@ foreach (var country in allCountries)
                     warSys.ProcessNavalBlockades(country);
                     warSys.ProcessWMDDevelopment(country);
                 }
+
+                // Process Covert/Recon Operations
+                if (country.activeCovertOps != null && country.activeCovertOps.Count > 0)
+                {
+                    for (int i_op = country.activeCovertOps.Count - 1; i_op >= 0; i_op--)
+                    {
+                        var op = country.activeCovertOps[i_op];
+                        if (op.daysRemaining > 0)
+                        {
+                            op.daysRemaining--;
+                            if (op.daysRemaining <= 0)
+                            {
+                                // Operation completes!
+                                string report = $"RECON REPORT ({op.priority}): Enemy movement detected in Sector 4. 2x Mechanized Brigades spotted.";
+                                if (country == playerCountry)
+                                {
+                                    NotificationManager.Instance?.AddNotification(report, new UnityEngine.Color(1.0f, 0.64f, 0.0f));
+                                }
+                                
+                                if (country.recentReconReports == null) country.recentReconReports = new System.Collections.Generic.List<string>();
+                                country.recentReconReports.Add($"[{TurnSystem?.CurrentDate ?? "Unknown Date"}] {op.opName} - {report}");
+                                
+                                country.activeCovertOps.RemoveAt(i_op);
+                                
+                                // Ideally we refresh the UI if it's open, but the player might not be on the tab
+                                // The feed will pick it up next time it is drawn.
+                            }
+                        }
+                    }                }
 
                 // Active operations give security boost every tick (makes them feel responsive)
                 if (country.activeOperations != null)
@@ -226,6 +290,7 @@ foreach (var country in allCountries)
                 InsurgencySystem.SimulateInsurgency(country);
 
                 // 4. Intelligence
+                country.intelligenceFunds += country.intelligenceBudget;
                 IntelligenceSystem.SimulateIntelligence(country);
 
                 // 5. Debt interest (monthly compounding)
@@ -244,6 +309,10 @@ foreach (var country in allCountries)
 
                 // 9. Monthly trade settlement
                 DiplomacySystem?.ProcessTradeDeals(country);
+
+                // 9b. Resolve pending treaty proposals (AI responds after 1-3 turns)
+                if (country == playerCountry && DiplomacySystem is StateCraft.Systems.DiplomacySystem dipSysForTreaties)
+                    dipSysForTreaties.ResolvePendingTreaties(country, this);
 
                 // 10. Stability aggregate
                 UpdateCountryStability(country);
@@ -308,6 +377,8 @@ foreach (var country in allCountries)
                 ProcessMilitaryProjects(country);
                 ProcessProductionOrders(country);
                 ProcessProcurementContracts(country);
+                ProcessFacilityConstruction(country);
+                ProcessFacilityUpgrades(country);
             }
 
             // 13. Monthly news generation
@@ -320,6 +391,76 @@ foreach (var country in allCountries)
                 StateCraft.Systems.GameCommunicator.ProcessTurnBriefing(playerCountry, TurnSystem.CurrentTurn);
 
 }
+
+        private void ProcessFacilityConstruction(CountryDataSO country)
+        {
+            if (country.facilityConstructionOrders == null) return;
+            for (int i = country.facilityConstructionOrders.Count - 1; i >= 0; i--)
+            {
+                var order = country.facilityConstructionOrders[i];
+                order.monthsRemaining--;
+                if (order.monthsRemaining <= 0)
+                {
+                    if (order.facilityType == 1) // Factory
+                    {
+                        var newFac = new StateCraft.Data.DefenseFactory
+                        {
+                            id = order.id,
+                            factoryName = order.facilityName,
+                            produceType = order.specialization,
+                            level = 1,
+                            utilizationPct = 0
+                        };
+                        country.defenseFactories.Add(newFac);
+                        country.baseDefenseFactoryCount++;
+                        if (country == playerCountry) NotificationManager.Instance?.AddNotification($"CONSTRUCTION COMPLETE: {order.facilityName} is now operational.", Color.green);
+                    }
+                    else // 0 = Base, 2 = Training
+                    {
+                        string roleStr = order.facilityType == 2 ? "Training" : "Combat";
+                        var newBase = new StateCraft.Data.MilitaryBase(order.id, order.facilityName, order.regionName, order.branch, order.capacity, roleStr);
+                        country.militaryBases.Add(newBase);
+                        if (order.branch == "ARMY") country.baseArmyCount++;
+                        else if (order.branch == "NAVY") country.baseNavyCount++;
+                        else if (order.branch == "AIR") country.baseAirForceCount++;
+                        else country.baseRDFCount++;
+                        if (country == playerCountry) NotificationManager.Instance?.AddNotification($"CONSTRUCTION COMPLETE: {order.facilityName} is now operational.", Color.green);
+                    }
+                    country.facilityConstructionOrders.RemoveAt(i);
+                }
+            }
+        }
+
+        private void ProcessFacilityUpgrades(CountryDataSO country)
+        {
+            if (country.facilityUpgradeOrders == null) return;
+            for (int i = country.facilityUpgradeOrders.Count - 1; i >= 0; i--)
+            {
+                var order = country.facilityUpgradeOrders[i];
+                order.monthsRemaining--;
+                if (order.monthsRemaining <= 0)
+                {
+                    // Find the facility and upgrade it
+                    var fac = country.defenseFactories?.Find(f => f.id == order.facilityId);
+                    if (fac != null)
+                    {
+                        fac.level++;
+                        if (country == playerCountry) NotificationManager.Instance?.AddNotification($"UPGRADE COMPLETE: {fac.factoryName} is now Level {fac.level}.", Color.green);
+                    }
+                    else
+                    {
+                        var mbase = country.militaryBases?.Find(b => b.id == order.facilityId);
+                        if (mbase != null)
+                        {
+                            mbase.capacity += 500;
+                            mbase.upkeepCost = mbase.capacity * 0.005f;
+                            if (country == playerCountry) NotificationManager.Instance?.AddNotification($"UPGRADE COMPLETE: {mbase.baseName} capacity increased by 500.", Color.green);
+                        }
+                    }
+                    country.facilityUpgradeOrders.RemoveAt(i);
+                }
+            }
+        }
 
         private void ProcessRecruitmentPipelines(CountryDataSO country)
         {
@@ -560,6 +701,13 @@ foreach (var country in allCountries)
             if (country.debt > country.gdp) country.stability -= 5f;
             if (country.inflationRate > 0.1f) country.stability -= 2f;
 
+            // Punishment for late budget allocation
+            if (TurnSystem != null && (TurnSystem.CurrentTurn - country.lastBudgetApprovalTurn) >= 4)
+            {
+                int monthsOverdue = (TurnSystem.CurrentTurn - country.lastBudgetApprovalTurn) - 3;
+                country.stability -= (3f + monthsOverdue); // Increasing penalty over time
+            }
+
             country.stability = Mathf.Clamp(country.stability, 0f, 100f);
         }
 
@@ -621,6 +769,28 @@ foreach (var country in allCountries)
                 foreach(var l in ledgers) data.economyLedgers.Add(UnityEngine.JsonUtility.ToJson(l));
             }
 
+            // Export ISaveable Systems
+            if (WarSystem is ISaveable warSaveable)
+            {
+                data.systemStateKeys.Add("WarSystem");
+                data.systemStateValues.Add(warSaveable.ExportState());
+            }
+            if (DiplomacySystem is ISaveable dipSaveable)
+            {
+                data.systemStateKeys.Add("DiplomacySystem");
+                data.systemStateValues.Add(dipSaveable.ExportState());
+            }
+            if (EventSystem is ISaveable eventSaveable)
+            {
+                data.systemStateKeys.Add("EventSystem");
+                data.systemStateValues.Add(eventSaveable.ExportState());
+            }
+            if (InsurgencySystem is ISaveable insSaveable)
+            {
+                data.systemStateKeys.Add("InsurgencySystem");
+                data.systemStateValues.Add(insSaveable.ExportState());
+            }
+
             string json = UnityEngine.JsonUtility.ToJson(data);
             System.IO.File.WriteAllText(UnityEngine.Application.persistentDataPath + "/savegame.json", json);
             
@@ -664,6 +834,19 @@ foreach (var country in allCountries)
                 foreach(var lJson in data.economyLedgers) ledgers.Add(UnityEngine.JsonUtility.FromJson<StateCraft.Systems.LedgerSaveWrapper>(lJson));
                 Ledger.ImportLedger(ledgers);
             }
+
+            // Import ISaveable Systems
+            for (int i = 0; i < data.systemStateKeys.Count; i++)
+            {
+                if (i >= data.systemStateValues.Count) break;
+                string key = data.systemStateKeys[i];
+                string val = data.systemStateValues[i];
+
+                if (key == "WarSystem" && WarSystem is ISaveable warSaveable) warSaveable.ImportState(val);
+                if (key == "DiplomacySystem" && DiplomacySystem is ISaveable dipSaveable) dipSaveable.ImportState(val);
+                if (key == "EventSystem" && EventSystem is ISaveable evSaveable) evSaveable.ImportState(val);
+                if (key == "InsurgencySystem" && InsurgencySystem is ISaveable insSaveable) insSaveable.ImportState(val);
+            }
             
             if (Systems.NewsSystem.Instance != null)
                 Systems.NewsSystem.Instance.PublishNews("SYSTEM: Quick Load Successful. Welcome back.");
@@ -699,6 +882,11 @@ foreach (var country in allCountries)
         {
             currentDay++;
 
+            if (GameManager.Instance != null && GameManager.Instance.playerCountry != null)
+            {
+                GameManager.Instance.EventSystem?.TickPendingEvents(GameManager.Instance.playerCountry);
+            }
+
             // Use real month lengths for the date display
             int[] daysInMonth = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
             int monthIndex = Mathf.Max(0, CurrentTurn - 1) % 12;
@@ -732,5 +920,9 @@ namespace StateCraft.Data
         public System.Collections.Generic.List<string> countryJsonData = new System.Collections.Generic.List<string>();
         public System.Collections.Generic.List<string> relationsMatrix = new System.Collections.Generic.List<string>();
         public System.Collections.Generic.List<string> economyLedgers = new System.Collections.Generic.List<string>();
+        
+        // Custom Systems
+        public System.Collections.Generic.List<string> systemStateKeys = new System.Collections.Generic.List<string>();
+        public System.Collections.Generic.List<string> systemStateValues = new System.Collections.Generic.List<string>();
     }
 }

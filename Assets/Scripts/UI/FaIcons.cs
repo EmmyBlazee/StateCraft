@@ -18,7 +18,9 @@ namespace StateCraft.UI
         public const string ChartPie         = "\uf200"; // fa-chart-pie
         public const string TrendUp          = "\uf062"; // fa-arrow-up (growth)
         public const string TrendDown        = "\uf063"; // fa-arrow-down (decline)
-        public const string Coins            = "\uf51e"; // fa-coins
+        public const string Coins            = "\uf51e"; // fa-coins (stack) — Free
+        public const string Coin             = "\uf51e"; // fa-coins used as single-coin fallback (fa-coin is Pro-only)
+        public const string MoneyBill        = "\uf0d6"; // fa-money-bill — Free
         public const string DollarSign       = "\uf155"; // fa-dollar-sign
         public const string HandHoldingUsd   = "\uf4c0"; // fa-hand-holding-dollar
         public const string CreditCard       = "\uf09d"; // fa-credit-card
@@ -71,6 +73,14 @@ namespace StateCraft.UI
         public const string Anchor           = "\uf13d"; // fa-anchor
         public const string Tower            = "\uf519"; // fa-broadcast-tower
         public const string Tint             = "\uf043"; // fa-tint
+
+        // ── Communications ────────────────────────────────────────────────
+        public const string Envelope         = "\uf0e0"; // fa-envelope (inbox)
+        public const string EnvelopeOpen     = "\uf2b6"; // fa-envelope-open
+        public const string Bell             = "\uf0f3"; // fa-bell
+        public const string BellSlash        = "\uf1f6"; // fa-bell-slash
+        public const string Comment          = "\uf075"; // fa-comment
+        public const string Comments         = "\uf086"; // fa-comments
 
         // ── Helper: icon for each budget ministry, in order ───────────────
         public static readonly string[] BudgetMinistryIcons =

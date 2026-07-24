@@ -38,9 +38,37 @@ namespace StateCraft.Systems
         public float securityGained;
     }
 
-    public class InsurgencySystem : IInsurgencySystem
+    public class InsurgencySystem : IInsurgencySystem, ISaveable
     {
         private static readonly HashSet<string> _notifiedCamps = new HashSet<string>();
+
+        [System.Serializable]
+        private class InsurgencySaveData
+        {
+            public List<string> notifiedCamps = new List<string>();
+        }
+
+        public string ExportState()
+        {
+            var data = new InsurgencySaveData();
+            foreach (var campId in _notifiedCamps)
+            {
+                data.notifiedCamps.Add(campId);
+            }
+            return JsonUtility.ToJson(data);
+        }
+
+        public void ImportState(string json)
+        {
+            var data = JsonUtility.FromJson<InsurgencySaveData>(json);
+            if (data == null) return;
+            
+            _notifiedCamps.Clear();
+            foreach (var campId in data.notifiedCamps)
+            {
+                _notifiedCamps.Add(campId);
+            }
+        }
 
         public void SimulateInsurgency(CountryDataSO country)
         {

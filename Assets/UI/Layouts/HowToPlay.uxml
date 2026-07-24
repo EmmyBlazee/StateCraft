@@ -1,0 +1,156 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/Global.uss" />
+
+    <!-- Full-screen overlay, hidden by default -->
+    <ui:VisualElement name="HowToPlayRoot" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: rgba(4, 6, 10, 0.97); align-items: center; justify-content: center; display: none; z-index: 9999;">
+
+        <!-- Panel -->
+        <ui:VisualElement name="HTPPanel" style="width: 880px; max-height: 90%; background-color: rgba(8, 12, 18, 0.98); border-radius: 10px; border-width: 1px; border-color: rgba(0, 200, 255, 0.25); flex-direction: column; overflow: hidden;">
+
+            <!-- Header -->
+            <ui:VisualElement style="background-color: rgba(0, 200, 255, 0.06); padding: 20px 28px; flex-direction: row; justify-content: space-between; align-items: center; border-bottom-width: 1px; border-bottom-color: rgba(0, 200, 255, 0.15);">
+                <ui:VisualElement>
+                    <ui:Label text="HOW TO PLAY" style="font-size: 22px; color: rgb(0, 200, 255); -unity-font-style: bold; letter-spacing: 4px;" />
+                    <ui:Label text="StateCraft — Global Strategy Simulator" style="font-size: 11px; color: rgba(150,150,150,1); letter-spacing: 1px; margin-top: 3px;" />
+                </ui:VisualElement>
+                <ui:Button name="BtnCloseHTP" text="✕  CLOSE" style="height: 34px; font-size: 11px; color: rgba(255,80,80,1); background-color: rgba(255,50,50,0.1); border-radius: 5px; border-width: 1px; border-color: rgba(255,80,80,0.4); padding: 0 14px; letter-spacing: 1px;" />
+            </ui:VisualElement>
+
+            <!-- Tab bar -->
+            <ui:VisualElement name="HTPTabBar" style="flex-direction: row; background-color: rgba(0,0,0,0.3); padding: 0 20px; border-bottom-width: 1px; border-bottom-color: rgba(255,255,255,0.06);">
+                <ui:Button name="HTPTab0" text="OVERVIEW"    class="htp-tab htp-tab-active" />
+                <ui:Button name="HTPTab1" text="ECONOMY"     class="htp-tab" />
+                <ui:Button name="HTPTab2" text="MILITARY"    class="htp-tab" />
+                <ui:Button name="HTPTab3" text="DIPLOMACY"   class="htp-tab" />
+                <ui:Button name="HTPTab4" text="INTELLIGENCE" class="htp-tab" />
+                <ui:Button name="HTPTab5" text="WINNING"     class="htp-tab" />
+            </ui:VisualElement>
+
+            <!-- Scrollable content area -->
+            <ui:ScrollView name="HTPScrollView" style="flex-grow: 1; padding: 24px 28px;">
+
+                <!-- ═══════════════════════════ TAB 0: OVERVIEW ═══════════════════════════ -->
+                <ui:VisualElement name="HTPPage0">
+                    <ui:Label text="Welcome to StateCraft" style="font-size: 18px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 6px;" />
+                    <ui:Label text="You are the Head of State of an African nation. Every month a new turn passes — your economy produces income, your military burns fuel, diplomatic relationships shift, and your citizens judge your performance. Mismanage and you'll face elections, coups, or bankruptcy. Govern well and you can become the dominant regional superpower." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 20px;" />
+
+                    <ui:Label text="THE BASICS" style="font-size: 13px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 8px; letter-spacing: 1px;" />
+
+                    <ui:VisualElement style="margin-bottom: 6px; flex-direction: row;">
+                        <ui:Label text="⏱" style="font-size: 14px; width: 24px;" />
+                        <ui:Label text="TIME — Use the ▶  ▶▶  ▶▶▶  buttons top-right to control game speed. Pause with ⏸ whenever you need to think." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; flex-grow: 1;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement style="margin-bottom: 6px; flex-direction: row;">
+                        <ui:Label text="📊" style="font-size: 14px; width: 24px;" />
+                        <ui:Label text="DASHBOARDS — Eight full dashboards (Economy, Military, Diplomacy, Intelligence, etc.) are accessible via the left sidebar icons. Each has multiple tabs." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; flex-grow: 1;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement style="margin-bottom: 6px; flex-direction: row;">
+                        <ui:Label text="📬" style="font-size: 14px; width: 24px;" />
+                        <ui:Label text="INBOX — Critical government reports appear in your Inbox (top-right envelope icon). Always check it after advancing time." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; flex-grow: 1;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement style="margin-bottom: 6px; flex-direction: row;">
+                        <ui:Label text="🌐" style="font-size: 14px; width: 24px;" />
+                        <ui:Label text="NEWS TICKER — The scrolling bar at the top shows world events and news from all nations in real time." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; flex-grow: 1;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement style="margin-bottom: 6px; flex-direction: row;">
+                        <ui:Label text="🔔" style="font-size: 14px; width: 24px;" />
+                        <ui:Label text="EVENTS — Pop-up events require your decision. Some pause the game. Choose carefully — they have economic and stability consequences." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; flex-grow: 1;" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement style="height: 1px; background-color: rgba(255,255,255,0.07); margin-top: 18px; margin-bottom: 18px;" />
+
+                    <ui:Label text="KEY METRICS TO WATCH" style="font-size: 13px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 8px; letter-spacing: 1px;" />
+                    <ui:Label text="STABILITY  —  0–100. Falling below 25% triggers snap elections. Below 15% risks a military coup." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 4px;" />
+                    <ui:Label text="TREASURY   —  Your cash balance in $Billions. Running out causes spending cuts, debt spirals, and default." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 4px;" />
+                    <ui:Label text="APPROVAL   —  Public approval rating. Fall below 50% at election time and you get voted out." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 4px;" />
+                    <ui:Label text="PRESTIGE   —  Global standing. Reach 100+ prestige and maintain it for 6 months to trigger a Victory condition." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal;" />
+                </ui:VisualElement>
+
+                <!-- ═══════════════════════════ TAB 1: ECONOMY ═══════════════════════════ -->
+                <ui:VisualElement name="HTPPage1" style="display: none;">
+                    <ui:Label text="Economy" style="font-size: 18px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 6px;" />
+                    <ui:Label text="Your economy is the engine of everything. Without income you cannot build an army, invest in infrastructure, or pay your debt obligations." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 18px;" />
+
+                    <ui:Label text="INCOME vs. SPENDING" style="font-size: 13px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 8px; letter-spacing: 1px;" />
+                    <ui:Label text="Each month: Income is deposited to Treasury. Spending is deducted. If spending exceeds income you run a deficit. Sustained deficits push your Credit Rating down from AAA to D (default)." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 14px;" />
+
+                    <ui:Label text="WHAT DRIVES INCOME?" style="font-size: 13px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 8px; letter-spacing: 1px;" />
+                    <ui:Label text="• Taxation — set rates in Economy → Taxation. Higher rates raise revenue but lower approval and may hurt GDP growth.&#10;• Industries — invest in Oil, Agriculture, Mining, Manufacturing, Tech, Tourism via Economy → Industries.&#10;• Trade — sign Trade Agreements under Diplomacy, then use Trade tab to export resources for income.&#10;• Debt — borrow short or long term in Economy → Debt. Interest compounds monthly." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 14px;" />
+
+                    <ui:Label text="CONSTRUCTION PROJECTS" style="font-size: 13px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 8px; letter-spacing: 1px;" />
+                    <ui:Label text="Economy → Construction lets you build Infrastructure (Ports, Roads, Power Plants) and Social Projects (Schools, Hospitals). These cost money monthly but increase GDP, stability, and approval over time. Build them early — they take months to complete." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal;" />
+                </ui:VisualElement>
+
+                <!-- ═══════════════════════════ TAB 2: MILITARY ═══════════════════════════ -->
+                <ui:VisualElement name="HTPPage2" style="display: none;">
+                    <ui:Label text="Military" style="font-size: 18px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 6px;" />
+                    <ui:Label text="Your armed forces deter aggression, project power, and win wars. But they are expensive — every tank and soldier costs money monthly." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 18px;" />
+
+                    <ui:Label text="BUILDING YOUR FORCES" style="font-size: 13px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 8px; letter-spacing: 1px;" />
+                    <ui:Label text="Military → Recruit — Hire Infantry, Tanks, APCs, Fighter Jets, and special forces (RDF).&#10;Military → Weapons — Order weapon systems and research new technology.&#10;Military → Bases — Construct Army, Air Force, and Naval bases in your regions." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 14px;" />
+
+                    <ui:Label text="GOING TO WAR" style="font-size: 13px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 8px; letter-spacing: 1px;" />
+                    <ui:Label text="1. Declare War via Diplomacy → select a country → Declare War.&#10;2. Deploy an Operation via Military → Operations → New Operation. Select enemy country, assign troops, tanks, fighters.&#10;3. Advance time. Monthly Battle Reports will arrive in your Inbox showing casualties, equipment losses, and front status.&#10;4. Reinforce operations that are running low on troops. An undefended front collapses quickly." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 14px;" />
+
+                    <ui:Label text="AIR SUPERIORITY" style="font-size: 13px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 8px; letter-spacing: 1px;" />
+                    <ui:Label text="Deploy 20+ fighters to a front and outnumber the enemy air force 1.5× to achieve Air Dominance — giving +30% combat power on that front. Enemy air dominance triggers bombing raids that destroy your tanks and APCs." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 14px;" />
+
+                    <ui:Label text="LOGISTICS" style="font-size: 13px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 8px; letter-spacing: 1px;" />
+                    <ui:Label text="Your army consumes Ammo and Fuel every month. Check Military → Logistics. If reserves fall below 30%, your units suffer combat power penalties. Keep stockpiles above 50%." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal;" />
+                </ui:VisualElement>
+
+                <!-- ═══════════════════════════ TAB 3: DIPLOMACY ═══════════════════════════ -->
+                <ui:VisualElement name="HTPPage3" style="display: none;">
+                    <ui:Label text="Diplomacy" style="font-size: 18px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 6px;" />
+                    <ui:Label text="Diplomacy lets you build alliances, sign trade agreements, and manage your global standing without firing a shot." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 18px;" />
+
+                    <ui:Label text="RELATIONS SCORE" style="font-size: 13px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 8px; letter-spacing: 1px;" />
+                    <ui:Label text="Every country has a Relations Score with you from −100 (Hostile) to +100 (Allied). It determines whether AI nations accept your treaty proposals, trade with you, or declare war." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 14px;" />
+
+                    <ui:Label text="TREATIES" style="font-size: 13px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 8px; letter-spacing: 1px;" />
+                    <ui:Label text="Diplomacy → Treaties → Propose Treaty. Choose the country and treaty type:&#10;• Non-Aggression Pact — prevents war, costs −relations if broken.&#10;• Trade Agreement — required before you can trade resources. Gives income bonus.&#10;• Mutual Defence Pact — they join your wars defensively.&#10;• Ceasefire — ends an active war, resets both to Tension.&#10;&#10;After proposing, the treaty shows as PENDING for 1–2 months while the AI deliberates. Check the Treaties tab to see Accepted or Rejected outcomes." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 14px;" />
+
+                    <ui:Label text="EMBASSIES" style="font-size: 13px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 8px; letter-spacing: 1px;" />
+                    <ui:Label text="Open embassies in foreign capitals to improve intelligence reports and passively increase relations over time." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal;" />
+                </ui:VisualElement>
+
+                <!-- ═══════════════════════════ TAB 4: INTELLIGENCE ═══════════════════════════ -->
+                <ui:VisualElement name="HTPPage4" style="display: none;">
+                    <ui:Label text="Intelligence" style="font-size: 18px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 6px;" />
+                    <ui:Label text="Your intelligence services let you spy on other nations, conduct covert operations, and manage internal security." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 18px;" />
+
+                    <ui:Label text="ESPIONAGE" style="font-size: 13px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 8px; letter-spacing: 1px;" />
+                    <ui:Label text="Intelligence → Espionage — Launch spy operations against foreign nations. Operations take time and cost money. If caught, relations take a major hit and your agent may be expelled or arrested." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 14px;" />
+
+                    <ui:Label text="COUNTER-INTELLIGENCE" style="font-size: 13px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 8px; letter-spacing: 1px;" />
+                    <ui:Label text="Invest in counter-intelligence to detect and neutralise foreign spies operating inside your borders. Undetected spies can steal technology, fund insurgents, and leak military plans." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 14px;" />
+
+                    <ui:Label text="INSURGENCY" style="font-size: 13px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 8px; letter-spacing: 1px;" />
+                    <ui:Label text="If stability falls in a region, insurgent groups may emerge. They drain stability and income. You can fund proxy insurgencies in enemy states via Intelligence → Covert Ops to destabilise them before a war." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal;" />
+                </ui:VisualElement>
+
+                <!-- ═══════════════════════════ TAB 5: WINNING ═══════════════════════════ -->
+                <ui:VisualElement name="HTPPage5" style="display: none;">
+                    <ui:Label text="How to Win (and Lose)" style="font-size: 18px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 6px;" />
+
+                    <ui:Label text="VICTORY CONDITIONS" style="font-size: 13px; color: rgb(56,220,120,1); -unity-font-style: bold; margin-bottom: 8px; letter-spacing: 1px;" />
+                    <ui:Label text="🏆  DIPLOMATIC SUPREMACY — Reach 100+ Global Prestige AND be the highest-prestige nation for 6 consecutive months." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 6px;" />
+                    <ui:Label text="🌍  REGIONAL DOMINATION — Be the prestige leader AND have 4+ Allied nations (Mutual Defence Pacts)." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 18px;" />
+
+                    <ui:Label text="BUILD PRESTIGE BY:" style="font-size: 13px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 8px; letter-spacing: 1px;" />
+                    <ui:Label text="• Winning wars&#10;• Signing major treaties&#10;• Resolving crises diplomatically&#10;• Maintaining high stability and growing GDP&#10;• Successfully hosting international organisations" style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 18px;" />
+
+                    <ui:Label text="DEFEAT CONDITIONS" style="font-size: 13px; color: rgba(255,80,80,1); -unity-font-style: bold; margin-bottom: 8px; letter-spacing: 1px;" />
+                    <ui:Label text="💀  NATION COLLAPSE — Stability reaches 0% for 3 consecutive months. Civil unrest destroys the government." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 6px;" />
+                    <ui:Label text="💸  SOVEREIGN DEFAULT — Treasury falls below −$50B AND credit rating reaches D. International creditors seize control." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 6px;" />
+                    <ui:Label text="🗳  VOTED OUT — Your approval falls below 50% when the 4-year election arrives (every 48 months)." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; margin-bottom: 18px;" />
+
+                    <ui:Label text="TIPS FOR SURVIVAL" style="font-size: 13px; color: rgb(0, 200, 255); -unity-font-style: bold; margin-bottom: 8px; letter-spacing: 1px;" />
+                    <ui:Label text="→ Never let Stability drop below 40% without addressing the root cause.&#10;→ Keep at least $5B in reserve Treasury for emergencies.&#10;→ Sign Trade Agreements early — passive income adds up fast.&#10;→ Don't declare war without deployed Operations — your troops fight unorganised without them.&#10;→ Check your Inbox every few turns — critical warnings appear there first." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal;" />
+                </ui:VisualElement>
+
+            </ui:ScrollView>
+
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

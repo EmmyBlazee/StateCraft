@@ -6,14 +6,372 @@ using System.Collections.Generic;
 
 namespace StateCraft.Systems
 {
-    public class DiplomacySystem : IDiplomacySystem
+    public class DiplomacySystem : IDiplomacySystem, ISaveable
     {
+        [System.Serializable]
+        private class DiplomacySaveData
+        {
+            public List<TradeDeal> ActiveDeals = new List<TradeDeal>();
+            public List<string> pendingProposalsKeys = new List<string>();
+            public List<TradeAgreementProposal> pendingProposalsValues = new List<TradeAgreementProposal>();
+        }
+
+        public string ExportState()
+        {
+            var data = new DiplomacySaveData();
+            data.ActiveDeals = ActiveDeals; // TradeDeal is already Serializable
+
+            foreach (var kvp in PendingProposals)
+            {
+                data.pendingProposalsKeys.Add(kvp.Key);
+                data.pendingProposalsValues.Add(kvp.Value);
+            }
+
+            return JsonUtility.ToJson(data);
+        }
+
+        public void ImportState(string json)
+        {
+            var data = JsonUtility.FromJson<DiplomacySaveData>(json);
+            if (data == null) return;
+
+            ActiveDeals = data.ActiveDeals ?? new List<TradeDeal>();
+
+            PendingProposals.Clear();
+            if (data.pendingProposalsKeys != null && data.pendingProposalsValues != null)
+            {
+                for (int i = 0; i < data.pendingProposalsKeys.Count; i++)
+                {
+                    if (i < data.pendingProposalsValues.Count)
+                    {
+                        PendingProposals[data.pendingProposalsKeys[i]] = data.pendingProposalsValues[i];
+                    }
+                }
+            }
+        }
+
         public List<TradeDeal> ActiveDeals = new List<TradeDeal>();
         public Dictionary<string, TradeAgreementProposal> PendingProposals { get; private set; } = new Dictionary<string, TradeAgreementProposal>();
 
         public void UpdateRelations(CountryDataSO country)
         {
             // Future: Relations matrix logic
+        }
+
+        // ─── Treaty Duration table ─────────────────────────────────────────────
+        private static int GetTreatyDuration(string treatyName)
+        {
+            switch (treatyName)
+            {
+                case "Non-Aggression Pact":     return 36;
+                case "Mutual Defence Pact":     return 48;
+                case "Trade Agreement":         return 24;
+                case "Coalition Force Pact":    return 36;
+                case "Ceasefire Agreement":     return 12;
+                case "Military Access Rights":  return 18;
+                default:                        return 24;
+            }
+        }
+
+        // ─── AI Acceptance Evaluation ─────────────────────────────────────────
+        /// <summary>
+        /// The AI evaluates the treaty proposal from <paramref name="player"/> and either
+          public bool ProposeTreaty(CountryDataSO player, CountryDataSO aiPartner, string treatyName)
+        {
+            var gm = GameManager.Instance;
+            if (gm == null || player == null || aiPartner == null) return false;
+
+            int currentTurn = gm.TurnSystem?.CurrentTurn ?? 0;
+            float relations  = gm.Relations?.GetScore(player.countryName, aiPartner.countryName) ?? 0f;
+
+            // Existing war: ceasefire may be accepted; offensive treaties blocked
+            bool atWar = gm.WarSystem?.GetWarStage(player) == WarStage.Conflict ||
+                         gm.WarSystem?.GetWarStage(aiPartner) == WarStage.Conflict;
+            if (atWar && treatyName != "Ceasefire Agreement")
+            {
+                UI.NotificationManager.Instance?.AddNotification(
+                    $"TREATY REJECTED: Cannot sign a {treatyName} while at war. Negotiate a Ceasefire first.",
+                    Color.red);
+                return false;
+            }
+
+            // Don't allow duplicate active or pending treaties of the same type
+            bool alreadyExists = player.activeTreaties != null &&
+                player.activeTreaties.Exists(t => t.treatyName == treatyName &&
+                                                  t.partnerCountry == aiPartner.countryName &&
+                                                  (t.status == "Active" || t.status == "Pending"));
+            if (alreadyExists)
+            {
+                UI.NotificationManager.Instance?.AddNotification(
+                    $"TREATY DUPLICATE: A {treatyName} with {aiPartner.countryName} is already active or pending.",
+                    Color.yellow);
+                return false;
+            }
+
+            if (player.activeTreaties == null)    player.activeTreaties    = new System.Collections.Generic.List<DiplomaticTreaty>();
+            if (aiPartner.activeTreaties == null) aiPartner.activeTreaties = new System.Collections.Generic.List<DiplomaticTreaty>();
+
+            // ── ADD PENDING TREATY to player's list. AI will resolve in 2-3 turns. ──
+            int waitTurns = UnityEngine.Random.Range(1, 3);
+            var pendingTreaty = new DiplomaticTreaty
+            {
+                treatyName            = treatyName,
+                partnerCountry        = aiPartner.countryName,
+                terms                 = $"Proposed turn {currentTurn}. Awaiting response from {aiPartner.countryName}.",
+                monthsRemaining       = 0,
+                turnSigned            = currentTurn,
+                status                = "Pending",
+                turnsUntilResolution  = waitTurns,
+                tradeIncomeBonus      = 0f,
+                blocksWar             = false,
+            };
+            player.activeTreaties.Add(pendingTreaty);
+
+            UI.NotificationManager.Instance?.AddNotification(
+                $"📨 TREATY PROPOSED: {treatyName} sent to {aiPartner.countryName}. Awaiting response...",
+                new Color(1f, 0.8f, 0.2f));
+
+            InboxSystem.Instance?.SendMessage(player,
+                $"FOREIGN MINISTRY — {aiPartner.countryName.ToUpper()}",
+                $"Treaty Proposal Submitted — {treatyName}",
+                $"Your proposal for a {treatyName} has been formally submitted to the Government of {aiPartner.countryName}.\n\n" +
+                $"Current bilateral relations: {relations:F0}.\n" +
+                $"The response is expected within {waitTurns}-{waitTurns + 1} months. You can track the status in the TREATIES tab.",
+                "Important");
+
+            NewsSystem.Instance?.PublishNews(
+                $"DIPLOMACY: {player.countryName} proposes a {treatyName} to {aiPartner.countryName}. Outcome pending.");
+
+            return true;
+        }
+
+        // ─── Resolve Pending Treaties (called each turn) ───────────────────────
+        /// <summary>
+        /// Iterates over all pending treaties for the player and resolves them when
+        /// turnsUntilResolution reaches zero, applying AI acceptance/rejection logic.
+        /// </summary>
+        public void ResolvePendingTreaties(CountryDataSO player, GameManager gm)
+        {
+            if (player?.activeTreaties == null || gm == null) return;
+
+            int currentTurn = gm.TurnSystem?.CurrentTurn ?? 0;
+
+            for (int i = player.activeTreaties.Count - 1; i >= 0; i--)
+            {
+                var t = player.activeTreaties[i];
+                if (t.status != "Pending") continue;
+
+                t.turnsUntilResolution--;
+                if (t.turnsUntilResolution > 0) continue;
+
+                // Time to resolve — find the AI partner
+                var aiPartner = gm.allCountries?.Find(c => c.countryName == t.partnerCountry);
+                if (aiPartner == null) { t.status = "Rejected"; t.rejectionReason = "Country not found."; continue; }
+
+                float relations = gm.Relations?.GetScore(player.countryName, aiPartner.countryName) ?? 0f;
+
+                float acceptanceThreshold = t.treatyName switch
+                {
+                    "Non-Aggression Pact"    => -20f,
+                    "Mutual Defence Pact"    =>  20f,
+                    "Trade Agreement"        => -10f,
+                    "Coalition Force Pact"   =>  30f,
+                    "Ceasefire Agreement"    => -60f,
+                    "Military Access Rights" =>  10f,
+                    _                        =>   0f,
+                };
+
+                bool accepted = relations >= acceptanceThreshold;
+                float roll = UnityEngine.Random.value;
+                if (!accepted && relations >= acceptanceThreshold - 15f && roll < 0.30f) accepted = true;
+                if ( accepted && relations <  acceptanceThreshold + 5f  && roll < 0.20f) accepted = false;
+
+                if (!accepted)
+                {
+                    // ── REJECTION: keep the treaty in history as Rejected ──
+                    string rejReason = relations < acceptanceThreshold - 30f
+                        ? "Bilateral relations are too strained for an agreement at this time."
+                        : relations < acceptanceThreshold
+                        ? "Conditions are not yet favourable. Improve relations and try again."
+                        : "The proposal was declined due to domestic political pressures.";
+
+                    t.status = "Rejected";
+                    t.rejectionReason = rejReason;
+                    t.terms = $"Proposed turn {t.turnSigned}. Rejected by {t.partnerCountry}.";
+
+                    gm.Relations?.Adjust(player.countryName, aiPartner.countryName, -5f,
+                        $"Treaty proposal rejected ({t.treatyName})", currentTurn);
+
+                    InboxSystem.Instance?.SendMessage(player,
+                        $"EMBASSY OF {aiPartner.countryName.ToUpper()}",
+                        $"Treaty Proposal Declined — {t.treatyName}",
+                        $"The Government of {aiPartner.countryName} regrets to inform you that, " +
+                        $"at this time, conditions are not suitable for formalising a {t.treatyName}.\n\n" +
+                        $"Reason: {rejReason}\n" +
+                        $"Current bilateral relations score: {relations:F0}.\n" +
+                        $"We advise working to improve diplomatic ties before re-submitting.",
+                        "Important");
+
+                    UI.NotificationManager.Instance?.AddNotification(
+                        $"❌ TREATY REJECTED: {aiPartner.countryName} declined the {t.treatyName}. Relations −5.",
+                        new Color(1f, 0.3f, 0.3f));
+
+                    NewsSystem.Instance?.PublishNews(
+                        $"DIPLOMACY: {aiPartner.countryName} rejects {player.countryName}'s proposed {t.treatyName}.");
+                }
+                else
+                {
+                    // ── ACCEPTANCE: convert to Active and apply all effects ──
+                    int duration     = GetTreatyDuration(t.treatyName);
+                    float tradeBonus = BuildTreatytTradeBonus(player, aiPartner, t.treatyName);
+                    bool  blocksWar  = t.treatyName == "Non-Aggression Pact" || t.treatyName == "Mutual Defence Pact";
+
+                    t.status           = "Active";
+                    t.monthsRemaining  = duration;
+                    t.tradeIncomeBonus = tradeBonus;
+                    t.blocksWar        = blocksWar;
+                    t.terms            = $"Signed turn {currentTurn}. Duration: {duration} months.";
+                    t.rejectionReason  = null;
+
+                    // Add treaty to the partner side
+                    if (aiPartner.activeTreaties == null) aiPartner.activeTreaties = new System.Collections.Generic.List<DiplomaticTreaty>();
+                    bool partnerAlreadyHas = aiPartner.activeTreaties.Exists(pt =>
+                        pt.treatyName == t.treatyName && pt.partnerCountry == player.countryName && pt.status == "Active");
+                    if (!partnerAlreadyHas)
+                    {
+                        aiPartner.activeTreaties.Add(new DiplomaticTreaty
+                        {
+                            treatyName       = t.treatyName,
+                            partnerCountry   = player.countryName,
+                            terms            = t.terms,
+                            monthsRemaining  = duration,
+                            turnSigned       = currentTurn,
+                            status           = "Active",
+                            tradeIncomeBonus = tradeBonus,
+                            blocksWar        = blocksWar,
+                        });
+                    }
+
+                    ApplyTreatyEffects(player, aiPartner, t.treatyName, gm, currentTurn, tradeBonus);
+
+                    float relationsBump = t.treatyName switch
+                    {
+                        "Non-Aggression Pact"    => 20f,
+                        "Mutual Defence Pact"    => 30f,
+                        "Trade Agreement"        => 15f,
+                        "Coalition Force Pact"   => 25f,
+                        "Ceasefire Agreement"    => 10f,
+                        "Military Access Rights" => 10f,
+                        _                        => 10f,
+                    };
+                    gm.Relations?.Adjust(player.countryName, aiPartner.countryName, relationsBump,
+                        $"{t.treatyName} signed", currentTurn);
+
+                    InboxSystem.Instance?.SendMessage(player,
+                        $"EMBASSY OF {aiPartner.countryName.ToUpper()}",
+                        $"Treaty Signed — {t.treatyName}",
+                        $"The Government of {aiPartner.countryName} is pleased to confirm the signing of " +
+                        $"the {t.treatyName}. This agreement will remain in effect for {duration} months. " +
+                        BuildTreatyEffectSummary(t.treatyName, tradeBonus, player.currencySymbol),
+                        "Important");
+
+                    UI.NotificationManager.Instance?.AddNotification(
+                        $"✅ TREATY SIGNED: {t.treatyName} with {aiPartner.countryName} for {duration} months. Relations +{relationsBump:F0}.",
+                        new Color(0f, 0.85f, 0.4f));
+
+                    NewsSystem.Instance?.PublishNews(
+                        $"DIPLOMACY: {player.countryName} and {aiPartner.countryName} sign {t.treatyName}.");
+                }
+            }
+        }
+
+        // ─── Treaty Effects ──────────────────────────────────────────────────
+        private float BuildTreatytTradeBonus(CountryDataSO a, CountryDataSO b, string treatyName)
+        {
+            return treatyName switch
+            {
+                "Trade Agreement"     => Mathf.Min(a.income, b.income) * 0.02f, // 2% of smaller GDP
+                "Coalition Force Pact"=> Mathf.Min(a.income, b.income) * 0.01f,
+                _                     => 0f,
+            };
+        }
+
+        private string BuildTreatyEffectSummary(string treatyName, float tradeBonus, string sym)
+        {
+            switch (treatyName)
+            {
+                case "Non-Aggression Pact":
+                    return "Effect: Neither signatory may declare war on the other while the pact is active. " +
+                           "Any violation immediately incurs a severe prestige penalty and a -30 relations adjustment.";
+                case "Mutual Defence Pact":
+                    return "Effect: If either signatory is attacked, the other is treaty-bound to join the war " +
+                           "and contribute coalition forces automatically.";
+                case "Trade Agreement":
+                    return $"Effect: Both economies benefit from regularised trade. " +
+                           $"Income bonus: +{sym}{tradeBonus:F2}B per turn each.";
+                case "Coalition Force Pact":
+                    return $"Effect: Shared security arrangement. Coalition forces pooled. " +
+                           $"Income bonus: +{sym}{tradeBonus:F2}B per turn.";
+                case "Ceasefire Agreement":
+                    return "Effect: Active hostilities are suspended. Both sides return to War Stage: Tension. " +
+                           "The ceasefire may be broken if diplomatic relations deteriorate below -40.";
+                case "Military Access Rights":
+                    return "Effect: Your armed forces may operate from the partner's bases. " +
+                           "Air assets gain +15% effective range in operations targeting the partner's region.";
+                default:
+                    return "";
+            }
+        }
+
+        private void ApplyTreatyEffects(CountryDataSO player, CountryDataSO partner,
+                                        string treatyName, GameManager gm, int turn, float tradeBonus)
+        {
+            switch (treatyName)
+            {
+                case "Ceasefire Agreement":
+                    // End active combat — reset both sides to Tension
+                    if (gm.WarSystem != null)
+                    {
+                        gm.WarSystem.SetWarStage(player,  WarStage.Tension);
+                        gm.WarSystem.SetWarStage(partner, WarStage.Tension);
+                    }
+                    break;
+
+                case "Coalition Force Pact":
+                    // Transfer 5% of partner's infantry and 4% of tanks as coalition contribution
+                    int coInfantry = Mathf.RoundToInt(partner.unitInfantry * 0.05f);
+                    int coTanks    = Mathf.RoundToInt(partner.unitTanks    * 0.04f);
+                    player.unitInfantry  += coInfantry;
+                    player.unitTanks     += coTanks;
+                    partner.unitInfantry  = Mathf.Max(0, partner.unitInfantry - coInfantry);
+                    partner.unitTanks     = Mathf.Max(0, partner.unitTanks    - coTanks);
+                    UI.NotificationManager.Instance?.AddNotification(
+                        $"🪖 COALITION ACTIVATED: {partner.countryName} contributes {coInfantry:N0} troops and {coTanks} tanks to your coalition.",
+                        new Color(0f, 0.85f, 1f));
+                    break;
+
+                case "Trade Agreement":
+                case "Non-Aggression Pact":
+                case "Mutual Defence Pact":
+                case "Military Access Rights":
+                    // Per-turn effects are handled by ProcessTradeDeals via tradeIncomeBonus on the treaty object
+                    break;
+            }
+
+            // Prestige gain for signing major treaties
+            float prestigeGain = treatyName == "Mutual Defence Pact" ? 5f :
+                                 treatyName == "Non-Aggression Pact" ? 3f : 1f;
+            player.globalPrestige  = Mathf.Min(100f, player.globalPrestige  + prestigeGain);
+            partner.globalPrestige = Mathf.Min(100f, partner.globalPrestige + prestigeGain);
+        }
+
+        // Called from ProcessTradeDeals when a treaty expires
+        public void RevokeTreatyEffects(CountryDataSO country, DiplomaticTreaty treaty)
+        {
+            // Coalition force return is handled in ProcessTradeDeals — no extra logic needed here.
+            // Prestige hit for letting treaty lapse
+            if (treaty.treatyName == "Mutual Defence Pact" || treaty.treatyName == "Non-Aggression Pact")
+                country.globalPrestige = Mathf.Max(0f, country.globalPrestige - 2f);
         }
 
         /// <summary>
@@ -89,6 +447,16 @@ namespace StateCraft.Systems
                     country.income += paymentInBillions;
             }
 
+            // ── Apply per-turn income bonuses from active treaties ──
+            if (country.activeTreaties != null)
+            {
+                foreach (var t in country.activeTreaties)
+                {
+                    if (t.status == "Active" && t.tradeIncomeBonus > 0f)
+                        country.income += t.tradeIncomeBonus;
+                }
+            }
+
             // ── Treaty expiry with proper coalition cleanup ──
             if (country.activeTreaties != null)
             {
@@ -139,6 +507,8 @@ namespace StateCraft.Systems
                             }
                         }
 
+                        treaty.status = "Expired";
+                        RevokeTreatyEffects(country, treaty);
                         country.activeTreaties.RemoveAt(i);
                         NewsSystem.Instance?.PublishNews(
                             $"TREATY EXPIRED: {treaty.treatyName} between {country.countryName} and {treaty.partnerCountry} has concluded.");

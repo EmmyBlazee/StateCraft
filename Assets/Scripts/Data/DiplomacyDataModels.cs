@@ -31,4 +31,15 @@ namespace StateCraft.Data
         public string currentResolution;
         public string voteStatus; // Approve, Abstain, Reject, Pending
     }
+
+    [Serializable]
+    public class ThreatAlert
+    {
+        public string title;
+        public string region;
+        public float probability;
+        public string impact;
+        public string icon;
+        public UnityEngine.Color color;
+    }
 }

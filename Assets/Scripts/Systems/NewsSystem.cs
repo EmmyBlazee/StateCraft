@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using StateCraft.Core;
 using StateCraft.Data;
+using StateCraft.UI;
 
 namespace StateCraft.Systems
 {
@@ -252,23 +253,38 @@ if (roll > 0.8f && countries != null && countries.Count > 0)
                     );
                 }
 
-                // INSURGENCY
+                // INSURGENCY & TERRORIST ATTACK REPORTS
                 bool hasInsurgency = false;
 
                 foreach (var r in country.regions)
                 {
-                    if (r.insurgencyLevel > 50)
+                    if (r.insurgencyLevel > 30f || r.security < 55f)
                     {
-                        if (UnityEngine.Random.value > 0.8f &&
-                            CanPublish($"{name}_{r.regionName}_insurgency", 4))
+                        if (UnityEngine.Random.value > 0.6f &&
+                            CanPublish($"{name}_{r.regionName}_terror_attack", 3))
                         {
-                            PublishNews(
-                                $"INSURGENCY: MILITANT GROUPS EXPANDING OPERATIONS IN {r.regionName} REGION, {name}.",
-                                globalOnly
-                            );
+                            int killedCount = UnityEngine.Random.Range(16, 58);
+                            int woundedCount = UnityEngine.Random.Range(22, 85);
+                            string attackNews = $"TERRORIST ATTACK: MILITANT ASSAULT IN {r.regionName.ToUpper()}, {name.ToUpper()} LEAVES {killedCount} PEOPLE KILLED AND {woundedCount} WOUNDED.";
+                            
+                            PublishNews(attackNews, globalOnly);
+
+                            if (isPlayer)
+                            {
+                                NotificationManager.Instance?.AddNotification($"TERRORIST ATTACK IN {r.regionName.ToUpper()}: {killedCount} KILLED!", Color.red);
+                                InboxSystem.Instance?.SendMessage(country, "NATIONAL SECURITY COUNCIL",
+                                    $"TERRORIST ATTACK REPORT — {r.regionName.ToUpper()}",
+                                    $"CRITICAL SECURITY DISPATCH FOR {country.countryName.ToUpper()}\n\n" +
+                                    $"A violent terrorist attack has occurred in {r.regionName}.\n" +
+                                    $"• Casualties: {killedCount} people killed (KIA), {woundedCount} wounded.\n" +
+                                    $"• Target Region: {r.regionName}\n" +
+                                    $"• Current Region Security: {r.security:F0}%\n" +
+                                    $"• Insurgency Level: {r.insurgencyLevel:F0}%\n\n" +
+                                    $"Immediate military or security deployment is recommended to restore order.",
+                                    "Critical");
+                            }
 
                             hasInsurgency = true;
-
                             break;
                         }
                     }
@@ -322,6 +338,14 @@ if (roll > 0.8f && countries != null && countries.Count > 0)
 
             string[] flashes =
             {
+                $"TERRORIST ATTACK: INSURGENT RAID IN {cap}, {name.ToUpper()} LEAVES {UnityEngine.Random.Range(18, 52)} PEOPLE KILLED.",
+
+                $"TERRORIST ATTACK: SUICIDE BOMBING IN {cap}, {name.ToUpper()} LEAVES {UnityEngine.Random.Range(20, 60)} CIVILIANS KILLED AND DOZENS INJURED.",
+
+                $"INSURGENT ATTACK: MILITANTS AMBUSH SECURITY CONVOY IN {name.ToUpper()} LEAVING {UnityEngine.Random.Range(15, 45)} SOLDIERS KILLED.",
+
+                $"CRISIS ALERT: TERRORIST CELL ATTACKS MARKETPLACE IN {name.ToUpper()}; {UnityEngine.Random.Range(22, 65)} PEOPLE KILLED.",
+
                 $"ECONOMY: {name} DIGITAL TRADE PROTOCOLS TRIGGER 12% GDP SURGE.",
 
                 $"CRISIS: {name} REGIONAL POWER GRID FAILURE SHUTS DOWN COBALT PROCESSING.",

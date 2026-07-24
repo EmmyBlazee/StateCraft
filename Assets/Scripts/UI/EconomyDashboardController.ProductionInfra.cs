@@ -139,11 +139,14 @@ namespace StateCraft.UI
 
                 var row = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween } };
                 AddSummaryMetric(row, "TRANSPORT", $"{(country.roadLevel + country.railLevel + country.portLevel) * 3.3f:F0}%", new Color(0, 210/255f, 1f));
-                AddSummaryMetric(row, "ENERGY", $"{country.electricityLevel:F0}%", country.electricityLevel > 50f ? Color.green : Color.red);
+                AddSummaryMetric(row, "GRID COVERAGE", $"{country.electricityLevel:F0}%", country.electricityLevel > 50f ? Color.green : Color.red);
                 
-                float cap = PowerGridManager.Instance != null ? PowerGridManager.Instance.CalculateCapacity(country) : 0f;
-                float dem = PowerGridManager.Instance != null ? PowerGridManager.Instance.CalculateDemand(country) : 0f;
+                float cap = GetTotalPowerCapacity(country);
+                float dem = GetTotalPowerDemand(country);
                 float netPower = cap - dem;
+                
+                AddSummaryMetric(row, "GRID CAPACITY", $"{cap:N0} MW", new Color(255/255f, 202/255f, 40/255f));
+                
                 string netStr = netPower >= 0 ? $"+{netPower:F0} MW" : $"{netPower:F0} MW";
                 AddSummaryMetric(row, "GRID BALANCE", netStr, netPower >= 0 ? new Color(0, 230/255f, 118/255f) : new Color(255/255f, 82/255f, 82/255f));
                 
@@ -279,6 +282,39 @@ namespace StateCraft.UI
             row.Add(new Label($"{name}: {count}") { style = { color = Color.white, fontSize = 9 } });
             row.Add(new Label(note) { style = { color = Color.grey, fontSize = 8 } });
             parent.Add(row);
+        }
+
+        private float GetTotalPowerCapacity(CountryDataSO country)
+        {
+            if (country == null) return 0f;
+            Debug.Log($"[PowerDebug] country: {country.countryName}, gas: {country.powerGasPlants}, hydro: {country.powerHydroPlants}, nuclear: {country.powerNuclearPlants}, solar: {country.powerSolarPlants}, wind: {country.powerWindPlants}");
+            if (PowerGridManager.Instance != null)
+            {
+                float calculated = PowerGridManager.Instance.CalculateCapacity(country);
+                Debug.Log($"[PowerDebug] PowerGridManager capacity: {calculated}");
+                return calculated;
+            }
+            
+            float fallback = country.powerGasPlants * 500f +
+                   country.powerHydroPlants * 1200f +
+                   country.powerNuclearPlants * 3000f +
+                   country.powerSolarPlants * 200f +
+                   country.powerWindPlants * 150f;
+            Debug.Log($"[PowerDebug] fallback capacity: {fallback}");
+            return fallback;
+        }
+
+        private float GetTotalPowerDemand(CountryDataSO country)
+        {
+            if (PowerGridManager.Instance != null)
+                return PowerGridManager.Instance.CalculateDemand(country);
+            
+            float civilianDemand = (country.population / 1000000f) * 50f;
+            float industrialDemand = (country.indAgriRice + country.indAgriCassava + country.indAgriCocoa + 
+                                       country.indMiningLocal + country.indMiningOil + 
+                                       country.indTechIT + country.indTechFintech) * 150f;
+            float militaryDemand = 500f;
+            return civilianDemand + industrialDemand + militaryDemand;
         }
 
     }

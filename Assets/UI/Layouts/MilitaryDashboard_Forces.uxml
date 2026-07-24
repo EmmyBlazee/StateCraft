@@ -131,7 +131,7 @@
                                         <ui:Label text="&#xf6de;" class="fa-icon" style="font-size: 21px; color: rgb(25, 127, 229); margin-right: 8px;" />
                                         <ui:VisualElement>
                                             <ui:Label text="ARMY" style="font-size: 16px; color: rgb(25, 127, 229); -unity-font-style: bold; letter-spacing: 2px;" />
-                                            <ui:Label text="The Nigerian Army" style="font-size: 12px; color: rgb(180,180,180);" />
+                                            <ui:Label name="ForcesLblArmyName" text="The National Army" style="font-size: 12px; color: rgb(180,180,180);" />
                                         </ui:VisualElement>
                                     </ui:VisualElement>
                                 </ui:VisualElement>
@@ -167,7 +167,6 @@
                                         <ui:Button name="BtnArmyCdrProfile" text="&#xf007;" class="button-premium fa-icon" style="width: 24px; height: 24px; font-size: 14px;" />
                                     </ui:VisualElement>
                                 </ui:VisualElement>
-                                <ui:Button name="BtnViewArmy" text="VIEW DETAILS" class="button-premium" style="margin: 0 6px 6px 6px; height: 22px; font-size: 11px; color: rgb(25, 127, 229); border-color: rgba(0,210,255,0.4);" />
                             </ui:VisualElement>
 
                             <!-- NAVY CARD -->
@@ -178,7 +177,7 @@
                                         <ui:Label text="&#xf21a;" class="fa-icon" style="font-size: 21px; color: rgb(25, 127, 229); margin-right: 8px;" />
                                         <ui:VisualElement>
                                             <ui:Label text="NAVY" style="font-size: 16px; color: rgb(25, 127, 229); -unity-font-style: bold; letter-spacing: 2px;" />
-                                            <ui:Label text="The Nigerian Navy" style="font-size: 12px; color: rgb(180,180,180);" />
+                                            <ui:Label name="ForcesLblNavyName" text="The National Navy" style="font-size: 12px; color: rgb(180,180,180);" />
                                         </ui:VisualElement>
                                     </ui:VisualElement>
                                 </ui:VisualElement>
@@ -212,7 +211,6 @@
                                         <ui:Button name="BtnNavyCdrProfile" text="&#xf007;" class="button-premium fa-icon" style="width: 24px; height: 24px; font-size: 14px;" />
                                     </ui:VisualElement>
                                 </ui:VisualElement>
-                                <ui:Button name="BtnViewNavy" text="VIEW DETAILS" class="button-premium" style="margin: 0 6px 6px 6px; height: 22px; font-size: 11px; color: rgb(25, 127, 229); border-color: rgba(33,150,243,0.4);" />
                             </ui:VisualElement>
 
                             <!-- AIR FORCE CARD -->
@@ -223,7 +221,7 @@
                                         <ui:Label text="&#xf072;" class="fa-icon" style="font-size: 21px; color: rgb(186,104,200); margin-right: 8px;" />
                                         <ui:VisualElement>
                                             <ui:Label text="AIR FORCE" style="font-size: 16px; color: rgb(186,104,200); -unity-font-style: bold; letter-spacing: 2px;" />
-                                            <ui:Label text="The Nigerian Air Force" style="font-size: 12px; color: rgb(180,180,180);" />
+                                            <ui:Label name="ForcesLblAirForceName" text="The National Air Force" style="font-size: 12px; color: rgb(180,180,180);" />
                                         </ui:VisualElement>
                                     </ui:VisualElement>
                                 </ui:VisualElement>
@@ -257,7 +255,6 @@
                                         <ui:Button name="BtnAFCdrProfile" text="&#xf007;" class="button-premium fa-icon" style="width: 24px; height: 24px; font-size: 14px;" />
                                     </ui:VisualElement>
                                 </ui:VisualElement>
-                                <ui:Button name="BtnViewAF" text="VIEW DETAILS" class="button-premium" style="margin: 0 6px 6px 6px; height: 22px; font-size: 11px; color: rgb(186,104,200); border-color: rgba(186,104,200,0.4);" />
                             </ui:VisualElement>
 
                             <!-- RAPID DEPLOYMENT FORCE CARD -->
@@ -302,7 +299,6 @@
                                         <ui:Button name="BtnRDFCdrProfile" text="&#xf007;" class="button-premium fa-icon" style="width: 24px; height: 24px; font-size: 14px;" />
                                     </ui:VisualElement>
                                 </ui:VisualElement>
-                                <ui:Button name="BtnViewRDF" text="VIEW DETAILS" class="button-premium" style="margin: 0 6px 6px 6px; height: 22px; font-size: 11px; color: rgb(229, 153, 0); border-color: rgba(241,196,15,0.4);" />
                             </ui:VisualElement>
 
                         </ui:VisualElement>

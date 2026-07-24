@@ -157,7 +157,8 @@
 .econ-date-box {
     min-width: 126px;
     width: auto;
-    padding: 7px 9px;
+    padding: 2px 9px;
+    max-height: 70px;
     border-width: 1px;
     border-color: rgba(165, 206, 226, 0.14);
     border-radius: 6px;
@@ -411,8 +412,8 @@
     flex-grow: 0;
     flex-shrink: 0;
     padding: 8px 10px;
-    margin-right: 4%;
-    margin-bottom: 6px;
+    margin-right: 2%;
+    margin-bottom: 8px;
     border-width: 1px;
     border-color: rgba(101, 161, 190, 0.22);
     border-radius: 4px;
@@ -1012,7 +1013,7 @@
 }
 
 .industry-summary-stat {
-    width: 205px;
+    width: 230px;
     flex-direction: row;
     align-items: center;
     border-left-width: 1px;
@@ -1038,7 +1039,8 @@
 
 .industry-stat-title {
     color: white;
-    font-size: 15px;
+    font-size: 13px;
+    white-space: normal;
 }
 
 .industry-stat-value {
@@ -1103,23 +1105,28 @@
     flex-shrink: 0;
     margin-right: 12px;
     border-radius: 3px;
-    background-color: rgb(75, 50, 29);
+    background-color: rgb(10, 20, 30);
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.industry-thumb.oil {
+    background-image: url('../Sprites/oil_gas_icon.png');
 }
 
 .industry-thumb.mining {
-    background-color: rgb(91, 66, 35);
+    background-image: url('../Sprites/mining_icon.png');
 }
 
 .industry-thumb.agriculture {
-    background-color: rgb(48, 82, 50);
+    background-image: url('../Sprites/agriculture_icon.png');
 }
 
 .industry-thumb.manufacturing {
-    background-color: rgb(38, 63, 77);
+    background-image: url('../Sprites/manufacturing_icon.png');
 }
 
 .industry-thumb.tech {
-    background-color: rgb(13, 62, 92);
+    background-image: url('../Sprites/tech_icon.png');
 }
 
 .industry-stats {
@@ -1385,6 +1392,16 @@
     font-size: 23px;
     -unity-text-align: middle-center;
     margin-right: 10px;
+}
+
+.budget-icon-military {
+    background-image: url('project://database/Assets/Images/MilitaryIcons/icon_personnel.png');
+    -unity-background-image-tint-color: rgb(25, 226, 255);
+}
+
+.budget-icon-intel {
+    background-image: url('project://database/Assets/Images/MilitaryIcons/icon_spy.png');
+    -unity-background-image-tint-color: rgb(25, 226, 255);
 }
 
 .budget-dept {
@@ -1688,27 +1705,93 @@
     background-color: rgb(55, 77, 82);
 }
 
-.project-image.rail,
+.project-image.highway,
 .blueprint-image.highway {
-    background-color: rgb(69, 87, 74);
+    background-image: url('project:/Assets/UI/Sprites/blueprint_highway.png');
+    -unity-background-scale-mode: scale-and-crop;
 }
 
-.project-image.satellite,
-.blueprint-image.comms {
-    background-color: rgb(22, 51, 86);
+.project-image.rail,
+.blueprint-image.rail {
+    background-image: url('project:/Assets/UI/Sprites/blueprint_rail.png');
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.project-image.port,
+.blueprint-image.port {
+    background-image: url('project:/Assets/UI/Sprites/blueprint_port.png');
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.project-image.gas,
+.blueprint-image.gas {
+    background-image: url('project:/Assets/UI/Sprites/blueprint_gas.png');
+    -unity-background-scale-mode: scale-and-crop;
 }
 
 .project-image.dam,
-.blueprint-image.irrigation {
-    background-color: rgb(48, 77, 80);
+.blueprint-image.dam {
+    background-image: url('project:/Assets/UI/Sprites/blueprint_dam.png');
+    -unity-background-scale-mode: scale-and-crop;
 }
 
-.blueprint-image.power {
-    background-color: rgb(86, 75, 47);
+.project-image.nuclear,
+.blueprint-image.nuclear {
+    background-image: url('project:/Assets/UI/Sprites/blueprint_power.png');
+    -unity-background-scale-mode: scale-and-crop;
 }
 
+.project-image.solar,
+.blueprint-image.solar {
+    background-image: url('project:/Assets/UI/Sprites/blueprint_solar.png');
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.project-image.rice,
+.blueprint-image.rice {
+    background-image: url('project:/Assets/UI/Sprites/blueprint_rice.png');
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.project-image.cocoa,
+.blueprint-image.cocoa {
+    background-image: url('project:/Assets/UI/Sprites/blueprint_cocoa.png');
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.project-image.datacenter,
+.blueprint-image.datacenter {
+    background-image: url('project:/Assets/UI/Sprites/blueprint_datacenter.png');
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.project-image.comms,
+.blueprint-image.comms {
+    background-image: url('project:/Assets/UI/Sprites/blueprint_comms.png');
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.project-image.defence,
 .blueprint-image.defence {
-    background-color: rgb(78, 57, 41);
+    background-image: url('project:/Assets/UI/Sprites/blueprint_defence.png');
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.econ-adviser-main > .adviser-copy-container,
+.industry-adviser-main > .adviser-copy-container,
+.budget-adviser-main > .adviser-copy-container,
+.projects-adviser-main > .adviser-copy-container {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.industry-copy,
+.budget-copy,
+.projects-copy,
+.econ-report-copy,
+.econ-muted {
+    white-space: normal;
 }
 
 .project-card-title {
@@ -3418,7 +3501,7 @@
     background-color: rgba(36, 238, 87, 0.2);
 }
 .ops-section-header {
-    font-size: 11px;
+    font-size: 13px;
     color: rgb(180, 190, 200);
     -unity-font-style: bold;
     letter-spacing: 0.5px;
@@ -3435,23 +3518,23 @@
     background-color: rgba(36, 238, 87, 0.05);
 }
 .det-title {
-    font-size: 14px;
+    font-size: 16px;
     color: rgb(255, 255, 255);
     -unity-font-style: bold;
     margin-bottom: 2px;
 }
 .det-subtitle {
-    font-size: 10px;
+    font-size: 12px;
     color: rgb(150, 160, 170);
 }
 .det-status {
-    font-size: 11px;
+    font-size: 13px;
     color: rgb(36, 238, 87);
     -unity-font-style: bold;
     margin-bottom: 2px;
 }
 .det-date {
-    font-size: 10px;
+    font-size: 12px;
     color: rgb(150, 160, 170);
 }
 .status-dot {
@@ -3476,11 +3559,11 @@
     margin-right: 8px;
 }
 .det-stat-key {
-    font-size: 9px;
+    font-size: 11px;
     color: rgb(150, 160, 170);
 }
 .det-stat-val {
-    font-size: 11px;
+    font-size: 14px;
     color: rgb(255, 255, 255);
     -unity-font-style: bold;
 }
@@ -3497,7 +3580,7 @@
     color: rgb(200, 210, 220);
     border-radius: 3px;
     padding: 2px 6px;
-    font-size: 9px;
+    font-size: 11px;
 }
 .ops-btn-outline {
     background-color: transparent;
@@ -3506,7 +3589,7 @@
     border-width: 1px;
     border-radius: 4px;
     padding: 8px;
-    font-size: 10px;
+    font-size: 12px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
 }
@@ -3517,7 +3600,7 @@
     border-width: 1px;
     border-radius: 4px;
     padding: 8px;
-    font-size: 10px;
+    font-size: 12px;
     -unity-font-style: bold;
     flex-grow: 1;
     margin-right: 8px;
@@ -3529,7 +3612,7 @@
     border-width: 1px;
     border-radius: 4px;
     padding: 8px;
-    font-size: 10px;
+    font-size: 12px;
     -unity-font-style: bold;
 }
 .ops-action-btn {
@@ -3551,13 +3634,13 @@
     margin-right: 12px;
 }
 .action-title {
-    font-size: 11px;
+    font-size: 13px;
     color: rgb(255, 255, 255);
     -unity-font-style: bold;
     -unity-text-align: middle-left;
 }
 .action-desc {
-    font-size: 9px;
+    font-size: 11px;
     color: rgb(150, 160, 170);
     -unity-text-align: middle-left;
     white-space: normal;
@@ -3569,7 +3652,7 @@
 }
 .ops-progress-label {
     width: 100px;
-    font-size: 10px;
+    font-size: 12px;
     color: rgb(200, 210, 220);
 }
 .ops-progress-bar-bg {
@@ -3586,7 +3669,7 @@
 }
 .ops-progress-val {
     width: 40px;
-    font-size: 9px;
+    font-size: 11px;
     color: rgb(255, 255, 255);
     -unity-text-align: middle-right;
 }
@@ -3600,7 +3683,7 @@
     background-color: rgba(255, 255, 255, 0.1);
     border-width: 0;
     color: white;
-    font-size: 10px;
+    font-size: 11px;
     -unity-text-align: middle-center;
     padding: 0;
     margin-left: 2px;
@@ -3631,7 +3714,7 @@
     margin-bottom: 8px;
 }
 .ops-feed-time {
-    font-size: 9px;
+    font-size: 11px;
     color: rgb(150, 160, 170);
     width: 35px;
     margin-right: 8px;
@@ -3647,8 +3730,181 @@
 .ops-feed-dot.good { background-color: rgb(36, 238, 87); }
 .ops-feed-dot.warning { background-color: rgb(255, 179, 0); }
 .ops-feed-text {
-    font-size: 10px;
+    font-size: 12px;
     color: rgb(200, 210, 220);
     flex-grow: 1;
     white-space: normal;
+}
+
+/* ========================================================== */
+/* UNIVERSAL UI COMPONENT LIBRARY                             */
+/* ========================================================== */
+
+/* --- 1. Universal Scroll View --- */
+.unity-scroller--vertical {
+    width: 10px;
+    background-color: transparent;
+    border-width: 0;
+}
+.unity-scroller--horizontal {
+    height: 10px;
+    background-color: transparent;
+    border-width: 0;
+}
+.unity-scroller__slider {
+    margin: 0;
+    width: 10px;
+}
+.unity-scroller--horizontal .unity-scroller__slider {
+    height: 10px;
+    margin: 0;
+}
+.unity-scroller .unity-base-slider__tracker {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-width: 0;
+    border-radius: 4px;
+}
+.unity-scroller .unity-base-slider__dragger {
+    background-color: #22C55E;
+    border-width: 0;
+    border-radius: 3px;
+    width: 6px;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+}
+.unity-scroller--horizontal .unity-base-slider__dragger {
+    height: 8px;
+    top: 1px;
+}
+.unity-scroller .unity-base-slider__dragger:hover {
+    background-color: #2FEA75;
+    border-color: rgba(0, 255, 255, 0.5);
+}
+.unity-scroller .unity-base-slider__dragger:active {
+    background-color: #1A9E48;
+    border-color: rgba(0, 255, 255, 0.8);
+}
+.unity-scroller .unity-repeat-button {
+    display: none; /* Hide standard arrows */
+}
+
+/* --- 2. Universal Progress Slider / Bar --- */
+.sc-progress-bar-bg {
+    background-color: #1C1F26;
+    border-width: 1px;
+    border-color: #2A2F3A;
+    border-radius: 3px;
+    overflow: hidden;
+    flex-grow: 1;
+}
+.sc-progress-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition-property: width, background-color;
+    transition-duration: 0.25s;
+    transition-timing-function: ease-out;
+}
+.sc-progress-bar-bg.sc-size-small { height: 6px; }
+.sc-progress-bar-bg.sc-size-medium { height: 10px; }
+.sc-progress-bar-bg.sc-size-large { height: 18px; }
+
+.sc-fill-low { background-color: #FF3B30; }
+.sc-fill-medium { background-color: #FF9500; }
+.sc-fill-high { background-color: #FFCC00; }
+.sc-fill-full { background-color: #22C55E; }
+
+/* Custom Slider thumb style for when user interaction is needed */
+.sc-slider {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+.sc-slider .unity-base-slider__input {
+    flex-grow: 1;
+}
+.sc-slider .unity-base-slider__tracker {
+    background-color: #1C1F26;
+    border-width: 1px;
+    border-color: #2A2F3A;
+    border-radius: 3px;
+    height: 10px;
+    margin-top: -5px;
+    top: 50%;
+}
+.sc-slider .unity-base-slider__dragger {
+    background-color: #22C55E;
+    border-width: 1px;
+    border-color: transparent;
+    border-radius: 4px;
+    width: 14px;
+    height: 14px;
+    margin-top: -7px;
+    top: 50%;
+    transition-property: background-color, border-color, scale;
+    transition-duration: 0.15s;
+}
+.sc-slider .unity-base-slider__dragger:hover {
+    background-color: #2FEA75;
+    border-color: rgba(0, 255, 255, 0.5);
+    scale: 1.1;
+}
+.sc-slider .unity-base-slider__dragger:active {
+    background-color: #1A9E48;
+    border-color: rgba(0, 255, 255, 0.8);
+}
+
+/* --- 3. Numeric Stepper --- */
+.sc-stepper-btn {
+    width: 24px;
+    height: 24px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-width: 0;
+    border-radius: 3px;
+    color: #FFFFFF;
+    font-size: 14px;
+    -unity-font-style: bold;
+    padding: 0;
+    margin: 0 4px;
+    transition-property: background-color, color;
+    transition-duration: 0.15s;
+}
+.sc-stepper-btn:hover {
+    background-color: #22C55E;
+    color: #000000;
+}
+.sc-stepper-btn:active {
+    background-color: #1A9E48;
+    color: #000000;
+}
+.sc-stepper-btn.unity-disabled {
+    opacity: 0.4;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.sc-stepper-val {
+    color: #FFFFFF;
+    font-size: 13px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    min-width: 60px;
+}
+
+/* Fix garbled text in Operation Inputs */
+.sc-input {
+    background-color: rgba(0,0,0,0.2);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255,255,255,0.2);
+    border-top-width: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+}
+.sc-input .unity-base-text-field__input,
+.sc-input .unity-popup-field__input {
+    color: white;
+    font-size: 12px;
+    background-color: transparent;
+    border-width: 0;
+    padding: 0;
+    margin: 0;
 }

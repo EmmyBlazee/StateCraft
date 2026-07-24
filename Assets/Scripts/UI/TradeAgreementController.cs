@@ -40,16 +40,38 @@ namespace StateCraft.UI
 
         private void Awake()
         {
-            var uiDoc = GetComponent<UIDocument>();
-            if (uiDoc == null) return;
-            
-            // Force this panel to render in front of standard dashboards
-            uiDoc.sortingOrder = 100;
-            
-            _root = uiDoc.rootVisualElement;
-            _panel = _root.Q<VisualElement>("TradeAgreementPanel");
-            if (_panel == null) return;
-            
+            // Find and disable any standalone UIDocument that is trying to render the TradeAgreementPanel directly
+            // This prevents the old popup from rendering automatically over the screen
+            var allDocs = UnityEngine.Object.FindObjectsOfType<UIDocument>();
+            foreach (var doc in allDocs)
+            {
+                if (doc.visualTreeAsset != null && doc.visualTreeAsset.name != null && doc.visualTreeAsset.name.Contains("TradeAgreement"))
+                {
+                    doc.enabled = false;
+                }
+            }
+
+            // Strategy 2: Panel is embedded as a Template inside the DiplomacyDashboard UXML
+            if (_panel == null)
+            {
+                var dipDoc = UnityEngine.Object.FindObjectOfType<DiplomacyDashboardController>();
+                if (dipDoc != null)
+                {
+                    var dipUI = dipDoc.GetComponent<UIDocument>();
+                    if (dipUI != null)
+                    {
+                        _root  = dipUI.rootVisualElement;
+                        _panel = _root?.Q<VisualElement>("TradeAgreementPanel");
+                    }
+                }
+            }
+
+            if (_panel == null)
+            {
+                UnityEngine.Debug.LogWarning("[TradeAgreementController] TradeAgreementPanel not found in any UIDocument. Ensure it is assigned.");
+                return;
+            }
+
             _activeAgreementsScroll = _panel.Q<ScrollView>("ActiveAgreementsScroll");
             _lblRelationsImpact = _panel.Q<Label>("LblRelationsImpact");
             _lblTreasuryDelta = _panel.Q<Label>("LblTreasuryDelta");
@@ -92,7 +114,7 @@ namespace StateCraft.UI
             _btnReject = _panel.Q<Button>("BtnReject");
 
             _btnPropose.clicked += OnPropose;
-            _btnClose.clicked += Hide;
+            if (_btnClose != null) _btnClose.clicked += Hide;
             _btnAccept.clicked += OnAccept;
             _btnReject.clicked += OnReject;
         }
@@ -118,6 +140,46 @@ namespace StateCraft.UI
                 _dropdownPartner.index = 0;
             }
             
+            UpdateMarketValue();
+            PopulateActiveAgreements();
+        }
+
+        /// <summary>
+        /// Opens the trade panel with a specific partner country pre-selected.
+        /// Used when opening trade from the bilateral detail view.
+        /// </summary>
+        public void ShowWithPartner(string partnerName)
+        {
+            if (_panel == null) return;
+
+            // First reset and open the panel
+            _panel.style.display = DisplayStyle.Flex;
+            _counterOfferArea.style.display = DisplayStyle.None;
+            _currentProposalId = null;
+
+            // Set direction to Export (Sell) as a sensible default
+            if (_dropdownTradeDirection != null)
+            {
+                _dropdownTradeDirection.value = "Export (Sell)";
+                if (_dropdownResource != null) _dropdownResource.style.display = DisplayStyle.Flex;
+                PopulateDropdowns();
+            }
+
+            // Pre-select the partner in the dropdown
+            if (_dropdownPartner != null)
+            {
+                int idx = _dropdownPartner.choices.IndexOf(partnerName);
+                if (idx >= 0)
+                    _dropdownPartner.index = idx;
+                // If the country is not in the list (no Trade Agreement yet), show a helpful message
+                else
+                {
+                    NotificationManager.Instance?.AddNotification(
+                        $"TRADE GATE: Sign a Trade Agreement with {partnerName} first to unlock resource trading.",
+                        Color.yellow);
+                }
+            }
+
             UpdateMarketValue();
             PopulateActiveAgreements();
         }

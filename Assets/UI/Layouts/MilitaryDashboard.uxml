@@ -23,12 +23,12 @@
             </ui:VisualElement>
 
             <ui:VisualElement class="econ-kpi-strip">
-                <ui:VisualElement class="econ-kpi"><ui:Label text="TREASURY" class="econ-kpi-label" /><ui:Label name="HdrTreasury" text="—" class="econ-kpi-value" /><ui:Label name="HdrTreasuryMoM" text="+₦0B" class="econ-kpi-delta positive" /></ui:VisualElement>
-                <ui:VisualElement class="econ-kpi"><ui:Label text="GDP" class="econ-kpi-label" /><ui:Label name="HdrGDP" text="—" class="econ-kpi-value" /><ui:Label name="HdrGDPYoY" text="—" class="econ-kpi-delta positive" /></ui:VisualElement>
-                <ui:VisualElement class="econ-kpi"><ui:Label text="INFLATION" class="econ-kpi-label" /><ui:Label name="HdrInflation" text="—" class="econ-kpi-value" /><ui:Label name="HdrInflationMoM" text="+0.0% MoM" class="econ-kpi-delta negative" /></ui:VisualElement>
-                <ui:VisualElement class="econ-kpi"><ui:Label text="NATIONAL DEBT" class="econ-kpi-label" /><ui:Label name="HdrDebt" text="—" class="econ-kpi-value" /><ui:Label name="HdrDebtGDP" text="Debt / GDP" class="econ-kpi-delta warning" /></ui:VisualElement>
-                <ui:VisualElement class="econ-kpi"><ui:Label text="FX RATE" class="econ-kpi-label" /><ui:Label name="HdrFX" text="—" class="econ-kpi-value" /><ui:Label name="HdrFXChange" text="-₦0" class="econ-kpi-delta negative" /></ui:VisualElement>
-                <ui:VisualElement class="econ-kpi"><ui:Label text="APPROVAL" class="econ-kpi-label" /><ui:Label name="HdrApproval" text="—" class="econ-kpi-value" /><ui:Label name="HdrApprovalChange" text="+0% MoM" class="econ-kpi-delta positive" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="FIREPOWER SCORE" class="econ-kpi-label" /><ui:Label name="HdrMilRank" text="—" class="econ-kpi-value" /><ui:Label name="HdrMilRankSub" text="Global Rating" class="econ-kpi-delta neutral" style="color: rgb(150,150,150);" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="TOTAL PERSONNEL" class="econ-kpi-label" /><ui:Label name="HdrPersonnel" text="—" class="econ-kpi-value" /><ui:Label name="HdrPersonnelDelta" text="Active Duty" class="econ-kpi-delta neutral" style="color: rgb(150,150,150);" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="DEFENCE BUDGET" class="econ-kpi-label" /><ui:Label name="HdrDefBudget" text="—" class="econ-kpi-value" /><ui:Label name="HdrDefBudgetPct" text="% of GDP" class="econ-kpi-delta neutral" style="color: rgb(150,150,150);" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="BASES &amp; FACILITIES" class="econ-kpi-label" /><ui:Label name="HdrBases" text="—" class="econ-kpi-value" /><ui:Label name="HdrBasesSub" text="Across all branches" class="econ-kpi-delta neutral" style="color: rgb(150,150,150);" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="ACTIVE OPERATIONS" class="econ-kpi-label" /><ui:Label name="HdrOperations" text="—" class="econ-kpi-value" /><ui:Label name="HdrOperationsSub" text="Deployed" class="econ-kpi-delta warning" /></ui:VisualElement>
+                <ui:VisualElement class="econ-kpi"><ui:Label text="AVG READINESS" class="econ-kpi-label" /><ui:Label name="HdrReadiness" text="—" class="econ-kpi-value" /><ui:Label name="HdrReadinessSub" text="Combat Ready" class="econ-kpi-delta positive" /></ui:VisualElement>
             </ui:VisualElement>
 
             <ui:VisualElement class="econ-date-box" style="flex-direction: row; align-items: center;">
@@ -44,7 +44,7 @@
         </ui:VisualElement>
 
         <!-- MILITARY SUB-TAB NAVIGATION -->
-        <ui:VisualElement name="SubTabs" style="flex-direction: row; background-color: rgb(10, 14, 20); padding: 0; border-bottom-width: 1px; border-bottom-color: rgba(0, 210, 255, 0.15); width: 100%;">
+        <ui:VisualElement name="SubTabs" style="flex-direction: row; background-color: rgb(10, 14, 20); padding: 0; border-bottom-width: 1px; border-bottom-color: rgba(0, 210, 255, 0.15); width: 100%; margin-top: 15px;">
             <ui:Button name="TabForces"     text="FORCES"      class="nav-button active-tab" style="flex-grow: 1; flex-shrink: 1; flex-basis: 0; padding-left: 5px; padding-right: 5px; height: 36px; font-size: 15px; -unity-font-style: bold; overflow: hidden; text-overflow: ellipsis;" />
             <ui:Button name="TabRecruit"    text="RECRUITMENT" class="nav-button"             style="flex-grow: 1; flex-shrink: 1; flex-basis: 0; padding-left: 5px; padding-right: 5px; height: 36px; font-size: 15px; overflow: hidden; text-overflow: ellipsis;" />
             <ui:Button name="TabWeapons"    text="WEAPONS &amp; EQUIPMENT"     class="nav-button"             style="flex-grow: 1; flex-shrink: 1; flex-basis: 0; padding-left: 5px; padding-right: 5px; height: 36px; font-size: 15px; overflow: hidden; text-overflow: ellipsis;" />
@@ -70,7 +70,7 @@
             <ui:Instance template="Template_Bases" name="PanelBasesInstance" />
 
             <!-- 5. OPERATIONS TAB -->
-            <ui:Instance template="Template_Operations" name="PanelOperationsInstance" />
+            <ui:Instance template="Template_Operations" name="PanelOperationsInstance" style="display: none; flex-grow: 1; height: 100%;" />
 
             <!-- 6. LOGISTICS TAB -->
             <ui:Instance template="Template_Logistics" name="PanelLogisticsInstance" />

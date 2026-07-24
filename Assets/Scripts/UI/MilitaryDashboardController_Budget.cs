@@ -19,13 +19,31 @@ namespace StateCraft.UI
             string sym = string.IsNullOrEmpty(country.currencySymbol) ? "₦" : country.currencySymbol;
             float exc = country.exchangeRate;
 
-            // 1. Calculate Base Values
-            float armyUpkeepLocal = ((country.unitInfantry * 0.000002f) + (country.unitTanks * 0.00003f) + (country.unitAPCs * 0.00001f) + (country.unitArtillery * 0.000015f)) * exc;
-            float airUpkeepLocal = ((country.airForceStats.personnel * 0.000006f) + (country.unitFighters * 0.00015f) + (country.unitBombers * 0.00028f) + (country.unitAttackHelis * 0.00008f) + (country.unitUAVs * 0.00002f)) * exc;
-            float navyUpkeepLocal = ((country.navyStats.personnel * 0.000005f) + (country.unitFrigates * 0.0004f) + (country.unitDestroyers * 0.0008f) + (country.unitSubmarines * 0.001f) + (country.unitPatrolBoats * 0.00004f)) * exc;
-            float rdfUpkeepLocal = ((country.rdfStats.personnel * 0.00001f) + (country.rdfStats.equipment * 0.00005f)) * exc;
+            // 1. Calculate Base Values based directly on CountryDataSO.CalculateMilitaryUpkeep() logic
+            float armyUpkeepLocal = ((country.unitInfantry * 0.0000020f) + (country.unitRifles * 0.0000002f) + (country.unitTanks * 0.000030f) + (country.unitAPCs * 0.000010f) + (country.unitArtillery * 0.000015f)) * exc;
+            float airUpkeepLocal = ((country.airForceStats.personnel * 0.000006f) + (country.unitFighters * 0.000150f) + (country.unitBombers * 0.000280f) + (country.unitAttackHelis * 0.000080f) + (country.unitUAVs * 0.000020f)) * exc;
+            float navyUpkeepLocal = ((country.navyStats.personnel * 0.000005f) + (country.unitFrigates * 0.000400f) + (country.unitDestroyers * 0.000800f) + (country.unitSubmarines * 0.001000f) + (country.unitPatrolBoats * 0.000040f)) * exc;
+            float rdfUpkeepLocal = ((country.rdfStats.personnel * 0.000010f) + (country.rdfStats.equipment * 0.000050f)) * exc;
+            
+            float baseUpkeepLocal = (country.militaryBases != null ? country.militaryBases.Count * 0.005000f : 0f) * exc;
+            float totalStandingActual = armyUpkeepLocal + airUpkeepLocal + navyUpkeepLocal + rdfUpkeepLocal + baseUpkeepLocal;
 
-            float totalActual = armyUpkeepLocal + airUpkeepLocal + navyUpkeepLocal + rdfUpkeepLocal;
+            float operationsCostLocal = 0f;
+            if (country.activeOperations != null) {
+                foreach (var op in country.activeOperations) operationsCostLocal += (op.costPerMonth / 1000f) * exc;
+            }
+
+            float procurementCostLocal = 0f;
+            if (country.activeContracts != null) {
+                foreach (var pc in country.activeContracts) procurementCostLocal += pc.monthlyCostB * exc;
+            }
+
+            float supplyContractsCostLocal = 0f;
+            if (country.activeSupplyContracts != null) {
+                foreach (var sc in country.activeSupplyContracts) supplyContractsCostLocal += sc.costPerTurn * exc;
+            }
+
+            float totalActual = totalStandingActual + operationsCostLocal + procurementCostLocal + supplyContractsCostLocal;
             
             // Use the exact allocation formula from the Economy Tab
             float totalBudget = Mathf.Max(1f, country.income * (country.budgetMilitaryShare / 100f) * exc);
@@ -55,8 +73,10 @@ namespace StateCraft.UI
             if (kpiAvail != null)
             {
                 kpiAvail.Clear();
+                Color availColor = available >= 0 ? new Color(0.14f, 0.93f, 0.34f) : new Color(1f, 0.3f, 0.3f);
+                string availStr = available >= 0 ? UiFormat.Money(available, sym) : UiFormat.MoneySigned(available, sym);
                 kpiAvail.Add(new Label("AVAILABLE") { style = { color = Color.grey, fontSize = 9, marginBottom = 4 } });
-                kpiAvail.Add(new Label(UiFormat.Money(available, sym)) { style = { color = new Color(0.14f, 0.93f, 0.34f), fontSize = 16, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 2 } });
+                kpiAvail.Add(new Label(availStr) { style = { color = availColor, fontSize = 16, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 2 } });
             }
 
             var kpiUtil = _panelBudget.Q<VisualElement>("KpiUtilization");
@@ -64,9 +84,12 @@ namespace StateCraft.UI
             {
                 kpiUtil.Clear();
                 kpiUtil.Add(new Label("BUDGET UTILIZATION") { style = { color = Color.grey, fontSize = 9, marginBottom = 6 } });
-                kpiUtil.Add(new Label($"{(pctUtil * 100f):F0}%") { style = { color = Color.white, fontSize = 16, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 6 } });
+                
+                Color utilColor = pctUtil > 1.0f ? new Color(1f, 0.3f, 0.3f) : new Color(0.14f, 0.93f, 0.34f);
+                kpiUtil.Add(new Label($"{(pctUtil * 100f):F0}%") { style = { color = utilColor, fontSize = 16, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 6 } });
+                
                 var barBg = new VisualElement() { style = { height = 4, backgroundColor = new Color(1,1,1,0.1f), width = Length.Percent(100) } };
-                var barFill = new VisualElement() { style = { height = 4, backgroundColor = new Color(0.14f, 0.93f, 0.34f), width = Length.Percent(pctUtil * 100f) } };
+                var barFill = new VisualElement() { style = { height = 4, backgroundColor = utilColor, width = Length.Percent(Mathf.Min(pctUtil * 100f, 100f)) } };
                 barBg.Add(barFill);
                 kpiUtil.Add(barBg);
             }
@@ -75,8 +98,9 @@ namespace StateCraft.UI
             if (kpiGDP != null)
             {
                 kpiGDP.Clear();
+                float pctGdp = country.gdp > 0 ? ((country.income * (country.budgetMilitaryShare / 100f) * 12f) / country.gdp) * 100f : 0f;
                 kpiGDP.Add(new Label("DEFENCE BUDGET (% OF GDP)") { style = { color = Color.grey, fontSize = 9, marginBottom = 4 } });
-                kpiGDP.Add(new Label("2.1%") { style = { color = Color.white, fontSize = 16, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 2 } });
+                kpiGDP.Add(new Label($"{pctGdp:F1}%") { style = { color = Color.white, fontSize = 16, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 2 } });
                 kpiGDP.Add(new Label("Target: 2.0%") { style = { color = Color.grey, fontSize = 9 } });
             }
 
@@ -153,22 +177,43 @@ namespace StateCraft.UI
             if (health != null)
             {
                 health.Clear();
-                var dContainer = new VisualElement() { style = { width = 80, height = 80, justifyContent = Justify.Center, alignItems = Align.Center, borderTopWidth = 6, borderBottomWidth = 6, borderLeftWidth = 6, borderRightWidth = 6, borderTopLeftRadius = 40, borderTopRightRadius = 40, borderBottomLeftRadius = 40, borderBottomRightRadius = 40, borderTopColor = new Color(0.14f, 0.93f, 0.34f), borderBottomColor = new Color(0.14f, 0.93f, 0.34f), borderLeftColor = new Color(0.14f, 0.93f, 0.34f), borderRightColor = new Color(1,1,1,0.1f), marginBottom = 15 } };
-                dContainer.Add(new Label("78%") { style = { color = Color.white, fontSize = 18, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = -2 } });
-                dContainer.Add(new Label("GOOD") { style = { color = new Color(0.14f, 0.93f, 0.34f), fontSize = 9 } });
+
+                // Derive health score from budget utilization
+                float healthPct = Mathf.Clamp((1f - pctUtil) * 100f + 50f, 0f, 100f);
+                // Map to label
+                string healthLabel;
+                Color ringColor;
+                if      (pctUtil <= 0.70f) { healthLabel = "EXCELLENT"; ringColor = new Color(0.14f, 0.93f, 0.34f); }
+                else if (pctUtil <= 0.90f) { healthLabel = "GOOD";      ringColor = new Color(0.14f, 0.93f, 0.34f); }
+                else if (pctUtil <= 1.00f) { healthLabel = "FAIR";      ringColor = new Color(1f, 0.7f, 0f); }
+                else                       { healthLabel = "CRITICAL";   ringColor = new Color(1f, 0.3f, 0.3f); }
+
+                // Donut ring (approximated with border)
+                float displayPct = Mathf.Clamp(pctUtil * 100f, 0f, 100f);
+                var dContainer = new VisualElement() { style = {
+                    width = 80, height = 80, justifyContent = Justify.Center, alignItems = Align.Center,
+                    borderTopWidth = 6, borderBottomWidth = 6, borderLeftWidth = 6, borderRightWidth = 6,
+                    borderTopLeftRadius = 40, borderTopRightRadius = 40, borderBottomLeftRadius = 40, borderBottomRightRadius = 40,
+                    borderTopColor = ringColor, borderBottomColor = ringColor,
+                    borderLeftColor = ringColor, borderRightColor = new Color(1,1,1,0.1f),
+                    marginBottom = 15
+                }};
+                dContainer.Add(new Label($"{displayPct:F0}%") { style = { color = Color.white, fontSize = 18, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = -2 } });
+                dContainer.Add(new Label(healthLabel) { style = { color = ringColor, fontSize = 9 } });
                 health.Add(dContainer);
                 
                 var r = new VisualElement() { style = { flexDirection = FlexDirection.Row, width = Length.Percent(100), justifyContent = Justify.SpaceAround } };
                 var r1 = new VisualElement() { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
                 r1.Add(new Label("Sustainable") { style = { color = Color.grey, fontSize = 8, marginRight = 4 } });
-                r1.Add(new VisualElement() { style = { width = 6, height = 6, backgroundColor = new Color(0.14f, 0.93f, 0.34f), borderTopLeftRadius = 3, borderTopRightRadius = 3, borderBottomLeftRadius = 3, borderBottomRightRadius = 3 } });
+                r1.Add(new VisualElement() { style = { width = 6, height = 6, backgroundColor = ringColor, borderTopLeftRadius = 3, borderTopRightRadius = 3, borderBottomLeftRadius = 3, borderBottomRightRadius = 3 } });
                 
                 var r2 = new VisualElement() { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
                 r2.Add(new Label("Stable") { style = { color = Color.grey, fontSize = 8, marginRight = 4 } });
-                r2.Add(new VisualElement() { style = { width = 6, height = 6, backgroundColor = new Color(0.14f, 0.93f, 0.34f), borderTopLeftRadius = 3, borderTopRightRadius = 3, borderBottomLeftRadius = 3, borderBottomRightRadius = 3 } });
+                r2.Add(new VisualElement() { style = { width = 6, height = 6, backgroundColor = ringColor, borderTopLeftRadius = 3, borderTopRightRadius = 3, borderBottomLeftRadius = 3, borderBottomRightRadius = 3 } });
                 r.Add(r1); r.Add(r2);
                 health.Add(r);
             }
+
 
             // -- BOTTOM ROW: EXPENSES LIST --
             var expensesList = _panelBudget.Q<VisualElement>("ExpensesScroll");
@@ -183,29 +228,30 @@ namespace StateCraft.UI
                     left.Add(new Label(n) { style = { color = Color.white, fontSize = 10, width = 140, paddingTop = 0, paddingBottom = 0, marginTop = 0, marginBottom = 0 } });
                     r.Add(left);
                     
-                    var right = new VisualElement() { style = { flexDirection = FlexDirection.Row, width = 130, justifyContent = Justify.SpaceBetween, alignItems = Align.Center } };
-                    right.Add(new Label(UiFormat.Money(amt, sym)) { style = { color = Color.white, fontSize = 10, width = 50, unityFontStyleAndWeight = FontStyle.Bold } });
+                    var right = new VisualElement() { style = { flexDirection = FlexDirection.Row, width = 220, justifyContent = Justify.SpaceBetween, alignItems = Align.Center } };
+                    right.Add(new Label(UiFormat.Money(amt, sym)) { style = { color = Color.white, fontSize = 10, width = 60, unityFontStyleAndWeight = FontStyle.Bold } });
                     
                     float pct = (amt / totalActual) * 100f;
-                    var pctBlock = new VisualElement() { style = { flexDirection = FlexDirection.Row, width = 60, alignItems = Align.Center } };
-                    pctBlock.Add(new Label($"{pct:F1}%") { style = { color = Color.white, fontSize = 9, width = 25, marginRight = 4 } });
-                    pctBlock.Add(new VisualElement() { style = { height = 4, width = 25, backgroundColor = new Color(0.14f, 0.93f, 0.34f) } });
+                    var pctBlock = new VisualElement() { style = { flexDirection = FlexDirection.Row, width = 80, alignItems = Align.Center } };
+                    pctBlock.Add(new Label($"{pct:F1}%") { style = { color = Color.white, fontSize = 9, width = 35, marginRight = 4, unityTextAlign = TextAnchor.MiddleRight } });
+                    pctBlock.Add(new VisualElement() { style = { height = 4, width = 35, backgroundColor = new Color(0.14f, 0.93f, 0.34f) } });
                     right.Add(pctBlock);
                     
-                    right.Add(new Label(trend) { style = { color = trendCol, fontSize = 9, width = 30, unityTextAlign = TextAnchor.MiddleRight } });
+                    right.Add(new Label(trend) { style = { color = trendCol, fontSize = 9, width = 40, unityTextAlign = TextAnchor.MiddleRight } });
                     r.Add(right);
                     expensesList.Add(r);
                 }
 
-                AddExpense("Personnel Salaries", totalActual * 0.34f, "↑ 2.1%", new Color(0.14f, 0.93f, 0.34f), 34);
-                AddExpense("Base Maintenance", totalActual * 0.10f, "↑ 1.3%", new Color(0.14f, 0.93f, 0.34f), 10);
-                AddExpense("Fuel Consumption", totalActual * 0.11f, "↓ -0.8%", new Color(255/255f, 82/255f, 82/255f), 11);
-                AddExpense("Aircraft Maintenance", totalActual * 0.07f, "↑ 3.4%", new Color(0.14f, 0.93f, 0.34f), 7);
-                AddExpense("Fleet Maintenance", totalActual * 0.07f, "↑ 1.7%", new Color(0.14f, 0.93f, 0.34f), 7);
-                AddExpense("Training", totalActual * 0.05f, "↑ 0.6%", new Color(0.14f, 0.93f, 0.34f), 5);
-                AddExpense("Research & Development", totalActual * 0.03f, "↑ 2.0%", new Color(0.14f, 0.93f, 0.34f), 3);
-                AddExpense("Operations (Active)", totalActual * 0.19f, "↑ 5.3%", new Color(0.14f, 0.93f, 0.34f), 19);
-                AddExpense("Reserve Fund", totalActual * 0.02f, "— 0.0%", Color.grey, 2);
+                float personnelCost = (country.unitInfantry * 0.0000020f + country.airForceStats.personnel * 0.000006f + country.navyStats.personnel * 0.000005f + country.rdfStats.personnel * 0.000010f) * exc;
+                float equipmentCost = totalStandingActual - personnelCost;
+                
+                AddExpense("Personnel Salaries", personnelCost, "—", Color.grey, personnelCost / totalActual * 100f);
+                AddExpense("Equipment & Maintenance", equipmentCost, "—", Color.grey, equipmentCost / totalActual * 100f);
+                
+                if (baseUpkeepLocal > 0) AddExpense("Base Maintenance", baseUpkeepLocal, "—", Color.grey, baseUpkeepLocal / totalActual * 100f);
+                if (supplyContractsCostLocal > 0) AddExpense("Supply Contracts", supplyContractsCostLocal, "—", Color.grey, supplyContractsCostLocal / totalActual * 100f);
+                if (operationsCostLocal > 0) AddExpense("Active Operations", operationsCostLocal, "—", Color.grey, operationsCostLocal / totalActual * 100f);
+                if (procurementCostLocal > 0) AddExpense("Procurement", procurementCostLocal, "—", Color.grey, procurementCostLocal / totalActual * 100f);
             }
             var tExpFooter = _panelBudget.Q<VisualElement>("TotalExpensesFooter");
             if (tExpFooter != null)
@@ -222,27 +268,36 @@ namespace StateCraft.UI
             if (opsScroll != null)
             {
                 opsScroll.Clear();
-                void AddOpCost(string n, string cost, string s, Color c)
+                void AddOpCost(string n, string costStr, string s, Color c)
                 {
                     var r = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, marginBottom = 8 } };
                     var left = new VisualElement();
                     left.Add(new Label(n) { style = { color = Color.white, fontSize = 10, marginBottom = 2 } });
-                    left.Add(new Label($"{sym}{cost}M / day") { style = { color = Color.grey, fontSize = 9 } });
+                    left.Add(new Label(costStr) { style = { color = Color.grey, fontSize = 9 } });
                     r.Add(left);
                     r.Add(new Label(s) { style = { color = c, fontSize = 9 } });
                     opsScroll.Add(r);
                 }
-                AddOpCost("Operation Lagos Shield", "420", "Active", new Color(0.14f, 0.93f, 0.34f));
-                AddOpCost("Delta Sea Watch", "180", "Planning", new Color(0.1f, 0.5f, 0.9f));
-                AddOpCost("Northern Corridor Security", "260", "Active", new Color(0.14f, 0.93f, 0.34f));
+                if (country.activeOperations != null && country.activeOperations.Count > 0)
+                {
+                    foreach (var op in country.activeOperations)
+                    {
+                        Color statusColor = op.status == "Active" ? new Color(0.14f, 0.93f, 0.34f) : new Color(0.1f, 0.5f, 0.9f);
+                        AddOpCost(op.opName, UiFormat.Money((op.costPerMonth / 1000f) * exc, sym) + " / month", op.status, statusColor);
+                    }
+                }
+                else
+                {
+                    opsScroll.Add(new Label("No Active Operations") { style = { color = Color.grey, fontSize = 10, marginTop = 10, unityTextAlign = TextAnchor.MiddleCenter } });
+                }
             }
             var tOpsFooter = _panelBudget.Q<VisualElement>("ActiveOpsFooter");
             if (tOpsFooter != null)
             {
                 tOpsFooter.Clear();
                 var r = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween } };
-                r.Add(new Label("TOTAL DAILY COST") { style = { color = new Color(0.14f, 0.93f, 0.34f), fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
-                r.Add(new Label($"{sym}860M") { style = { color = new Color(0.14f, 0.93f, 0.34f), fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
+                r.Add(new Label("TOTAL MONTHLY COST") { style = { color = new Color(0.14f, 0.93f, 0.34f), fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
+                r.Add(new Label($"{UiFormat.Money(operationsCostLocal, sym)}") { style = { color = new Color(0.14f, 0.93f, 0.34f), fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
                 tOpsFooter.Add(r);
             }
 
@@ -257,9 +312,12 @@ namespace StateCraft.UI
                     r.Add(new Label(v) { style = { color = c, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
                     forecast.Add(r);
                 }
-                AddFcst("Expected Income", UiFormat.Money(totalBudget, sym), new Color(0.14f, 0.93f, 0.34f));
-                AddFcst("Expected Spending", UiFormat.Money(totalActual * 1.1f, sym), new Color(255/255f, 82/255f, 82/255f));
-                AddFcst("Projected Surplus", UiFormat.Money(totalBudget - (totalActual * 1.1f), sym), new Color(0.14f, 0.93f, 0.34f));
+                float projectedSurplus = totalBudget - totalActual;
+                Color surplusColor = projectedSurplus >= 0 ? new Color(0.14f, 0.93f, 0.34f) : new Color(255/255f, 82/255f, 82/255f);
+                
+                AddFcst("Expected Income", UiFormat.Money(totalBudget, sym), Color.white);
+                AddFcst("Expected Spending", UiFormat.Money(totalActual, sym), Color.white);
+                AddFcst("Projected Surplus", UiFormat.MoneySigned(projectedSurplus, sym), surplusColor);
                 AddFcst("Forecast Confidence", "High", new Color(0.14f, 0.93f, 0.34f));
             }
 
@@ -279,17 +337,25 @@ namespace StateCraft.UI
                     r.Add(new Label(d) { style = { color = new Color(0.14f, 0.93f, 0.34f), fontSize = 8, width = 60, unityTextAlign = TextAnchor.MiddleRight } });
                     cmtScroll.Add(r);
                 }
-                AddCmt("20 APCs", "4.2B", "15 Days");
-                AddCmt("2 Patrol Boats", "8.7B", "48 Days");
-                AddCmt("12 Attack Helicopters", "15B", "93 Days");
+                if (country.activeContracts != null && country.activeContracts.Count > 0)
+                {
+                    foreach (var pc in country.activeContracts)
+                    {
+                        AddCmt($"{pc.quantity} {pc.unitLabel}", UiFormat.Money(pc.monthlyCostB * exc, sym), $"{pc.monthsRemaining} Mo");
+                    }
+                }
+                else
+                {
+                    cmtScroll.Add(new Label("No Active Procurement") { style = { color = Color.grey, fontSize = 10, marginTop = 10, unityTextAlign = TextAnchor.MiddleCenter } });
+                }
             }
             var tCmtFooter = _panelBudget.Q<VisualElement>("CommitmentsFooter");
             if (tCmtFooter != null)
             {
                 tCmtFooter.Clear();
                 var r = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween } };
-                r.Add(new Label("TOTAL COMMITTED") { style = { color = new Color(0.9f, 0.6f, 0f), fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
-                r.Add(new Label($"{sym}27.9B") { style = { color = new Color(0.9f, 0.6f, 0f), fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
+                r.Add(new Label("TOTAL COMMITTED (MONTHLY)") { style = { color = new Color(0.9f, 0.6f, 0f), fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
+                r.Add(new Label($"{UiFormat.Money(procurementCostLocal, sym)}") { style = { color = new Color(0.9f, 0.6f, 0f), fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
                 tCmtFooter.Add(r);
             }
         }

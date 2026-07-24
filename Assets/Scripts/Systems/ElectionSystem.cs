@@ -123,32 +123,60 @@ namespace StateCraft.Systems
             country.stability       = Mathf.Min(100f, country.stability + 8f);
             country.globalPrestige  = Mathf.Min(100f, country.globalPrestige + 5f);
 
+            // Simulate realistic vote numbers
+            float playerVoteShare = Mathf.Clamp(approval + UnityEngine.Random.Range(-3f, 3f), 50.1f, 99.9f);
+            float oppVoteShare = 100f - playerVoteShare;
+            
+            long eligibleVoters = (long)(country.population * 0.75f);
+            float turnoutPct = UnityEngine.Random.Range(0.55f, 0.85f);
+            long totalVotes = (long)(eligibleVoters * turnoutPct);
+            long playerVotes = (long)(totalVotes * (playerVoteShare / 100f));
+            long oppVotes = totalVotes - playerVotes;
+
             NewsSystem.Instance?.PublishNews(
                 $"ELECTION RESULT: Incumbent government wins re-election in {country.countryName} " +
-                $"with {approval:F0}% approval. Mandate renewed.");
+                $"with {playerVoteShare:F1}% of the vote. Mandate renewed.");
 
             if (!isPlayer) return;
 
-            string margin = approval >= 70f ? "LANDSLIDE VICTORY" :
-                            approval >= 60f ? "CONVINCING WIN" :
-                            approval >= 55f ? "COMFORTABLE MAJORITY" : "NARROW VICTORY";
+            string margin = playerVoteShare >= 65f ? "LANDSLIDE VICTORY" :
+                            playerVoteShare >= 55f ? "CONVINCING WIN" :
+                            playerVoteShare >= 51f ? "COMFORTABLE MAJORITY" : "NARROW VICTORY";
 
-            // Show as critical dispatch so player sees it immediately
-            InboxSystem.Instance?.SendMessage(country,
-                "ELECTORAL COMMISSION",
-                $"🗳 {margin} — RE-ELECTED AS PRESIDENT",
-                $"FINAL ELECTION RESULTS — {electionType}\n\n" +
-                $"APPROVAL RATING: {approval:F0}%\n" +
-                $"RESULT: {margin}\n\n" +
+            string electionSummary = $"FINAL ELECTION RESULTS — {electionType}\n\n" +
+                $"TOTAL VOTES CAST: {totalVotes:N0} (Turnout: {turnoutPct * 100:F1}%)\n\n" +
+                $"INCUMBENT PARTY: {playerVoteShare:F1}% ({playerVotes:N0})\n" +
+                $"OPPOSITION PARTY: {oppVoteShare:F1}% ({oppVotes:N0})\n\n" +
                 $"The people have spoken. Your mandate has been renewed.\n\n" +
                 $"KEY FACTORS IN YOUR VICTORY:\n" +
                 BuildWinFactors(country, approval) +
                 $"\n\nYour next election is in {ElectionIntervalMonths} months.\n" +
-                $"Stability +8%, Prestige +5% from electoral mandate.",
-                "Critical");
+                $"Stability +8%, Prestige +5% from electoral mandate.";
+                
+            country.latestElectionResult = $"🗳 {margin} — RE-ELECTED AS PRESIDENT\n\n" + electionSummary;
+
+            InboxSystem.Instance?.SendMessage(country,
+                "NATIONAL ELECTORAL COMMISSION",
+                "🗳 ELECTION VICTORY — ANOTHER TERM SECURED",
+                $"Mr. President,\n\nThe electoral commission has certified the final results. You have secured another term in office with a {margin.ToLower()}.\n\n" + electionSummary,
+                "Important");
+
+            if (CriticalDispatchController.Instance != null)
+            {
+                CriticalDispatchController.Instance.ShowDispatch(
+                    "NATIONAL ELECTORAL COMMISSION",
+                    "🗳 ELECTION VICTORY",
+                    $"Mr. President,\n\nThe electoral commission has certified the final results. You have secured another term in office with a {margin.ToLower()}.\n\n" + electionSummary,
+                    new Color(0.2f, 0.85f, 0.4f)); // Green for victory
+            }
+
+            // Pause the game and open the event dashboard
+            if (GameManager.Instance != null) GameManager.Instance.isRealTime = false;
+            var eventDash = UnityEngine.Object.FindObjectOfType<EventDashboardController>();
+            if (eventDash != null) eventDash.Show();
 
             NotificationManager.Instance?.AddNotification(
-                $"🗳 ELECTION WON: {margin} — Approval {approval:F0}%. " +
+                $"🗳 ELECTION WON: {margin} — {playerVoteShare:F1}% of vote. " +
                 $"Next election in {ElectionIntervalMonths} months.",
                 new Color(0.2f, 0.9f, 0.45f));
         }
@@ -164,31 +192,41 @@ namespace StateCraft.Systems
             country.taxRate      = Mathf.Lerp(country.taxRate, 22f, 0.3f);
             country.subsidyLevel = Mathf.Lerp(country.subsidyLevel, 30f, 0.3f);
 
+            // Simulate realistic vote numbers
+            float playerVoteShare = Mathf.Clamp(approval + UnityEngine.Random.Range(-3f, 3f), 0.1f, 49.9f);
+            float oppVoteShare = 100f - playerVoteShare;
+            
+            long eligibleVoters = (long)(country.population * 0.75f);
+            float turnoutPct = UnityEngine.Random.Range(0.55f, 0.85f);
+            long totalVotes = (long)(eligibleVoters * turnoutPct);
+            long playerVotes = (long)(totalVotes * (playerVoteShare / 100f));
+            long oppVotes = totalVotes - playerVotes;
+
             NewsSystem.Instance?.PublishNews(
-                $"ELECTION RESULT: Opposition wins in {country.countryName}. " +
-                $"Incumbent approval was {approval:F0}%. Power transfer begins.");
+                $"ELECTION RESULT: Opposition wins in {country.countryName} with {oppVoteShare:F1}% of the vote. " +
+                $"Power transfer begins.");
 
             if (!isPlayer) return;
 
-            // ── GAME OVER — player is voted out ──
-            // Show the critical dispatch first, then trigger game over screen
-            InboxSystem.Instance?.SendMessage(country,
-                "ELECTORAL COMMISSION",
-                "🗳 ELECTORAL DEFEAT — YOUR PRESIDENCY HAS ENDED",
-                $"FINAL ELECTION RESULTS — {electionType}\n\n" +
-                $"APPROVAL RATING: {approval:F0}%\n" +
+            string stats = $"• Final Approval: {approval:F1}%\n" +
+                           $"• Opponent Votes: {oppVotes:N0}\n" +
+                           $"• Player Votes: {playerVotes:N0}";
+
+            string electionSummary = $"FINAL ELECTION RESULTS — {electionType}\n\n" +
+                $"TOTAL VOTES CAST: {totalVotes:N0} (Turnout: {turnoutPct * 100:F1}%)\n\n" +
+                $"OPPOSITION PARTY: {oppVoteShare:F1}% ({oppVotes:N0})\n" +
+                $"INCUMBENT PARTY: {playerVoteShare:F1}% ({playerVotes:N0})\n\n" +
                 $"RESULT: DEFEATED\n\n" +
                 $"The people have voted. Your government has lost its mandate.\n\n" +
                 $"KEY REASONS FOR DEFEAT:\n" +
                 BuildLossReasons(country, approval) +
                 $"\n\nThe opposition party will form a new government.\n" +
-                $"Your presidency ends after {currentMonth} months in office.\n\n" +
-                $"Press ACKNOWLEDGE to view your final legacy report.",
-                "Critical");
+                $"Your presidency ends after {currentMonth} months in office.";
 
-            // Trigger game over after a short delay
-            // UIStateManager handles the actual game over screen
-            GameManager.Instance?.StartCoroutine(TriggerGameOver(country, approval, currentMonth));
+            country.latestElectionResult = $"🗳 ELECTORAL DEFEAT — YOUR PRESIDENCY HAS ENDED\n\n" + electionSummary;
+
+            var gm = GameManager.Instance;
+            if (gm != null) gm.TriggerGameOver(false, "VOTED OUT", electionSummary, stats);
         }
 
         // ─────────────────────────────────────────────────────────
@@ -237,18 +275,24 @@ namespace StateCraft.Systems
         private System.Collections.IEnumerator TriggerGameOver(CountryDataSO country,
             float approval, int monthsInOffice, bool isCoup = false)
         {
-            // Wait for the Critical dispatch to be acknowledged
-            yield return new UnityEngine.WaitForSeconds(0.5f);
-
-            // Wait until the dispatch queue is empty
-            float waitTime = 0f;
-            while (CriticalDispatchController.Instance != null &&
-                   waitTime < 30f) // max 30 seconds wait
+            if (!isCoup)
             {
-                waitTime += UnityEngine.Time.deltaTime;
-                yield return null;
-                // Check if modal is still showing
-                // Once acknowledged, UIStateManager will handle it
+                // For elections, wait until the player acknowledges the result on the Event Dashboard
+                while (!string.IsNullOrEmpty(country.latestElectionResult))
+                {
+                    yield return null;
+                }
+            }
+            else
+            {
+                // For coups, wait for the critical dispatch to be acknowledged
+                yield return new UnityEngine.WaitForSeconds(0.5f);
+                float waitTime = 0f;
+                while (CriticalDispatchController.Instance != null && waitTime < 30f)
+                {
+                    waitTime += UnityEngine.Time.deltaTime;
+                    yield return null;
+                }
             }
 
             yield return new UnityEngine.WaitForSeconds(1f);

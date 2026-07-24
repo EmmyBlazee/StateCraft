@@ -355,22 +355,55 @@ namespace StateCraft.UI
             for (int i = 0; i < count; i++)
             {
                 var line = lines[i];
-                var row = new VisualElement();
-                row.AddToClassList("live-feed-row");
 
-                var tag = new Label(line.Tag.ToUpper())
+                // Outer row — horizontal, with a bottom border separator
+                var row = new VisualElement
+                {
+                    style =
+                    {
+                        flexDirection = FlexDirection.Row,
+                        alignItems = Align.FlexStart,
+                        paddingTop = 7,
+                        paddingBottom = 7,
+                        borderBottomWidth = 1,
+                        borderBottomColor = new Color(1f, 1f, 1f, 0.06f),
+                    }
+                };
+
+                // Coloured tag pill — fixed width so it never bleeds into the message
+                var tagPill = new VisualElement
+                {
+                    style =
+                    {
+                        width = 52,
+                        minWidth = 52,
+                        flexShrink = 0,
+                        backgroundColor = new Color(line.Color.r, line.Color.g, line.Color.b, 0.12f),
+                        borderTopLeftRadius = 3,
+                        borderTopRightRadius = 3,
+                        borderBottomLeftRadius = 3,
+                        borderBottomRightRadius = 3,
+                        paddingLeft = 4,
+                        paddingRight = 4,
+                        paddingTop = 2,
+                        paddingBottom = 2,
+                        marginRight = 10,
+                        marginTop = 1,
+                    }
+                };
+                tagPill.Add(new Label(line.Tag.ToUpper())
                 {
                     style =
                     {
                         color = line.Color,
                         fontSize = 8,
                         unityFontStyleAndWeight = FontStyle.Bold,
-                        minWidth = 42,
-                        marginRight = 6
+                        unityTextAlign = TextAnchor.MiddleCenter,
                     }
-                };
-                row.Add(tag);
+                });
+                row.Add(tagPill);
 
+                // Message — takes up remaining space and wraps naturally
                 var msg = new Label(line.Message)
                 {
                     style =
@@ -378,7 +411,9 @@ namespace StateCraft.UI
                         color = new Color(0.85f, 0.85f, 0.88f),
                         fontSize = 9,
                         whiteSpace = WhiteSpace.Normal,
-                        flexGrow = 1
+                        flexGrow = 1,
+                        flexShrink = 1,
+                        overflow = Overflow.Hidden,
                     }
                 };
                 row.Add(msg);

@@ -264,7 +264,7 @@ namespace StateCraft.UI
                     var barSegment = new VisualElement(); barSegment.style.flexGrow = pct; barSegment.style.backgroundColor = new StyleColor(HexToColor(color)); barSegment.style.height = Length.Percent(100f);
                     stackedBar.Add(barSegment);
                     var legRow = new VisualElement(); legRow.style.flexDirection = FlexDirection.Row; legRow.style.marginBottom = 3; legRow.style.alignItems = Align.Center;
-                    var dot = new Label("?"); dot.style.color = new StyleColor(HexToColor(color)); dot.style.marginRight = 5; dot.style.fontSize = 10;
+                    var dot = new Label("●"); dot.style.color = new StyleColor(HexToColor(color)); dot.style.marginRight = 5; dot.style.fontSize = 10;
                     var nameLabel = new Label(alloc.title); nameLabel.style.color = new StyleColor(HexToColor(color)); nameLabel.style.flexGrow = 1; nameLabel.style.fontSize = 11;
                     var pctLabel = new Label(""+pct.ToString("F0")+"%"); pctLabel.style.color = new StyleColor(UnityEngine.Color.white); pctLabel.style.marginRight = 4; pctLabel.style.fontSize = 11;
                     var amtLabel = new Label("(" + UiFormat.Money(baseTotalB * pct / 100f, sym) + ")"); amtLabel.style.color = new StyleColor(new UnityEngine.Color(0.7f, 0.7f, 0.7f)); amtLabel.style.fontSize = 10;
@@ -279,14 +279,69 @@ namespace StateCraft.UI
 
             // 18. Budget Trend Chart
             if (bp.Q<Label>("BudgetTrendChart") is Label lChart && country.budgetHistory != null) {
-                var sb = new System.Text.StringBuilder();
-                sb.AppendLine("Net Balance Trend (Last 6 Months)");
-                foreach(float histB in country.budgetHistory) {
-                    string symbol = histB >= 0 ? "+" : "-";
-                    sb.AppendLine($"{symbol} {UiFormat.Money(histB * country.exchangeRate, sym)}");
+                lChart.text = ""; // Clear text
+                lChart.Clear();
+                lChart.style.flexDirection = FlexDirection.Row;
+                lChart.style.alignItems = Align.FlexEnd;
+                lChart.style.justifyContent = Justify.SpaceBetween;
+                lChart.style.height = 70;
+                lChart.style.paddingTop = 15;
+
+                // For testing/visuals, if history is completely empty, let's inject a few zero-bars so the chart structure is visible
+                var hist = country.budgetHistory;
+                
+                float maxVal = 0.1f;
+                foreach(float v in hist) { if (Mathf.Abs(v) > maxVal) maxVal = Mathf.Abs(v); }
+
+                for (int i = 0; i < 6; i++) {
+                    float val = 0f;
+                    bool hasData = false;
+                    
+                    if (hist.Count > 0) {
+                        int offset = 6 - hist.Count;
+                        if (i >= offset) {
+                            val = hist[i - offset];
+                            hasData = true;
+                        }
+                    }
+
+                    var barCont = new VisualElement();
+                    barCont.style.width = Length.Percent(14f);
+                    barCont.style.height = Length.Percent(100f);
+                    barCont.style.justifyContent = Justify.FlexEnd;
+                    barCont.style.alignItems = Align.Center;
+
+                    // The actual bar
+                    var bar = new VisualElement();
+                    bar.style.width = Length.Percent(100f);
+                    
+                    if (!hasData) {
+                        bar.style.height = 4;
+                        bar.style.backgroundColor = new StyleColor(new Color(0.3f, 0.3f, 0.3f, 0.5f)); // Empty placeholder
+                    } else {
+                        float pct = Mathf.Clamp01(Mathf.Abs(val) / maxVal);
+                        bar.style.height = Length.Percent(Mathf.Max(5f, pct * 100f));
+                        if (val >= 0) bar.style.backgroundColor = new StyleColor(new Color(0.23f, 0.81f, 0.64f)); // Green for surplus
+                        else bar.style.backgroundColor = new StyleColor(new Color(0.88f, 0.25f, 0.25f)); // Red for deficit
+                    }
+                    bar.style.borderTopLeftRadius = 2;
+                    bar.style.borderTopRightRadius = 2;
+
+                    barCont.Add(bar);
+                    lChart.Add(barCont);
                 }
-                if (country.budgetHistory.Count == 0) sb.AppendLine("No historical data available yet.");
-                lChart.text = sb.ToString();
+
+                if (hist.Count == 0) {
+                    var emptyLbl = new Label("No historical data available yet. Time must advance.");
+                    emptyLbl.style.position = Position.Absolute;
+                    emptyLbl.style.top = 25;
+                    emptyLbl.style.left = 0;
+                    emptyLbl.style.right = 0;
+                    emptyLbl.style.unityTextAlign = TextAnchor.MiddleCenter;
+                    emptyLbl.style.color = new Color(0.6f, 0.6f, 0.6f);
+                    emptyLbl.style.fontSize = 11;
+                    lChart.Add(emptyLbl);
+                }
             }
 
             // 19. Key Effects Grid
@@ -355,16 +410,18 @@ namespace StateCraft.UI
 
                 string symIcon = "O";
                 switch (capturedAlloc.id) {
-                    case "MILITARY": symIcon = "*"; break;
-                    case "INTELLIGENCE": symIcon = "i"; break;
-                    case "EDUCATION": symIcon = "E"; break;
-                    case "HEALTH": symIcon = "+"; break;
-                    case "INFRASTRUCTURE": symIcon = "B"; break;
-                    case "AGRICULTURE": symIcon = "A"; break;
-                    case "ENERGY": symIcon = "W"; break;
-                    case "WELFARE": symIcon = "H"; break;
+                    case "MILITARY": symIcon = ""; break;
+                    case "INTELLIGENCE": symIcon = ""; break;
+                    case "EDUCATION": symIcon = "✎"; break;
+                    case "HEALTH": symIcon = "✚"; break;
+                    case "INFRASTRUCTURE": symIcon = "⌂"; break;
+                    case "AGRICULTURE": symIcon = "✿"; break;
+                    case "ENERGY": symIcon = "☼"; break;
+                    case "WELFARE": symIcon = "♥"; break;
                 }
                 var icon = new Label(symIcon); icon.AddToClassList("budget-icon");
+                if (capturedAlloc.id == "MILITARY") icon.AddToClassList("budget-icon-military");
+                if (capturedAlloc.id == "INTELLIGENCE") icon.AddToClassList("budget-icon-intel");
 
                 var deptGroup = new VisualElement(); deptGroup.AddToClassList("budget-dept");
                 var lblTitle = new Label(capturedAlloc.title); lblTitle.AddToClassList("budget-row-title");

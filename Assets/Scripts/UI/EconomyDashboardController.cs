@@ -44,6 +44,8 @@ namespace StateCraft.UI
         private Label _labelInterestRate, _labelTariffRate, _labelDebtService;
         private Label _lblDebtServiceCost;
         private Button _btnBorrowDebt, _btnRepayDebt;
+        private Slider _sliderDebtTransaction;
+        private Label _labelDebtTransaction;
 
         // Tax Simulator State
         private string _simSelectedTaxKey = "CORPORATE"; // which row's preview shows in the Tax Impact Simulator panel
@@ -249,6 +251,23 @@ namespace StateCraft.UI
             _lblDebtServiceCost = root.Q<Label>("LblDebtServiceCost");
             _btnBorrowDebt = root.Q<Button>("BtnBorrowDebt");
             _btnRepayDebt = root.Q<Button>("BtnRepayDebt");
+
+            _sliderDebtTransaction = root.Q<Slider>("SliderDebtTransaction");
+            _labelDebtTransaction = root.Q<Label>("LabelDebtTransaction");
+
+            if (_sliderDebtTransaction != null)
+            {
+                _sliderDebtTransaction.RegisterValueChangedCallback(evt =>
+                {
+                    if (_labelDebtTransaction != null)
+                    {
+                        var country = GameManager.Instance?.playerCountry;
+                        string sym = country != null && !string.IsNullOrEmpty(country.currencySymbol) ? country.currencySymbol : "₦";
+                        _labelDebtTransaction.text = $"{sym}{evt.newValue:F0}B";
+                    }
+                    RefreshDisplay();
+                });
+            }
 
             // Debt breakdown labels
             _valTotalDebt = root.Q<Label>("ValTotalDebt");
@@ -1203,15 +1222,14 @@ namespace StateCraft.UI
             RefreshDebtServiceCostLabel(country);
 
             // Update Borrow/Repay button texts based on currency symbol
-            float borrowAmt = AdviserEngine.GetDynamicBorrowAmount(country);
-            float repayAmt = AdviserEngine.GetDynamicRepayAmount(country);
+            float txAmt = _sliderDebtTransaction != null ? _sliderDebtTransaction.value : 50f;
             
-            if (_btnBorrowDebt != null) _btnBorrowDebt.text = $"BORROW {sym}{borrowAmt:F0}B";
+            if (_btnBorrowDebt != null) _btnBorrowDebt.text = $"BORROW {sym}{txAmt:F0}B";
             if (_btnRepayDebt != null)
             {
-                _btnRepayDebt.text = $"REPAY {sym}{repayAmt:F0}B";
+                _btnRepayDebt.text = $"REPAY {sym}{txAmt:F0}B";
                 // Only enable repayment if player has money and has debt to repay
-                _btnRepayDebt.SetEnabled(gm.playerBudget >= repayAmt && country.debt > 0f);
+                _btnRepayDebt.SetEnabled(gm.playerBudget >= txAmt && country.debt > 0f);
             }
 
             UpdateCurrentAdviserRecommendation(country);

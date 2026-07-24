@@ -94,6 +94,8 @@ namespace StateCraft.UI
 
         private void InitializeElements(VisualElement root)
         {
+            root.Q<Button>("BtnLaunchReconMission")?.RegisterCallback<ClickEvent>(_ => LaunchReconMission());
+            root.Q<Button>("BtnLaunchCovertOp")?.RegisterCallback<ClickEvent>(_ => LaunchSampleCovertOp());
             _tabOverview = root.Q<Button>("TabOverview");
             _tabIntelNetwork = root.Q<Button>("TabIntelNetwork");
             _tabRecon = root.Q<Button>("TabRecon");
@@ -169,6 +171,26 @@ namespace StateCraft.UI
                 _intelGridList.parent.Insert(_intelGridList.parent.IndexOf(_intelGridList) + 1, _satellitePanelContainer);
             }
 
+            // Asset Procurement
+            root.Q<Button>("BtnBuySatellite")?.RegisterCallback<ClickEvent>(_ => LaunchSatellite());
+            root.Q<Button>("BtnBuyDrones")?.RegisterCallback<ClickEvent>(_ => ProcureDrones());
+
+            var pSatImg = root.Q<VisualElement>("ProcurementSatImage");
+            if (pSatImg != null && System.IO.File.Exists("Assets/UI/Icons/spy_satellite.png"))
+            {
+                var tex = new UnityEngine.Texture2D(2, 2);
+                tex.LoadImage(System.IO.File.ReadAllBytes("Assets/UI/Icons/spy_satellite.png"));
+                pSatImg.style.backgroundImage = new UnityEngine.UIElements.StyleBackground(tex);
+            }
+
+            var pDroneImg = root.Q<VisualElement>("ProcurementDroneImage");
+            if (pDroneImg != null && System.IO.File.Exists("Assets/UI/Icons/recon_drone.png"))
+            {
+                var tex = new UnityEngine.Texture2D(2, 2);
+                tex.LoadImage(System.IO.File.ReadAllBytes("Assets/UI/Icons/recon_drone.png"));
+                pDroneImg.style.backgroundImage = new UnityEngine.UIElements.StyleBackground(tex);
+            }
+
             root.Q<Button>("CloseIntelligence").clicked += Hide;
         }
 
@@ -216,14 +238,30 @@ namespace StateCraft.UI
         public void RefreshIntelligenceData()
         {
             var gm = GameManager.Instance;
-            var country = gm.playerCountry;
-            
-            string sym = string.IsNullOrEmpty(country.currencySymbol) ? "₦" : country.currencySymbol;
+            var country = gm?.playerCountry;
+            if (country == null) return;
+
+            string sym = string.IsNullOrEmpty(country.currencySymbol) ? "$" : country.currencySymbol;
+
+            // --- DEV BOOST: Ensure player has enough funds to test new assets immediately ---
+            if (country.intelligenceFunds < 2000f)
+            {
+                country.intelligenceFunds = 2000f;
+            }
 
             if (gm.TurnSystem != null && gm.TurnSystem.CurrentTurn != _lastSeenTurn)
             {
                 _lastSeenTurn = gm.TurnSystem.CurrentTurn;
                 _resolvedThreatNames.Clear();
+            }
+
+            if (_dashboardRoot != null)
+            {
+                var satCost = _dashboardRoot.Q<Label>("LblSatCost");
+                if (satCost != null) satCost.text = $"{sym}500M";
+
+                var droneCost = _dashboardRoot.Q<Label>("LblDroneCost");
+                if (droneCost != null) droneCost.text = $"{sym}150M";
             }
 
             if (_headerBudget != null)
@@ -274,10 +312,197 @@ namespace StateCraft.UI
             PopulateCovertOperationsTab(country);
             PopulateDataAnalysisTab(country);
             PopulateOverviewTab(country);
+
+            // ── Intelligence Top Bar KPIs ──────────────────────────────────────
+            var hdrCoverage = _dashboardRoot?.Q<Label>("HdrIntelCoverage");
+            var hdrCoverageRating = _dashboardRoot?.Q<Label>("HdrIntelCoverageRating");
+            if (hdrCoverage != null)
+            {
+                hdrCoverage.text = $"{country.globalIntelCoverage:F0}/100";
+                hdrCoverage.style.color = country.globalIntelCoverage >= 70 ? new Color(0.14f, 0.93f, 0.34f) : country.globalIntelCoverage >= 40 ? new Color(1f, 0.83f, 0.2f) : new Color(1f, 0.3f, 0.3f);
+                if (hdrCoverageRating != null)
+                    hdrCoverageRating.text = country.globalIntelCoverage >= 70 ? "High Coverage" : country.globalIntelCoverage >= 40 ? "Moderate" : "Low Coverage";
+            }
+
+            var hdrOps = _dashboardRoot?.Q<Label>("HdrOperatives");
+            if (hdrOps != null) hdrOps.text = country.operativeCount.ToString();
+
+            var hdrCovert = _dashboardRoot?.Q<Label>("HdrCovertOps");
+            var hdrCovertSub = _dashboardRoot?.Q<Label>("HdrCovertOpsSub");
+            if (hdrCovert != null)
+            {
+                int covertCount = country.activeCovertOps?.Count ?? 0;
+                hdrCovert.text = covertCount.ToString();
+                hdrCovert.style.color = covertCount > 0 ? new Color(1f, 0.83f, 0.2f) : Color.white;
+                if (hdrCovertSub != null) hdrCovertSub.text = covertCount == 1 ? "Active Mission" : "Active Missions";
+            }
+
+            var hdrSat = _dashboardRoot?.Q<Label>("HdrSatellites");
+            if (hdrSat != null)
+            {
+                hdrSat.text = $"{country.satelliteCount}/4";
+                hdrSat.style.color = country.satelliteCount >= 4 ? new Color(0.14f, 0.93f, 0.34f) : Color.white;
+            }
+
+            var hdrExp = _dashboardRoot?.Q<Label>("HdrExposureRisk");
+            var hdrExpSub = _dashboardRoot?.Q<Label>("HdrExposureRiskSub");
+            if (hdrExp != null)
+            {
+                hdrExp.text = $"{country.exposureRisk:F0}%";
+                hdrExp.style.color = country.exposureRisk > 75f ? new Color(1f, 0.3f, 0.3f) : country.exposureRisk > 40f ? new Color(1f, 0.83f, 0.2f) : new Color(0.14f, 0.93f, 0.34f);
+                if (hdrExpSub != null)
+                    hdrExpSub.text = country.exposureRisk > 75f ? "⚠ CRITICAL" : country.exposureRisk > 40f ? "Elevated Risk" : "Network Safe";
+            }
+
+            var hdrBudgetTop = _dashboardRoot?.Q<Label>("HdrIntelBudgetTop");
+            if (hdrBudgetTop != null)
+                hdrBudgetTop.text = UiFormat.Money(country.intelligenceBudget * country.exchangeRate, sym);
         }
 
         private void PopulateSurveillance(CountryDataSO country, GameManager gm)
         {
+            Debug.Log($"[IntelligenceDashboard] Populating Surveillance Tab... Satellites: {country.satelliteCount}, Exposure Risk: {country.exposureRisk}");
+            
+            var panel = _dashboardRoot?.Q<VisualElement>("PanelSurveillance");
+            if (panel != null)
+            {
+                int totalAssets = country.satelliteCount * 4 + 10;
+                int onlineAssets = Mathf.RoundToInt(totalAssets * 0.75f);
+                if (panel.Q<Label>("RS_TotalAssets") != null) panel.Q<Label>("RS_TotalAssets").text = totalAssets.ToString();
+                if (panel.Q<Label>("RS_OnlineAssets") != null) panel.Q<Label>("RS_OnlineAssets").text = $"Online: {onlineAssets}";
+                if (panel.Q<Label>("RS_AssetHeaderCounts") != null) panel.Q<Label>("RS_AssetHeaderCounts").text = $"{onlineAssets} Online / {totalAssets} Total";
+
+                int totalMissions = country.activeCovertOps.Count;
+                int highPriority = country.activeCovertOps.FindAll(x => x.riskLevel == "Extreme" || x.riskLevel == "High").Count;
+                if (panel.Q<Label>("RS_TotalMissions") != null) panel.Q<Label>("RS_TotalMissions").text = totalMissions.ToString();
+                if (panel.Q<Label>("RS_HighPriority") != null) panel.Q<Label>("RS_HighPriority").text = $"High Priority: {highPriority}";
+
+                float collectionRate = Mathf.Clamp(60f + country.intelligenceLevel * 0.4f, 0, 100);
+                if (panel.Q<Label>("RS_CollectionRate") != null) panel.Q<Label>("RS_CollectionRate").text = $"{collectionRate:F0}%";
+                if (panel.Q<Label>("RS_CollectionStatus") != null) panel.Q<Label>("RS_CollectionStatus").text = collectionRate > 80 ? "Excellent" : (collectionRate > 60 ? "Good" : "Poor");
+
+                float detectionRate = Mathf.Clamp(50f + country.globalIntelCoverage * 0.3f, 0, 100);
+                if (panel.Q<Label>("RS_DetectionRate") != null) panel.Q<Label>("RS_DetectionRate").text = $"{detectionRate:F0}%";
+                if (panel.Q<Label>("RS_DetectionStatus") != null) panel.Q<Label>("RS_DetectionStatus").text = detectionRate > 75 ? "Optimal" : (detectionRate > 50 ? "Moderate" : "Low");
+
+                float fusionAccuracy = Mathf.Clamp(70f + country.intelligenceLevel * 0.2f, 0, 100);
+                if (panel.Q<Label>("RS_FusionAccuracy") != null) panel.Q<Label>("RS_FusionAccuracy").text = $"{fusionAccuracy:F0}%";
+                if (panel.Q<Label>("RS_FusionStatus") != null) panel.Q<Label>("RS_FusionStatus").text = fusionAccuracy > 80 ? "High" : "Average";
+
+                var assetsList = panel.Q<VisualElement>("RS_AssetsList");
+                if (assetsList != null)
+                {
+                    assetsList.Clear();
+                    if (totalAssets <= 0)
+                    {
+                        AddPlaceholder(assetsList, "No surveillance assets deployed.");
+                    }
+                    else
+                    {
+                        // Synthesize a few key assets for the dashboard
+                        int itemsToShow = Mathf.Min(totalAssets, 6); // Just show top 6
+                        for (int i = 0; i < itemsToShow; i++)
+                        {
+                            bool isOnline = i < onlineAssets;
+                            string type = (i % 3 == 0) ? "IMINT" : (i % 3 == 1) ? "SIGINT" : "UAV";
+                            string assetName = type == "UAV" ? $"MQ-{(9 + i)} Reaper Sqn" : $"SAT-{(101 + i)} Orbital";
+                            string coverage = type == "UAV" ? "Regional" : "Global";
+                            
+                            var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 8, paddingBottom = 4, borderBottomWidth = 1, borderBottomColor = new Color(1, 1, 1, 0.1f) } };
+                            row.Add(new Label(assetName) { style = { flexGrow = 2, width = Length.Percent(30), color = Color.white, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
+                            row.Add(new Label(type) { style = { flexGrow = 1, width = Length.Percent(15), color = Color.gray, fontSize = 10 } });
+                            row.Add(new Label(isOnline ? "ONLINE" : "OFFLINE") { style = { flexGrow = 1, width = Length.Percent(20), color = isOnline ? new Color(0.14f, 0.93f, 0.34f) : Color.gray, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
+                            row.Add(new Label(coverage) { style = { flexGrow = 1, width = Length.Percent(20), color = Color.gray, fontSize = 10 } });
+                            row.Add(new Label(isOnline ? $"{70 + i * 4}%" : "0%") { style = { flexGrow = 1, width = Length.Percent(15), color = Color.white, fontSize = 10, unityTextAlign = TextAnchor.MiddleRight } });
+                            assetsList.Add(row);
+                        }
+                    }
+                }
+                var missionsList = panel.Q<VisualElement>("RS_MissionsList");
+                var missionsHeader = panel.Q<Label>("RS_MissionsHeaderTitle");
+                if (missionsList != null)
+                {
+                    missionsList.Clear();
+                    int opsCount = (country.activeCovertOps != null) ? country.activeCovertOps.Count : 0;
+                    
+                    if (missionsHeader != null)
+                    {
+                        missionsHeader.text = $"ACTIVE RECON MISSIONS ({opsCount})";
+                    }
+
+                    if (opsCount == 0)
+                    {
+                        AddPlaceholder(missionsList, "No active recon missions.");
+                    }
+                    else
+                    {
+                        foreach (var op in country.activeCovertOps)
+                        {
+                            var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 8, paddingBottom = 4, borderBottomWidth = 1, borderBottomColor = new Color(1, 1, 1, 0.1f) } };
+                            row.Add(new Label(op.opName) { style = { flexGrow = 2, width = Length.Percent(25), color = Color.white, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold, whiteSpace = WhiteSpace.Normal } });
+                            row.Add(new Label(op.operativeName) { style = { flexGrow = 1, width = Length.Percent(15), color = Color.gray, fontSize = 10 } });
+                            row.Add(new Label(op.type) { style = { flexGrow = 2, width = Length.Percent(20), color = new Color(0.14f, 0.93f, 0.34f), fontSize = 10 } });
+                            row.Add(new Label(op.target) { style = { flexGrow = 1, width = Length.Percent(15), color = Color.gray, fontSize = 10 } });
+                            row.Add(new Label(op.status.ToUpper()) { style = { flexGrow = 1, width = Length.Percent(15), color = op.status == "ACTIVE" ? new Color(0.14f, 0.93f, 0.34f) : new Color(1f, 0.67f, 0.25f), fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
+                            row.Add(new Label($"Phase {op.currentPhase}/{op.totalPhases}") { style = { flexGrow = 1, width = Length.Percent(10), color = Color.white, fontSize = 10, unityTextAlign = TextAnchor.MiddleRight } });
+                            missionsList.Add(row);
+                        }
+                    }
+                }
+                var sensorList = panel.Q<VisualElement>("RS_SensorCoverageList");
+                if (sensorList != null)
+                {
+                    sensorList.Clear();
+                    if (country.regions == null || country.regions.Count == 0) AddPlaceholder(sensorList, "Sensor network offline.");
+                    else
+                    {
+                        for (int i = 0; i < country.regions.Count && i < 5; i++)
+                        {
+                            var reg = country.regions[i];
+                            var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 6 } };
+                            
+                            var rL = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, width = 110 } };
+                            rL.Add(new Label(reg.regionName) { style = { color = Color.gray, fontSize = 8, whiteSpace = WhiteSpace.Normal } });
+                            row.Add(rL);
+                            
+                            var barBg = new VisualElement { style = { flexGrow = 1, height = 4, backgroundColor = new Color(1, 1, 1, 0.1f), borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, marginRight = 8, marginLeft = 8 } };
+                            float cov = Mathf.Clamp(reg.security + country.intelligenceLevel * 0.2f, 0f, 100f);
+                            barBg.Add(new VisualElement { style = { width = Length.Percent(cov), height = 4, backgroundColor = cov > 70f ? new Color(0.14f, 0.93f, 0.34f) : cov > 40f ? new Color(0.95f, 0.77f, 0.06f) : new Color(1f, 0.32f, 0.32f), borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } });
+                            row.Add(barBg);
+                            
+                            row.Add(new Label($"{cov:F0}%") { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold, width = 30, unityTextAlign = TextAnchor.MiddleRight } });
+                            sensorList.Add(row);
+                        }
+                    }
+                }
+                AddPlaceholder(panel.Q<VisualElement>("RS_DonutBreakdownList"), "No data.");
+                AddPlaceholder(panel.Q<VisualElement>("RS_AnalyticsList"), "Insufficient data for analytics.");
+                var recentActivityList = panel.Q<VisualElement>("RS_RecentActivityContainer");
+                if (recentActivityList != null)
+                {
+                    recentActivityList.Clear();
+                    if (country.recentReconReports != null && country.recentReconReports.Count > 0)
+                    {
+                        foreach (var report in country.recentReconReports)
+                        {
+                            var reportLabel = new Label(report) { style = { color = new Color(0.8f, 0.8f, 0.8f), fontSize = 10, whiteSpace = WhiteSpace.Normal, marginBottom = 4, borderBottomWidth = 1, borderBottomColor = new Color(1, 1, 1, 0.1f), paddingBottom = 4 } };
+                            recentActivityList.Add(reportLabel);
+                        }
+                    }
+                    else
+                    {
+                        AddPlaceholder(recentActivityList, "No recent activity.");
+                    }
+                }
+                
+                var feedList = panel.Q<ScrollView>("RS_LiveFeedList");
+                if (feedList != null) {
+                    var feedLines = DashboardLiveContent.BuildIntelFeed(country, gm);
+                    DashboardLiveContent.PopulateFeed(feedList, feedLines, 15);
+                }
+
+            }
+
             if (_regionalCoverageList == null) return;
             _regionalCoverageList.Clear();
 
@@ -310,8 +535,18 @@ namespace StateCraft.UI
             }
         }
 
+        
+        private void AddPlaceholder(VisualElement container, string text = "Data not available")
+        {
+            if (container == null) return;
+            container.Clear();
+            var label = new Label(text) { style = { color = Color.gray, unityTextAlign = TextAnchor.MiddleCenter, flexGrow = 1, marginTop = 20, fontSize = 12 } };
+            container.Add(label);
+        }
+
         private void PopulateIntelGrid(CountryDataSO country, GameManager gm)
         {
+            Debug.Log($"[IntelligenceDashboard] Populating Intel Grid... Global Coverage: {country.globalIntelCoverage}");
             if (_intelGridList == null) return;
             _intelGridList.Clear();
             _intelGridList.style.flexDirection = FlexDirection.Row;
@@ -320,9 +555,9 @@ namespace StateCraft.UI
 
             var cells = new[]
             {
-                ("SIGINT", country.globalIntelCoverage),
+                ("SIGINT", country.signalInterceptCapability),
                 ("HUMINT", country.intelligenceLevel),
-                ("CYBER", Mathf.Clamp(country.intelligenceLevel * 0.8f + country.covertBudget * 5f, 0f, 100f)),
+                ("CYBER", country.cyberDefenseLevel),
                 ("MARITIME", Mathf.Clamp(country.portLevel * 20f, 0f, 100f)),
                 ("BORDER", country.security),
                 ("IMINT (SAT)", Mathf.Clamp(country.satelliteCount * 25f, 0f, 100f))
@@ -511,7 +746,8 @@ namespace StateCraft.UI
 
         private void PopulateIntelNetworkTab(CountryDataSO country)
         {
-            var panel = _root.Q<VisualElement>("PanelCovertOps");
+            Debug.Log($"[IntelligenceDashboard] Populating Intel Network Tab... Active Ops: {country.activeCovertOps.Count}, Recruited Assets: {country.recruitedAssets.Count}");
+            var panel = _dashboardRoot?.Q<VisualElement>("PanelCovertOps");
             if (panel == null) return;
 
             // --- 1. KPI Top Strip ---
@@ -531,7 +767,7 @@ namespace StateCraft.UI
             
             panel.Q<Label>("IN_SuccessRate").text = $"{successRate:F0}%";
             
-            panel.Q<Label>("IN_CovertBudget").text = $"₦{country.covertBudget:F1}B / month";
+            panel.Q<Label>("IN_CovertBudget").text = $"${country.covertBudget:F1}B / month";
             panel.Q<Label>("IN_NetworkExposure").text = country.exposureRisk > 70 ? "HIGH" : (country.exposureRisk > 40 ? "MEDIUM" : "LOW");
             panel.Q<Label>("IN_NetworkExposure").style.color = country.exposureRisk > 70 ? new Color(1f, 0.3f, 0.3f) : (country.exposureRisk > 40 ? new Color(1f, 0.6f, 0.2f) : new Color(0.137f, 0.929f, 0.337f));
 
@@ -554,18 +790,25 @@ namespace StateCraft.UI
             // --- 3. Recent Network Events ---
             var eventsList = panel.Q<ScrollView>("IN_RecentEventsList");
             eventsList.Clear();
-            string[] sampleEvents = {
-                "Asset successfully recruited in neighboring region.",
-                "Agent RAVEN reported successful infiltration.",
-                "Intercepted encrypted comms from Insurgent Camp.",
-                "Counter-intel sweep neutralized foreign mole."
-            };
-            foreach (var ev in sampleEvents)
+            var realEvents = DashboardLiveContent.BuildIntelFeed(country, GameManager.Instance);
+            if (realEvents == null || realEvents.Count == 0)
             {
-                var evRow = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 8 } };
-                evRow.Add(new Label("◉") { style = { color = new Color(0.137f, 0.929f, 0.337f), marginRight = 8, fontSize = 8, marginTop = 2 } });
-                evRow.Add(new Label(ev) { style = { color = new Color(0.8f, 0.8f, 0.8f), fontSize = 9, whiteSpace = WhiteSpace.Normal, flexShrink = 1 } });
-                eventsList.Add(evRow);
+                eventsList.Add(new Label("NO RECENT EVENTS") { style = { color = Color.grey, fontSize = 10, marginTop = 10, unityTextAlign = TextAnchor.MiddleCenter } });
+            }
+            else
+            {
+                int count = 0;
+                foreach (var ev in realEvents)
+                {
+                    if (count >= 10) break;
+                    var evRow = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 8 } };
+                    var iconLbl = new Label("\uf192") { style = { color = new Color(0.137f, 0.929f, 0.337f), marginRight = 8, fontSize = 8, marginTop = 2 } };
+                    iconLbl.AddToClassList("fa-icon");
+                    evRow.Add(iconLbl);
+                    evRow.Add(new Label(ev.Message) { style = { color = new Color(0.8f, 0.8f, 0.8f), fontSize = 9, whiteSpace = WhiteSpace.Normal, flexShrink = 1 } });
+                    eventsList.Add(evRow);
+                    count++;
+                }
             }
 
             // --- 4. Foreign Assets ---
@@ -649,15 +892,41 @@ namespace StateCraft.UI
             var recruitList = panel.Q<ScrollView>("IN_RecruitList");
             recruitList.Clear();
             string[] recNames = { "Domestic Agent", "Foreign Asset", "Cyber Operative", "Double Agent" };
-            string[] recCosts = { "₦15M", "₦45M", "₦30M", "₦80M" };
+            float[] recCosts = { 15f, 45f, 30f, 80f }; // in Millions
             for (int i=0; i<recNames.Length; i++)
             {
                 var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, backgroundColor = new Color(1,1,1,0.03f), paddingBottom = 6, paddingTop = 6, paddingLeft = 8, paddingRight = 8, marginBottom = 4, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } };
                 row.Add(new Label(recNames[i]) { style = { color = Color.white, fontSize = 9 } });
                 
                 var right = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
-                right.Add(new Label(recCosts[i]) { style = { color = new Color(0.137f, 0.929f, 0.337f), fontSize = 9, marginRight = 8 } });
-                right.Add(new Button { text = "HIRE", style = { height = 18, fontSize = 8, backgroundColor = new Color(0.137f, 0.929f, 0.337f, 0.2f), color = new Color(0.137f, 0.929f, 0.337f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = new Color(0.137f, 0.929f, 0.337f, 0.5f), borderBottomColor = new Color(0.137f, 0.929f, 0.337f, 0.5f), borderLeftColor = new Color(0.137f, 0.929f, 0.337f, 0.5f), borderRightColor = new Color(0.137f, 0.929f, 0.337f, 0.5f) } });
+                
+                string sym = string.IsNullOrEmpty(country.currencySymbol) ? "$" : country.currencySymbol;
+                float localCost = recCosts[i] * country.exchangeRate;
+                
+                right.Add(new Label($"{sym}{localCost:F0}M") { style = { color = new Color(0.137f, 0.929f, 0.337f), fontSize = 9, marginRight = 8 } });
+                
+                var hireBtn = new Button { text = "HIRE", style = { height = 18, fontSize = 8, backgroundColor = new Color(0.137f, 0.929f, 0.337f, 0.2f), color = new Color(0.137f, 0.929f, 0.337f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = new Color(0.137f, 0.929f, 0.337f, 0.5f), borderBottomColor = new Color(0.137f, 0.929f, 0.337f, 0.5f), borderLeftColor = new Color(0.137f, 0.929f, 0.337f, 0.5f), borderRightColor = new Color(0.137f, 0.929f, 0.337f, 0.5f) } };
+                
+                int index = i;
+                hireBtn.clicked += () => 
+                {
+                    if (country.intelligenceFunds < localCost)
+                    {
+                        NotificationManager.Instance?.AddNotification($"INSUFFICIENT FUNDS: Need {sym}{localCost:F0}M to hire {recNames[index]}.", Color.red);
+                        return;
+                    }
+                    country.intelligenceFunds -= localCost;
+                    
+                    if (index == 0) country.operativeCount++;
+                    else if (index == 1) country.recruitedAssets.Add(new ForeignAsset { assetName = "New Asset", targetCountry = "Unknown", loyalty = 50f, intelLevelProvided = 2 });
+                    else if (index == 2) country.intelligenceLevel = Mathf.Min(100f, country.intelligenceLevel + 1f);
+                    else if (index == 3) country.exposureRisk = Mathf.Max(0f, country.exposureRisk - 5f);
+                    
+                    NotificationManager.Instance?.AddNotification($"{recNames[index].ToUpper()} HIRED: Deducted {sym}{localCost:F0}M from Intelligence Funds.", new Color(0.137f, 0.929f, 0.337f));
+                    RefreshIntelligenceData();
+                };
+                
+                right.Add(hireBtn);
                 row.Add(right);
                 recruitList.Add(row);
             }
@@ -666,9 +935,10 @@ namespace StateCraft.UI
             var qaGrid = panel.Q<VisualElement>("IN_QuickActionsGrid");
             qaGrid.Clear();
             string[] qaNames = { "Dispatch Agent", "Fund Operation", "Secure Channel", "Increase Surv.", "Debrief Agents", "Counter Intel" };
-            foreach (var qa in qaNames)
+            float[] qaCosts = { 5f, 12f, 3f, 8f, 2f, 10f }; // in Millions
+            for (int i=0; i<qaNames.Length; i++)
             {
-                var btn = new Button { text = qa };
+                var btn = new Button { text = qaNames[i] };
                 btn.style.width = Length.Percent(48);
                 btn.style.height = 24;
                 btn.style.marginBottom = 4;
@@ -677,6 +947,26 @@ namespace StateCraft.UI
                 btn.style.borderTopWidth = 1; btn.style.borderBottomWidth = 1; btn.style.borderLeftWidth = 1; btn.style.borderRightWidth = 1;
                 btn.style.borderTopColor = new Color(1,1,1,0.1f); btn.style.borderBottomColor = new Color(1,1,1,0.1f); btn.style.borderLeftColor = new Color(1,1,1,0.1f); btn.style.borderRightColor = new Color(1,1,1,0.1f);
                 btn.style.color = Color.white;
+                
+                int index = i;
+                string sym = string.IsNullOrEmpty(country.currencySymbol) ? "$" : country.currencySymbol;
+                float localCost = qaCosts[i] * country.exchangeRate;
+                
+                btn.clicked += () => 
+                {
+                    if (country.intelligenceFunds < localCost)
+                    {
+                        NotificationManager.Instance?.AddNotification($"INSUFFICIENT FUNDS: Need {sym}{localCost:F0}M for {qaNames[index]}.", Color.red);
+                        return;
+                    }
+                    country.intelligenceFunds -= localCost;
+                    
+                    if (index == 5) country.exposureRisk = Mathf.Max(0f, country.exposureRisk - 2f);
+                    
+                    NotificationManager.Instance?.AddNotification($"{qaNames[index].ToUpper()} EXECUTED: Deducted {sym}{localCost:F0}M.", new Color(0.18f, 0.6f, 0.95f));
+                    RefreshIntelligenceData();
+                };
+                
                 qaGrid.Add(btn);
             }
         }
@@ -693,7 +983,7 @@ namespace StateCraft.UI
             card.style.borderTopColor = new Color(1,1,1,0.05f); card.style.borderBottomColor = new Color(1,1,1,0.05f); card.style.borderLeftColor = new Color(1,1,1,0.05f); card.style.borderRightColor = new Color(1,1,1,0.05f);
 
             var avatar = new VisualElement { style = { width = 36, height = 36, borderTopLeftRadius = 18, borderTopRightRadius = 18, borderBottomLeftRadius = 18, borderBottomRightRadius = 18, backgroundColor = new Color(1,1,1,0.1f), marginRight = 10, alignItems = Align.Center, justifyContent = Justify.Center } };
-            var lbl = new Label("&#xf21b;") { style = { color = Color.white, fontSize = 16 } };
+            var lbl = new Label("\uf21b") { style = { color = Color.white, fontSize = 16 } };
             lbl.AddToClassList("fa-icon");
             avatar.Add(lbl);
             card.Add(avatar);
@@ -729,11 +1019,13 @@ namespace StateCraft.UI
 
         private void PopulateProxyWarPanel(CountryDataSO country, GameManager gm)
         {
+            Debug.Log("[IntelligenceDashboard] Populating Proxy War Panel...");
             // Provides a shortcut button in the Threat Board to fund enemy insurgencies
         }
 
         private void PopulateThreatBoard(CountryDataSO country, GameManager gm)
         {
+            Debug.Log("[IntelligenceDashboard] Populating Threat Board...");
             if (_foreignThreatsList == null || _insurgentThreatsList == null || _internalThreatsList == null) return;
             _foreignThreatsList.Clear();
             _insurgentThreatsList.Clear();
@@ -897,7 +1189,8 @@ namespace StateCraft.UI
                         $"CLASSIFIED: {country.countryName} intelligence command authorises airstrike on {ideology} camp in {region.regionName}.");
 
                     RefreshIntelligenceData();
-                }) { text = "🚀  FLAG FOR AIRSTRIKE  →  MILITARY TO EXECUTE" };
+                }) { text = "\uf0fb  FLAG FOR AIRSTRIKE  \uf061  MILITARY TO EXECUTE" };
+                flagBtn.AddToClassList("fa-icon");
 
                 flagBtn.style.height = 32;
                 flagBtn.style.fontSize = 9;
@@ -935,7 +1228,8 @@ namespace StateCraft.UI
                         $"Hearts & Minds +20%, supply lines cut -25%, insurgency -15%. Cost: $0.08B.",
                         new Color(0.4f, 0.8f, 1f));
                     RefreshIntelligenceData();
-                }) { text = "🤝  COUNTER-INSURGENCY OP  ($0.08B)" };
+                }) { text = "\uf2b5  COUNTER-INSURGENCY OP  ($0.08B)" };
+                cinBtn.AddToClassList("fa-icon");
 
                 cinBtn.style.height = 26;
                 cinBtn.style.fontSize = 8;
@@ -947,7 +1241,8 @@ namespace StateCraft.UI
             else
             {
                 // Strike already ordered — show reminder
-                var reminder = new Label("→ Go to MILITARY → OPERATIONS to execute the strike");
+                var reminder = new Label("\uf061 Go to MILITARY \uf061 OPERATIONS to execute the strike");
+                reminder.AddToClassList("fa-icon");
                 reminder.style.color = new Color(0.6f, 0.6f, 0.7f);
                 reminder.style.fontSize = 8;
                 reminder.style.marginTop = 4;
@@ -1059,7 +1354,8 @@ namespace StateCraft.UI
                     NewsSystem.Instance?.PublishNews($"AIR FORCE COMMAND: Successful tactical airstrike completely destroys insurgent stronghold.");
                     RefreshIntelligenceData();
 
-                }) { text = "DEPLOY AIR ASSET TO BOMB LOCATION" };
+                }) { text = "\uf072 DEPLOY AIR ASSET TO BOMB LOCATION" };
+                actionBtn.AddToClassList("fa-icon");
                 actionBtn.style.backgroundColor = new Color(0.6f, 0.1f, 0.1f, 0.8f);
             }
             else
@@ -1105,7 +1401,8 @@ namespace StateCraft.UI
                             {
                                 diplo.FundProxyInsurgency(country, targetCountry, 0.1f);
                                 RefreshIntelligenceData();
-                            }) { text = "💰 FUND PROXY ($0.1B)" };
+                            }) { text = "\uf53d FUND PROXY ($0.1B)" };
+                            proxyBtn.AddToClassList("fa-icon");
                             proxyBtn.AddToClassList("button-premium");
                             proxyBtn.style.marginTop = 6;
                             proxyBtn.style.height = 22;
@@ -1194,7 +1491,8 @@ namespace StateCraft.UI
 
         private void PopulateCovertOperationsTab(CountryDataSO country)
         {
-            var panel = _root.Q<VisualElement>("PanelCovertOperations");
+            Debug.Log($"[IntelligenceDashboard] Populating Covert Operations Tab... Active Ops: {country.activeCovertOps.Count}");
+            var panel = _dashboardRoot?.Q<VisualElement>("PanelCovertOperations");
             if (panel == null) return;
 
             // Colors
@@ -1206,34 +1504,52 @@ namespace StateCraft.UI
             var cWhiteAlpha = new Color(1, 1, 1, 0.1f);
 
             int intelLvl = Mathf.Clamp((int)country.intelligenceLevel, 10, 100);
-            float budget = country.covertBudget;
-
+            float budget = country.covertBudget > 0 ? country.covertBudget : (country.intelligenceBudget * 0.15f * 1000f); // Fallback to 15% of intel budget in millions
+            
             // --- KPIs ---
-            int totalOps = 12; // Static for mockup look
-            int inProgress = 5;
-            int planning = 3;
-            int onHold = 2;
-            int completed = 2;
+            int inProgress = country.activeCovertOps.Count(x => x.status == "In Progress");
+            int planning = country.activeCovertOps.Count(x => x.status == "Planning");
+            int onHold = country.activeCovertOps.Count(x => x.status == "On Hold");
+            int completed = country.activeCovertOps.Count(x => x.status == "Completed");
+            int totalOps = inProgress + planning + onHold + completed;
 
-            panel.Q<Label>("CO_ActiveOps").text = inProgress.ToString();
-            panel.Q<Label>("CO_HighRiskOps").text = "2 High Risk";
-            panel.Q<Label>("CO_SuccessRate").text = "68%";
-            panel.Q<Label>("CO_SuccessDelta").text = "↗ 6% vs last month";
-            panel.Q<Label>("CO_Budget").text = $"₦{Mathf.RoundToInt(budget)}M";
-            panel.Q<Label>("CO_BudgetRemaining").text = $"₦{Mathf.RoundToInt(budget * 0.28f)}M remaining";
+            if (panel.Q<Label>("CO_ActiveOps") != null) panel.Q<Label>("CO_ActiveOps").text = inProgress.ToString();
+            
+            int highRiskCount = country.activeCovertOps.FindAll(x => (x.riskLevel == "High" || x.riskLevel == "Extreme") && x.status == "In Progress").Count;
+            if (panel.Q<Label>("CO_HighRiskOps") != null) panel.Q<Label>("CO_HighRiskOps").text = $"{highRiskCount} High Risk";
+            
+            string sym = string.IsNullOrEmpty(country.currencySymbol) ? "$" : country.currencySymbol;
+            
+            if (panel.Q<Label>("CO_IntelFundsLabel") != null) panel.Q<Label>("CO_IntelFundsLabel").text = $"FUNDS: {UiFormat.Money(country.intelligenceFunds * country.exchangeRate, sym)}";
+            
+            float successRate = Mathf.Clamp(40f + (country.intelligenceLevel * 0.4f) + (country.operativeCount * 2f), 10f, 95f);
+            if (panel.Q<Label>("CO_SuccessRate") != null) panel.Q<Label>("CO_SuccessRate").text = $"{successRate:F0}%";
+            if (panel.Q<Label>("CO_SuccessDelta") != null) panel.Q<Label>("CO_SuccessDelta").text = "Stable";
+            
+            float localBudget = budget * country.exchangeRate;
+            if (panel.Q<Label>("CO_Budget") != null) panel.Q<Label>("CO_Budget").text = $"{UiFormat.Money(localBudget, sym)}";
+            if (panel.Q<Label>("CO_BudgetRemaining") != null) panel.Q<Label>("CO_BudgetRemaining").text = $"{UiFormat.Money(localBudget * 0.28f, sym)} rem.";
             
             var riskLbl = panel.Q<Label>("CO_RiskLabel");
-            riskLbl.text = "MEDIUM";
-            riskLbl.style.color = cOrange;
-            panel.Q<VisualElement>("CO_RiskDot").style.backgroundColor = cOrange;
+            if (riskLbl != null)
+            {
+                if (country.exposureRisk > 60) { riskLbl.text = "HIGH"; riskLbl.style.color = cRed; if (panel.Q<VisualElement>("CO_RiskDot") != null) panel.Q<VisualElement>("CO_RiskDot").style.backgroundColor = cRed; }
+                else if (country.exposureRisk > 30) { riskLbl.text = "MEDIUM"; riskLbl.style.color = cOrange; if (panel.Q<VisualElement>("CO_RiskDot") != null) panel.Q<VisualElement>("CO_RiskDot").style.backgroundColor = cOrange; }
+                else { riskLbl.text = "LOW"; riskLbl.style.color = cGreen; if (panel.Q<VisualElement>("CO_RiskDot") != null) panel.Q<VisualElement>("CO_RiskDot").style.backgroundColor = cGreen; }
+            }
 
             // --- DONUT CHART (Mock text) ---
-            panel.Q<Label>("CO_TotalOpsDonut").text = totalOps.ToString();
+            if (panel.Q<Label>("CO_TotalOpsDonut") != null) panel.Q<Label>("CO_TotalOpsDonut").text = totalOps.ToString();
             
             var statusList = panel.Q<VisualElement>("CO_StatusList");
             statusList.Clear();
             string[] sNames = { "In Progress", "Planning", "On Hold", "Completed" };
-            int[] sVals = { inProgress, planning, onHold, completed };
+            int inProgCount = country.activeCovertOps.Count(x => x.status == "In Progress");
+            int planCount = country.activeCovertOps.Count(x => x.status == "Planning");
+            int holdCount = country.activeCovertOps.Count(x => x.status == "On Hold");
+            int compCount = country.activeCovertOps.Count(x => x.status == "Completed");
+            int[] sVals = { inProgCount, planCount, holdCount, compCount };
+            int actualTotalOps = Mathf.Max(1, inProgCount + planCount + holdCount + compCount);
             Color[] sColors = { cGreen, cBlue, cOrange, cPurple };
             
             for(int i=0; i<4; i++)
@@ -1243,7 +1559,7 @@ namespace StateCraft.UI
                 rL.Add(new VisualElement { style = { width = 6, height = 6, backgroundColor = sColors[i], marginRight = 6 } });
                 rL.Add(new Label(sNames[i]) { style = { color = Color.white, fontSize = 8 } });
                 row.Add(rL);
-                row.Add(new Label($"{sVals[i]} ({Mathf.RoundToInt(sVals[i]*100f/totalOps)}%)") { style = { color = Color.grey, fontSize = 8 } });
+                row.Add(new Label($"{sVals[i]} ({Mathf.RoundToInt(sVals[i]*100f/actualTotalOps)}%)") { style = { color = Color.grey, fontSize = 8 } });
                 statusList.Add(row);
             }
 
@@ -1251,8 +1567,11 @@ namespace StateCraft.UI
             var catList = panel.Q<VisualElement>("CO_CategoryList");
             catList.Clear();
             string[] cNames = { "Political Operations", "Economic Operations", "Military Operations", "Influence Operations", "Cyber Operations" };
-            string[] cIcons = { "&#xf0c0;", "&#xf153;", "&#xf132;", "&#xf0a1;", "&#xf108;" };
-            int[] cVals = { 4, 3, 2, 2, 1 };
+            string[] cIcons = { "\uf0c0", "\uf153", "\uf132", "\uf0a1", "\uf108" };
+            string[] cTypes = { "Political", "Economic", "Military", "Influence", "Cyber" };
+            int[] cVals = new int[5];
+            for(int i=0; i<5; i++) cVals[i] = country.activeCovertOps.Count(x => x.type == cTypes[i]);
+
             for(int i=0; i<5; i++)
             {
                 var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, marginBottom = 6, alignItems = Align.Center } };
@@ -1267,69 +1586,66 @@ namespace StateCraft.UI
             // --- RESOURCE ALLOCATION ---
             var resList = panel.Q<VisualElement>("CO_ResourceList");
             resList.Clear();
-            string[] rNames = { "Field Agents", "Technical Assets", "Safe Houses", "Logistics", "Cyber Tools" };
-            int[] rVals = { 65, 55, 40, 60, 70 };
             Color[] rColors = { cGreen, cBlue, cOrange, cPurple, new Color(0.2f, 0.7f, 0.7f) };
-            for(int i=0; i<5; i++)
+            for(int i=0; i<country.covertResources.Count; i++)
             {
+                var res = country.covertResources[i];
                 var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 6 } };
-                row.Add(new Label(rNames[i]) { style = { color = Color.grey, fontSize = 8, width = 80 } });
+                row.Add(new Label(res.resourceName) { style = { color = Color.grey, fontSize = 8, width = 80 } });
                 
+                float pct = res.maxAmount > 0 ? (res.allocatedAmount / (float)res.maxAmount) * 100f : 0f;
+                Color col = rColors[i % rColors.Length];
+
                 var barBg = new VisualElement { style = { flexGrow = 1, height = 4, backgroundColor = cWhiteAlpha, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, marginRight = 8, marginLeft = 8 } };
-                barBg.Add(new VisualElement { style = { width = Length.Percent(rVals[i]), height = 4, backgroundColor = rColors[i], borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } });
+                barBg.Add(new VisualElement { style = { width = Length.Percent(pct), height = 4, backgroundColor = col, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } });
                 row.Add(barBg);
                 
-                row.Add(new Label($"{rVals[i]}%") { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold, width = 25, unityTextAlign = TextAnchor.MiddleRight } });
+                row.Add(new Label($"{Mathf.RoundToInt(pct)}%") { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold, width = 25, unityTextAlign = TextAnchor.MiddleRight } });
                 resList.Add(row);
             }
 
             // --- ACTIVE COVERT OPERATIONS ---
             var activeList = panel.Q<ScrollView>("CO_ActiveOpsList");
             activeList.Clear();
-            string[] aOps = { "OPERATION SILENCE", "OPERATION MARKET SHIFT", "OPERATION WHISPER", "OPERATION IRON SHIELD", "OPERATION DARKNET" };
-            string[] aCats = { "Political", "Economic", "Influence", "Military", "Cyber" };
-            string[] aObjs = { "Discredit opposition leadership", "Undermine rival trade network", "Spread pro-government propaganda", "Acquire arms shipment intelligence", "Infiltrate hostile communication network" };
-            string[] aLocs = { "Northern Nigeria", "Lagos State", "South-East Region", "Chad Basin", "Gulf of Guinea" };
-            string[] aRisks = { "HIGH", "MEDIUM", "LOW", "HIGH", "MEDIUM" };
-            string[] aStats = { "IN PROGRESS", "IN PROGRESS", "IN PROGRESS", "PLANNING", "PLANNING" };
-            int[] aProgs = { 72, 45, 60, 25, 15 };
-            string[] aEtas = { "12 DAYS", "18 DAYS", "9 DAYS", "—", "—" };
-            Color[] aColors = { cRed, cOrange, cPurple, cBlue, cGreen };
-            
-            panel.Q<Label>("CO_ActiveTitle").text = $"ACTIVE COVERT OPERATIONS ({inProgress})";
+            var activeOps = country.activeCovertOps.FindAll(x => x.status == "In Progress");
+            panel.Q<Label>("CO_ActiveTitle").text = $"ACTIVE COVERT OPERATIONS ({activeOps.Count})";
 
-            for(int i=0; i<5; i++)
+            foreach(var op in activeOps)
             {
                 var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, backgroundColor = new Color(1,1,1,0.03f), paddingBottom = 6, paddingTop = 6, paddingLeft = 8, paddingRight = 8, marginBottom = 4, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } };
                 
+                Color cCol = op.type == "Political" ? cPurple : op.type == "Economic" ? cOrange : op.type == "Military" ? cBlue : op.type == "Influence" ? cGreen : cRed;
+                string cIcn = op.type == "Political" ? "\uf0c0" : op.type == "Economic" ? "\uf153" : op.type == "Military" ? "\uf132" : op.type == "Influence" ? "\uf0a1" : "\uf108";
+                
                 var nameCol = new VisualElement { style = { width = 140, flexDirection = FlexDirection.Row, alignItems = Align.Center } };
-                var iconBox = new VisualElement { style = { width = 24, height = 24, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, backgroundColor = new Color(aColors[i].r, aColors[i].g, aColors[i].b, 0.1f), alignItems = Align.Center, justifyContent = Justify.Center, marginRight = 8 } };
-                iconBox.Add(new Label(cIcons[i]) { style = { color = aColors[i], fontSize = 10 } }.WithClass("fa-icon"));
+                var iconBox = new VisualElement { style = { width = 24, height = 24, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, backgroundColor = new Color(cCol.r, cCol.g, cCol.b, 0.1f), alignItems = Align.Center, justifyContent = Justify.Center, marginRight = 8 } };
+                iconBox.Add(new Label(cIcn) { style = { color = cCol, fontSize = 10 } }.WithClass("fa-icon"));
                 nameCol.Add(iconBox);
                 
                 var nameText = new VisualElement { style = { flexDirection = FlexDirection.Column } };
-                nameText.Add(new Label(aOps[i]) { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } });
-                nameText.Add(new Label(aCats[i]) { style = { color = Color.grey, fontSize = 7 } });
+                nameText.Add(new Label(op.opName) { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } });
+                nameText.Add(new Label(op.type) { style = { color = Color.grey, fontSize = 7 } });
                 nameCol.Add(nameText);
                 row.Add(nameCol);
 
-                row.Add(new Label(aObjs[i]) { style = { color = Color.grey, fontSize = 8, flexGrow = 1, whiteSpace = WhiteSpace.Normal } });
-                row.Add(new Label(aLocs[i]) { style = { color = Color.white, fontSize = 8, width = 80 } });
+                row.Add(new Label(op.target) { style = { color = Color.grey, fontSize = 8, flexGrow = 1, whiteSpace = WhiteSpace.Normal } });
+                row.Add(new Label("Unknown") { style = { color = Color.white, fontSize = 8, width = 80 } }); // Add region later if in data
                 
-                var rCol = aRisks[i] == "HIGH" ? cRed : (aRisks[i] == "MEDIUM" ? cOrange : cGreen);
-                row.Add(new Label(aRisks[i]) { style = { color = rCol, fontSize = 7, width = 50 } });
+                var rCol = op.riskLevel == "Extreme" ? cRed : op.riskLevel == "High" ? cRed : (op.riskLevel == "Medium" ? cOrange : cGreen);
+                row.Add(new Label(op.riskLevel.ToUpper()) { style = { color = rCol, fontSize = 7, width = 50 } });
                 
-                var sCol = aStats[i] == "IN PROGRESS" ? cGreen : cBlue;
-                row.Add(new Label(aStats[i]) { style = { color = sCol, fontSize = 7, width = 70 } });
+                var sCol = op.status == "In Progress" ? cGreen : cBlue;
+                row.Add(new Label(op.status.ToUpper()) { style = { color = sCol, fontSize = 7, width = 70 } });
 
+                float progPct = op.totalPhases > 0 ? (op.currentPhase / (float)op.totalPhases) * 100f : 0f;
                 var progCol = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, width = 60 } };
                 var pBarBg = new VisualElement { style = { flexGrow = 1, height = 3, backgroundColor = cWhiteAlpha, borderTopLeftRadius = 1, borderTopRightRadius = 1, borderBottomLeftRadius = 1, borderBottomRightRadius = 1, marginRight = 6 } };
-                pBarBg.Add(new VisualElement { style = { width = Length.Percent(aProgs[i]), height = 3, backgroundColor = sCol, borderTopLeftRadius = 1, borderTopRightRadius = 1, borderBottomLeftRadius = 1, borderBottomRightRadius = 1 } });
+                pBarBg.Add(new VisualElement { style = { width = Length.Percent(progPct), height = 3, backgroundColor = sCol, borderTopLeftRadius = 1, borderTopRightRadius = 1, borderBottomLeftRadius = 1, borderBottomRightRadius = 1 } });
                 progCol.Add(pBarBg);
-                progCol.Add(new Label($"{aProgs[i]}%") { style = { color = Color.white, fontSize = 7 } });
+                progCol.Add(new Label($"{Mathf.RoundToInt(progPct)}%") { style = { color = Color.white, fontSize = 7 } });
                 row.Add(progCol);
 
-                row.Add(new Label(aEtas[i]) { style = { color = Color.white, fontSize = 8, width = 40, unityTextAlign = TextAnchor.MiddleRight } });
+                row.Add(new Label($"{op.monthsRemaining} MONTHS") { style = { color = Color.white, fontSize = 8, width = 60, unityTextAlign = TextAnchor.MiddleRight } });
                 
                 activeList.Add(row);
             }
@@ -1337,114 +1653,148 @@ namespace StateCraft.UI
             // --- OPERATION DETAILS ---
             var detailsContainer = panel.Q<VisualElement>("CO_OpDetailsContainer");
             detailsContainer.Clear();
-            detailsContainer.style.flexDirection = FlexDirection.Row;
 
-            // Details Left
-            var dLeft = new VisualElement { style = { width = Length.Percent(50), paddingRight = 12, borderRightWidth = 1, borderRightColor = cWhiteAlpha } };
-            
-            var dHeader = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 12 } };
-            var dIcon = new VisualElement { style = { width = 36, height = 36, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, backgroundColor = new Color(cRed.r, cRed.g, cRed.b, 0.1f), alignItems = Align.Center, justifyContent = Justify.Center, marginRight = 12 } };
-            dIcon.Add(new Label("&#xf0c0;") { style = { color = cRed, fontSize = 16 } }.WithClass("fa-icon"));
-            dHeader.Add(dIcon);
-            var dTitle = new VisualElement();
-            dTitle.Add(new Label("OPERATION SILENCE") { style = { color = Color.white, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
-            dTitle.Add(new Label("Political Operation") { style = { color = Color.grey, fontSize = 8 } });
-            dHeader.Add(dTitle);
-            dLeft.Add(dHeader);
-
-            dLeft.Add(new Label("DESCRIPTION") { style = { color = Color.grey, fontSize = 7, marginBottom = 2 } });
-            dLeft.Add(new Label("Discredit the leader of a major opposition party through exposure of fabricated corruption evidence.") { style = { color = Color.white, fontSize = 8, whiteSpace = WhiteSpace.Normal, marginBottom = 12 } });
-
-            var dGrid = new VisualElement { style = { flexDirection = FlexDirection.Row, flexWrap = Wrap.Wrap } };
-            dGrid.Add(CreateDetailStat("TARGET", "Opposition Leadership"));
-            dGrid.Add(CreateDetailStat("TARGET AREA", "Northern Nigeria"));
-            dGrid.Add(CreateDetailStat("SPONSOR", "NIA Directorate"));
-            dGrid.Add(CreateDetailStat("ASSIGNED CASE OFFICER", "Agent Atlas"));
-            dLeft.Add(dGrid);
-            
-            var dBtns = new VisualElement { style = { flexDirection = FlexDirection.Row, marginTop = 12 } };
-            dBtns.Add(new Button { text = "VIEW INTEL", style = { height = 24, fontSize = 8, flexGrow = 1, backgroundColor = new Color(0.18f, 0.6f, 0.95f, 0.1f), color = cBlue, borderTopColor = cBlue, borderBottomColor = cBlue, borderLeftColor = cBlue, borderRightColor = cBlue, borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, marginRight = 6 } });
-            dBtns.Add(new Button { text = "MODIFY PLAN", style = { height = 24, fontSize = 8, flexGrow = 1, backgroundColor = new Color(0.18f, 0.6f, 0.95f, 0.1f), color = cBlue, borderTopColor = cBlue, borderBottomColor = cBlue, borderLeftColor = cBlue, borderRightColor = cBlue, borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, marginRight = 6 } });
-            dBtns.Add(new Button { text = "PAUSE OPERATION", style = { height = 24, fontSize = 8, flexGrow = 1, backgroundColor = new Color(0.95f, 0.77f, 0.06f, 0.1f), color = cOrange, borderTopColor = cOrange, borderBottomColor = cOrange, borderLeftColor = cOrange, borderRightColor = cOrange, borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, marginRight = 6 } });
-            dBtns.Add(new Button { text = "TERMINATE", style = { height = 24, fontSize = 8, flexGrow = 1, backgroundColor = new Color(1f, 0.32f, 0.32f, 0.1f), color = cRed, borderTopColor = cRed, borderBottomColor = cRed, borderLeftColor = cRed, borderRightColor = cRed, borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1 } });
-            dLeft.Add(dBtns);
-            
-            detailsContainer.Add(dLeft);
-
-            // Details Right
-            var dRight = new VisualElement { style = { width = Length.Percent(50), paddingLeft = 12, flexDirection = FlexDirection.Column } };
-            dRight.Add(new Label("OBJECTIVES") { style = { color = Color.grey, fontSize = 8, marginBottom = 6 } });
-            string[] objTxt = { "Identify vulnerabilities", "Create disinformation package", "Leak to media", "Amplify through social channels", "Monitor public reaction" };
-            bool[] objDone = { true, true, false, false, false };
-            for(int i=0; i<5; i++)
+            if (activeOps == null || activeOps.Count == 0)
             {
-                var oRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 4 } };
-                oRow.Add(new Label(objDone[i] ? "&#xf058;" : "&#xf111;") { style = { color = objDone[i] ? cGreen : Color.grey, fontSize = 10, marginRight = 6 } }.WithClass("fa-icon"));
-                oRow.Add(new Label(objTxt[i]) { style = { color = objDone[i] ? Color.white : Color.grey, fontSize = 8 } });
-                dRight.Add(oRow);
+                detailsContainer.style.flexDirection = FlexDirection.Column;
+                detailsContainer.style.justifyContent = Justify.Center;
+                detailsContainer.style.alignItems = Align.Center;
+                detailsContainer.Add(new Label("\uf059") { style = { color = cWhiteAlpha, fontSize = 24, marginBottom = 8 } }.WithClass("fa-icon"));
+                detailsContainer.Add(new Label("NO OPERATION SELECTED") { style = { color = Color.grey, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold, letterSpacing = 1f } });
             }
+            else
+            {
+                var op = activeOps[0]; // Display the first one by default for V1
+                detailsContainer.style.flexDirection = FlexDirection.Row;
 
-            var dMetrics = new VisualElement { style = { flexDirection = FlexDirection.Row, marginTop = 12, justifyContent = Justify.SpaceBetween } };
-            
-            var mRisk = new VisualElement { style = { width = Length.Percent(30) } };
-            mRisk.Add(new Label("RISK LEVEL") { style = { color = Color.grey, fontSize = 7, marginBottom = 2 } });
-            var mrRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
-            mrRow.Add(new Label("&#xf071;") { style = { color = cRed, fontSize = 12, marginRight = 4 } }.WithClass("fa-icon"));
-            mrRow.Add(new Label("HIGH") { style = { color = cRed, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
-            mRisk.Add(mrRow);
-            dMetrics.Add(mRisk);
-            
-            var mDet = new VisualElement { style = { width = Length.Percent(30) } };
-            mDet.Add(new Label("DETECTION RISK") { style = { color = Color.grey, fontSize = 7, marginBottom = 2 } });
-            mDet.Add(new Label("68%") { style = { color = Color.white, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
-            var dbBar1 = new VisualElement { style = { height = 3, backgroundColor = cWhiteAlpha, marginTop = 4 } };
-            dbBar1.Add(new VisualElement { style = { width = Length.Percent(68), height = 3, backgroundColor = cOrange } });
-            mDet.Add(dbBar1);
-            dMetrics.Add(mDet);
+                Color oCol = op.type == "Political" ? cPurple : op.type == "Economic" ? cOrange : op.type == "Military" ? cBlue : op.type == "Influence" ? cGreen : cRed;
+                string oIcn = op.type == "Political" ? "\uf0c0" : op.type == "Economic" ? "\uf153" : op.type == "Military" ? "\uf132" : op.type == "Influence" ? "\uf0a1" : "\uf108";
 
-            var mSuc = new VisualElement { style = { width = Length.Percent(30) } };
-            mSuc.Add(new Label("SUCCESS CHANCE") { style = { color = Color.grey, fontSize = 7, marginBottom = 2 } });
-            mSuc.Add(new Label("72%") { style = { color = Color.white, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
-            var dbBar2 = new VisualElement { style = { height = 3, backgroundColor = cWhiteAlpha, marginTop = 4 } };
-            dbBar2.Add(new VisualElement { style = { width = Length.Percent(72), height = 3, backgroundColor = cGreen } });
-            mSuc.Add(dbBar2);
-            dMetrics.Add(mSuc);
+                // Details Left
+                var dLeft = new VisualElement { style = { width = Length.Percent(50), paddingRight = 12, borderRightWidth = 1, borderRightColor = cWhiteAlpha } };
+                
+                var dHeader = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 12 } };
+                var dIcon = new VisualElement { style = { width = 36, height = 36, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, backgroundColor = new Color(oCol.r, oCol.g, oCol.b, 0.1f), alignItems = Align.Center, justifyContent = Justify.Center, marginRight = 12 } };
+                dIcon.Add(new Label(oIcn) { style = { color = oCol, fontSize = 16 } }.WithClass("fa-icon"));
+                dHeader.Add(dIcon);
+                var dTitle = new VisualElement();
+                dTitle.Add(new Label(op.opName) { style = { color = Color.white, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
+                dTitle.Add(new Label($"{op.type} Operation") { style = { color = Color.grey, fontSize = 8 } });
+                dHeader.Add(dTitle);
+                dLeft.Add(dHeader);
 
-            dRight.Add(dMetrics);
-            detailsContainer.Add(dRight);
+                dLeft.Add(new Label("DESCRIPTION") { style = { color = Color.grey, fontSize = 7, marginBottom = 2 } });
+                dLeft.Add(new Label($"Targeting {op.target} with priority '{op.priority}'. Currently in phase {op.currentPhase} of {op.totalPhases}.") { style = { color = Color.white, fontSize = 8, whiteSpace = WhiteSpace.Normal, marginBottom = 12 } });
+
+                var dGrid = new VisualElement { style = { flexDirection = FlexDirection.Row, flexWrap = Wrap.Wrap } };
+                dGrid.Add(CreateDetailStat("TARGET", op.target));
+                dGrid.Add(CreateDetailStat("STATUS", op.status));
+                dGrid.Add(CreateDetailStat("SPONSOR", "NIA Directorate"));
+                dGrid.Add(CreateDetailStat("ASSIGNED CASE OFFICER", string.IsNullOrEmpty(op.operativeName) ? "Unassigned" : op.operativeName));
+                dLeft.Add(dGrid);
+                
+                var dBtns = new VisualElement { style = { flexDirection = FlexDirection.Row, marginTop = 12 } };
+                
+                var btnView = new Button { text = "VIEW INTEL", style = { height = 24, fontSize = 8, flexGrow = 1, backgroundColor = new Color(0.18f, 0.6f, 0.95f, 0.1f), color = cBlue, borderTopColor = cBlue, borderBottomColor = cBlue, borderLeftColor = cBlue, borderRightColor = cBlue, borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, marginRight = 6 } };
+                btnView.clicked += () => NotificationManager.Instance?.AddNotification($"INTEL REPORT: {op.opName} is progressing as expected.", cBlue);
+                dBtns.Add(btnView);
+                
+                var btnPause = new Button { text = "PAUSE OPERATION", style = { height = 24, fontSize = 8, flexGrow = 1, backgroundColor = new Color(0.95f, 0.77f, 0.06f, 0.1f), color = cOrange, borderTopColor = cOrange, borderBottomColor = cOrange, borderLeftColor = cOrange, borderRightColor = cOrange, borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, marginRight = 6 } };
+                btnPause.clicked += () => {
+                    op.status = "On Hold";
+                    NotificationManager.Instance?.AddNotification($"OPERATION PAUSED: Agents ordered to stand down.", cOrange);
+                    RefreshIntelligenceData();
+                };
+                dBtns.Add(btnPause);
+                
+                var btnTerm = new Button { text = "TERMINATE", style = { height = 24, fontSize = 8, flexGrow = 1, backgroundColor = new Color(1f, 0.32f, 0.32f, 0.1f), color = cRed, borderTopColor = cRed, borderBottomColor = cRed, borderLeftColor = cRed, borderRightColor = cRed, borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1 } };
+                btnTerm.clicked += () => {
+                    country.activeCovertOps.Remove(op);
+                    country.operativeCount++;
+                    NotificationManager.Instance?.AddNotification($"OPERATION TERMINATED: Asset retrieved safely.", cRed);
+                    RefreshIntelligenceData();
+                };
+                dBtns.Add(btnTerm);
+                
+                dLeft.Add(dBtns);
+                
+                detailsContainer.Add(dLeft);
+
+                // Details Right
+                var dRight = new VisualElement { style = { width = Length.Percent(50), paddingLeft = 12, flexDirection = FlexDirection.Column } };
+                dRight.Add(new Label("OBJECTIVES") { style = { color = Color.grey, fontSize = 8, marginBottom = 6 } });
+                string[] objTxt = { "Initial reconnaissance", "Deploy assets", "Execute primary directive" };
+                for(int i=0; i<3; i++)
+                {
+                    bool isDone = i < op.currentPhase;
+                    var oRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 4, flexShrink = 0 } };
+                    oRow.Add(new Label(isDone ? "\uF058" : "\uF111") { style = { color = isDone ? cGreen : Color.grey, fontSize = 10, marginRight = 6 } }.WithClass("fa-icon"));
+                    oRow.Add(new Label(objTxt[i]) { style = { color = isDone ? Color.white : Color.grey, fontSize = 8 } });
+                    dRight.Add(oRow);
+                }
+
+                var dMetrics = new VisualElement { style = { flexDirection = FlexDirection.Row, marginTop = 12, justifyContent = Justify.SpaceBetween } };
+                
+                Color rCol = op.riskLevel == "Extreme" || op.riskLevel == "High" ? cRed : op.riskLevel == "Medium" ? cOrange : cGreen;
+                var mRisk = new VisualElement { style = { width = Length.Percent(30) } };
+                mRisk.Add(new Label("RISK LEVEL") { style = { color = Color.grey, fontSize = 7, marginBottom = 2 } });
+                var mrRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
+                mrRow.Add(new Label("\uf071") { style = { color = rCol, fontSize = 12, marginRight = 4 } }.WithClass("fa-icon"));
+                mrRow.Add(new Label(string.IsNullOrEmpty(op.riskLevel) ? "UNKNOWN" : op.riskLevel.ToUpper()) { style = { color = rCol, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
+                mRisk.Add(mrRow);
+                dMetrics.Add(mRisk);
+                
+                var mDet = new VisualElement { style = { width = Length.Percent(30) } };
+                mDet.Add(new Label("DETECTION RISK") { style = { color = Color.grey, fontSize = 7, marginBottom = 2 } });
+                mDet.Add(new Label($"{Mathf.RoundToInt(op.detectionRisk)}%") { style = { color = Color.white, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
+                var dbBar1 = new VisualElement { style = { height = 3, backgroundColor = cWhiteAlpha, marginTop = 4 } };
+                dbBar1.Add(new VisualElement { style = { width = Length.Percent(op.detectionRisk), height = 3, backgroundColor = cOrange } });
+                mDet.Add(dbBar1);
+                dMetrics.Add(mDet);
+
+                var mSuc = new VisualElement { style = { width = Length.Percent(30) } };
+                float sucChance = Mathf.Clamp(100f - op.detectionRisk, 0, 100f);
+                mSuc.Add(new Label("SUCCESS CHANCE") { style = { color = Color.grey, fontSize = 7, marginBottom = 2 } });
+                mSuc.Add(new Label($"{Mathf.RoundToInt(sucChance)}%") { style = { color = Color.white, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
+                var dbBar2 = new VisualElement { style = { height = 3, backgroundColor = cWhiteAlpha, marginTop = 4 } };
+                dbBar2.Add(new VisualElement { style = { width = Length.Percent(sucChance), height = 3, backgroundColor = cGreen } });
+                mSuc.Add(dbBar2);
+                dMetrics.Add(mSuc);
+
+                dRight.Add(dMetrics);
+                detailsContainer.Add(dRight);
+            }
 
             // --- UPCOMING OPERATIONS ---
             var upcomingList = panel.Q<ScrollView>("CO_UpcomingOpsList");
             upcomingList.Clear();
-            string[] uOps = { "OPERATION PUPPET", "OPERATION FRACTURE", "OPERATION BLACK SEA" };
-            string[] uCats = { "Influence", "Political", "Military" };
-            string[] uTargs = { "Target: Media Outlets", "Target: Opposition Party", "Target: Smuggling Route" };
-            string[] uStarts = { "Start In: 3 Days", "Start In: 5 Days", "Start In: 7 Days" };
-            string[] uRisks = { "MEDIUM", "HIGH", "HIGH" };
-            int[] uDots = { 3, 4, 4 };
-            Color[] uColors = { cPurple, cRed, cBlue };
+            var upcomingOps = country.activeCovertOps.FindAll(x => x.status == "Planning" || x.status == "On Hold");
 
-            for(int i=0; i<3; i++)
+            foreach(var op in upcomingOps)
             {
-                var card = new VisualElement { style = { flexDirection = FlexDirection.Row, backgroundColor = new Color(1,1,1,0.03f), paddingBottom = 8, paddingTop = 8, paddingLeft = 8, paddingRight = 8, marginBottom = 6, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, borderLeftWidth = 2, borderLeftColor = uColors[i] } };
+                Color uCol = op.type == "Political" ? cPurple : op.type == "Economic" ? cOrange : op.type == "Military" ? cBlue : op.type == "Influence" ? cGreen : cRed;
+                string uIcn = op.type == "Political" ? "\uf0c0" : op.type == "Economic" ? "\uf153" : op.type == "Military" ? "\uf132" : op.type == "Influence" ? "\uf0a1" : "\uf108";
+                int dots = op.riskLevel == "Extreme" ? 4 : op.riskLevel == "High" ? 3 : op.riskLevel == "Medium" ? 2 : 1;
+
+                var card = new VisualElement { style = { flexDirection = FlexDirection.Row, backgroundColor = new Color(1,1,1,0.03f), paddingBottom = 8, paddingTop = 8, paddingLeft = 8, paddingRight = 8, marginBottom = 6, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, borderLeftWidth = 2, borderLeftColor = uCol } };
                 
-                var cIcon = new VisualElement { style = { width = 24, height = 24, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, backgroundColor = new Color(uColors[i].r, uColors[i].g, uColors[i].b, 0.1f), alignItems = Align.Center, justifyContent = Justify.Center, marginRight = 8 } };
-                cIcon.Add(new Label(uCats[i] == "Influence" ? "&#xf0a1;" : uCats[i] == "Political" ? "&#xf0c0;" : "&#xf132;") { style = { color = uColors[i], fontSize = 10 } }.WithClass("fa-icon"));
+                var cIcon = new VisualElement { style = { width = 24, height = 24, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, backgroundColor = new Color(uCol.r, uCol.g, uCol.b, 0.1f), alignItems = Align.Center, justifyContent = Justify.Center, marginRight = 8 } };
+                cIcon.Add(new Label(uIcn) { style = { color = uCol, fontSize = 10 } }.WithClass("fa-icon"));
                 card.Add(cIcon);
                 
                 var cMid = new VisualElement { style = { flexGrow = 1, justifyContent = Justify.Center } };
-                cMid.Add(new Label(uOps[i]) { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } });
-                cMid.Add(new Label(uCats[i]) { style = { color = Color.grey, fontSize = 7 } });
-                cMid.Add(new Label(uTargs[i]) { style = { color = Color.grey, fontSize = 7, marginTop = 2 } });
-                cMid.Add(new Label(uStarts[i]) { style = { color = Color.white, fontSize = 7, marginTop = 2 } });
+                cMid.Add(new Label(op.opName) { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } });
+                cMid.Add(new Label(op.type) { style = { color = Color.grey, fontSize = 7 } });
+                cMid.Add(new Label($"Target: {op.target}") { style = { color = Color.grey, fontSize = 7, marginTop = 2 } });
+                cMid.Add(new Label($"Start In: {op.monthsRemaining} Months") { style = { color = Color.white, fontSize = 7, marginTop = 2 } });
                 card.Add(cMid);
                 
                 var cRight = new VisualElement { style = { alignItems = Align.FlexEnd, justifyContent = Justify.SpaceBetween } };
-                cRight.Add(new Label(uRisks[i]) { style = { color = uRisks[i] == "HIGH" ? cRed : cOrange, fontSize = 7, marginBottom = 12 } });
+                cRight.Add(new Label(op.riskLevel.ToUpper()) { style = { color = dots >= 3 ? cRed : cOrange, fontSize = 7, marginBottom = 12 } });
                 var dotRow = new VisualElement { style = { flexDirection = FlexDirection.Row } };
                 for(int d=0; d<4; d++)
                 {
-                    dotRow.Add(new VisualElement { style = { width = 4, height = 4, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, backgroundColor = d < uDots[i] ? (uRisks[i] == "HIGH" ? cRed : cOrange) : cWhiteAlpha, marginLeft = 2 } });
+                    dotRow.Add(new VisualElement { style = { width = 4, height = 4, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, backgroundColor = d < dots ? (dots >= 3 ? cRed : cOrange) : cWhiteAlpha, marginLeft = 2 } });
                 }
                 cRight.Add(dotRow);
                 card.Add(cRight);
@@ -1452,30 +1802,6 @@ namespace StateCraft.UI
                 upcomingList.Add(card);
             }
 
-            // --- SAFE HOUSES ---
-            var safeList = panel.Q<ScrollView>("CO_SafeHousesList");
-            safeList.Clear();
-            string[] shNames = { "SAFE HOUSE ALPHA", "SAFE HOUSE BRAVO", "SAFE HOUSE CHARLIE", "SAFE HOUSE DELTA" };
-            string[] shLocs = { "Lagos State", "Kano State", "Rivers State", "Abuja FCT" };
-            int[] shAgents = { 2, 3, 1, 2 };
-            bool[] shSec = { true, true, false, true };
-
-            for(int i=0; i<4; i++)
-            {
-                var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, paddingBottom = 6, paddingTop = 6, borderBottomWidth = 1, borderBottomColor = cWhiteAlpha } };
-                row.Add(new Label("&#xf015;") { style = { color = Color.white, fontSize = 12, marginRight = 10 } }.WithClass("fa-icon"));
-                
-                var sMid = new VisualElement { style = { flexGrow = 1 } };
-                sMid.Add(new Label(shNames[i]) { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } });
-                var sSub = new VisualElement { style = { flexDirection = FlexDirection.Row } };
-                sSub.Add(new Label(shLocs[i]) { style = { color = Color.grey, fontSize = 7, width = 60 } });
-                sSub.Add(new Label($"{shAgents[i]} Agents") { style = { color = Color.grey, fontSize = 7 } });
-                sMid.Add(sSub);
-                row.Add(sMid);
-                
-                row.Add(new Label(shSec[i] ? "SECURE" : "AT RISK") { style = { color = shSec[i] ? cGreen : cOrange, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } });
-                safeList.Add(row);
-            }
 
             // --- RECENT ACTIVITY ---
             var actList = panel.Q<ScrollView>("CO_RecentActivityList");
@@ -1487,7 +1813,7 @@ namespace StateCraft.UI
             {
                 var row = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 6 } };
                 var iconBox = new VisualElement { style = { width = 16, height = 16, borderTopLeftRadius = 8, borderTopRightRadius = 8, borderBottomLeftRadius = 8, borderBottomRightRadius = 8, backgroundColor = new Color(raCol[i].r, raCol[i].g, raCol[i].b, 0.2f), alignItems = Align.Center, justifyContent = Justify.Center, marginRight = 8 } };
-                iconBox.Add(new Label("&#xf023;") { style = { color = raCol[i], fontSize = 8 } }.WithClass("fa-icon"));
+                iconBox.Add(new Label("\uf023") { style = { color = raCol[i], fontSize = 8 } }.WithClass("fa-icon"));
                 row.Add(iconBox);
                 
                 var rtRow = new VisualElement { style = { flexGrow = 1, flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween } };
@@ -1497,55 +1823,116 @@ namespace StateCraft.UI
                 actList.Add(row);
             }
 
-            // --- RECENT OUTCOMES ---
-            var outList = panel.Q<ScrollView>("CO_RecentOutcomesList");
-            outList.Clear();
-            string[] roOps = { "Operation Deep Net", "Operation White Noise", "Operation Broken Chain", "Operation Silent Echo" };
-            string[] roCats = { "Cyber Operation", "Influence Operation", "Economic Operation", "Political Operation" };
-            string[] roRes = { "SUCCESS", "SUCCESS", "PARTIAL", "FAILED" };
-            string[] roDates = { "14 JAN 2026", "13 JAN 2026", "12 JAN 2026", "11 JAN 2026" };
-            for(int i=0; i<4; i++)
+
+
+            PopulateAssetRoster(country, panel);
+        }
+
+        private void PopulateAssetRoster(StateCraft.Data.CountryDataSO country, VisualElement panel)
+        {
+            var rosterList = panel.Q<ScrollView>("CO_AssetRosterList");
+            if (rosterList == null) return;
+            rosterList.Clear();
+
+            if (country.intelHardware == null || country.intelHardware.Count == 0)
             {
-                var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, backgroundColor = new Color(1,1,1,0.03f), paddingBottom = 6, paddingTop = 6, paddingLeft = 8, paddingRight = 8, marginBottom = 4, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4 } };
-                var rL = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, width = 120 } };
-                rL.Add(new Label("&#xf21b;") { style = { color = Color.white, fontSize = 10, marginRight = 6 } }.WithClass("fa-icon"));
-                rL.Add(new Label(roOps[i]) { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } });
-                row.Add(rL);
-                
-                row.Add(new Label(roCats[i]) { style = { color = Color.grey, fontSize = 7, width = 80 } });
-                
-                var resCol = roRes[i] == "SUCCESS" ? cGreen : (roRes[i] == "PARTIAL" ? cOrange : cRed);
-                var rStRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, width = 60 } };
-                rStRow.Add(new Label(roRes[i] == "SUCCESS" ? "&#xf058;" : (roRes[i] == "PARTIAL" ? "&#xf071;" : "&#xf057;")) { style = { color = resCol, fontSize = 8, marginRight = 4 } }.WithClass("fa-icon"));
-                rStRow.Add(new Label(roRes[i]) { style = { color = resCol, fontSize = 7, unityFontStyleAndWeight = FontStyle.Bold } });
-                row.Add(rStRow);
-                
-                row.Add(new Label(roDates[i]) { style = { color = Color.grey, fontSize = 7 } });
-                outList.Add(row);
+                AddPlaceholder(rosterList, "No intelligence hardware deployed.");
+                return;
             }
 
-            // --- QUICK ACTIONS ---
-            var qac = panel.Q<VisualElement>("CO_QuickActionsContainer");
-            qac.Clear();
-            string[] qaTxt = { "LAUNCH NEW OPERATION", "RECRUIT ASSET", "EXTRACT ASSET", "SECURE SAFE HOUSE", "DISINFORMATION CAMPAIGN", "CYBER INTRUSION" };
-            string[] qaIco = { "&#xf067;", "&#xf21b;", "&#xf072;", "&#xf132;", "&#xf0a1;", "&#xf108;" };
-            for(int i=0; i<6; i++)
+            UnityEngine.Texture2D satTex = new UnityEngine.Texture2D(2, 2);
+            if (System.IO.File.Exists("Assets/UI/Icons/spy_satellite.png"))
+                satTex.LoadImage(System.IO.File.ReadAllBytes("Assets/UI/Icons/spy_satellite.png"));
+
+            UnityEngine.Texture2D droneTex = new UnityEngine.Texture2D(2, 2);
+            if (System.IO.File.Exists("Assets/UI/Icons/recon_drone.png"))
+                droneTex.LoadImage(System.IO.File.ReadAllBytes("Assets/UI/Icons/recon_drone.png"));
+
+            foreach (var hw in country.intelHardware)
             {
-                var btn = new Button { style = { width = Length.Percent(48), height = 28, flexDirection = FlexDirection.Row, justifyContent = Justify.FlexStart, alignItems = Align.Center, backgroundColor = new Color(1,1,1,0.05f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = cWhiteAlpha, borderBottomColor = cWhiteAlpha, borderLeftColor = cWhiteAlpha, borderRightColor = cWhiteAlpha, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, marginBottom = 6, paddingLeft = 12 } };
-                btn.Add(new Label(qaIco[i]) { style = { color = cGreen, fontSize = 10, marginRight = 8, width = 16 } }.WithClass("fa-icon"));
-                btn.Add(new Label(qaTxt[i]) { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } });
-                qac.Add(btn);
+                var card = new VisualElement { style = { flexDirection = FlexDirection.Row, backgroundColor = new UnityEngine.Color(1,1,1,0.05f), paddingBottom = 6, paddingTop = 6, paddingLeft = 6, paddingRight = 6, marginBottom = 6, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4 } };
+                
+                var img = new VisualElement { style = { width = 40, height = 40, marginRight = 10, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4 } };
+                if (hw.type == "Satellite") img.style.backgroundImage = new StyleBackground(satTex);
+                else if (hw.type == "Drone") img.style.backgroundImage = new StyleBackground(droneTex);
+                card.Add(img);
+
+                var infoCol = new VisualElement { style = { flexGrow = 1, justifyContent = Justify.Center } };
+                infoCol.Add(new Label(hw.assetName) { style = { color = UnityEngine.Color.white, fontSize = 11, unityFontStyleAndWeight = UnityEngine.FontStyle.Bold } });
+                infoCol.Add(new Label(hw.type) { style = { color = UnityEngine.Color.grey, fontSize = 9 } });
+                card.Add(infoCol);
+
+                var statusCol = new VisualElement { style = { justifyContent = Justify.Center, alignItems = Align.FlexEnd } };
+                if (hw.status == "Building")
+                {
+                    statusCol.Add(new Label("CONSTRUCTING") { style = { color = new UnityEngine.Color(0.95f, 0.77f, 0.06f), fontSize = 9, unityFontStyleAndWeight = UnityEngine.FontStyle.Bold } });
+                    statusCol.Add(new Label($"{hw.monthsRemaining} mo remaining") { style = { color = UnityEngine.Color.grey, fontSize = 8 } });
+                }
+                else
+                {
+                    statusCol.Add(new Label("ACTIVE") { style = { color = new UnityEngine.Color(0.137f, 0.929f, 0.337f), fontSize = 9, unityFontStyleAndWeight = UnityEngine.FontStyle.Bold } });
+                    statusCol.Add(new Label("Operational") { style = { color = UnityEngine.Color.grey, fontSize = 8 } });
+                }
+                card.Add(statusCol);
+
+                rosterList.Add(card);
             }
         }
 
         private VisualElement CreateDetailStat(string label, string value)
         {
-            var box = new VisualElement { style = { width = Length.Percent(50), marginBottom = 8 } };
+            var box = new VisualElement { style = { width = Length.Percent(50), marginBottom = 8, flexShrink = 0 } };
             box.Add(new Label(label) { style = { color = Color.grey, fontSize = 7, marginBottom = 2 } });
             box.Add(new Label(value) { style = { color = Color.white, fontSize = 8, whiteSpace = WhiteSpace.Normal } });
             return box;
         }
 
+
+        private void LaunchReconMission()
+        {
+            var root = _uiDoc?.rootVisualElement;
+            var drpPriority = root?.Q<UnityEngine.UIElements.DropdownField>("DrpReconPriority");
+            string priority = drpPriority != null ? drpPriority.value : "Low";
+
+            UnityEngine.Debug.Log($"Recon Mission Launch Button Clicked! Priority: {priority}");
+            var gm = GameManager.Instance;
+            if (gm != null)
+            {
+                if (gm.playerBudget < 0.05f)
+                {
+                    NotificationManager.Instance?.AddNotification("INSUFFICIENT FUNDS: Need $0.05B for Recon Mission.", UnityEngine.Color.red);
+                    return;
+                }
+                gm.playerBudget -= 0.05f;
+            }
+            
+            int delayDays = priority == "Critical" ? 1 : priority == "High" ? 3 : priority == "Medium" ? 7 : 14;
+            NotificationManager.Instance?.AddNotification($"RECON MISSION LAUNCHED ({priority} Priority): Aerial assets deployed to scan area. ETA: {delayDays} Days", new UnityEngine.Color(0.2f, 0.8f, 0.2f));
+
+            var country = GameManager.Instance?.playerCountry;
+            if (country != null)
+            {
+                if (country.activeCovertOps == null) country.activeCovertOps = new System.Collections.Generic.List<StateCraft.Data.CovertOperation>();
+                var op = new StateCraft.Data.CovertOperation
+                {
+                    opName = $"Recon Sweep {(char)UnityEngine.Random.Range(65, 91)}{UnityEngine.Random.Range(10, 99)}",
+                    type = "Aerial Recon",
+                    target = "Eastern Border",
+                    operativeName = "Drone Sqn 1",
+                    riskLevel = priority,
+                    status = "Scanning",
+                    detectionRisk = 5f,
+                    currentPhase = 1,
+                    totalPhases = 1,
+                    monthsRemaining = 1,
+                    daysRemaining = delayDays,
+                    priority = priority
+                };
+                country.activeCovertOps.Add(op);
+            }
+            
+            RefreshIntelligenceData();
+        }
         private void LaunchSampleCovertOp()
         {
             var country = GameManager.Instance?.playerCountry;
@@ -1557,7 +1944,7 @@ namespace StateCraft.UI
             if (rivals.Count == 0) rivals = gm.allCountries.Where(c => c != country).ToList();
             var targetCountry = rivals.Count > 0 ? rivals[Random.Range(0, rivals.Count)].countryName : "Unknown";
 
-            string[] types = { "Sabotage", "Propaganda", "Asset Recruitment", "Assassination" };
+            string[] types = { "Military", "Influence", "Political", "Cyber", "Economic" };
             
             float opCost = 0.1f; // $100M per op
             var gm3 = GameManager.Instance;
@@ -1585,7 +1972,7 @@ namespace StateCraft.UI
                 target = targetCountry,
                 operativeName = $"Agent {Random.Range(100, 999)}",
                 riskLevel = riskLevel,
-                status = "Infiltration",
+                status = "In Progress",
                 detectionRisk = baseDetection,
                 currentPhase = 1,
                 totalPhases = 3,
@@ -1598,6 +1985,8 @@ namespace StateCraft.UI
             NotificationManager.Instance?.AddNotification($"OPERATION LAUNCHED ({riskLevel} risk, $0.1B): {op.opName} targeting {targetCountry}. Type: {opType}.", new Color(186/255f, 104/255f, 200/255f));
             RefreshIntelligenceData();
         }
+
+
 
         private void RunInternalAudit()
         {
@@ -1622,211 +2011,138 @@ namespace StateCraft.UI
 
         private void PopulateOverviewTab(CountryDataSO country)
         {
-            if (_overviewIntelSummaryContainer == null) return;
+            var panel = _dashboardRoot?.Q<VisualElement>("PanelOverview");
+            if (panel == null) return;
 
-            // 1. INTEL SUMMARY
-            _overviewIntelSummaryContainer.Clear();
-            AddOverviewSummaryRow("Intel Level", country.intelligenceLevel > 75 ? "HIGH" : country.intelligenceLevel > 40 ? "MEDIUM" : "LOW", country.intelligenceLevel > 75 ? new Color(0.14f, 0.93f, 0.34f) : new Color(1f, 0.67f, 0.25f), FaIcons.BullsEye);
-            AddOverviewSummaryRowWithBar("Overall Coverage", country.globalIntelCoverage, FaIcons.Globe);
-            AddOverviewSummaryRow("Active Agents", country.operativeCount.ToString(), Color.white, FaIcons.UserSecret);
-            AddOverviewSummaryRow("Satellite Status", country.satelliteCount > 0 ? "ONLINE" : "OFFLINE", country.satelliteCount > 0 ? new Color(0.14f, 0.93f, 0.34f) : Color.grey, FaIcons.Microchip);
-            AddOverviewSummaryRowWithBar("Border Surveillance", country.security, FaIcons.Road, new Color(0.24f, 0.53f, 0.94f));
-            AddOverviewSummaryRowWithBar("Cyber Security", Mathf.Clamp(country.intelligenceLevel * 0.9f, 0, 100), FaIcons.Microchip, new Color(0.73f, 0.41f, 0.78f));
-            float sigintLevel = Mathf.Clamp(country.intelligenceLevel * 0.8f + country.satelliteCount * 10f, 0, 100);
-            AddOverviewSummaryRow("Signal Intercepts", sigintLevel > 70 ? "HIGH" : "MODERATE", sigintLevel > 70 ? new Color(0.14f, 0.93f, 0.34f) : new Color(1f, 0.67f, 0.25f), FaIcons.Bolt);
+            // Colors
+            var cGreen = new Color(0.137f, 0.929f, 0.337f);
+            var cRed = new Color(1f, 0.32f, 0.32f);
+            var cOrange = new Color(0.95f, 0.77f, 0.06f);
+
+            // 1. OVERALL THREAT LEVEL
+            var threatCard = panel.Q<VisualElement>("OverviewThreatCard");
+            var threatTitle = panel.Q<Label>("OverviewThreatTitle");
+            var threatIcon = panel.Q<Label>("OverviewThreatIcon");
+            var threatLevelLbl = panel.Q<Label>("OverviewThreatLevel");
+            var threatSubLbl = panel.Q<Label>("OverviewThreatSubtext");
             
-            string sym = string.IsNullOrEmpty(country.currencySymbol) ? "₦" : country.currencySymbol;
-            AddOverviewSummaryRow("Intel Budget", $"{UiFormat.Money(country.intelligenceBudget, sym)} / month", Color.white, FaIcons.Clock, true);
-
-            // 2. ACTIVE OPERATIONS
-            if (_overviewActiveOpsList != null)
+            if (threatLevelLbl != null)
             {
-                _overviewActiveOpsList.Clear();
-                // Add mock ops to match mockup
-                AddOverviewActiveOp("Operation Eagle Eye", "Border Surveillance", "ACTIVE", new Color(0.14f, 0.93f, 0.34f), FaIcons.Bolt);
-                AddOverviewActiveOp("Border Watch", "Northern Border", "ACTIVE", new Color(0.14f, 0.93f, 0.34f), FaIcons.Bolt);
-                AddOverviewActiveOp("Gulf Shield", "Maritime Surveillance", "ACTIVE", new Color(0.14f, 0.93f, 0.34f), FaIcons.Shield);
-                AddOverviewActiveOp("Cyber Shield", "National Cyber Defense", "ACTIVE", new Color(0.14f, 0.93f, 0.34f), FaIcons.Shield);
+                if (country.exposureRisk > 60)
+                {
+                    threatLevelLbl.text = "CRITICAL";
+                    threatLevelLbl.style.color = cRed;
+                    if (threatSubLbl != null) { threatSubLbl.text = "Immediate Action Required"; threatSubLbl.style.color = new Color(cRed.r, cRed.g, cRed.b, 0.6f); }
+                    if (threatIcon != null) { threatIcon.text = "\uf071"; threatIcon.style.color = cRed; }
+                    if (threatTitle != null) threatTitle.style.color = new Color(cRed.r, cRed.g, cRed.b, 0.8f);
+                    if (threatCard != null) threatCard.style.borderTopColor = threatCard.style.borderBottomColor = threatCard.style.borderLeftColor = threatCard.style.borderRightColor = new Color(cRed.r, cRed.g, cRed.b, 0.3f);
+                }
+                else if (country.exposureRisk > 30)
+                {
+                    threatLevelLbl.text = "ELEVATED";
+                    threatLevelLbl.style.color = cOrange;
+                    if (threatSubLbl != null) { threatSubLbl.text = "Monitor Active Threats"; threatSubLbl.style.color = new Color(cOrange.r, cOrange.g, cOrange.b, 0.6f); }
+                    if (threatIcon != null) { threatIcon.text = "\uf071"; threatIcon.style.color = cOrange; }
+                    if (threatTitle != null) threatTitle.style.color = new Color(cOrange.r, cOrange.g, cOrange.b, 0.8f);
+                    if (threatCard != null) threatCard.style.borderTopColor = threatCard.style.borderBottomColor = threatCard.style.borderLeftColor = threatCard.style.borderRightColor = new Color(cOrange.r, cOrange.g, cOrange.b, 0.3f);
+                }
+                else
+                {
+                    threatLevelLbl.text = "STABLE";
+                    threatLevelLbl.style.color = cGreen;
+                    if (threatSubLbl != null) { threatSubLbl.text = "No Immediate Danger Detected"; threatSubLbl.style.color = new Color(cGreen.r, cGreen.g, cGreen.b, 0.6f); }
+                    if (threatIcon != null) { threatIcon.text = "\uf058"; threatIcon.style.color = cGreen; } // Check-circle icon
+                    if (threatTitle != null) threatTitle.style.color = new Color(cGreen.r, cGreen.g, cGreen.b, 0.8f);
+                    if (threatCard != null) threatCard.style.borderTopColor = threatCard.style.borderBottomColor = threatCard.style.borderLeftColor = threatCard.style.borderRightColor = new Color(cGreen.r, cGreen.g, cGreen.b, 0.3f);
+                }
             }
 
-            // 3. RECENT REPORTS
-            if (_overviewRecentReportsList != null)
+            // 2. THREAT MATRIX
+            var threatList = panel.Q<ScrollView>("OverviewThreatMatrixList");
+            if (threatList != null)
             {
-                _overviewRecentReportsList.Clear();
-                // Add mock reports
-                AddOverviewRecentReport("Border Incursion Detected", "Northern Nigeria", "Armed militants observed crossing from Niger near Katsina region.", "08 Jan 2026\n07:45", "HIGH", new Color(1f, 0.2f, 0.2f), FaIcons.Shield, new Color(0.14f, 0.93f, 0.34f));
-                AddOverviewRecentReport("Political Unrest", "Cameroon", "Growing public discontent due to economic hardship and political instability.", "08 Jan 2026\n06:20", "MEDIUM", new Color(1f, 0.67f, 0.25f), FaIcons.UserSecret, new Color(1f, 0.67f, 0.25f));
-                AddOverviewRecentReport("Pirate Activity Increase", "Gulf of Guinea", "Increase in pirate attacks on commercial vessels near Delta region.", "08 Jan 2026\n05:10", "MEDIUM", new Color(1f, 0.67f, 0.25f), FaIcons.TriangleExclaim, new Color(0.24f, 0.53f, 0.94f));
-                AddOverviewRecentReport("Military Build-up", "Niger", "Heavy military equipment movement observed near Diffa region.", "08 Jan 2026\n04:30", "HIGH", new Color(1f, 0.2f, 0.2f), FaIcons.CircleXMark, new Color(1f, 0.2f, 0.2f));
+                threatList.Clear();
+                var threats = GameManager.Instance.ThreatAssessmentSystem?.GenerateThreats(country, GameManager.Instance);
+                if (threats != null && threats.Count > 0)
+                {
+                    foreach (var th in threats)
+                    {
+                        AddThreatMatrixItem(threatList, th.title, th.region, th.probability, th.impact, th.color);
+                    }
+                }
+                else
+                {
+                    threatList.Add(new Label("No significant threats detected in the current operational theater.") { style = { fontSize = 10, color = Color.grey, whiteSpace = WhiteSpace.Normal, marginTop = 12 } });
+                }
             }
 
-            // 4. COVERAGE GRID
-            if (_overviewCoverageGrid != null)
+            // 3. INTEL FEED
+            var intelFeed = panel.Q<ScrollView>("OverviewIntelFeedList");
+            if (intelFeed != null)
             {
-                _overviewCoverageGrid.Clear();
-                AddOverviewCoverageItem("BORDER AREAS", 81, "GOOD", FaIcons.Road, new Color(0.14f, 0.93f, 0.34f));
-                AddOverviewCoverageItem("MARITIME ZONE", 66, "FAIR", FaIcons.TriangleExclaim, new Color(1f, 0.67f, 0.25f));
-                AddOverviewCoverageItem("CYBER SPACE", 62, "FAIR", FaIcons.Microchip, new Color(0.73f, 0.41f, 0.78f));
-                AddOverviewCoverageItem("POLITICAL", 74, "GOOD", FaIcons.Landmark, new Color(0.14f, 0.93f, 0.34f));
-                AddOverviewCoverageItem("ECONOMIC", 58, "FAIR", FaIcons.ChartLine, new Color(1f, 0.67f, 0.25f));
-                AddOverviewCoverageItem("MILITARY", 77, "GOOD", FaIcons.Shield, new Color(0.14f, 0.93f, 0.34f));
+                intelFeed.Clear();
+                var feedLines = DashboardLiveContent.BuildIntelFeed(country, GameManager.Instance);
+                foreach (var feed in feedLines)
+                {
+                    AddIntelFeedItem(intelFeed, feed.Tag, feed.Message, feed.Color);
+                }
             }
 
-            // 5. THREAT ALERTS
-            if (_overviewThreatsList != null)
+            // 4. BLINDSPOTS
+            var blindspotList = panel.Q<ScrollView>("OverviewBlindspotsList");
+            if (blindspotList != null)
             {
-                _overviewThreatsList.Clear();
-                AddOverviewThreatAlert("Border Breach Risk", "Northern Border", 78, "High", FaIcons.Shield, new Color(1f, 0.2f, 0.2f));
-                AddOverviewThreatAlert("Insurgency Risk", "Northern Region", 52, "Medium", FaIcons.Fire, new Color(1f, 0.67f, 0.25f));
-                AddOverviewThreatAlert("Military Build-up", "Niger", 87, "High", FaIcons.CircleXMark, new Color(1f, 0.2f, 0.2f));
-                AddOverviewThreatAlert("Pirate Activity", "Gulf of Guinea", 48, "Medium", FaIcons.TriangleExclaim, new Color(1f, 0.67f, 0.25f));
-                AddOverviewThreatAlert("Economic Espionage", "Multiple Targets", 28, "Low", FaIcons.Microchip, new Color(0.24f, 0.53f, 0.94f));
-            }
-
-            // 6. FOOTER METRICS
-            if (_overviewFooterContainer != null)
-            {
-                _overviewFooterContainer.Clear();
-                AddOverviewFooterMetric("Last Intel Update", "08 Jan 2026, 09:05", FaIcons.Clock, Color.white);
-                AddOverviewFooterMetric("Intel Accuracy", "87%", FaIcons.BullsEye, new Color(0.14f, 0.93f, 0.34f));
-                AddOverviewFooterMetric("Intel Influence", "STRONG", FaIcons.UserSecret, new Color(0.14f, 0.93f, 0.34f));
-                AddOverviewFooterMetric("Data Intercepts (24h)", "1,248", FaIcons.ChartLine, Color.white);
-                AddOverviewFooterMetric("Active Assets", "23", FaIcons.Bolt, Color.white);
+                blindspotList.Clear();
+                // Mock blindspots based on country stats
+                if (country.satelliteCount == 0) AddBlindspotItem(blindspotList, "ORBITAL COVERAGE", "No active spy satellites. Global troop movements cannot be tracked.", cRed);
+                if (country.operativeCount < 5) AddBlindspotItem(blindspotList, "HUMINT (HUMAN INTELLIGENCE)", "Insufficient field agents. High risk of missing localized radicalization or political plots.", cOrange);
+                if (country.intelligenceLevel < 30) AddBlindspotItem(blindspotList, "CYBER NETWORK", "Weak digital surveillance. Vulnerable to foreign cyber intrusions and disinformation.", cRed);
+                
+                if (blindspotList.childCount == 0)
+                {
+                    blindspotList.Add(new Label("Coverage optimal. No critical blindspots currently identified.") { style = { fontSize = 10, color = cGreen, whiteSpace = WhiteSpace.Normal, marginTop = 12 } });
+                }
             }
         }
 
-        private void AddOverviewSummaryRow(string label, string value, Color valColor, string icon, bool isBottom = false)
+        private void AddThreatMatrixItem(VisualElement container, string title, string region, float prob, string impact, Color color)
         {
-            var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = isBottom ? 0 : 8 } };
-            var left = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
-            var iconLabel = new Label(icon) { style = { fontSize = 10, color = Color.grey, width = 16 } };
-            iconLabel.AddToClassList("fa-icon");
-            left.Add(iconLabel);
-            left.Add(new Label(label) { style = { fontSize = 10, color = Color.grey } });
-            row.Add(left);
-            row.Add(new Label(value) { style = { fontSize = 10, color = valColor, unityFontStyleAndWeight = FontStyle.Bold } });
-            _overviewIntelSummaryContainer.Add(row);
-        }
-
-        private void AddOverviewSummaryRowWithBar(string label, float value, string icon, Color? barColor = null)
-        {
-            var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 8 } };
-            var left = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
-            var iconLabel = new Label(icon) { style = { fontSize = 10, color = Color.grey, width = 16 } };
-            iconLabel.AddToClassList("fa-icon");
-            left.Add(iconLabel);
-            left.Add(new Label(label) { style = { fontSize = 10, color = Color.grey } });
-            row.Add(left);
+            var card = new VisualElement { style = { backgroundColor = new Color(0.05f, 0.07f, 0.1f, 0.95f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = new Color(0.2f, 0.25f, 0.35f, 0.5f), borderBottomColor = new Color(0.2f, 0.25f, 0.35f, 0.5f), borderLeftColor = new Color(0.2f, 0.25f, 0.35f, 0.5f), borderRightColor = new Color(0.2f, 0.25f, 0.35f, 0.5f), borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, paddingBottom = 10, paddingTop = 10, paddingLeft = 10, paddingRight = 10, marginBottom = 8 } };
+            card.Add(new Label(title) { style = { fontSize = 11, color = Color.white, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 2 } });
+            card.Add(new Label($"Target Region: {region}") { style = { fontSize = 9, color = Color.grey, marginBottom = 6 } });
             
-            var right = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, width = 70, justifyContent = Justify.FlexEnd } };
-            right.Add(new Label($"{value:F0}%") { style = { fontSize = 10, color = Color.white, unityFontStyleAndWeight = FontStyle.Bold, marginRight = 6 } });
-            var pBar = new ProgressBar { value = value, highValue = 100, style = { width = 35, height = 4 } };
-            if (barColor.HasValue) pBar.style.backgroundColor = barColor.Value;
-            right.Add(pBar);
-            row.Add(right);
-            
-            _overviewIntelSummaryContainer.Add(row);
-        }
-
-        private void AddOverviewActiveOp(string opName, string region, string status, Color statusColor, string icon)
-        {
-            var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 12 } };
-            var left = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
-            
-            var iconBox = new VisualElement { style = { width = 24, height = 24, borderTopLeftRadius = 12, borderTopRightRadius = 12, borderBottomLeftRadius = 12, borderBottomRightRadius = 12, backgroundColor = new Color(0.1f, 0.15f, 0.25f), justifyContent = Justify.Center, alignItems = Align.Center, marginRight = 10 } };
-            var iconLabel = new Label(icon) { style = { fontSize = 12, color = new Color(0.73f, 0.41f, 0.78f) } };
-            iconLabel.AddToClassList("fa-icon");
-            iconBox.Add(iconLabel);
-            left.Add(iconBox);
-            
-            var textCol = new VisualElement { style = { flexDirection = FlexDirection.Column } };
-            textCol.Add(new Label(opName) { style = { fontSize = 10, color = Color.white, unityFontStyleAndWeight = FontStyle.Bold } });
-            textCol.Add(new Label(region) { style = { fontSize = 9, color = Color.grey } });
-            left.Add(textCol);
-            
-            row.Add(left);
-            row.Add(new Label(status) { style = { fontSize = 9, color = statusColor, unityFontStyleAndWeight = FontStyle.Bold } });
-            
-            _overviewActiveOpsList.Add(row);
-        }
-
-        private void AddOverviewRecentReport(string title, string region, string desc, string time, string severity, Color sevColor, string icon, Color iconColor)
-        {
-            var card = new VisualElement { style = { flexDirection = FlexDirection.Row, backgroundColor = new Color(0.05f, 0.07f, 0.1f, 0.95f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = new Color(0.2f, 0.25f, 0.35f, 0.5f), borderBottomColor = new Color(0.2f, 0.25f, 0.35f, 0.5f), borderLeftColor = new Color(0.2f, 0.25f, 0.35f, 0.5f), borderRightColor = new Color(0.2f, 0.25f, 0.35f, 0.5f), borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, paddingBottom = 10, paddingTop = 10, paddingLeft = 12, paddingRight = 12, marginBottom = 8 } };
-            
-            var iconBox = new VisualElement { style = { width = 36, height = 36, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, backgroundColor = new Color(iconColor.r, iconColor.g, iconColor.b, 0.1f), justifyContent = Justify.Center, alignItems = Align.Center, marginRight = 12, borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = new Color(iconColor.r, iconColor.g, iconColor.b, 0.3f), borderBottomColor = new Color(iconColor.r, iconColor.g, iconColor.b, 0.3f), borderLeftColor = new Color(iconColor.r, iconColor.g, iconColor.b, 0.3f), borderRightColor = new Color(iconColor.r, iconColor.g, iconColor.b, 0.3f) } };
-            var iconLabel = new Label(icon) { style = { fontSize = 18, color = iconColor } };
-            iconLabel.AddToClassList("fa-icon");
-            iconBox.Add(iconLabel);
-            card.Add(iconBox);
-            
-            var mid = new VisualElement { style = { flexGrow = 1, flexDirection = FlexDirection.Column, justifyContent = Justify.Center } };
-            var header = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.FlexEnd, marginBottom = 2 } };
-            header.Add(new Label(title) { style = { fontSize = 11, color = Color.white, unityFontStyleAndWeight = FontStyle.Bold, marginRight = 6 } });
-            header.Add(new Label(region) { style = { fontSize = 9, color = Color.grey } });
-            mid.Add(header);
-            mid.Add(new Label(desc) { style = { fontSize = 9, color = new Color(0.6f, 0.65f, 0.7f), whiteSpace = WhiteSpace.Normal } });
-            card.Add(mid);
-            
-            var right = new VisualElement { style = { flexDirection = FlexDirection.Column, alignItems = Align.FlexEnd, justifyContent = Justify.SpaceBetween, width = 60 } };
-            right.Add(new Label(time) { style = { fontSize = 8, color = Color.grey, unityTextAlign = TextAnchor.UpperRight } });
-            var badge = new Label(severity) { style = { fontSize = 8, color = sevColor, unityFontStyleAndWeight = FontStyle.Bold, backgroundColor = new Color(sevColor.r, sevColor.g, sevColor.b, 0.15f), paddingTop = 2, paddingBottom = 2, paddingLeft = 6, paddingRight = 6, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = new Color(sevColor.r, sevColor.g, sevColor.b, 0.3f), borderBottomColor = new Color(sevColor.r, sevColor.g, sevColor.b, 0.3f), borderLeftColor = new Color(sevColor.r, sevColor.g, sevColor.b, 0.3f), borderRightColor = new Color(sevColor.r, sevColor.g, sevColor.b, 0.3f) } };
-            right.Add(badge);
-            card.Add(right);
-            
-            _overviewRecentReportsList.Add(card);
-        }
-
-        private void AddOverviewCoverageItem(string label, float val, string status, string icon, Color color)
-        {
-            var col = new VisualElement { style = { flexDirection = FlexDirection.Column, alignItems = Align.Center, width = Length.Percent(15) } };
-            col.Add(new Label(label) { style = { fontSize = 8, color = Color.grey, unityTextAlign = TextAnchor.MiddleCenter, marginBottom = 6, whiteSpace = WhiteSpace.Normal } });
-            col.Add(new Label($"{val:F0}%") { style = { fontSize = 14, color = color, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 2 } });
-            col.Add(new Label(status) { style = { fontSize = 9, color = color, marginBottom = 6 } });
-            var pBar = new ProgressBar { value = val, highValue = 100, style = { width = 30, height = 3, marginBottom = 8 } };
-            col.Add(pBar);
-            var iconLabel = new Label(icon) { style = { fontSize = 16, color = Color.grey } };
-            iconLabel.AddToClassList("fa-icon");
-            col.Add(iconLabel);
-            _overviewCoverageGrid.Add(col);
-        }
-
-        private void AddOverviewThreatAlert(string title, string region, float prob, string impact, string icon, Color color)
-        {
-            var card = new VisualElement { style = { flexDirection = FlexDirection.Row, backgroundColor = new Color(0.05f, 0.07f, 0.1f, 0.95f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = new Color(0.2f, 0.25f, 0.35f, 0.5f), borderBottomColor = new Color(0.2f, 0.25f, 0.35f, 0.5f), borderLeftColor = new Color(0.2f, 0.25f, 0.35f, 0.5f), borderRightColor = new Color(0.2f, 0.25f, 0.35f, 0.5f), borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, paddingBottom = 12, paddingTop = 12, paddingLeft = 12, paddingRight = 12, marginBottom = 8, alignItems = Align.Center } };
-            
-            var iconBox = new VisualElement { style = { width = 36, height = 36, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, backgroundColor = new Color(color.r, color.g, color.b, 0.1f), justifyContent = Justify.Center, alignItems = Align.Center, marginRight = 12, borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = new Color(color.r, color.g, color.b, 0.3f), borderBottomColor = new Color(color.r, color.g, color.b, 0.3f), borderLeftColor = new Color(color.r, color.g, color.b, 0.3f), borderRightColor = new Color(color.r, color.g, color.b, 0.3f) } };
-            var iconLabel = new Label(icon) { style = { fontSize = 18, color = color } };
-            iconLabel.AddToClassList("fa-icon");
-            iconBox.Add(iconLabel);
-            card.Add(iconBox);
-            
-            var mid = new VisualElement { style = { flexGrow = 1, flexDirection = FlexDirection.Column, justifyContent = Justify.Center } };
-            mid.Add(new Label(title) { style = { fontSize = 11, color = Color.white, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 2 } });
-            mid.Add(new Label(region) { style = { fontSize = 9, color = Color.grey, marginBottom = 4 } });
-            
-            var row = new VisualElement { style = { flexDirection = FlexDirection.Row } };
-            row.Add(new Label($"Probability: {prob}%") { style = { fontSize = 8, color = color, marginRight = 8 } });
+            var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween } };
+            row.Add(new Label($"Probability: {prob}%") { style = { fontSize = 8, color = color } });
             row.Add(new Label($"Impact: {impact}") { style = { fontSize = 8, color = color } });
-            mid.Add(row);
+            card.Add(row);
             
-            card.Add(mid);
-            card.Add(new Label("›") { style = { fontSize = 16, color = Color.grey } });
-            
-            _overviewThreatsList.Add(card);
+            container.Add(card);
         }
 
-        private void AddOverviewFooterMetric(string label, string val, string icon, Color color)
+        private void AddIntelFeedItem(VisualElement container, string tag, string message, Color color)
         {
-            var el = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
-            var iconLabel = new Label(icon) { style = { fontSize = 12, color = Color.grey, marginRight = 6 } };
+            var row = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 8, borderBottomWidth = 1, borderBottomColor = new Color(1,1,1,0.05f), paddingBottom = 8 } };
+            var tagLbl = new Label(tag) { style = { width = 50, fontSize = 9, color = color, unityFontStyleAndWeight = FontStyle.Bold } };
+            var msgLbl = new Label(message) { style = { flexGrow = 1, fontSize = 9, color = Color.white, whiteSpace = WhiteSpace.Normal } };
+            row.Add(tagLbl);
+            row.Add(msgLbl);
+            container.Add(row);
+        }
+
+        private void AddBlindspotItem(VisualElement container, string title, string desc, Color color)
+        {
+            var card = new VisualElement { style = { flexDirection = FlexDirection.Row, backgroundColor = new Color(color.r, color.g, color.b, 0.05f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = new Color(color.r, color.g, color.b, 0.3f), borderBottomColor = new Color(color.r, color.g, color.b, 0.3f), borderLeftColor = new Color(color.r, color.g, color.b, 0.3f), borderRightColor = new Color(color.r, color.g, color.b, 0.3f), borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, paddingBottom = 10, paddingTop = 10, paddingLeft = 10, paddingRight = 10, marginBottom = 8 } };
+            
+            var iconLabel = new Label("\uf06e") { style = { fontSize = 16, color = color, marginRight = 12 } };
             iconLabel.AddToClassList("fa-icon");
-            el.Add(iconLabel);
-            var col = new VisualElement { style = { flexDirection = FlexDirection.Column } };
-            col.Add(new Label(label) { style = { fontSize = 8, color = Color.grey } });
-            col.Add(new Label(val) { style = { fontSize = 10, color = color, unityFontStyleAndWeight = FontStyle.Bold } });
-            el.Add(col);
-            _overviewFooterContainer.Add(el);
+            card.Add(iconLabel);
+            
+            var mid = new VisualElement { style = { flexGrow = 1, flexDirection = FlexDirection.Column } };
+            mid.Add(new Label(title) { style = { fontSize = 10, color = color, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 2 } });
+            mid.Add(new Label(desc) { style = { fontSize = 9, color = Color.grey, whiteSpace = WhiteSpace.Normal } });
+            card.Add(mid);
+            
+            container.Add(card);
         }
 
         private void LaunchSatellite()
@@ -1834,27 +2150,74 @@ namespace StateCraft.UI
             var country = GameManager.Instance?.playerCountry;
             var gm = GameManager.Instance;
             if (country == null || gm == null) return;
-            if (country.satelliteCount + country.satellitesUnderConstruction >= 4) return;
-            
-            float cost = 0.5f; // $500M
-            if (gm.playerBudget < cost)
+            if (country.satelliteCount + country.satellitesUnderConstruction >= 4)
             {
-                NotificationManager.Instance?.AddNotification($"INSUFFICIENT FUNDS: Need $0.5B to build spy satellite.", Color.red);
+                NotificationManager.Instance?.AddNotification($"MAX CONSTELLATION REACHED. You cannot maintain more than 4 satellites.", UnityEngine.Color.yellow);
+                return;
+            }
+            
+            float cost = 500f; // 500M
+            if (country.intelligenceFunds < cost)
+            {
+                NotificationManager.Instance?.AddNotification($"INSUFFICIENT FUNDS: Need $500M in Intelligence Funds to build spy satellite.", UnityEngine.Color.red);
                 return;
             }
 
-            gm.playerBudget -= cost;
-            country.treasury = gm.playerBudget;
+            country.intelligenceFunds -= cost;
             country.satellitesUnderConstruction++;
-            country.satelliteBuildMonthsRemaining += 6;
+
+            string aName = $"Argus-{UnityEngine.Random.Range(10, 99)}";
+
+            if (country.intelHardware == null) country.intelHardware = new System.Collections.Generic.List<StateCraft.Data.IntelligenceHardware>();
+            country.intelHardware.Add(new StateCraft.Data.IntelligenceHardware {
+                id = System.Guid.NewGuid().ToString(),
+                assetName = aName,
+                type = "Satellite",
+                status = "Building",
+                monthsTotal = 6,
+                monthsRemaining = 6
+            });
             
-            NotificationManager.Instance?.AddNotification($"SPY SATELLITE COMMISSIONED. Construction will take {country.satelliteBuildMonthsRemaining} months.", new Color(186/255f, 104/255f, 200/255f));
+            NotificationManager.Instance?.AddNotification($"SPY SATELLITE '{aName}' COMMISSIONED. Construction will take 6 months.", new UnityEngine.Color(186/255f, 104/255f, 200/255f));
+            
+            RefreshIntelligenceData();
+        }
+
+        private void ProcureDrones()
+        {
+            var country = GameManager.Instance?.playerCountry;
+            if (country == null) return;
+            
+            float cost = 150f; // 150M
+            if (country.intelligenceFunds < cost)
+            {
+                NotificationManager.Instance?.AddNotification($"INSUFFICIENT FUNDS: Need $150M in Intelligence Funds to procure Recon Drones.", UnityEngine.Color.red);
+                return;
+            }
+
+            country.intelligenceFunds -= cost;
+            country.dronesUnderConstruction++;
+
+            string aName = $"Reaper-Sq-{UnityEngine.Random.Range(1, 9)}";
+
+            if (country.intelHardware == null) country.intelHardware = new System.Collections.Generic.List<StateCraft.Data.IntelligenceHardware>();
+            country.intelHardware.Add(new StateCraft.Data.IntelligenceHardware {
+                id = System.Guid.NewGuid().ToString(),
+                assetName = aName,
+                type = "Drone",
+                status = "Building",
+                monthsTotal = 2,
+                monthsRemaining = 2
+            });
+            
+            NotificationManager.Instance?.AddNotification($"RECON DRONES '{aName}' PROCURED. Delivery and setup will take 2 months.", new UnityEngine.Color(35/255f, 237/255f, 86/255f));
             
             RefreshIntelligenceData();
         }
 
         private void PopulateThreatAssessmentTab(CountryDataSO country)
         {
+            Debug.Log($"[IntelligenceDashboard] Populating Threat Assessment Tab... Detected Threats: {country.detectedThreats.Count}");
             var panel = _dashboardRoot?.Q<VisualElement>("PanelThreatBoard");
             if (panel == null) return;
 
@@ -1865,64 +2228,97 @@ namespace StateCraft.UI
             var cBlue = new Color(0.18f, 0.6f, 0.95f);
             var cWhiteAlpha = new Color(1, 1, 1, 0.1f);
 
+            var gm = StateCraft.Core.GameManager.Instance;
+            var threats = gm.ThreatAssessmentSystem.GenerateThreats(country, gm);
+
             // --- KPIs ---
-            panel.Q<Label>("TA_ActiveThreats").text = "18";
-            panel.Q<Label>("TA_CriticalThreats").text = "4";
-            panel.Q<Label>("TA_CountriesConcern").text = "7";
+            panel.Q<Label>("TA_ActiveThreats").text = threats.Count.ToString();
+            int criticals = 0;
+            foreach (var t in threats) if (t.impact == "Critical") criticals++;
+            panel.Q<Label>("TA_CriticalThreats").text = criticals.ToString();
+            panel.Q<Label>("TA_CountriesConcern").text = gm.allCountries != null ? (gm.allCountries.Count / 3).ToString() : "0";
 
             // --- THREAT MATRIX ---
+            var matrixContainer = panel.Q<VisualElement>("TA_MatrixGrid")?.parent;
             var matrix = panel.Q<VisualElement>("TA_MatrixGrid");
-            matrix.Clear();
-            Color[] mColors = { cGreen, cGreen, cOrange, cOrange,
-                                cGreen, cOrange, cOrange, cRed,
-                                cOrange, cOrange, cRed, cRed,
-                                cOrange, cRed, cRed, cRed };
-            for(int i=0; i<16; i++)
+            if (matrix != null)
             {
-                var box = new VisualElement { style = { width = Length.Percent(23), height = 24, marginRight = Length.Percent(2), marginBottom = 6, backgroundColor = mColors[i], borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, alignItems = Align.Center, justifyContent = Justify.Center } };
-                if (i == 3 || i == 7 || i == 11 || i == 15) box.style.marginRight = 0; // last column
-                box.Add(new Label($"{i+1}") { style = { color = new Color(1,1,1,0.5f), fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } });
-                matrix.Add(box);
+                // Clear and rebuild the whole container to add axis labels
+                matrix.Clear();
+                Color[] mColors = { cGreen, cGreen, cOrange, cOrange,
+                                    cGreen, cOrange, cOrange, cRed,
+                                    cOrange, cOrange, cRed, cRed,
+                                    cOrange, cRed, cRed, cRed };
+                string[] colHeaders = { "LOW", "MED", "HIGH", "CRIT" };
+                string[] rowHeaders = { "RARE", "LIKELY", "PROBABLE", "CERTAIN" };
+
+                // Column axis header (Probability →)
+                var colAxisRow = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 2, marginLeft = 55 } };
+                colAxisRow.Add(new Label("← IMPACT →") { style = { color = new Color(1,1,1,0.35f), fontSize = 7, flexGrow = 1, unityTextAlign = TextAnchor.MiddleCenter } });
+                matrix.Add(colAxisRow);
+
+                // Column header labels
+                var colLabelRow = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 4, marginLeft = 55 } };
+                foreach (var h in colHeaders)
+                    colLabelRow.Add(new Label(h) { style = { color = new Color(1,1,1,0.4f), fontSize = 7, width = Length.Percent(23), marginRight = Length.Percent(2), unityTextAlign = TextAnchor.MiddleCenter } });
+                matrix.Add(colLabelRow);
+
+                // Grid rows with row axis label
+                for (int row = 0; row < 4; row++)
+                {
+                    var rowEl = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 5, alignItems = Align.Center } };
+                    rowEl.Add(new Label(rowHeaders[row]) { style = { color = new Color(1,1,1,0.4f), fontSize = 6, width = 50, unityTextAlign = TextAnchor.MiddleRight, marginRight = 5 } });
+                    for (int col = 0; col < 4; col++)
+                    {
+                        int i = row * 4 + col;
+                        var box = new VisualElement { style = { width = Length.Percent(23), height = 22, marginRight = col < 3 ? Length.Percent(2) : new Length(0), backgroundColor = mColors[i], borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, alignItems = Align.Center, justifyContent = Justify.Center } };
+                        box.Add(new Label($"{i+1}") { style = { color = new Color(1,1,1,0.6f), fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } });
+                        rowEl.Add(box);
+                    }
+                    matrix.Add(rowEl);
+                }
+
+                // Row axis label (Probability ↑)
+                var rowAxisLbl = new Label("← PROBABILITY →") { style = { color = new Color(1,1,1,0.35f), fontSize = 7, marginTop = 2, unityTextAlign = TextAnchor.MiddleCenter } };
+                matrix.Add(rowAxisLbl);
             }
 
             // --- TOP THREATS ---
             var tList = panel.Q<ScrollView>("TA_TopThreatsList");
             tList.Clear();
-            string[] tNames = { "Insurgent Activity", "Political Instability", "Economic Collapse", "Cyber Warfare", "Ethno-Religious Conflict" };
-            string[] tCats = { "Terrorism", "Political", "Economic", "Cyber", "Social" };
-            string[] tRisks = { "CRITICAL", "HIGH", "HIGH", "HIGH", "MEDIUM" };
-            for(int i=0; i<5; i++)
+            for(int i=0; i<threats.Count; i++)
             {
+                var t = threats[i];
                 var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, paddingBottom = 6, paddingTop = 6, borderBottomWidth = 1, borderBottomColor = cWhiteAlpha } };
                 row.Add(new Label((i+1).ToString()) { style = { color = Color.grey, fontSize = 8, width = 16 } });
-                row.Add(new Label(tNames[i]) { style = { color = Color.white, fontSize = 8, width = 124 } });
-                row.Add(new Label(tCats[i]) { style = { color = Color.grey, fontSize = 8, flexGrow = 1 } });
+                row.Add(new Label(t.title) { style = { color = Color.white, fontSize = 8, width = 124 } });
+                row.Add(new Label(t.region) { style = { color = Color.grey, fontSize = 8, flexGrow = 1 } });
                 
                 // Impact dots
                 var impCol = new VisualElement { style = { flexDirection = FlexDirection.Row, width = 60 } };
-                for(int d=0; d<4; d++) impCol.Add(new VisualElement { style = { width = 6, height = 6, borderTopLeftRadius = 3, borderTopRightRadius = 3, borderBottomLeftRadius = 3, borderBottomRightRadius = 3, backgroundColor = (d < (5-i)) ? (tRisks[i] == "CRITICAL" ? cRed : cOrange) : cWhiteAlpha, marginRight = 2 } });
+                for(int d=0; d<4; d++) impCol.Add(new VisualElement { style = { width = 6, height = 6, borderTopLeftRadius = 3, borderTopRightRadius = 3, borderBottomLeftRadius = 3, borderBottomRightRadius = 3, backgroundColor = (d < (t.impact == "Critical" ? 4 : t.impact == "High" ? 3 : 2)) ? (t.impact == "Critical" ? cRed : cOrange) : cWhiteAlpha, marginRight = 2 } });
                 row.Add(impCol);
                 
                 // Likelihood dots
                 var likCol = new VisualElement { style = { flexDirection = FlexDirection.Row, width = 60 } };
-                for(int d=0; d<4; d++) likCol.Add(new VisualElement { style = { width = 6, height = 6, borderTopLeftRadius = 3, borderTopRightRadius = 3, borderBottomLeftRadius = 3, borderBottomRightRadius = 3, backgroundColor = (d < (4-i)) ? (tRisks[i] == "CRITICAL" ? cRed : cOrange) : cWhiteAlpha, marginRight = 2 } });
+                for(int d=0; d<4; d++) likCol.Add(new VisualElement { style = { width = 6, height = 6, borderTopLeftRadius = 3, borderTopRightRadius = 3, borderBottomLeftRadius = 3, borderBottomRightRadius = 3, backgroundColor = (d < (int)(t.probability/25f)) ? (t.impact == "Critical" ? cRed : cOrange) : cWhiteAlpha, marginRight = 2 } });
                 row.Add(likCol);
                 
                 // Trend
-                row.Add(new Label(tRisks[i] == "MEDIUM" ? "→" : "↑") { style = { color = tRisks[i] == "MEDIUM" ? cOrange : cRed, fontSize = 10, width = 40, unityTextAlign = TextAnchor.MiddleCenter, unityFontStyleAndWeight = FontStyle.Bold } });
+                row.Add(new Label(t.impact == "Medium" ? "->" : "^") { style = { color = t.impact == "Medium" ? cOrange : cRed, fontSize = 10, width = 40, unityTextAlign = TextAnchor.MiddleCenter, unityFontStyleAndWeight = FontStyle.Bold } });
                 
                 // Risk Level
-                row.Add(new Label(tRisks[i]) { style = { color = tRisks[i] == "CRITICAL" ? cRed : cOrange, fontSize = 8, width = 60, unityTextAlign = TextAnchor.MiddleRight, unityFontStyleAndWeight = FontStyle.Bold } });
+                row.Add(new Label(t.impact.ToUpper()) { style = { color = t.impact == "Critical" ? cRed : cOrange, fontSize = 8, width = 60, unityTextAlign = TextAnchor.MiddleRight, unityFontStyleAndWeight = FontStyle.Bold } });
                 tList.Add(row);
             }
 
             // --- CATEGORIES ---
-            panel.Q<Label>("TA_CatDonut").text = "18";
+            panel.Q<Label>("TA_CatDonut").text = threats.Count.ToString();
             var cList = panel.Q<VisualElement>("TA_CategoryList");
             cList.Clear();
             string[] cNames = { "Terrorism", "Political", "Economic", "Cyber" };
             Color[] cColors = { cRed, cOrange, cOrange, cPurple };
-            string[] cVals = { "4 (22%)", "3 (17%)", "3 (17%)", "2 (11%)" };
+            string[] cVals = { $"{criticals} ({(threats.Count>0?criticals*100/threats.Count:0)}%)", "0 (0%)", "0 (0%)", "0 (0%)" };
             for(int i=0; i<4; i++)
             {
                 var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 4 } };
@@ -1937,119 +2333,77 @@ namespace StateCraft.UI
             // --- REGIONAL THREAT OVERVIEW ---
             var rList = panel.Q<VisualElement>("TA_RegionList");
             rList.Clear();
-            string[] rNames = { "North-East Region", "North-West Region", "North-Central Region", "South-South Region", "South-East Region", "South-West Region" };
-            string[] rLvls = { "VERY HIGH", "HIGH", "MEDIUM", "MEDIUM", "LOW", "LOW" };
-            int[] rVals = { 85, 72, 48, 46, 28, 26 };
-            for(int i=0; i<6; i++)
+            if (country.regions != null && country.regions.Count > 0)
             {
-                var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 6 } };
-                row.Add(new Label(rNames[i]) { style = { color = Color.grey, fontSize = 8, width = 90 } });
-                
-                var rCol = rLvls[i] == "VERY HIGH" ? cRed : (rLvls[i] == "HIGH" ? cOrange : (rLvls[i] == "MEDIUM" ? cOrange : cGreen));
-                row.Add(new Label(rLvls[i]) { style = { color = rCol, fontSize = 7, width = 50, unityFontStyleAndWeight = FontStyle.Bold } });
-                
-                var barBg = new VisualElement { style = { flexGrow = 1, height = 4, backgroundColor = cWhiteAlpha, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, marginRight = 8, marginLeft = 8 } };
-                barBg.Add(new VisualElement { style = { width = Length.Percent(rVals[i]), height = 4, backgroundColor = rCol, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } });
-                row.Add(barBg);
-                
-                row.Add(new Label($"{rVals[i]}%") { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold, width = 25, unityTextAlign = TextAnchor.MiddleRight } });
-                rList.Add(row);
+                for(int i=0; i<country.regions.Count && i<6; i++)
+                {
+                    var reg = country.regions[i];
+                    var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 6 } };
+                    
+                    var rL = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, width = 110 } };
+                    rL.Add(new Label(reg.regionName) { style = { color = Color.grey, fontSize = 8, whiteSpace = WhiteSpace.Normal } });
+                    row.Add(rL);
+                    
+                    var barBg = new VisualElement { style = { flexGrow = 1, height = 4, backgroundColor = cWhiteAlpha, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, marginRight = 8, marginLeft = 8 } };
+                    float risk = Mathf.Clamp(100f - reg.security, 0f, 100f);
+                    barBg.Add(new VisualElement { style = { width = Length.Percent(risk), height = 4, backgroundColor = risk > 70f ? cRed : risk > 40f ? cOrange : cGreen, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } });
+                    row.Add(barBg);
+                    
+                    string rLvl = risk > 70f ? "HIGH" : risk > 40f ? "MEDIUM" : "LOW";
+                    row.Add(new Label(rLvl) { style = { color = risk > 70f ? cRed : risk > 40f ? cOrange : cGreen, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold, width = 50, unityTextAlign = TextAnchor.MiddleRight } });
+                    rList.Add(row);
+                }
             }
 
-            // --- THREAT LEVEL OVER TIME (Bar Chart instead of Line Graph) ---
-            var chart = panel.Q<VisualElement>("TA_TrendChart");
-            chart.Clear();
-            for(int i=0; i<20; i++)
-            {
-                var barCont = new VisualElement { style = { height = Length.Percent(100), width = 12, justifyContent = Justify.FlexEnd, alignItems = Align.Center } };
-                float val = UnityEngine.Random.Range(30f, 90f);
-                var bar = new VisualElement { style = { width = 6, height = Length.Percent(val), backgroundColor = val > 75 ? cRed : cOrange, borderTopLeftRadius = 2, borderTopRightRadius = 2 } };
-                barCont.Add(bar);
-                if (i % 5 == 0) barCont.Add(new Label($"{i+1} JAN") { style = { color = Color.grey, fontSize = 6, marginTop = 4 } });
-                else barCont.Add(new Label("") { style = { fontSize = 6, marginTop = 4 } });
-                chart.Add(barCont);
-            }
+              AddPlaceholder(panel.Q<VisualElement>("TA_TrendChart"), "Trend visualization offline.");
+                
+                var cConcernList = panel.Q<ScrollView>("TA_CountriesList");
+                if (cConcernList != null)
+                {
+                    cConcernList.Clear();
+                    int numCountries = gm.allCountries != null ? (gm.allCountries.Count / 3) : 0;
+                    if (numCountries == 0) AddPlaceholder(cConcernList, "No countries of concern monitored.");
+                    else
+                    {
+                        for (int k = 0; k < numCountries; k++)
+                        {
+                            var c = gm.allCountries[k];
+                            var r = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 8, paddingBottom = 4, borderBottomWidth = 1, borderBottomColor = cWhiteAlpha } };
+                            r.Add(new Label(c.countryName) { style = { flexGrow = 2, width = Length.Percent(30), color = Color.white, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
+                            r.Add(new Label(c.militaryReadiness > 70 ? "HIGH" : "MEDIUM") { style = { flexGrow = 1, width = Length.Percent(20), color = c.militaryReadiness > 70 ? cRed : cOrange, fontSize = 10 } });
+                            r.Add(new Label("Ideological Divergence") { style = { flexGrow = 2, width = Length.Percent(30), color = Color.gray, fontSize = 10 } });
+                            r.Add(new Label(c.militaryReadiness > 70 ? "RISING" : "STABLE") { style = { flexGrow = 1, width = Length.Percent(20), color = c.militaryReadiness > 70 ? cRed : cOrange, fontSize = 10 } });
+                            cConcernList.Add(r);
+                        }
+                    }
+                }
 
-            // --- COUNTRIES OF CONCERN ---
-            var coList = panel.Q<ScrollView>("TA_CountriesList");
-            coList.Clear();
-            string[] coNames = { "Niger", "Cameroon", "Chad", "Libya", "Mali", "Benin", "Ghana" };
-            string[] coLvls = { "HIGH", "MEDIUM", "MEDIUM", "HIGH", "MEDIUM", "LOW", "LOW" };
-            string[] coReas = { "Insurgent Safe Haven", "Cross-border Arms Flow", "Militant Movement", "Arms Proliferation", "Terrorist Training Camps", "Smuggling Routes", "Cyber Threat Origin" };
-            for(int i=0; i<7; i++)
-            {
-                var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, paddingBottom = 6, paddingTop = 6, borderBottomWidth = 1, borderBottomColor = cWhiteAlpha } };
-                row.Add(new Label(coNames[i]) { style = { color = Color.white, fontSize = 8, width = 70 } });
-                var coCol = coLvls[i] == "HIGH" ? cRed : (coLvls[i] == "MEDIUM" ? cOrange : cGreen);
-                row.Add(new Label(coLvls[i]) { style = { color = coCol, fontSize = 8, width = 80, unityTextAlign = TextAnchor.MiddleCenter, unityFontStyleAndWeight = FontStyle.Bold } });
-                row.Add(new Label(coReas[i]) { style = { color = Color.grey, fontSize = 8, flexGrow = 1 } });
-                row.Add(new Label(coLvls[i] == "LOW" ? "↓" : "↑") { style = { color = coLvls[i] == "LOW" ? cGreen : cRed, fontSize = 10, width = 30, unityTextAlign = TextAnchor.MiddleCenter, unityFontStyleAndWeight = FontStyle.Bold } });
-                coList.Add(row);
-            }
+                var critCards = panel.Q<VisualElement>("TA_CriticalCards");
+                if (critCards != null)
+                {
+                    critCards.Clear();
+                    var crits = threats.FindAll(x => x.impact == "Critical");
+                    if (crits.Count == 0) AddPlaceholder(critCards, "No critical threats detected.");
+                    else
+                    {
+                        foreach (var t in crits)
+                        {
+                            var card = new VisualElement { style = { backgroundColor = new Color(1f, 0.32f, 0.32f, 0.1f), paddingLeft = 8, paddingRight = 8, paddingTop = 8, paddingBottom = 8, marginBottom = 8, width = Length.Percent(48) } };
+                            card.Add(new Label(t.title) { style = { color = cRed, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold, whiteSpace = WhiteSpace.Normal } });
+                            card.Add(new Label(t.region) { style = { color = Color.white, fontSize = 10, marginTop = 4 } });
+                            critCards.Add(card);
+                        }
+                    }
+                }
 
-            // --- CRITICAL THREATS ---
-            var crList = panel.Q<VisualElement>("TA_CriticalCards");
-            crList.Clear();
-            string[] crNames = { "Insurgent Activity", "Political Instability", "Economic Collapse", "Cyber Warfare" };
-            string[] crCats = { "Terrorism", "Political", "Economic", "Cyber" };
-            string[] crIcons = { "&#xf071;", "&#xf19c;", "&#xf201;", "&#xf108;" };
-            string[] crDesc = { "Increase in attacks and militant recruitment in North-East region.", "Rising political tensions could lead to civil unrest in major cities.", "High inflation and debt levels pose risk to economic stability.", "Increasing attempts to disrupt critical government infrastructure." };
-            for(int i=0; i<4; i++)
-            {
-                var card = new VisualElement { style = { width = Length.Percent(24), backgroundColor = new Color(1,1,1,0.03f), paddingTop = 12, paddingBottom = 12, paddingLeft = 12, paddingRight = 12, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, borderTopWidth = 2, borderTopColor = cRed } };
-                
-                var topRow = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 8 } };
-                topRow.Add(new Label(crIcons[i]) { style = { color = cRed, fontSize = 16, marginRight = 8 } }.WithClass("fa-icon"));
-                var topT = new VisualElement();
-                topT.Add(new Label(crNames[i]) { style = { color = Color.white, fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
-                topT.Add(new Label(crCats[i]) { style = { color = Color.grey, fontSize = 7 } });
-                topRow.Add(topT);
-                card.Add(topRow);
-                
-                card.Add(new Label(crDesc[i]) { style = { color = Color.grey, fontSize = 8, whiteSpace = WhiteSpace.Normal, height = 40 } });
-                card.Add(new Label("RISK LEVEL") { style = { color = Color.grey, fontSize = 7, marginTop = 8 } });
-                card.Add(new Label("CRITICAL") { style = { color = cRed, fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 8 } });
-                
-                card.Add(new Button { text = "VIEW DETAILS", style = { height = 24, fontSize = 8, backgroundColor = new Color(1,1,1,0.05f), color = Color.white, borderTopColor = cWhiteAlpha, borderBottomColor = cWhiteAlpha, borderLeftColor = cWhiteAlpha, borderRightColor = cWhiteAlpha, borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1 } });
-                crList.Add(card);
-            }
+              AddPlaceholder(panel.Q<VisualElement>("TA_MitigationList"), "No active mitigation progress.");
+              AddPlaceholder(panel.Q<VisualElement>("TA_RecommendationsList"), "No recommendations available.");
 
-            // --- MITIGATION PROGRESS ---
-            var mList = panel.Q<ScrollView>("TA_MitigationList");
-            mList.Clear();
-            string[] mNames = { "Counter Terrorism Operations", "Intelligence Sharing", "Cyber Defense Enhancement", "Border Security Reinforcement", "Economic Stabilization Measures", "Community Engagement Programs" };
-            int[] mVals = { 72, 68, 55, 45, 38, 32 };
-            Color[] mColors2 = { cGreen, cGreen, cBlue, cOrange, cOrange, cRed };
-            for(int i=0; i<6; i++)
-            {
-                var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 6 } };
-                row.Add(new Label(mNames[i]) { style = { color = Color.grey, fontSize = 8, flexGrow = 1 } });
-                
-                var barBg = new VisualElement { style = { width = 100, height = 4, backgroundColor = cWhiteAlpha, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, marginRight = 8, marginLeft = 8 } };
-                barBg.Add(new VisualElement { style = { width = Length.Percent(mVals[i]), height = 4, backgroundColor = mColors2[i], borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } });
-                row.Add(barBg);
-                
-                row.Add(new Label($"{mVals[i]}%") { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold, width = 25, unityTextAlign = TextAnchor.MiddleRight } });
-                mList.Add(row);
-            }
-
-            // --- RECOMMENDATIONS ---
-            var recList = panel.Q<ScrollView>("TA_RecommendationsList");
-            recList.Clear();
-            string[] recTxt = { "Increase surveillance in North-East region.", "Strengthen intelligence cooperation with Niger.", "Address economic vulnerabilities urgently.", "Enhance cybersecurity infrastructure.", "Monitor political developments closely." };
-            bool[] recIsWarn = { false, false, true, false, true };
-            for(int i=0; i<5; i++)
-            {
-                var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 6 } };
-                var icon = new Label(recIsWarn[i] ? "&#xf071;" : "&#xf058;") { style = { color = recIsWarn[i] ? cOrange : cGreen, fontSize = 10, marginRight = 8 } }.WithClass("fa-icon");
-                row.Add(icon);
-                row.Add(new Label(recTxt[i]) { style = { color = Color.white, fontSize = 8, whiteSpace = WhiteSpace.Normal, flexGrow = 1 } });
-                recList.Add(row);
-            }
         }
 
         private void PopulateDataAnalysisTab(CountryDataSO country)
         {
+            Debug.Log($"[IntelligenceDashboard] Populating Data Analysis Tab... Agency Integrity: {country.agencyIntegrity}, Corruption: {country.corruptionIndex}");
             var panel = _dashboardRoot?.Q<VisualElement>("PanelDataAnalysis");
             if (panel == null) return;
 
@@ -2064,19 +2418,37 @@ namespace StateCraft.UI
             int intelLvl = Mathf.Clamp((int)country.intelligenceLevel, 10, 100);
 
             // --- KPIs ---
-            panel.Q<Label>("DA_DataSources").text = "87";
-            panel.Q<Label>("DA_DataPoints").text = "2.48M";
-            panel.Q<Label>("DA_Accuracy").text = "78%";
-            panel.Q<Label>("DA_Insights").text = "34";
-            float budget = country.covertBudget; // We can use covert budget for analysis budget mockup
-            panel.Q<Label>("DA_Budget").text = $"₦{Mathf.RoundToInt(budget * 0.8f)}M / month";
-            panel.Q<Label>("DA_BudgetRem").text = $"₦{Mathf.RoundToInt(budget * 0.8f * 0.4f)}M remaining";
+            int dataSources = Mathf.Clamp(10 + Mathf.RoundToInt(country.intelligenceLevel * 0.5f) + country.satelliteCount * 2, 10, 150);
+            if (panel.Q<Label>("DA_DataSources") != null) panel.Q<Label>("DA_DataSources").text = dataSources.ToString();
+            
+            float dataPoints = Mathf.Clamp(0.5f + (country.intelligenceLevel * 0.05f) + (country.satelliteCount * 0.1f), 0.5f, 10f);
+            if (panel.Q<Label>("DA_DataPoints") != null) panel.Q<Label>("DA_DataPoints").text = $"{dataPoints:F2}M";
+            
+            float accuracy = Mathf.Clamp(40f + (country.intelligenceLevel * 0.4f) + (100f - country.corruptionIndex) * 0.2f, 10f, 98f);
+            if (panel.Q<Label>("DA_Accuracy") != null) panel.Q<Label>("DA_Accuracy").text = $"{accuracy:F0}%";
+            
+            int insights = Mathf.RoundToInt((accuracy / 100f) * dataSources * 0.4f);
+            if (panel.Q<Label>("DA_Insights") != null) panel.Q<Label>("DA_Insights").text = insights.ToString();
+            
+            float budget = country.covertBudget;
+            string daSym = string.IsNullOrEmpty(country.currencySymbol) ? "$" : country.currencySymbol;
+            float budgetLocal = budget * country.exchangeRate;
+            if (panel.Q<Label>("DA_Budget") != null) panel.Q<Label>("DA_Budget").text = $"{UiFormat.Money(budgetLocal * 0.8f, daSym)} / month";
+            if (panel.Q<Label>("DA_BudgetRem") != null) panel.Q<Label>("DA_BudgetRem").text = $"{UiFormat.Money(budgetLocal * 0.32f, daSym)} remaining";
 
             // --- DATA SOURCES OVERVIEW ---
             var srcList = panel.Q<VisualElement>("DA_SourcesList");
             srcList.Clear();
             string[] sNames = { "Human Intelligence (HUMINT)", "Signals Intelligence (SIGINT)", "Imagery Intelligence (IMINT)", "Open Source Intelligence (OSINT)", "Cyber Intelligence (CYBINT)", "Financial Intelligence (FININT)", "Technical Intelligence (TECHINT)" };
-            int[] sVals = { 68, 72, 64, 81, 59, 67, 53 };
+            int[] sVals = { 
+                Mathf.Clamp(Mathf.RoundToInt(country.intelligenceLevel * 0.8f + country.operativeCount * 1.5f), 10, 100), 
+                Mathf.Clamp(Mathf.RoundToInt(country.globalIntelCoverage * 0.7f + 20f), 10, 100), 
+                Mathf.Clamp(Mathf.RoundToInt(country.satelliteCount * 15f + 10f), 10, 100), 
+                Mathf.Clamp(Mathf.RoundToInt(country.intelligenceLevel * 0.9f), 10, 100), 
+                Mathf.Clamp(Mathf.RoundToInt(country.intelligenceLevel * 0.6f + 20f), 10, 100), 
+                Mathf.Clamp(Mathf.RoundToInt(100f - country.corruptionIndex), 10, 100), 
+                Mathf.Clamp(Mathf.RoundToInt(country.globalIntelCoverage * 0.5f + country.intelligenceLevel * 0.3f), 10, 100) 
+            };
             Color[] sCols = { cGreen, cBlue, cOrange, cTeal, cPurple, cRed, cOrange };
             for(int i=0; i<7; i++)
             {
@@ -2123,7 +2495,7 @@ namespace StateCraft.UI
             string[] iDesc = { "Political instability indicators have increased by 24% in the last 30 days.", "Inflation and unemployment data suggest potential economic unrest.", "Cyber attacks targeting government systems up by 32% this week.", "New routes identified along northern corridor and coastal areas." };
             string[] iPri = { "HIGH PRIORITY", "MEDIUM PRIORITY", "HIGH PRIORITY", "MEDIUM PRIORITY" };
             string[] iDates = { "16 JAN 2026", "16 JAN 2026", "16 JAN 2026", "14 JAN 2026" };
-            string[] iIco = { "&#xf062;", "&#xf155;", "&#xf51e;", "&#xf508;" };
+            string[] iIco = { "\uf062", "\uf155", "\uf51e", "\uf508" };
             Color[] iCols = { cRed, cOrange, cPurple, cGreen };
             for(int i=0; i<4; i++)
             {
@@ -2190,7 +2562,7 @@ namespace StateCraft.UI
             pList.Clear();
             string[] pNames = { "Unusual Financial Transactions", "Arms Movement Pattern", "Communications Anomaly", "Social Media Sentiment Shift", "Supply Chain Disruption" };
             string[] pStat = { "DETECTED", "DETECTED", "DETECTED", "MONITORING", "MONITORING" };
-            string[] pIco = { "&#xf19c;", "&#xf132;", "&#xf09e;", "&#xf0ac;", "&#xf0d1;" };
+            string[] pIco = { "\uf19c", "\uf132", "\uf09e", "\uf0ac", "\uf0d1" };
             for(int i=0; i<5; i++)
             {
                 var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, paddingBottom = 6, paddingTop = 6, borderBottomWidth = 1, borderBottomColor = cWhiteAlpha } };
@@ -2213,7 +2585,7 @@ namespace StateCraft.UI
             {
                 var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 12 } };
                 var iconBox = new VisualElement { style = { width = 24, height = 24, borderTopLeftRadius = 12, borderTopRightRadius = 12, borderBottomLeftRadius = 12, borderBottomRightRadius = 12, backgroundColor = new Color(cGreen.r, cGreen.g, cGreen.b, 0.1f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = cGreen, borderBottomColor = cGreen, borderLeftColor = cGreen, borderRightColor = cGreen, alignItems = Align.Center, justifyContent = Justify.Center, marginRight = 12 } };
-                iconBox.Add(new Label("&#xf00c;") { style = { color = cGreen, fontSize = 10 } }.WithClass("fa-icon"));
+                iconBox.Add(new Label("\uf00c") { style = { color = cGreen, fontSize = 10 } }.WithClass("fa-icon"));
                 row.Add(iconBox);
                 
                 var tRight = new VisualElement { style = { flexGrow = 1 } };
@@ -2248,15 +2620,36 @@ namespace StateCraft.UI
             tGrid.Clear();
             string[] tlNames = { "Data Correlation", "Risk Modeling", "Scenario Analysis", "Network Analysis", "Sentiment Analysis", "Predictive Analytics" };
             string[] tlDesc = { "Find relationships", "Predict threats", "What-if scenarios", "Entity connections", "Social monitoring", "Trend forecasting" };
-            string[] tlIco = { "&#xf0e8;", "&#xf071;", "&#xf126;", "&#xf247;", "&#xf118;", "&#xf201;" };
+            string[] tlIco = { "\uf0e8", "\uf071", "\uf126", "\uf247", "\uf118", "\uf201" };
+            float[] tlCosts = { 10f, 15f, 25f, 12f, 8f, 30f }; // in Millions
             for(int i=0; i<6; i++)
             {
                 var btn = new Button { style = { width = Length.Percent(48), height = 36, flexDirection = FlexDirection.Row, justifyContent = Justify.FlexStart, alignItems = Align.Center, backgroundColor = new Color(1,1,1,0.02f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = cWhiteAlpha, borderBottomColor = cWhiteAlpha, borderLeftColor = cWhiteAlpha, borderRightColor = cWhiteAlpha, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, marginBottom = 6, paddingLeft = 12 } };
                 btn.Add(new Label(tlIco[i]) { style = { color = Color.white, fontSize = 14, marginRight = 10, width = 16 } }.WithClass("fa-icon"));
                 var txts = new VisualElement();
+                
+                float actionCost = tlCosts[i] * country.exchangeRate;
+                
                 txts.Add(new Label(tlNames[i]) { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } });
-                txts.Add(new Label(tlDesc[i]) { style = { color = Color.grey, fontSize = 7 } });
+                txts.Add(new Label($"{tlDesc[i]} ({daSym}{actionCost:F0}M)") { style = { color = Color.grey, fontSize = 7 } });
                 btn.Add(txts);
+                
+                int index = i;
+                btn.clicked += () => 
+                {
+                    if (country.intelligenceFunds < actionCost)
+                    {
+                        NotificationManager.Instance?.AddNotification($"INSUFFICIENT FUNDS: Need {daSym}{actionCost:F0}M for {tlNames[index]}.", Color.red);
+                        return;
+                    }
+                    country.intelligenceFunds -= actionCost;
+                    
+                    if (index == 0) country.agencyIntegrity = Mathf.Min(100f, country.agencyIntegrity + 1f);
+                    
+                    NotificationManager.Instance?.AddNotification($"ANALYSIS INITIATED: {tlNames[index].ToUpper()} running. Deducted {daSym}{actionCost:F0}M.", new Color(0.73f, 0.41f, 0.78f));
+                    RefreshIntelligenceData();
+                };
+                
                 tGrid.Add(btn);
             }
 
@@ -2264,12 +2657,31 @@ namespace StateCraft.UI
             var qaList = panel.Q<VisualElement>("DA_QuickActions");
             qaList.Clear();
             string[] qTxts = { "REQUEST DEEP ANALYSIS", "GENERATE THREAT REPORT", "EXPORT INTELLIGENCE DATA", "SHARE WITH STAKEHOLDERS" };
-            string[] qIcos = { "&#xf002;", "&#xf15c;", "&#xf56e;", "&#xf1e0;" };
+            string[] qIcos = { "\uf002", "\uf15c", "\uf56e", "\uf1e0" };
+            float[] qCosts = { 50f, 20f, 5f, 10f }; // in Millions
             for(int i=0; i<4; i++)
             {
                 var btn = new Button { style = { height = 28, flexDirection = FlexDirection.Row, justifyContent = Justify.FlexStart, alignItems = Align.Center, backgroundColor = new Color(1,1,1,0.05f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = cWhiteAlpha, borderBottomColor = cWhiteAlpha, borderLeftColor = cWhiteAlpha, borderRightColor = cWhiteAlpha, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, paddingLeft = 12 } };
                 btn.Add(new Label(qIcos[i]) { style = { color = cGreen, fontSize = 10, marginRight = 8, width = 16 } }.WithClass("fa-icon"));
-                btn.Add(new Label(qTxts[i]) { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } });
+                
+                float actionCost = qCosts[i] * country.exchangeRate;
+                
+                btn.Add(new Label($"{qTxts[i]} ({daSym}{actionCost:F0}M)") { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } });
+                
+                int index = i;
+                btn.clicked += () => 
+                {
+                    if (country.intelligenceFunds < actionCost)
+                    {
+                        NotificationManager.Instance?.AddNotification($"INSUFFICIENT FUNDS: Need {daSym}{actionCost:F0}M for {qTxts[index]}.", Color.red);
+                        return;
+                    }
+                    country.intelligenceFunds -= actionCost;
+                    
+                    NotificationManager.Instance?.AddNotification($"ACTION EXECUTED: {qTxts[index].ToUpper()}. Deducted {daSym}{actionCost:F0}M.", new Color(0.18f, 0.6f, 0.95f));
+                    RefreshIntelligenceData();
+                };
+                
                 qaList.Add(btn);
             }
         }

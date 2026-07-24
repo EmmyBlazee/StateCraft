@@ -586,10 +586,9 @@ doc.gameObject.SetActive(false);
 
             var restartBtn = new Button(() =>
             {
-                // Reload the scene
-                UnityEngine.SceneManagement.SceneManager.LoadScene(
-                    UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
-            }) { text = "🔄  NEW GAME" };
+                // Return to Main Menu
+                UnityEngine.SceneManagement.SceneManager.LoadScene("SplashScene");
+            }) { text = "🏠  MAIN MENU" };
 
             restartBtn.style.height      = 40;
             restartBtn.style.paddingLeft = 28; restartBtn.style.paddingRight = 28;
@@ -689,8 +688,22 @@ doc.gameObject.SetActive(false);
                     // Skip unresolved (NaN / 0) layouts
                     if (float.IsNaN(veW) || float.IsNaN(veH) || pW <= 0 || pH <= 0) return;
 
+                    // Check if the element resides inside a ScrollView
+                    bool insideScrollView = false;
+                    for (VisualElement current = parent; current != null; current = current.parent)
+                    {
+                        if (current is ScrollView)
+                        {
+                            insideScrollView = true;
+                            break;
+                        }
+                    }
+
                     bool overflowsX = veW > pW + 2f;  // 2px tolerance for rounding
                     bool overflowsY = veH > pH + 2f;
+
+                    // Ignore vertical overflows inside ScrollViews since they are meant to scroll
+                    if (insideScrollView) overflowsY = false;
 
                     if (overflowsX || overflowsY)
                     {

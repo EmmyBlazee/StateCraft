@@ -16,6 +16,14 @@ namespace StateCraft.Data
         public GameEventSO nextEvent;
     }
 
+    [System.Serializable]
+    public class PendingEvent
+    {
+        public CountryDataSO country;
+        public GameEventSO ev;
+        public int daysRemaining;
+    }
+
     [CreateAssetMenu(fileName = "NewEvent", menuName = "StateCraft/Data/Game Event")]
     public class GameEventSO : ScriptableObject
     {

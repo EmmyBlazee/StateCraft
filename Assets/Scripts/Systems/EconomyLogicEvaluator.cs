@@ -369,7 +369,8 @@ namespace StateCraft.Systems
             float cost = GetInfraInvestCost(c, def);
             if (TreasuryB < cost)
             {
-                message = $"Need {UI.UiFormat.Money(cost)} in treasury.";
+                string sym = string.IsNullOrEmpty(c.currencySymbol) ? "$" : c.currencySymbol;
+                message = $"Need {UI.UiFormat.Money(cost, sym)} in treasury.";
                 return false;
             }
             SpendTreasury(cost, c);
@@ -389,7 +390,8 @@ namespace StateCraft.Systems
             float cost = GetIndustryUpgradeCost(c, def);
             if (TreasuryB < cost)
             {
-                message = $"Need {UI.UiFormat.Money(cost)} in treasury.";
+                string sym = string.IsNullOrEmpty(c.currencySymbol) ? "$" : c.currencySymbol;
+                message = $"Need {UI.UiFormat.Money(cost, sym)} in treasury.";
                 return false;
             }
             SpendTreasury(cost, c);

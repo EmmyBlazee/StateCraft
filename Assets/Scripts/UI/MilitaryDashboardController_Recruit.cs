@@ -37,37 +37,21 @@ namespace StateCraft.UI
 
         private void InitializeRecruitTab(VisualElement root)
         {
-            // Army Buttons
-            var btnArmy100 = root.Q<Button>("BtnArmyRecruit100");
-            if (btnArmy100 != null) btnArmy100.clicked += () => ShowPurchaseModal("Infantry Battalion", "INF", 0.005f, 100, true, false, 0);
-            var btnArmy500 = root.Q<Button>("BtnArmyRecruit500");
-            if (btnArmy500 != null) btnArmy500.clicked += () => ShowPurchaseModal("Infantry Battalion", "INF", 0.025f, 500, true, false, 0);
-            var btnArmy1000 = root.Q<Button>("BtnArmyRecruit1000");
-            if (btnArmy1000 != null) btnArmy1000.clicked += () => ShowPurchaseModal("Infantry Battalion", "INF", 0.05f, 1000, true, false, 0);
+            // Army RECRUIT button — opens modal with slider
+            var btnArmy = root.Q<Button>("BtnArmyRecruit");
+            if (btnArmy != null) btnArmy.clicked += () => ShowPurchaseModal("Infantry Battalion", "INF", 0.005f, 100, true, false, 0);
 
-            // Air Force Buttons
-            var btnAF25 = root.Q<Button>("BtnAFRecruit25");
-            if (btnAF25 != null) btnAF25.clicked += () => ShowPurchaseModal("Airforce Flight Academy", "AIR_PERS", 0.01f, 25, true, false, 0);
-            var btnAF50 = root.Q<Button>("BtnAFRecruit50");
-            if (btnAF50 != null) btnAF50.clicked += () => ShowPurchaseModal("Airforce Flight Academy", "AIR_PERS", 0.02f, 50, true, false, 0);
-            var btnAF150 = root.Q<Button>("BtnAFRecruit150");
-            if (btnAF150 != null) btnAF150.clicked += () => ShowPurchaseModal("Airforce Flight Academy", "AIR_PERS", 0.06f, 150, true, false, 0);
+            // Air Force RECRUIT button
+            var btnAF = root.Q<Button>("BtnAFRecruit");
+            if (btnAF != null) btnAF.clicked += () => ShowPurchaseModal("Airforce Flight Academy", "AIR_PERS", 0.01f, 25, true, false, 0);
 
-            // Navy Buttons
-            var btnNavy50 = root.Q<Button>("BtnNavyRecruit50");
-            if (btnNavy50 != null) btnNavy50.clicked += () => ShowPurchaseModal("Naval Crew Training", "NAVY_PERS", 0.008f, 50, true, false, 0);
-            var btnNavy100 = root.Q<Button>("BtnNavyRecruit100");
-            if (btnNavy100 != null) btnNavy100.clicked += () => ShowPurchaseModal("Naval Crew Training", "NAVY_PERS", 0.016f, 100, true, false, 0);
-            var btnNavy250 = root.Q<Button>("BtnNavyRecruit250");
-            if (btnNavy250 != null) btnNavy250.clicked += () => ShowPurchaseModal("Naval Crew Training", "NAVY_PERS", 0.04f, 250, true, false, 0);
+            // Navy RECRUIT button
+            var btnNavy = root.Q<Button>("BtnNavyRecruit");
+            if (btnNavy != null) btnNavy.clicked += () => ShowPurchaseModal("Naval Crew Training", "NAVY_PERS", 0.008f, 50, true, false, 0);
 
-            // RDF Buttons (formerly Gendarmerie)
-            var btnRDF250 = root.Q<Button>("BtnRDFRecruit250");
-            if (btnRDF250 != null) btnRDF250.clicked += () => ShowPurchaseModal("Elite Spec-Ops RDF", "RDF_PERS", 0.20f, 250, true, false, 0);
-            var btnRDF500 = root.Q<Button>("BtnRDFRecruit500");
-            if (btnRDF500 != null) btnRDF500.clicked += () => ShowPurchaseModal("Elite Spec-Ops RDF", "RDF_PERS", 0.40f, 500, true, false, 0);
-            var btnRDF1000 = root.Q<Button>("BtnRDFRecruit1000");
-            if (btnRDF1000 != null) btnRDF1000.clicked += () => ShowPurchaseModal("Elite Spec-Ops RDF", "RDF_PERS", 0.80f, 1000, true, false, 0);
+            // RDF RECRUIT button
+            var btnRDF = root.Q<Button>("BtnRDFRecruit");
+            if (btnRDF != null) btnRDF.clicked += () => ShowPurchaseModal("Elite Spec-Ops RDF", "RDF_PERS", 0.20f, 250, true, false, 0);
         }
 
         private void PopulateRecruit(CountryDataSO country)
@@ -319,44 +303,63 @@ namespace StateCraft.UI
 
             if (isPersonnel)
             {
-                // Enforce base capacity limit!
+                // Enforce Training Academy capacity limit
                 int capacity = 0;
-                int currentTotal = 0;
-                int inTraining = GetTotalInTraining(country, id);
-                string baseTypeNeeded = "";
+                int currentTrainees = GetTotalInTraining(country, id);
+                string academyName = "";
 
                 switch (id)
                 {
                     case "INF":
                         capacity = 5000 + (country.baseArmyCount * 15000);
-                        currentTotal = country.armyStats.personnel + inTraining;
-                        baseTypeNeeded = "Military Base (Army)";
+                        academyName = "Army Training Command";
                         break;
                     case "POLICE":
                         capacity = 5000 + (country.baseArmyCount * 5000);
-                        currentTotal = country.nationalPoliceSize + inTraining;
-                        baseTypeNeeded = "Military Base (Army)";
+                        academyName = "Army Training Command (Police)";
                         break;
                     case "NAVY_PERS":
                         capacity = 1000 + (country.baseNavyCount * 3000);
-                        currentTotal = country.navyStats.personnel + inTraining;
-                        baseTypeNeeded = "Naval Base (Navy)";
+                        academyName = "Naval Training Command";
                         break;
                     case "AIR_PERS":
                         capacity = 500 + (country.baseAirForceCount * 2000);
-                        currentTotal = country.airForceStats.personnel + inTraining;
-                        baseTypeNeeded = "Strategic Airbase";
+                        academyName = "Air Force Academy";
                         break;
                     case "RDF_PERS":
                         capacity = 200 + (country.baseRDFCount * 1000);
-                        currentTotal = country.rdfStats.personnel + inTraining;
-                        baseTypeNeeded = "RDF Command Center";
+                        academyName = "RDF Command Center";
                         break;
                 }
 
-                if (currentTotal + amount > capacity)
+                if (currentTrainees + amount > capacity)
                 {
-                    NotificationManager.Instance?.AddNotification($"CAPACITY FULL: Build more {baseTypeNeeded}s to house these recruits! (Cap: {capacity:N0})", Color.red);
+                    NotificationManager.Instance?.AddNotification($"ACADEMY FULL: The {academyName} cannot train that many at once! (Max: {capacity:N0})", Color.red);
+                    return;
+                }
+
+                // Enforce Base Housing Capacity limit
+                int housingCapacity = 0;
+                int currentTotal = 0;
+                string baseBranch = "";
+                switch (id)
+                {
+                    case "INF":       currentTotal = country.armyStats.personnel; baseBranch = "ARMY"; break;
+                    case "POLICE":    currentTotal = country.nationalPoliceSize; baseBranch = "ARMY"; break;
+                    case "NAVY_PERS": currentTotal = country.navyStats.personnel; baseBranch = "NAVY"; break;
+                    case "AIR_PERS":  currentTotal = country.airForceStats.personnel; baseBranch = "AIR FORCE"; break;
+                    case "RDF_PERS":  currentTotal = country.rdfStats.personnel; baseBranch = "RDF"; break;
+                }
+                
+                foreach (var b in country.militaryBases)
+                {
+                    if (b.branch == baseBranch || (baseBranch == "AIR FORCE" && b.branch == "AIR"))
+                        housingCapacity += b.capacity;
+                }
+
+                if (currentTotal + amount > housingCapacity)
+                {
+                    NotificationManager.Instance?.AddNotification($"HOUSING FULL: Build more {baseBranch} bases to house these troops! (Cap: {housingCapacity:N0})", Color.red);
                     return;
                 }
             }

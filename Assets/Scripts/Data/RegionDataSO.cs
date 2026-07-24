@@ -20,6 +20,14 @@ namespace StateCraft.Data
         Cartel
     }
 
+    public enum InsurgencyEntrenchment
+    {
+        Low,
+        Moderate,
+        High,
+        DeeplyEntrenched
+    }
+
     [CreateAssetMenu(fileName = "NewRegion", menuName = "StateCraft/Region Data")]
     public class RegionDataSO : ScriptableObject
     {
@@ -34,14 +42,30 @@ namespace StateCraft.Data
 
         [Tooltip("Percentage of the country's national GDP generated here")]
         public float economicContribution = 10f; 
+
+        [Header("Geography")]
+        public bool isCoastal = true;
         
         [Header("Instability")]
+        [Range(0, 100)]
+        public float intelCoverage = 0f; // High coverage = accurate threat estimates and combat bonuses
         public float insurgencyLevel = 0f;
         [Tooltip("Floor risk. Insurgency will rapidly bounce back to this minimum level if unattended.")]
         public float baseInsurgencyRisk = 0f;
         
         // Advanced Insurgency Mechanics (Expansion II)
         public InsurgencyIdeology insurgencyIdeology = InsurgencyIdeology.None;
+        [Tooltip("Number of turns/months this insurgency has been active without a major counter-operation.")]
+        public int insurgencyDuration = 0; 
+        
+        public InsurgencyEntrenchment GetEntrenchment()
+        {
+            if (insurgencyDuration >= 12) return InsurgencyEntrenchment.DeeplyEntrenched;
+            if (insurgencyDuration >= 6) return InsurgencyEntrenchment.High;
+            if (insurgencyDuration >= 3) return InsurgencyEntrenchment.Moderate;
+            return InsurgencyEntrenchment.Low;
+        }
+
         [Range(0, 100)]
         public float heartsAndMinds = 50f; // High civilian support suppresses insurgency passively
         [Range(0, 100)]

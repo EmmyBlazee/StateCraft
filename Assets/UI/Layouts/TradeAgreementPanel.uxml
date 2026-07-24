@@ -1,9 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <ui:VisualElement name="TradeAgreementPanel" class="panel premium-card" style="position: absolute; width: 900px; height: 500px; max-height: 85%; left: 50%; top: 10%; margin-left: -450px; display: none; background-color: rgba(14, 18, 28, 0.98); border-radius: 8px; border-width: 1px; border-color: rgba(0, 210, 255, 0.3);">
+    <ui:VisualElement name="TradeAgreementPanel" class="panel premium-card" style="height: 100%; display: flex; background-color: rgba(14, 18, 28, 0.98); border-radius: 8px; border-width: 1px; border-color: rgba(0, 210, 255, 0.3);">
         <ui:VisualElement class="header" style="flex-direction: row; justify-content: space-between; padding: 12px; background-color: rgba(0, 0, 0, 0.4); border-bottom-width: 1px; border-bottom-color: rgba(0, 210, 255, 0.2);">
             <ui:Label text="GLOBAL TRADE DESK" class="header-title" style="color: rgb(255, 255, 255); -unity-font-style: bold; font-size: 17px; letter-spacing: 2px;" />
-            <ui:Button name="BtnCloseTrade" text="X" class="button-premium" style="width: 30px; height: 30px; background-color: rgba(255, 82, 82, 0.2); border-color: rgba(255, 82, 82, 0.5); color: rgb(255, 82, 82);" />
         </ui:VisualElement>
         
         <ui:VisualElement style="flex-direction: row; flex-grow: 1; padding: 10px;">

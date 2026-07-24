@@ -98,7 +98,7 @@ namespace StateCraft.UI
             if (_btnDiplomacy != null) _btnDiplomacy.clicked += () => ShowPanel("Diplomacy");
 
             _btnSearch = _root.Q<Button>("NavSearch");
-            if (_btnSearch != null) _btnSearch.clicked += OpenCountrySelector;
+            if (_btnSearch != null) _btnSearch.clicked += () => ShowPanel("Global");
 
             _btnEvents = _root.Q<Button>("NavEvents");
             if (_btnEvents != null) _btnEvents.clicked += () => ShowPanel("Events");
@@ -206,6 +206,9 @@ namespace StateCraft.UI
             var evtCtrl = FindObjectOfType<EventDashboardController>(true);
             InjectPanel(GetDashboardPanel(evtCtrl, "EventDashboard"), "Events");
 
+            var globalCtrl = FindObjectOfType<GlobalDashboardController>(true);
+            InjectPanel(GetDashboardPanel(globalCtrl, "GlobalDashboard"), "Global");
+
             HideAllPanels();
         }
 
@@ -226,6 +229,7 @@ namespace StateCraft.UI
                     case "Intel": FindObjectOfType<IntelligenceDashboardController>(true)?.Show(); break;
                     case "Diplomacy": FindObjectOfType<DiplomacyDashboardController>(true)?.Show(); break;
                     case "Events": FindObjectOfType<EventDashboardController>(true)?.Show(); break;
+                    case "Global": FindObjectOfType<GlobalDashboardController>(true)?.Show(); break;
                 }
 
                 // Log any overflowing UI elements in this panel (runs after next layout pass)
@@ -340,6 +344,20 @@ namespace StateCraft.UI
             {
                 if (_stabilityLabel != null) _stabilityLabel.text = $"{country.stability:N0}%  |  POP: {FormatPopulation(country.population)} {FormatPopulationSigned(country.populationChangeLastTurn)}";
                 
+                string symbol = !string.IsNullOrEmpty(country.currencySymbol) ? country.currencySymbol : "$";
+
+                var gdpLbl = _root?.Q<Label>("ValGDP");
+                if (gdpLbl != null) gdpLbl.text = FormatCurrency(country.gdp * country.exchangeRate, symbol);
+
+                var inflLbl = _root?.Q<Label>("ValInflation");
+                if (inflLbl != null) inflLbl.text = $"{country.inflationRate:F1}%";
+
+                var debtLbl = _root?.Q<Label>("ValTotalDebt");
+                if (debtLbl != null) 
+                {
+                    debtLbl.text = FormatCurrency(country.debt * country.exchangeRate, symbol);
+                }
+
                 string displayName = country.countryName.ToUpper();
                 if (displayName.EndsWith(" COUNTRY")) displayName = displayName.Replace(" COUNTRY", "");
                 if (_playerCountryLabel != null) _playerCountryLabel.text = displayName;
@@ -447,29 +465,42 @@ namespace StateCraft.UI
                 var evSys     = GameManager.Instance?.EventSystem;
                 int pending   = (evCountry != null && evSys != null)
                     ? evSys.GetPendingEvents(evCountry).Count : 0;
-
-                var iconLbl = btnEvents.Q<Label>(className: "modern-nav-icon");
-                if (pending > 0)
-                {
-                    btnEvents.style.backgroundColor = new Color(0.55f, 0.08f, 0.55f, 0.7f);
-                    btnEvents.style.borderTopColor    = new Color(0.9f, 0.4f, 0.9f);
-                    btnEvents.style.borderBottomColor = new Color(0.9f, 0.4f, 0.9f);
-                    btnEvents.style.borderLeftColor   = new Color(0.9f, 0.4f, 0.9f);
-                    btnEvents.style.borderRightColor  = new Color(0.9f, 0.4f, 0.9f);
-                    btnEvents.style.borderTopWidth    = 1;
-                    btnEvents.style.borderBottomWidth = 1;
-                    btnEvents.style.borderLeftWidth   = 1;
-                    btnEvents.style.borderRightWidth  = 1;
-                    if (iconLbl != null) iconLbl.text = $"📰({pending})";
+                
+                if (evCountry != null && GameManager.Instance?.TurnSystem != null) {
+                    bool budgetOverdue = (GameManager.Instance.TurnSystem.CurrentTurn - evCountry.lastBudgetApprovalTurn) >= 3;
+                    bool hasElectionResult = !string.IsNullOrEmpty(evCountry.latestElectionResult);
+                    if (budgetOverdue) pending++;
+                    if (hasElectionResult) pending++;
                 }
-                else
+
+                var badge = btnEvents.Q<Label>("EventBadge");
+                if (badge != null)
                 {
-                    btnEvents.style.backgroundColor   = StyleKeyword.Null;
-                    btnEvents.style.borderTopWidth    = 0;
-                    btnEvents.style.borderBottomWidth = 0;
-                    btnEvents.style.borderLeftWidth   = 0;
-                    btnEvents.style.borderRightWidth  = 0;
-                    if (iconLbl != null) iconLbl.text = "📰";
+                    if (pending > 0)
+                    {
+                        badge.style.display = DisplayStyle.Flex;
+                        badge.text = pending > 99 ? "99+" : pending.ToString();
+                        
+                        btnEvents.style.backgroundColor = new Color(0.6f, 0.0f, 0.0f, 0.7f);
+                        btnEvents.style.borderTopColor    = new Color(0.9f, 0.1f, 0.1f);
+                        btnEvents.style.borderBottomColor = new Color(0.9f, 0.1f, 0.1f);
+                        btnEvents.style.borderLeftColor   = new Color(0.9f, 0.1f, 0.1f);
+                        btnEvents.style.borderRightColor  = new Color(0.9f, 0.1f, 0.1f);
+                        btnEvents.style.borderTopWidth    = 1;
+                        btnEvents.style.borderBottomWidth = 1;
+                        btnEvents.style.borderLeftWidth   = 1;
+                        btnEvents.style.borderRightWidth  = 1;
+                    }
+                    else
+                    {
+                        badge.style.display = DisplayStyle.None;
+                        
+                        btnEvents.style.backgroundColor   = StyleKeyword.Null;
+                        btnEvents.style.borderTopWidth    = 0;
+                        btnEvents.style.borderBottomWidth = 0;
+                        btnEvents.style.borderLeftWidth   = 0;
+                        btnEvents.style.borderRightWidth  = 0;
+                    }
                 }
             }
         }
@@ -478,6 +509,12 @@ namespace StateCraft.UI
         {
             var selector = FindObjectOfType<CountrySelectorToolkitController>();
             if (selector != null) selector.Show();
+        }
+
+        public void ShowWarDeclaredModal(StateCraft.Data.CountryDataSO aggressor)
+        {
+            // TODO: Implement War Declared UI Modal
+            Debug.LogWarning($"[UI] War Declared by {aggressor.countryName}! Modal UI not yet implemented.");
         }
     }
 }

@@ -59,7 +59,7 @@ namespace StateCraft.UI
         private TextField _inputConstructName;
         private Button _btnCancelConstruct;
         private Button _btnConfirmConstruct;
-        private Label _labelConstructBranch;
+        private VisualElement _containerConstructBranch;
         
         // Construction Stats
         private Label _labelConstructCost;
@@ -81,6 +81,7 @@ namespace StateCraft.UI
         private Label _labelUpgradeCost;
         private Label _labelUpgradeBenefitTitle;
         private Label _labelUpgradeBenefit;
+        private Label _labelUpgradeTime;
         
         private bool _basesWired = false;
 
@@ -120,8 +121,6 @@ namespace StateCraft.UI
 
         private string _currentBranchFilter = "ALL";
         private Button _btnFilterAll, _btnFilterArmy, _btnFilterAirForce, _btnFilterNavy, _btnFilterJoint;
-        private VisualElement _containerConstructSpecialization;
-        private DropdownField _dropdownConstructSpecialization;
         
         private Button _btnDetailUpgrade;
         private MilitaryBase _currentSelectedBase;
@@ -193,12 +192,11 @@ namespace StateCraft.UI
             _btnTypeTraining = root.Q<Button>("BtnTypeTraining");
             _dropdownConstructRegion = root.Q<DropdownField>("DropdownConstructRegion");
             _dropdownConstructBranch = root.Q<DropdownField>("DropdownConstructBranch");
-            _containerConstructSpecialization = root.Q<VisualElement>("ContainerConstructSpecialization");
-            _dropdownConstructSpecialization = root.Q<DropdownField>("DropdownConstructSpecialization");
+            if (_dropdownConstructBranch != null) _dropdownConstructBranch.RegisterValueChangedCallback(evt => UpdateConstructStatsUI());
+            _containerConstructBranch = root.Q<VisualElement>("ContainerConstructBranch");
             _inputConstructName = root.Q<TextField>("InputConstructName");
             _btnCancelConstruct = root.Q<Button>("BtnCancelConstruct");
             _btnConfirmConstruct = root.Q<Button>("BtnConfirmConstruct");
-            _labelConstructBranch = root.Q<Label>("LabelConstructBranch");
             
             _labelConstructCost = root.Q<Label>("LabelConstructCost");
             _labelConstructCapacityTitle = root.Q<Label>("LabelConstructCapacityTitle");
@@ -226,6 +224,7 @@ namespace StateCraft.UI
             _labelUpgradeCost = root.Q<Label>("LabelUpgradeCost");
             _labelUpgradeBenefitTitle = root.Q<Label>("LabelUpgradeBenefitTitle");
             _labelUpgradeBenefit = root.Q<Label>("LabelUpgradeBenefit");
+            _labelUpgradeTime = root.Q<Label>("LabelUpgradeTime");
 
             if (_btnCloseUpgradeModal != null) _btnCloseUpgradeModal.clicked += () => _upgradeModalOverlay.style.display = DisplayStyle.None;
             if (_btnCancelUpgrade != null) _btnCancelUpgrade.clicked += () => _upgradeModalOverlay.style.display = DisplayStyle.None;
@@ -311,12 +310,12 @@ namespace StateCraft.UI
 
                 if (firstVisible == null) firstVisible = b;
                 RegionDataSO region = country.regions?.Find(r => r.regionName == b.regionName);
-                string locationLabel = region != null ? $"{region.regionName}, Nigeria" : b.regionName;
+                string locationLabel = region != null ? $"{region.regionName}, {GameManager.Instance.playerCountry.countryName}" : b.regionName;
                 string threatLevel   = GetThreatLevel(region);
                 Color  sColor = b.status == "OPERATIONAL" ? new Color(0.14f, 0.93f, 0.34f) : new Color(1f, 0.67f, 0.25f);
                 string bIcon  = b.branch == "AIR" ? FaIcons.Plane : b.branch == "NAVY" ? FaIcons.Anchor : b.branch == "JOINT" ? FaIcons.Shield : FaIcons.HardHat;
                 var baseRef = b;
-                AddBaseListItem(b.baseName, locationLabel, b.status, sColor, $"{b.currentPersonnel:N0} / {b.capacity:N0}", b.role, bIcon, false, () => ShowBaseDetails(baseRef, country));
+                AddBaseListItem(b.baseName, b.branch, locationLabel, b.status, sColor, $"{b.currentPersonnel:N0} / {b.capacity:N0}", b.role, bIcon, false, () => ShowBaseDetails(baseRef, country));
             }
 
             if (country.defenseFactories != null)
@@ -338,7 +337,47 @@ namespace StateCraft.UI
                     var factoryRef = fac;
                     string status = fac.level > 0 ? "OPERATIONAL" : "UNDER CONSTRUCTION";
                     Color statusColor = fac.level > 0 ? new Color(0.14f, 0.93f, 0.34f) : new Color(1f, 0.67f, 0.25f);
-                    AddBaseListItem(fac.factoryName, "Defense Facility", status, statusColor, $"{fac.utilizationPct:F0}% Utilized", $"Level {fac.level} Factory", FaIcons.Wrench, false, () => ShowFactoryDetails(factoryRef, country));
+                    AddBaseListItem(fac.factoryName, fBranch, "Defense Facility", status, statusColor, $"{fac.utilizationPct:F0}% Utilized", $"Level {fac.level} Factory", FaIcons.Wrench, false, () => ShowFactoryDetails(factoryRef, country));
+                }
+            }
+
+            if (country.facilityConstructionOrders != null)
+            {
+                foreach (var order in country.facilityConstructionOrders)
+                {
+                    if (order.facilityType == 1) continue; // Skip factories since they might be handled separately or they don't map to bases easily here
+                    
+                    string branch = order.branch == "AIR" ? "AIR FORCE" : order.branch;
+                    
+                    if (branch == "ARMY") cArmy++;
+                    else if (branch == "AIR FORCE") cAir++;
+                    else if (branch == "NAVY") cNavy++;
+                    else if (branch == "JOINT") cJoint++;
+                    cAll++;
+
+                    if (_currentBranchFilter != "ALL" && branch != _currentBranchFilter) continue;
+
+                    string bIcon = order.branch == "AIR" ? FaIcons.Plane : order.branch == "NAVY" ? FaIcons.Anchor : order.branch == "JOINT" ? FaIcons.Shield : FaIcons.HardHat;
+                    string locationLabel = $"{order.regionName}, {GameManager.Instance.playerCountry.countryName}";
+                    string role = order.facilityType == 2 ? "Training Academy" : "Base under construction";
+
+                    // For the click handler, we can pass a dummy MilitaryBase to ShowBaseDetails just so it renders something, or disable click.
+                    // For now, let's create a temporary MilitaryBase object to display in details panel
+                    var tempBase = new MilitaryBase(
+                        order.id,
+                        order.facilityName,
+                        order.regionName,
+                        order.branch,
+                        order.capacity,
+                        role
+                    );
+                    tempBase.status = "UNDER CONSTRUCTION";
+                    tempBase.currentPersonnel = 0;
+                    tempBase.upkeepCost = 0f;
+                    
+                    if (firstVisible == null) firstVisible = tempBase;
+
+                    AddBaseListItem(order.facilityName, order.branch, locationLabel, "UNDER CONSTRUCTION", new Color(1f, 0.67f, 0.25f), $"0 / {order.capacity:N0}", role, bIcon, false, () => ShowBaseDetails(tempBase, country));
                 }
             }
 
@@ -371,25 +410,8 @@ namespace StateCraft.UI
             AddOverviewRow("Under Construction", constrCount.ToString(), new Color(1f, 0.67f, 0.25f));
             AddOverviewRow("Inactive", "0", Color.grey);
 
-            // 5. Construction & Upgrade queues (UNDER CONSTRUCTION bases)
-            _constructionQueueContainer.Clear();
-            _upgradeQueueContainer.Clear();
-            var constructingBases = country.militaryBases.FindAll(x => x.status == "UNDER CONSTRUCTION");
-            if (constructingBases.Count == 0)
-            {
-                _constructionQueueContainer.Add(new Label("No bases under construction") { style = { fontSize = 11, color = new Color(0.5f, 0.5f, 0.5f), unityTextAlign = TextAnchor.MiddleCenter, marginTop = 16, marginBottom = 16, paddingBottom = 12, paddingTop = 12 } });
-            }
-            else
-            {
-                foreach (var b in constructingBases)
-                {
-                    string bIcon = b.branch == "AIR" ? FaIcons.Plane : b.branch == "NAVY" ? FaIcons.Anchor : b.branch == "JOINT" ? FaIcons.Shield : FaIcons.HardHat;
-                    AddQueueItem(_constructionQueueContainer, b.baseName, b.regionName, 40, "~180 Days", $"₦{b.upkeepCost * 10:F1}B", bIcon);
-                }
-            }
-
-            _upgradeQueueContainer.Add(new Label("No active upgrades") { style = { fontSize = 11, color = new Color(0.5f, 0.5f, 0.5f), unityTextAlign = TextAnchor.MiddleCenter, marginTop = 16, marginBottom = 16, paddingBottom = 12, paddingTop = 12 } });
-
+            // 5. Construction & Upgrade queues
+            PopulateQueues(country);
             
             Debug.Log("[Bases] PopulateBases finished successfully!");
             }
@@ -399,7 +421,71 @@ namespace StateCraft.UI
             }
         }
 
-        private void AddBaseListItem(string name, string location, string status, Color statusColor, string personnel, string role, string icon, bool isActive, System.Action onClick = null)
+        private void PopulateQueues(CountryDataSO country)
+        {
+            if (_constructionQueueContainer == null || _upgradeQueueContainer == null) return;
+            
+            _constructionQueueContainer.Clear();
+            _upgradeQueueContainer.Clear();
+            
+            // Build combined construction list: new queue orders + legacy "UNDER CONSTRUCTION" bases
+            bool hasConstructionItems = false;
+
+            // New queue orders
+            if (country.facilityConstructionOrders != null)
+            {
+                foreach (var order in country.facilityConstructionOrders)
+                {
+                    string icon = order.branch == "AIR" ? FaIcons.Plane : order.branch == "NAVY" ? FaIcons.Anchor : order.branch == "JOINT" ? FaIcons.Shield : FaIcons.HardHat;
+                    if (order.facilityType == 1) icon = FaIcons.Wrench;
+                    AddQueueItem(_constructionQueueContainer, order.facilityName, order.regionName, (int)order.progressPct, $"{order.monthsRemaining} Months", "BUILD", icon);
+                    hasConstructionItems = true;
+                }
+            }
+
+            // Legacy: bases added directly with UNDER CONSTRUCTION status (old save data)
+            if (country.militaryBases != null)
+            {
+                foreach (var b in country.militaryBases)
+                {
+                    if (b.status != "UNDER CONSTRUCTION") continue;
+                    string icon = b.branch == "AIR" ? FaIcons.Plane : b.branch == "NAVY" ? FaIcons.Anchor : b.branch == "JOINT" ? FaIcons.Shield : FaIcons.HardHat;
+                    AddQueueItem(_constructionQueueContainer, b.baseName, b.regionName, 20, "In Progress", "BUILD", icon);
+                    hasConstructionItems = true;
+                }
+            }
+
+            // Legacy: factories at level 0 are also under construction
+            if (country.defenseFactories != null)
+            {
+                foreach (var fac in country.defenseFactories)
+                {
+                    if (fac.level != 0) continue;
+                    AddQueueItem(_constructionQueueContainer, fac.factoryName, "Defense Facility", 20, "In Progress", "BUILD", FaIcons.Wrench);
+                    hasConstructionItems = true;
+                }
+            }
+
+            if (!hasConstructionItems)
+            {
+                _constructionQueueContainer.Add(new Label("No facilities under construction") { style = { fontSize = 11, color = new Color(0.5f, 0.5f, 0.5f), unityTextAlign = TextAnchor.MiddleCenter, marginTop = 16, marginBottom = 16, paddingBottom = 12, paddingTop = 12 } });
+            }
+
+            // Upgrade queue
+            if (country.facilityUpgradeOrders == null || country.facilityUpgradeOrders.Count == 0)
+            {
+                _upgradeQueueContainer.Add(new Label("No active upgrades") { style = { fontSize = 11, color = new Color(0.5f, 0.5f, 0.5f), unityTextAlign = TextAnchor.MiddleCenter, marginTop = 16, marginBottom = 16, paddingBottom = 12, paddingTop = 12 } });
+            }
+            else
+            {
+                foreach (var order in country.facilityUpgradeOrders)
+                {
+                    AddQueueItem(_upgradeQueueContainer, order.facilityName, order.upgradeType, (int)order.progressPct, $"{order.monthsRemaining} Months", "UPGRADE", FaIcons.Hammer);
+                }
+            }
+        }
+
+        private void AddBaseListItem(string name, string branch, string location, string status, Color statusColor, string personnel, string role, string icon, bool isActive, System.Action onClick = null)
         {
             var card = new VisualElement { style = { flexDirection = FlexDirection.Row, paddingTop = 12, paddingBottom = 12, paddingLeft = 12, paddingRight = 12, marginBottom = 8, backgroundColor = isActive ? new Color(0.14f, 0.93f, 0.34f, 0.15f) : new Color(0.05f, 0.07f, 0.1f, 0.95f), borderTopWidth = isActive ? 2 : 1, borderBottomWidth = isActive ? 2 : 1, borderLeftWidth = isActive ? 2 : 1, borderRightWidth = isActive ? 2 : 1, borderTopColor = isActive ? new Color(0.14f, 0.93f, 0.34f, 1f) : new Color(0.2f, 0.25f, 0.35f, 0.5f), borderBottomColor = isActive ? new Color(0.14f, 0.93f, 0.34f, 1f) : new Color(0.2f, 0.25f, 0.35f, 0.5f), borderLeftColor = isActive ? new Color(0.14f, 0.93f, 0.34f, 1f) : new Color(0.2f, 0.25f, 0.35f, 0.5f), borderRightColor = isActive ? new Color(0.14f, 0.93f, 0.34f, 1f) : new Color(0.2f, 0.25f, 0.35f, 0.5f), borderTopLeftRadius = 6, borderTopRightRadius = 6, borderBottomLeftRadius = 6, borderBottomRightRadius = 6 } };
             
@@ -414,10 +500,10 @@ namespace StateCraft.UI
             nameRow.Add(new Label(name) { style = { fontSize = 14, color = Color.white, unityFontStyleAndWeight = FontStyle.Bold, marginRight = 6 } });
             
             // Branch badge
-            string branch = name.Contains("Air") ? "AIR" : name.Contains("Nav") ? "NAVY" : name.Contains("Joint") ? "JOINT" : "ARMY";
-            Color branchColor = branch == "AIR" ? new Color(0.4f, 0.7f, 1f) : branch == "NAVY" ? new Color(0.1f, 0.4f, 0.9f) : branch == "JOINT" ? new Color(0.7f, 0.4f, 0.9f) : new Color(0.3f, 0.6f, 0.3f);
+            string cleanBranch = branch == "AIR" ? "AIR FORCE" : branch;
+            Color branchColor = cleanBranch == "AIR FORCE" ? new Color(0.4f, 0.7f, 1f) : cleanBranch == "NAVY" ? new Color(0.1f, 0.4f, 0.9f) : cleanBranch == "JOINT" ? new Color(0.7f, 0.4f, 0.9f) : cleanBranch == "RDF" ? Color.black : new Color(0.3f, 0.6f, 0.3f);
             var badge = new VisualElement { style = { backgroundColor = branchColor, paddingLeft = 4, paddingRight = 4, paddingTop = 2, paddingBottom = 2, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } };
-            badge.Add(new Label(branch) { style = { fontSize = 10, color = Color.white, unityFontStyleAndWeight = FontStyle.Bold } });
+            badge.Add(new Label(cleanBranch) { style = { fontSize = 10, color = Color.white, unityFontStyleAndWeight = FontStyle.Bold } });
             nameRow.Add(badge);
             mid.Add(nameRow);
 
@@ -572,7 +658,7 @@ namespace StateCraft.UI
             if (_titleBaseThreat != null) _titleBaseThreat.text = isTraining ? "Graduation Rate" : "Threat Level";
 
             RegionDataSO region = country.regions?.Find(r => r.regionName == b.regionName);
-            string locationLabel = region != null ? $"{region.regionName}, Nigeria" : b.regionName;
+            string locationLabel = region != null ? $"{region.regionName}, {GameManager.Instance.playerCountry.countryName}" : b.regionName;
             string threatLevel   = GetThreatLevel(region);
             Color  threatColor   = GetThreatColor(threatLevel);
             string branchIcon    = b.branch == "AIR" ? FaIcons.Plane : b.branch == "NAVY" ? FaIcons.Anchor : b.branch == "JOINT" ? FaIcons.Shield : FaIcons.HardHat;
@@ -631,7 +717,7 @@ namespace StateCraft.UI
                 AddBaseInfoRow("Security", $"{region.security:F0}%", FaIcons.UserSecret);
                 AddBaseInfoRow("Insurgency", $"{region.insurgencyLevel:F0}%", FaIcons.Shield);
             }
-            AddBaseInfoRow("Monthly Upkeep", $"₦{b.upkeepCost:F1}B", FaIcons.Coins);
+            AddBaseInfoRow("Monthly Upkeep", $"₦{b.upkeepCost:F1}B", FaIcons.Coin);
 
             // Capabilities — from live data
             _baseCapabilitiesContainer.Clear();
@@ -737,7 +823,7 @@ namespace StateCraft.UI
             _baseInfoListContainer.Clear();
             AddBaseInfoRow("Location", "National Industrial Zone", FaIcons.Globe);
             AddBaseInfoRow("Specialization", fac.produceType, FaIcons.Wrench);
-            AddBaseInfoRow("Monthly Upkeep", $"₦{fac.level * 2f:F1}B", FaIcons.Coins);
+            AddBaseInfoRow("Monthly Upkeep", $"₦{fac.level * 2f:F1}B", FaIcons.Coin);
 
             _baseCapabilitiesContainer.Clear();
             AddCapabilityRow($"Produces {fac.produceType}", fac.level, FaIcons.Wrench);
@@ -753,9 +839,91 @@ namespace StateCraft.UI
 
         private void OnUpgradeClicked()
         {
+            if (_upgradeModalOverlay == null) return;
+
+            var country = Core.GameManager.Instance?.playerCountry;
+
+            if (_currentSelectedBase != null)
+            {
+                // Block if already queued
+                bool alreadyQueued = country?.facilityUpgradeOrders?.Exists(o => o.facilityId == _currentSelectedBase.id) ?? false;
+                if (alreadyQueued)
+                {
+                    Debug.Log($"[Bases] {_currentSelectedBase.baseName} already has a pending upgrade.");
+                    if (_labelUpgradeName != null) _labelUpgradeName.text = _currentSelectedBase.baseName;
+                    if (_labelUpgradeDesc != null) _labelUpgradeDesc.text = $"⚠ {_currentSelectedBase.baseName} is already queued for an upgrade. Wait for the current upgrade to complete before starting another.";
+                    if (_labelUpgradeCost != null) _labelUpgradeCost.text = "—";
+                    if (_labelUpgradeBenefitTitle != null) _labelUpgradeBenefitTitle.text = "STATUS";
+                    if (_labelUpgradeBenefit != null) _labelUpgradeBenefit.text = "Upgrade In Progress";
+                    if (_labelUpgradeTime != null) _labelUpgradeTime.text = "In Queue";
+                    if (_btnConfirmUpgrade != null) _btnConfirmUpgrade.SetEnabled(false);
+                    _upgradeModalOverlay.style.display = DisplayStyle.Flex;
+                    return;
+                }
+
+                if (_btnConfirmUpgrade != null) _btnConfirmUpgrade.SetEnabled(true);
+                if (_labelUpgradeName != null) _labelUpgradeName.text = _currentSelectedBase.baseName;
+                if (_labelUpgradeDesc != null) _labelUpgradeDesc.text = "Expanding this military base increases its maximum personnel capacity by 500, allowing it to support more assigned units and defensive structures. Note: Upkeep costs will marginally increase.";
+                if (_labelUpgradeCost != null) _labelUpgradeCost.text = "₦20.0B";
+                if (_labelUpgradeBenefitTitle != null) _labelUpgradeBenefitTitle.text = "NEW CAPACITY";
+                if (_labelUpgradeBenefit != null) _labelUpgradeBenefit.text = $"+500 Personnel";
+                if (_labelUpgradeTime != null) _labelUpgradeTime.text = "~90 Days";
+            }
+            else if (_currentSelectedFactory != null)
+            {
+                if (_currentSelectedFactory.level >= 3)
+                {
+                    Debug.Log("Factory is already at maximum level.");
+                    return;
+                }
+
+                // Block if already queued
+                bool alreadyQueued = country?.facilityUpgradeOrders?.Exists(o => o.facilityId == _currentSelectedFactory.id) ?? false;
+                if (alreadyQueued)
+                {
+                    Debug.Log($"[Bases] {_currentSelectedFactory.factoryName} already has a pending upgrade.");
+                    if (_labelUpgradeName != null) _labelUpgradeName.text = _currentSelectedFactory.factoryName;
+                    if (_labelUpgradeDesc != null) _labelUpgradeDesc.text = $"⚠ {_currentSelectedFactory.factoryName} is already queued for an upgrade. Wait for the current upgrade to complete before starting another.";
+                    if (_labelUpgradeCost != null) _labelUpgradeCost.text = "—";
+                    if (_labelUpgradeBenefitTitle != null) _labelUpgradeBenefitTitle.text = "STATUS";
+                    if (_labelUpgradeBenefit != null) _labelUpgradeBenefit.text = "Upgrade In Progress";
+                    if (_labelUpgradeTime != null) _labelUpgradeTime.text = "In Queue";
+                    if (_btnConfirmUpgrade != null) _btnConfirmUpgrade.SetEnabled(false);
+                    _upgradeModalOverlay.style.display = DisplayStyle.Flex;
+                    return;
+                }
+
+                if (_btnConfirmUpgrade != null) _btnConfirmUpgrade.SetEnabled(true);
+                if (_labelUpgradeName != null) _labelUpgradeName.text = _currentSelectedFactory.factoryName;
+                if (_labelUpgradeDesc != null) _labelUpgradeDesc.text = "Upgrading this defense factory drastically increases its monthly production output for heavy equipment and arms. Note: Monthly upkeep costs will increase proportionally.";
+                if (_labelUpgradeCost != null) _labelUpgradeCost.text = "₦35.0B";
+                if (_labelUpgradeBenefitTitle != null) _labelUpgradeBenefitTitle.text = "NEW CAPACITY";
+                if (_labelUpgradeBenefit != null) _labelUpgradeBenefit.text = $"Level {_currentSelectedFactory.level + 1}";
+                if (_labelUpgradeTime != null) _labelUpgradeTime.text = "~180 Days";
+            }
+            else
+            {
+                return;
+            }
+            
+            _upgradeModalOverlay.style.display = DisplayStyle.Flex;
+        }
+
+        private void OnConfirmUpgradeClicked()
+        {
             var country = Core.GameManager.Instance?.playerCountry;
             if (country == null) return;
 
+            if (country.facilityUpgradeOrders == null) country.facilityUpgradeOrders = new List<StateCraft.Data.FacilityUpgradeOrder>();
+
+            // Hard guard: prevent duplicate queue entries
+            string targetId = _currentSelectedBase?.id ?? _currentSelectedFactory?.id;
+            if (!string.IsNullOrEmpty(targetId) && country.facilityUpgradeOrders.Exists(o => o.facilityId == targetId))
+            {
+                Debug.LogWarning($"[Bases] Upgrade already queued for facility {targetId}. Ignoring.");
+                if (_upgradeModalOverlay != null) _upgradeModalOverlay.style.display = DisplayStyle.None;
+                return;
+            }
             if (_currentSelectedBase != null)
             {
                 float costNGN = 20.0f; // 20B NGN to upgrade a base
@@ -764,20 +932,26 @@ namespace StateCraft.UI
                 if (country.treasury >= costUSD)
                 {
                     country.treasury -= costUSD;
-                    _currentSelectedBase.capacity += 500;
-                    _currentSelectedBase.upkeepCost += 0.5f;
-                    
-                    // Automatically hire some new personnel to fill the new capacity over time, 
-                    // but for now we just bump it slightly so it doesn't look empty
-                    _currentSelectedBase.currentPersonnel += 100;
-                    
+
+                    var order = new StateCraft.Data.FacilityUpgradeOrder
+                    {
+                        id = $"UPG_{System.Guid.NewGuid().ToString().Substring(0,5)}",
+                        facilityId = _currentSelectedBase.id,
+                        facilityName = _currentSelectedBase.baseName,
+                        upgradeType = "Capacity Increase",
+                        monthsTotal = 3,
+                        monthsRemaining = 3
+                    };
+                    country.facilityUpgradeOrders.Add(order);
+
                     if (Core.GameManager.Instance != null && Core.GameManager.Instance.playerCountry != null)
                     {
                         ShowBaseDetails(_currentSelectedBase, Core.GameManager.Instance.playerCountry);
-                        PopulateBases(Core.GameManager.Instance.playerCountry); // refresh list to update the visual fill bars
+                        PopulateQueues(Core.GameManager.Instance.playerCountry); // update the visual queues
                     }
                     
-                    Debug.Log($"Upgraded Base: {_currentSelectedBase.baseName}");
+                    if (_upgradeModalOverlay != null) _upgradeModalOverlay.style.display = DisplayStyle.None;
+                    Debug.Log($"Queued Upgrade for Base: {_currentSelectedBase.baseName}");
                 }
                 else
                 {
@@ -794,19 +968,29 @@ namespace StateCraft.UI
                     if (country.treasury >= costUSD)
                     {
                         country.treasury -= costUSD;
-                        _currentSelectedFactory.level += 1;
+                        
+                        var order = new StateCraft.Data.FacilityUpgradeOrder
+                        {
+                            id = $"UPG_{System.Guid.NewGuid().ToString().Substring(0,5)}",
+                            facilityId = _currentSelectedFactory.id,
+                            facilityName = _currentSelectedFactory.factoryName,
+                            upgradeType = "Level Up",
+                            monthsTotal = 6,
+                            monthsRemaining = 6
+                        };
+                        country.facilityUpgradeOrders.Add(order);
+
                         if (Core.GameManager.Instance != null && Core.GameManager.Instance.playerCountry != null)
                             ShowFactoryDetails(_currentSelectedFactory, Core.GameManager.Instance.playerCountry);
-                        Debug.Log($"Upgraded Factory: {_currentSelectedFactory.factoryName}");
+                            PopulateQueues(Core.GameManager.Instance.playerCountry);
+                        
+                        if (_upgradeModalOverlay != null) _upgradeModalOverlay.style.display = DisplayStyle.None;
+                        Debug.Log($"Queued Upgrade for Factory: {_currentSelectedFactory.factoryName}");
                     }
                     else
                     {
                         Debug.LogWarning("Not enough treasury to upgrade factory!");
                     }
-                }
-                else
-                {
-                    Debug.Log("Factory is already at maximum level.");
                 }
             }
         }
@@ -831,20 +1015,68 @@ namespace StateCraft.UI
             if (country.militaryBases == null)
                 country.militaryBases = new List<MilitaryBase>();
 
+            // Check if existing bases belong to a different country (e.g. leftover serialized data)
+            if (country.militaryBases.Count > 0 && country.regions != null && country.regions.Count > 0)
+            {
+                bool baseMatchesRegion = false;
+                foreach (var region in country.regions)
+                {
+                    if (country.militaryBases[0].regionName == region.regionName)
+                    {
+                        baseMatchesRegion = true;
+                        break;
+                    }
+                }
+                
+                if (!baseMatchesRegion)
+                {
+                    Debug.Log($"[Bases] Existing bases do not match {country.countryName}'s regions. Clearing and regenerating...");
+                    country.militaryBases.Clear();
+                }
+            }
+
             if (country.militaryBases.Count == 0)
             {
-                // Seed using real Nigerian RegionDataSO region names
-                country.militaryBases.Add(new MilitaryBase("BASE_1", "Lagos Joint Base",           "Lagos",        "JOINT", 3000, "Joint Operations"));
-                country.militaryBases.Add(new MilitaryBase("BASE_2", "Kano Army Base",              "Kano",         "ARMY",  2500, "Training & Logistics"));
-                country.militaryBases.Add(new MilitaryBase("BASE_3", "Maiduguri Air Base",          "Borno",        "AIR",   2000, "Air Superiority"));
-                country.militaryBases.Add(new MilitaryBase("BASE_4", "Port Harcourt Naval Base",    "Rivers",       "NAVY",  1500, "Maritime Operations"));
-                country.militaryBases.Add(new MilitaryBase("BASE_5", "Enugu Army Garrison",         "Enugu",        "ARMY",  1800, "Armored Division"));
-                country.militaryBases.Add(new MilitaryBase("BASE_6", "Abuja Defense HQ",            "Abuja (FCT)",  "JOINT", 2200, "National Defense HQ"));
-
-                // Borno base has higher threat due to insurgency — GetThreatLevel will auto-reflect this
-                var base7 = new MilitaryBase("BASE_7", "Maiduguri Forward Op Base", "Borno", "ARMY", 800, "Counter-Insurgency");
-                base7.status = "UNDER CONSTRUCTION";
-                country.militaryBases.Add(base7);
+                // Generate dynamic bases based on the country's actual regions
+                if (country.regions != null && country.regions.Count > 0)
+                {
+                    int idCounter = 1;
+                    
+                    // Base 1: National HQ in the first region (often capital)
+                    country.militaryBases.Add(new MilitaryBase($"BASE_{idCounter++}", $"{country.regions[0].regionName} Defense HQ", country.regions[0].regionName, "JOINT", 3000, "National Defense HQ"));
+                    
+                    // Create bases distributed among other regions
+                    string[] branches = { "ARMY", "AIR", "NAVY", "ARMY" };
+                    string[] roles = { "Training & Logistics", "Air Superiority", "Maritime Operations", "Armored Division" };
+                    
+                    for (int i = 1; i < Mathf.Min(country.regions.Count, 6); i++)
+                    {
+                        int branchIdx = (i - 1) % branches.Length;
+                        string branch = branches[branchIdx];
+                        string role = roles[branchIdx];
+                        
+                        // Default to JOINT if landlocked and NAVY is selected, but for simplicity let's just use it
+                        string baseName = branch == "AIR" ? $"{country.regions[i].regionName} Air Base" :
+                                          branch == "NAVY" ? $"{country.regions[i].regionName} Naval Base" :
+                                          $"{country.regions[i].regionName} Army Garrison";
+                                          
+                        country.militaryBases.Add(new MilitaryBase($"BASE_{idCounter++}", baseName, country.regions[i].regionName, branch, UnityEngine.Random.Range(1500, 2500), role));
+                    }
+                    
+                    // Add one under construction if they have enough regions
+                    if (country.regions.Count > 2)
+                    {
+                        var bUnderConst = new MilitaryBase($"BASE_{idCounter++}", $"{country.regions[country.regions.Count - 1].regionName} Forward Op Base", country.regions[country.regions.Count - 1].regionName, "ARMY", 800, "Border Security");
+                        bUnderConst.status = "UNDER CONSTRUCTION";
+                        country.militaryBases.Add(bUnderConst);
+                    }
+                }
+                else
+                {
+                    // Fallback if no regions defined
+                    country.militaryBases.Add(new MilitaryBase("BASE_1", "National Defense HQ", "Capital", "JOINT", 3000, "National Defense HQ"));
+                    country.militaryBases.Add(new MilitaryBase("BASE_2", "First Army Base", "Central", "ARMY", 2500, "Training & Logistics"));
+                }
             }
             
             // Ensure any existing bases have the newly added fields populated
@@ -972,38 +1204,21 @@ namespace StateCraft.UI
                 _btnTypeTraining.style.color = facilityType == 2 ? Color.white : Color.grey;
             }
 
-            if (_dropdownConstructBranch != null)
+            if (_containerConstructBranch != null)
             {
-                if (facilityType == 1)
+                if (facilityType == 1) // Defense Factory
                 {
-                    _dropdownConstructBranch.SetEnabled(false);
-                    _dropdownConstructBranch.choices = new List<string> { "Not Applicable" };
-                    _dropdownConstructBranch.value = "Not Applicable";
+                    _containerConstructBranch.style.display = DisplayStyle.None;
                 }
-                else
+                else // Military Base (0) or Training Academy (2)
                 {
-                    _dropdownConstructBranch.SetEnabled(true);
-                    _dropdownConstructBranch.choices = new List<string> { "ARMY", "NAVY", "AIR FORCE", "JOINT" };
-                    _dropdownConstructBranch.value = "ARMY";
-                }
-            }
-
-            if (_containerConstructSpecialization != null)
-            {
-                _containerConstructSpecialization.style.display = facilityType == 0 ? DisplayStyle.None : DisplayStyle.Flex;
-            }
-
-            if (_dropdownConstructSpecialization != null)
-            {
-                if (facilityType == 1)
-                {
-                    _dropdownConstructSpecialization.choices = new List<string> { "Small Arms", "Armored Vehicles", "Artillery Systems", "Aircraft", "Naval Vessels" };
-                    _dropdownConstructSpecialization.value = "Armored Vehicles";
-                }
-                else if (facilityType == 2)
-                {
-                    _dropdownConstructSpecialization.choices = new List<string> { "Basic Training", "Officer Academy", "Special Forces", "Logistics School" };
-                    _dropdownConstructSpecialization.value = "Basic Training";
+                    _containerConstructBranch.style.display = DisplayStyle.Flex;
+                    if (_dropdownConstructBranch != null)
+                    {
+                        _dropdownConstructBranch.choices = new List<string> { "ARMY", "NAVY", "AIR FORCE", "RDF" };
+                        if (string.IsNullOrEmpty(_dropdownConstructBranch.value))
+                            _dropdownConstructBranch.value = "ARMY";
+                    }
                 }
             }
 
@@ -1013,24 +1228,52 @@ namespace StateCraft.UI
                                             facilityType == 2 ? "New Training Academy" : "New Forward Base";
             }
 
-            if (_labelConstructCost != null)
-            {
-                _labelConstructCost.text = facilityType == 1 ? "₦120.0B" : 
-                                           facilityType == 2 ? "₦35.0B" : "₦50.0B";
-            }
+            UpdateConstructStatsUI();
+        }
+
+        private void UpdateConstructStatsUI()
+        {
+            float cost;
+            int capacity;
+            string timeStr;
+            GetConstructStats(_constructFacilityType, _dropdownConstructBranch?.value ?? "ARMY", out cost, out capacity, out timeStr);
+
+            if (_labelConstructCost != null) _labelConstructCost.text = $"₦{cost:N1}B";
+            
             if (_labelConstructCapacityTitle != null)
-            {
-                _labelConstructCapacityTitle.text = facilityType == 1 ? "EXPECTED OUTPUT" : "EXPECTED CAPACITY";
-            }
+                _labelConstructCapacityTitle.text = _constructFacilityType == 1 ? "EXPECTED OUTPUT" : "EXPECTED CAPACITY";
+
             if (_labelConstructCapacity != null)
+                _labelConstructCapacity.text = _constructFacilityType == 1 ? $"+{capacity} Eqp/mo" : $"+{capacity:N0}";
+
+            if (_labelConstructTime != null) _labelConstructTime.text = timeStr;
+        }
+
+        private void GetConstructStats(int type, string branch, out float cost, out int capacity, out string timeStr)
+        {
+            if (type == 1) // Defense Factory
             {
-                _labelConstructCapacity.text = facilityType == 1 ? "+100 Eqp/mo" :
-                                               facilityType == 2 ? "+500" : "+1,000";
+                cost = 120.0f;
+                capacity = 100;
+                timeStr = "~365 Days";
+                return;
             }
-            if (_labelConstructTime != null)
+            
+            if (type == 0) // Military Base
             {
-                _labelConstructTime.text = facilityType == 1 ? "~365 Days" :
-                                           facilityType == 2 ? "~120 Days" : "~180 Days";
+                cost = 50.0f;
+                capacity = 1000;
+                timeStr = "~180 Days";
+                if (branch == "RDF") { cost = 80.0f; capacity = 300; }
+                else if (branch == "AIR FORCE") { cost = 75.0f; capacity = 500; }
+            }
+            else // Training Academy (Type 2)
+            {
+                cost = 35.0f;
+                capacity = 500;
+                timeStr = "~120 Days";
+                if (branch == "RDF") { cost = 55.0f; capacity = 150; }
+                else if (branch == "AIR FORCE") { cost = 50.0f; capacity = 250; }
             }
         }
 
@@ -1041,39 +1284,42 @@ namespace StateCraft.UI
 
             string selectedRegName = _dropdownConstructRegion?.value;
             string selBranch = _dropdownConstructBranch?.value;
-            string selSpec = _dropdownConstructSpecialization?.value;
             string selName = _inputConstructName?.value;
 
             string cleanBranch = selBranch == "AIR FORCE" ? "AIR" : selBranch;
+            if (_constructFacilityType == 1) cleanBranch = "Not Applicable"; // Defense factory doesn't use branch
 
-            if (_constructFacilityType == 1) // Defense Factory
+            if (country.facilityConstructionOrders == null) country.facilityConstructionOrders = new List<StateCraft.Data.FacilityConstructionOrder>();
+
+            float costNGN;
+            int capacity;
+            string timeStr;
+            GetConstructStats(_constructFacilityType, selBranch, out costNGN, out capacity, out timeStr);
+            
+            float costUSD = costNGN / country.exchangeRate;
+            if (country.treasury < costUSD)
             {
-                if (country.defenseFactories == null) country.defenseFactories = new List<DefenseFactory>();
-                var newFac = new DefenseFactory
-                {
-                    id = $"FAC_{System.Guid.NewGuid().ToString().Substring(0,5)}",
-                    factoryName = string.IsNullOrEmpty(selName) ? $"{selectedRegName} Weapons Plant" : selName,
-                    level = 0, // Level 0 implies UNDER CONSTRUCTION
-                    utilizationPct = 0,
-                    produceType = selSpec
-                };
-                country.defenseFactories.Add(newFac);
+                Debug.LogWarning("Not enough treasury to construct facility!");
+                return;
             }
-            else // 0 = Military Base, 2 = Training Academy
+            country.treasury -= costUSD;
+
+            var order = new StateCraft.Data.FacilityConstructionOrder
             {
-                var newBase = new MilitaryBase($"BASE_{System.Guid.NewGuid().ToString().Substring(0,5)}", 
-                                            string.IsNullOrEmpty(selName) ? $"{selectedRegName} Facility" : selName, 
-                                            selectedRegName, 
-                                            cleanBranch, 
-                                            _constructFacilityType == 2 ? 500 : 1000, 
-                                            _constructFacilityType == 2 ? selSpec : "Forward Operations");
-                newBase.status = "UNDER CONSTRUCTION";
-                newBase.establishedYear = 2026;
-                country.militaryBases.Add(newBase);
-            }
+                id = $"CON_{System.Guid.NewGuid().ToString().Substring(0,5)}",
+                facilityName = string.IsNullOrEmpty(selName) ? $"{selectedRegName} " + (_constructFacilityType == 1 ? "Weapons Plant" : _constructFacilityType == 2 ? "Academy" : "Facility") : selName,
+                facilityType = _constructFacilityType,
+                regionName = selectedRegName,
+                branch = cleanBranch,
+                specialization = "None",
+                capacity = capacity,
+                monthsTotal = _constructFacilityType == 1 ? 12 : _constructFacilityType == 2 ? 4 : 6,
+                monthsRemaining = _constructFacilityType == 1 ? 12 : _constructFacilityType == 2 ? 4 : 6
+            };
+            country.facilityConstructionOrders.Add(order);
 
             if (_constructModalOverlay != null) _constructModalOverlay.style.display = DisplayStyle.None;
-            PopulateBases(country); // Refresh UI
+            PopulateBases(country);
         }
         
         private Color rgba(int r, int g, int b, float a)
