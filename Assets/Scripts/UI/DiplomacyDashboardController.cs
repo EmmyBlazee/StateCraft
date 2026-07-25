@@ -35,7 +35,7 @@ namespace StateCraft.UI
 
         // Bilateral filter — ACTIVE (Allies+Rivals) is the default so the player leads with actionable data
         private enum BilateralFilter { Actionable, Allies, Rivals, Neutral, All }
-        private BilateralFilter _currentBilateralFilter = BilateralFilter.Actionable;
+        private BilateralFilter _currentBilateralFilter = BilateralFilter.All;
         private Button _btnFilterActive, _btnFilterAllies, _btnFilterRivals, _btnFilterNeutral, _btnFilterAll;
 
         // Bilateral Detail panel
@@ -560,20 +560,20 @@ namespace StateCraft.UI
             {
                 _detailActionsList.Clear();
 
-                AddAction("📜  PROPOSE TREATY",   new Color(0.18f, 0.6f, 0.95f), () =>
+                AddAction("PROPOSE TREATY",   new Color(0.18f, 0.6f, 0.95f), () =>
                 {
                     ShowBilateralGrid();   // close detail, re-open from Treaties tab
                     SwitchTab(2);
                     ShowProposeTreatyModal(target);
                 });
 
-                AddAction("💱  TRADE RESOURCES", new Color(0.95f, 0.72f, 0.05f), () =>
+                AddAction("TRADE RESOURCES", new Color(0.95f, 0.72f, 0.05f), () =>
                 {
                     if (_tradeController == null) _tradeController = UnityEngine.Object.FindObjectOfType<TradeAgreementController>();
                     if (_tradeController != null) _tradeController.ShowWithPartner(target.countryName);
                     else NotificationManager.Instance?.AddNotification("TRADE DESK: Could not find TradeAgreementController in scene.", Color.red);
                 });
-                AddAction("💰  OFFER AID PACKAGE", new Color(0.14f, 0.93f, 0.34f), () =>
+                AddAction("OFFER AID PACKAGE", new Color(0.14f, 0.93f, 0.34f), () =>
                 {
                     var g = GameManager.Instance;
                     if (g == null) return;
@@ -585,7 +585,7 @@ namespace StateCraft.UI
                     OpenBilateralDetail(player, target, DashboardLiveContent.ComputeRelation(player, target, g), g);
                 });
 
-                AddAction("🚫  IMPOSE SANCTIONS",  new Color(1f, 0.67f, 0.25f), () =>
+                AddAction("IMPOSE SANCTIONS",  new Color(1f, 0.67f, 0.25f), () =>
                 {
                     var g = GameManager.Instance;
                     if (g == null) return;
@@ -601,13 +601,13 @@ namespace StateCraft.UI
                 bool atWar = gm?.WarSystem?.GetWarStage(target) == Interfaces.WarStage.Conflict;
                 if (atWar)
                 {
-                    AddAction("🕊  PROPOSE CEASEFIRE",   new Color(0.4f, 0.8f, 1f), () =>
+                    AddAction("PROPOSE CEASEFIRE",   new Color(0.4f, 0.8f, 1f), () =>
                     {
                         var g = GameManager.Instance;
                         if (g?.WarSystem is WarSystem ws) ws.ProposePeace(player, target);
                         if (g != null) OpenBilateralDetail(player, target, DashboardLiveContent.ComputeRelation(player, target, g), g);
                     });
-                    AddAction("🏳  DEMAND CAPITULATION", new Color(1f, 0.32f, 0.32f), () =>
+                    AddAction("DEMAND CAPITULATION", new Color(1f, 0.32f, 0.32f), () =>
                     {
                         var g = GameManager.Instance;
                         if (g?.WarSystem is WarSystem ws) ws.ProposeReparationsPeace(player, target);
@@ -617,7 +617,7 @@ namespace StateCraft.UI
                 else
                 {
                     // Declare War button — always visible, nuclear blocks the CONFIRM not the button itself
-                    var warBtn = new Button(() => ShowDeclareWarModal(player, target, relation, gm)) { text = "⚔  DECLARE WAR" };
+                    var warBtn = new Button(() => ShowDeclareWarModal(player, target, relation, gm)) { text = "DECLARE WAR" };
                     warBtn.AddToClassList("econ-small-button");
                     warBtn.style.height = 36; warBtn.style.fontSize = 11; warBtn.style.marginTop = 4;
                     warBtn.style.color = new Color(1f, 0.32f, 0.32f);
@@ -704,7 +704,7 @@ namespace StateCraft.UI
             cancelBtn.style.width = Length.Percent(45); cancelBtn.style.height = 36; cancelBtn.style.fontSize = 11;
             btnRow.Add(cancelBtn);
 
-            var confirmBtn = new Button { text = "⚔  CONFIRM — DECLARE WAR" };
+            var confirmBtn = new Button { text = "CONFIRM — DECLARE WAR" };
             confirmBtn.AddToClassList("econ-small-button");
             confirmBtn.style.width = Length.Percent(50); confirmBtn.style.height = 36; confirmBtn.style.fontSize = 11;
 
@@ -763,7 +763,7 @@ namespace StateCraft.UI
 
             // Header
             var headerRow = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 20 } };
-            headerRow.Add(new Label("📜  PROPOSE TREATY") { style = { color = cBlue, fontSize = 18, unityFontStyleAndWeight = FontStyle.Bold } });
+            headerRow.Add(new Label("PROPOSE TREATY") { style = { color = cBlue, fontSize = 18, unityFontStyleAndWeight = FontStyle.Bold } });
             var closeX = new Button(() => overlay.parent?.Remove(overlay)) { text = "×" };
             closeX.AddToClassList("econ-small-button"); closeX.style.width = 28; closeX.style.height = 28; closeX.style.fontSize = 16;
             headerRow.Add(closeX);

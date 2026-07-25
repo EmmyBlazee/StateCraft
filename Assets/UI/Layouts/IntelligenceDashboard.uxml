@@ -509,30 +509,11 @@
 
                 <!-- MIDDLE GRID -->
                 <ui:VisualElement style="flex-grow: 1; flex-direction: row; flex-shrink: 0; margin-bottom: 12px;">
-                    <!-- LEFT COLUMN -->
+                    <!-- LEFT COLUMN: BUDGET & UPKEEP -->
                     <ui:VisualElement style="width: 22%; margin-right: 12px; flex-direction: column;">
-                        <!-- Status -->
-                        <ui:VisualElement class="sub-panel" style="margin-bottom: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                            <ui:Label text="OPERATION STATUS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
-                            <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: space-between;">
-                                <ui:VisualElement style="width: 60px; height: 60px; border-radius: 30px; border-width: 8px; border-color: rgba(255,255,255,0.1); align-items: center; justify-content: center;">
-                                    <ui:Label name="CO_TotalOpsDonut" text="0" style="font-size: 16px; color: white; -unity-font-style: bold;" />
-                                    <ui:Label text="TOTAL" style="font-size: 10px; color: grey;" />
-                                </ui:VisualElement>
-                                <ui:VisualElement name="CO_StatusList" style="flex-grow: 1; margin-left: 16px;" />
-                            </ui:VisualElement>
-                        </ui:VisualElement>
-
-                        <!-- Categories -->
-                        <ui:VisualElement class="sub-panel" style="margin-bottom: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
-                            <ui:Label text="OPERATION CATEGORIES" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
-                            <ui:VisualElement name="CO_CategoryList" style="flex-direction: column;" />
-                        </ui:VisualElement>
-
-                        <!-- Resource Allocation -->
                         <ui:VisualElement class="sub-panel" style="flex-grow: 1; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05); min-height: 0;">
-                            <ui:Label text="RESOURCE ALLOCATION" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
-                            <ui:VisualElement name="CO_ResourceList" style="flex-direction: column;" />
+                            <ui:Label text="OPERATIONS BUDGET &amp; UPKEEP" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; margin-bottom: 12px; letter-spacing: 1px;" />
+                            <ui:ScrollView name="CO_BudgetRunningCostsList" style="flex-grow: 1;" />
                         </ui:VisualElement>
                     </ui:VisualElement>
 
@@ -543,8 +524,7 @@
                             <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                                 <ui:Label name="CO_ActiveTitle" text="ACTIVE COVERT OPERATIONS (0)" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px;" />
                                 <ui:VisualElement style="flex-direction: row; align-items: center;">
-                                    <ui:Button name="BtnLaunchCovertOp" text="LAUNCH OPERATION" style="height: 24px; font-size: 10px; background-color: rgba(35, 237, 86, 0.2); color: rgb(35, 237, 86); border-width: 1px; border-color: rgba(35, 237, 86, 0.5); border-radius: 2px; margin-right: 12px; padding-left: 12px; padding-right: 12px;" />
-                                    <ui:Label text="VIEW ALL" style="font-size: 12px; color: rgb(35, 237, 86); -unity-font-style: bold;" />
+                                <ui:Label text="VIEW ALL" style="font-size: 12px; color: rgb(35, 237, 86); -unity-font-style: bold;" />
                                 </ui:VisualElement>
                             </ui:VisualElement>
                             <ui:VisualElement style="flex-direction: row; border-bottom-width: 1px; border-color: rgba(255,255,255,0.1); padding-bottom: 6px; margin-bottom: 6px;">

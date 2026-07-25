@@ -83,11 +83,11 @@
                 <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                     <ui:Label text="BILATERAL RELATIONS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px;" />
                     <ui:VisualElement style="flex-direction: row; background-color: rgba(0,0,0,0.4); border-radius: 4px; padding: 2px;">
-                        <ui:Button name="BtnFilterActive" text="ACTIONABLE" class="econ-tab active-tab" style="font-size: 9px; height: 20px; padding-left: 8px; padding-right: 8px;" />
+                        <ui:Button name="BtnFilterActive" text="ACTIONABLE" class="econ-tab" style="font-size: 9px; height: 20px; padding-left: 8px; padding-right: 8px;" />
                         <ui:Button name="BtnFilterAllies" text="ALLIES" class="econ-tab" style="font-size: 9px; height: 20px; padding-left: 8px; padding-right: 8px;" />
                         <ui:Button name="BtnFilterRivals" text="RIVALS" class="econ-tab" style="font-size: 9px; height: 20px; padding-left: 8px; padding-right: 8px;" />
                         <ui:Button name="BtnFilterNeutral" text="NEUTRAL" class="econ-tab" style="font-size: 9px; height: 20px; padding-left: 8px; padding-right: 8px;" />
-                        <ui:Button name="BtnFilterAll" text="ALL" class="econ-tab" style="font-size: 9px; height: 20px; padding-left: 8px; padding-right: 8px;" />
+                        <ui:Button name="BtnFilterAll" text="ALL" class="econ-tab active-tab" style="font-size: 9px; height: 20px; padding-left: 8px; padding-right: 8px;" />
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:ScrollView style="flex-grow: 1;">

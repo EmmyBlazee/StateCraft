@@ -95,7 +95,7 @@ namespace StateCraft.UI
         private void InitializeElements(VisualElement root)
         {
             root.Q<Button>("BtnLaunchReconMission")?.RegisterCallback<ClickEvent>(_ => LaunchReconMission());
-            root.Q<Button>("BtnLaunchCovertOp")?.RegisterCallback<ClickEvent>(_ => LaunchSampleCovertOp());
+
             _tabOverview = root.Q<Button>("TabOverview");
             _tabIntelNetwork = root.Q<Button>("TabIntelNetwork");
             _tabRecon = root.Q<Button>("TabRecon");
@@ -1504,7 +1504,7 @@ namespace StateCraft.UI
             var cWhiteAlpha = new Color(1, 1, 1, 0.1f);
 
             int intelLvl = Mathf.Clamp((int)country.intelligenceLevel, 10, 100);
-            float budget = country.covertBudget > 0 ? country.covertBudget : (country.intelligenceBudget * 0.15f * 1000f); // Fallback to 15% of intel budget in millions
+            float budget = country.covertBudget > 0 ? country.covertBudget : (country.intelligenceBudget * 0.15f); // Fallback to 15% of intel budget in billions
             
             // --- KPIs ---
             int inProgress = country.activeCovertOps.Count(x => x.status == "In Progress");
@@ -1520,7 +1520,7 @@ namespace StateCraft.UI
             
             string sym = string.IsNullOrEmpty(country.currencySymbol) ? "$" : country.currencySymbol;
             
-            if (panel.Q<Label>("CO_IntelFundsLabel") != null) panel.Q<Label>("CO_IntelFundsLabel").text = $"FUNDS: {UiFormat.Money(country.intelligenceFunds * country.exchangeRate, sym)}";
+            if (panel.Q<Label>("CO_IntelFundsLabel") != null) panel.Q<Label>("CO_IntelFundsLabel").text = $"FUNDS: {UiFormat.Money((country.intelligenceFunds / 1000f) * country.exchangeRate, sym)}";
             
             float successRate = Mathf.Clamp(40f + (country.intelligenceLevel * 0.4f) + (country.operativeCount * 2f), 10f, 95f);
             if (panel.Q<Label>("CO_SuccessRate") != null) panel.Q<Label>("CO_SuccessRate").text = $"{successRate:F0}%";
@@ -1538,70 +1538,33 @@ namespace StateCraft.UI
                 else { riskLbl.text = "LOW"; riskLbl.style.color = cGreen; if (panel.Q<VisualElement>("CO_RiskDot") != null) panel.Q<VisualElement>("CO_RiskDot").style.backgroundColor = cGreen; }
             }
 
-            // --- DONUT CHART (Mock text) ---
-            if (panel.Q<Label>("CO_TotalOpsDonut") != null) panel.Q<Label>("CO_TotalOpsDonut").text = totalOps.ToString();
-            
-            var statusList = panel.Q<VisualElement>("CO_StatusList");
-            statusList.Clear();
-            string[] sNames = { "In Progress", "Planning", "On Hold", "Completed" };
-            int inProgCount = country.activeCovertOps.Count(x => x.status == "In Progress");
-            int planCount = country.activeCovertOps.Count(x => x.status == "Planning");
-            int holdCount = country.activeCovertOps.Count(x => x.status == "On Hold");
-            int compCount = country.activeCovertOps.Count(x => x.status == "Completed");
-            int[] sVals = { inProgCount, planCount, holdCount, compCount };
-            int actualTotalOps = Mathf.Max(1, inProgCount + planCount + holdCount + compCount);
-            Color[] sColors = { cGreen, cBlue, cOrange, cPurple };
-            
-            for(int i=0; i<4; i++)
+            // --- OPERATIONS BUDGET & UPKEEP (VERSION 1) ---
+            var budgetList = panel.Q<ScrollView>("CO_BudgetRunningCostsList");
+            if (budgetList != null)
             {
-                var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, marginBottom = 4, alignItems = Align.Center } };
-                var rL = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
-                rL.Add(new VisualElement { style = { width = 6, height = 6, backgroundColor = sColors[i], marginRight = 6 } });
-                rL.Add(new Label(sNames[i]) { style = { color = Color.white, fontSize = 8 } });
-                row.Add(rL);
-                row.Add(new Label($"{sVals[i]} ({Mathf.RoundToInt(sVals[i]*100f/actualTotalOps)}%)") { style = { color = Color.grey, fontSize = 8 } });
-                statusList.Add(row);
-            }
+                budgetList.Clear();
+                float satCost = country.satelliteCount * 50f;
+                float droneCost = country.droneCount * 10f;
+                float opCost = country.operativeCount * 5f;
+                float totalCost = satCost + droneCost + opCost;
 
-            // --- CATEGORIES ---
-            var catList = panel.Q<VisualElement>("CO_CategoryList");
-            catList.Clear();
-            string[] cNames = { "Political Operations", "Economic Operations", "Military Operations", "Influence Operations", "Cyber Operations" };
-            string[] cIcons = { "\uf0c0", "\uf153", "\uf132", "\uf0a1", "\uf108" };
-            string[] cTypes = { "Political", "Economic", "Military", "Influence", "Cyber" };
-            int[] cVals = new int[5];
-            for(int i=0; i<5; i++) cVals[i] = country.activeCovertOps.Count(x => x.type == cTypes[i]);
+                string[] bNames = { "Orbital Surveillance", "Tactical Recon", "Field Operatives", "TOTAL UPKEEP" };
+                float[] bVals = { satCost, droneCost, opCost, totalCost };
+                Color[] bColors = { cBlue, cGreen, cOrange, Color.white };
 
-            for(int i=0; i<5; i++)
-            {
-                var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, marginBottom = 6, alignItems = Align.Center } };
-                var rL = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
-                rL.Add(new Label(cIcons[i]) { style = { color = Color.grey, fontSize = 10, marginRight = 8, width = 14 } }.WithClass("fa-icon"));
-                rL.Add(new Label(cNames[i]) { style = { color = Color.grey, fontSize = 8 } });
-                row.Add(rL);
-                row.Add(new Label(cVals[i].ToString()) { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } });
-                catList.Add(row);
-            }
-
-            // --- RESOURCE ALLOCATION ---
-            var resList = panel.Q<VisualElement>("CO_ResourceList");
-            resList.Clear();
-            Color[] rColors = { cGreen, cBlue, cOrange, cPurple, new Color(0.2f, 0.7f, 0.7f) };
-            for(int i=0; i<country.covertResources.Count; i++)
-            {
-                var res = country.covertResources[i];
-                var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 6 } };
-                row.Add(new Label(res.resourceName) { style = { color = Color.grey, fontSize = 8, width = 80 } });
-                
-                float pct = res.maxAmount > 0 ? (res.allocatedAmount / (float)res.maxAmount) * 100f : 0f;
-                Color col = rColors[i % rColors.Length];
-
-                var barBg = new VisualElement { style = { flexGrow = 1, height = 4, backgroundColor = cWhiteAlpha, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, marginRight = 8, marginLeft = 8 } };
-                barBg.Add(new VisualElement { style = { width = Length.Percent(pct), height = 4, backgroundColor = col, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } });
-                row.Add(barBg);
-                
-                row.Add(new Label($"{Mathf.RoundToInt(pct)}%") { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold, width = 25, unityTextAlign = TextAnchor.MiddleRight } });
-                resList.Add(row);
+                for(int i=0; i<4; i++)
+                {
+                    var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, marginBottom = 12, alignItems = Align.Center } };
+                    
+                    var leftBox = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
+                    leftBox.Add(new VisualElement { style = { width = 8, height = 8, backgroundColor = bColors[i], marginRight = 8, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4 } });
+                    leftBox.Add(new Label(bNames[i]) { style = { color = Color.white, fontSize = 9, unityFontStyleAndWeight = (i == 3 ? FontStyle.Bold : FontStyle.Normal) } });
+                    row.Add(leftBox);
+                    
+                    float localVal = (bVals[i] / 1000f) * country.exchangeRate; // Convert Millions to Billions
+                    row.Add(new Label(UiFormat.Money(localVal, sym)) { style = { color = bColors[i], fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
+                    budgetList.Add(row);
+                }
             }
 
             // --- ACTIVE COVERT OPERATIONS ---
@@ -2097,6 +2060,13 @@ namespace StateCraft.UI
                 if (country.satelliteCount == 0) AddBlindspotItem(blindspotList, "ORBITAL COVERAGE", "No active spy satellites. Global troop movements cannot be tracked.", cRed);
                 if (country.operativeCount < 5) AddBlindspotItem(blindspotList, "HUMINT (HUMAN INTELLIGENCE)", "Insufficient field agents. High risk of missing localized radicalization or political plots.", cOrange);
                 if (country.intelligenceLevel < 30) AddBlindspotItem(blindspotList, "CYBER NETWORK", "Weak digital surveillance. Vulnerable to foreign cyber intrusions and disinformation.", cRed);
+                
+                // Budget Check
+                float totalUpkeep = (country.satelliteCount * 50f) + (country.droneCount * 10f) + (country.operativeCount * 5f);
+                if (country.intelligenceFunds < totalUpkeep) 
+                {
+                    AddBlindspotItem(blindspotList, "CRITICAL SHORTAGE", "Intelligence funds are depleted. Operations are halting and Agency Integrity is dropping. Increase the Intelligence Budget immediately.", cRed);
+                }
                 
                 if (blindspotList.childCount == 0)
                 {

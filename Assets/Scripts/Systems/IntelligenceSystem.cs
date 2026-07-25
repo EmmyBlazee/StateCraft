@@ -16,6 +16,68 @@ namespace StateCraft.Systems
                 country.treasury -= country.covertBudget;
                 country.intelligenceFunds += (country.covertBudget * 1000f);
             }
+            // ── Autonomous Running Costs (Version 1) ──
+            float satelliteCost = country.satelliteCount * 50f;
+            float droneCost = country.droneCount * 10f;
+            float operativeCost = country.operativeCount * 5f;
+            float totalRunningCost = satelliteCost + droneCost + operativeCost;
+
+            if (country.intelligenceFunds >= totalRunningCost)
+            {
+                country.intelligenceFunds -= totalRunningCost;
+            }
+            else
+            {
+                // Not enough funds to sustain the network
+                country.intelligenceFunds = 0f;
+                country.agencyIntegrity = Mathf.Max(10f, country.agencyIntegrity - 3f);
+                country.intelligenceLevel = Mathf.Max(5f, country.intelligenceLevel - 1f);
+                StateCraft.UI.NotificationManager.Instance?.AddNotification($"CRITICAL SHORTAGE: Intelligence funds depleted! Agency integrity dropping. Increase Budget.", Color.red);
+            }
+
+            // ── Autonomous Actions (Version 1) ──
+            if (country.intelligenceFunds > 100f && country.operativeCount < 20 && Random.value < 0.25f)
+            {
+                float recruitCost = 50f; 
+                if (country.intelligenceFunds >= recruitCost)
+                {
+                    country.intelligenceFunds -= recruitCost;
+                    country.operativeCount++;
+                    StateCraft.UI.NotificationManager.Instance?.AddNotification($"AGENCY UPDATE: New operative successfully recruited and deployed.", Color.cyan);
+                }
+            }
+            
+            if (country.intelligenceFunds > 200f && country.activeCovertOps.Count < 3 && Random.value < 0.15f && country.operativeCount >= 2)
+            {
+                // Launch autonomous mission against a random rival or threat
+                float opCost = 100f;
+                if (country.intelligenceFunds >= opCost)
+                {
+                    country.intelligenceFunds -= opCost;
+                    country.activeCovertOps.Add(new CovertOperation 
+                    {
+                        opName = "Operation " + (Random.value < 0.5f ? "Silent Night" : "Black Watch"),
+                        target = "Unknown Rival",
+                        type = "Intelligence Gathering",
+                        riskLevel = "Medium",
+                        totalPhases = 3,
+                        currentPhase = 1,
+                        monthsRemaining = 3,
+                        detectionRisk = 15f
+                    });
+                    StateCraft.UI.NotificationManager.Instance?.AddNotification($"AGENCY UPDATE: Covert Operation launched autonomously by Intelligence Directorate.", Color.cyan);
+                }
+            }
+
+            // ── Player Advisories ──
+            if (country.globalIntelCoverage < 30f && country.satelliteCount < 2)
+            {
+                StateCraft.UI.NotificationManager.Instance?.AddNotification($"ADVISORY: Global intelligence coverage is critically low ({country.globalIntelCoverage:F0}%). Procure a Spy Satellite.", new Color(1f, 0.6f, 0f));
+            }
+            if (country.intelligenceLevel < 40f && country.droneCount < 2)
+            {
+                StateCraft.UI.NotificationManager.Instance?.AddNotification($"ADVISORY: Local tactical intelligence is weak. Deploy Recon Drones.", new Color(1f, 0.6f, 0f));
+            }
 
             // ── Base stats driven by intel budget ──
             country.counterIntelligence = Mathf.Clamp(30f + (country.intelligenceBudget * 3f) + (country.agencyIntegrity * 0.2f), 10f, 95f);
