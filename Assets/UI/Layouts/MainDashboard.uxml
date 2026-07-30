@@ -9,7 +9,7 @@
                 <ui:VisualElement>
                     <ui:VisualElement class="econ-country-line">
                         <ui:Label name="PlayerCountryName" text="SELECT COUNTRY" class="econ-country-name" />
-                        <ui:Image name="PlayerFlag" class="econ-flag" />
+                        <ui:Image name="PlayerFlag" class="econ-flag" picking-mode="Position" tooltip="Click to view your Presidential Profile" style="cursor: link;" />
                     </ui:VisualElement>
                     <ui:Label name="IntelValue" text="ELECTION: --" class="econ-country-subtitle" />
                 </ui:VisualElement>
@@ -33,35 +33,36 @@
                     <ui:Button name="Time1x" text="1x" class="time-btn time-btn-active" />
                     <ui:Button name="Time2x" text="2x" class="time-btn" />
                     <ui:Button name="Time3x" text="3x" class="time-btn" />
-                    <ui:Button name="BtnSystemMenu" text="⚙" class="time-btn" style="margin-left: 10px; font-size: 20px; background-color: rgba(0, 150, 255, 0.2);" />
+                    <ui:Button name="BtnNotificationHistory" text="" class="time-btn" style="margin-left: 10px; width: 35px; background-image: url('project://database/Assets/Resources/NavIcons/icon_bell_final.png'); -unity-background-scale-mode: scale-to-fit; -unity-background-image-tint-color: #90a4ae;" />
+                    <ui:Button name="BtnSystemMenu" text="" class="time-btn" style="margin-left: 5px; width: 35px; background-image: url('project://database/Assets/Resources/NavIcons/icon_gear_final.png'); -unity-background-scale-mode: scale-to-fit; -unity-background-image-tint-color: #90a4ae;" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="PanelContainer" style="position: absolute; top: 65px; bottom: 115px; left: 0; right: 0; width: 100%; pointer-events: auto;" />
         <ui:VisualElement name="BottomNavBar" class="glass-panel hologram-border" style="height: 80px; width: 100%; position: absolute; bottom: 0; pointer-events: auto; flex-direction: row; justify-content: space-around; align-items: center; padding: 0 10%; z-index: 10;">
             <ui:Button name="NavEconomy" class="modern-nav-btn">
-                <ui:Label class="modern-nav-icon" style="background-image: url(&quot;project://database/Assets/icons/economy.png?fileID=2800000&amp;guid=9818a6cb1c3fccb4aa6859f9d8f8c7c4&amp;type=3#economy&quot;); width: 56px; -unity-background-scale-mode: scale-to-fit;" />
+                <ui:Label class="modern-nav-icon" style="background-image: url('project://database/Assets/Resources/NavIcons/economy.png?fileID=2800000&amp;guid=9818a6cb1c3fccb4aa6859f9d8f8c7c4&amp;type=3#economy'); width: 56px; -unity-background-scale-mode: scale-to-fit;" />
                 <ui:Label text="ECONOMY" class="modern-nav-label" />
             </ui:Button>
             <ui:Button name="NavMilitary" class="modern-nav-btn">
-                <ui:Label class="modern-nav-icon" style="background-image: url(&quot;project://database/Assets/icons/Military.png?fileID=2800000&amp;guid=8b4eb402129b60c488f4626d9dfc9158&amp;type=3#Military&quot;); width: 63px; -unity-background-scale-mode: scale-to-fit;" />
+                <ui:Label class="modern-nav-icon" style="background-image: url('project://database/Assets/Resources/NavIcons/Military.png?fileID=2800000&amp;guid=8b4eb402129b60c488f4626d9dfc9158&amp;type=3#Military'); width: 63px; -unity-background-scale-mode: scale-to-fit;" />
                 <ui:Label text="MILITARY" class="modern-nav-label" />
             </ui:Button>
             <ui:Button name="NavIntelligence" class="modern-nav-btn">
-                <ui:Label class="modern-nav-icon" style="background-image: url(&quot;project://database/Assets/icons/Intel.png?fileID=2800000&amp;guid=6b9946a1be5292f468bc6a42d62b456a&amp;type=3#Intel&quot;); width: 67px; -unity-background-scale-mode: scale-to-fit;" />
+                <ui:Label class="modern-nav-icon" style="background-image: url('project://database/Assets/Resources/NavIcons/Intel.png?fileID=2800000&amp;guid=6b9946a1be5292f468bc6a42d62b456a&amp;type=3#Intel'); width: 67px; -unity-background-scale-mode: scale-to-fit;" />
                 <ui:Label text="INTEL" class="modern-nav-label" />
             </ui:Button>
             <ui:Button name="NavDiplomacy" class="modern-nav-btn">
-                <ui:Label class="modern-nav-icon" style="background-image: url(&quot;project://database/Assets/icons/Diplomacy.png?fileID=2800000&amp;guid=97bd2638a7141aa4c878c98a78d52d0f&amp;type=3#Diplomacy&quot;); width: 81px; -unity-background-scale-mode: scale-to-fit;" />
+                <ui:Label class="modern-nav-icon" style="background-image: url('project://database/Assets/Resources/NavIcons/Diplomacy.png?fileID=2800000&amp;guid=97bd2638a7141aa4c878c98a78d52d0f&amp;type=3#Diplomacy'); width: 81px; -unity-background-scale-mode: scale-to-fit;" />
                 <ui:Label text="DIPLOMACY" class="modern-nav-label" />
             </ui:Button>
             <ui:Button name="NavEvents" class="modern-nav-btn" style="background-image: none; -unity-background-scale-mode: scale-to-fit; height: 67px;">
-                <ui:Label text="" class="modern-nav-icon" style="height: 46px; background-image: url(&quot;project://database/Assets/icons/EVENT.png?fileID=2800000&amp;guid=7b6feb2de27a2a6459f46aeb6bf4ef53&amp;type=3#EVENT&quot;); -unity-background-scale-mode: scale-to-fit; width: 76px;" />
+                <ui:Label text="" class="modern-nav-icon" style="height: 46px; background-image: url('project://database/Assets/Resources/NavIcons/EVENT.png?fileID=2800000&amp;guid=7b6feb2de27a2a6459f46aeb6bf4ef53&amp;type=3#EVENT'); -unity-background-scale-mode: scale-to-fit; width: 76px;" />
                 <ui:Label text="EVENTS" class="modern-nav-label" />
                 <ui:Label name="EventBadge" text="0" style="display: none; position: absolute; right: 0px; top: 0px; width: 20px; height: 20px; background-color: rgb(255, 50, 50); border-radius: 10px; color: white; font-size: 10px; -unity-font-style: bold; -unity-text-align: middle-center; border-width: 1px; border-color: rgba(255,255,255,0.5);" />
             </ui:Button>
             <ui:Button name="NavSearch" class="modern-nav-btn">
-                <ui:Label class="modern-nav-icon" style="background-image: url(&quot;project://database/Assets/icons/Global.png?fileID=2800000&amp;guid=80a83b8d287064a4ba7e6cfbd8df2284&amp;type=3#Global&quot;); -unity-background-scale-mode: scale-to-fit; width: 83px;" />
+                <ui:Label class="modern-nav-icon" style="background-image: url('project://database/Assets/Resources/NavIcons/Global.png?fileID=2800000&amp;guid=80a83b8d287064a4ba7e6cfbd8df2284&amp;type=3#Global'); -unity-background-scale-mode: scale-to-fit; width: 83px;" />
                 <ui:Label text="GLOBAL" class="modern-nav-label" />
             </ui:Button>
         </ui:VisualElement>
@@ -69,6 +70,28 @@
         <ui:Instance template="SystemMenu" name="SystemMenuInstance" picking-mode="Ignore" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 100;" />
         <ui:Instance template="HowToPlay" name="HowToPlayInstance" picking-mode="Ignore" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 300;" />
         <ui:Instance template="GameOverScreen" name="GameOverInstance" picking-mode="Ignore" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 400;" />
+        
+        <!-- War Declared Modal -->
+        <ui:VisualElement name="WarDeclaredModal" style="flex-grow: 1; background-color: rgba(5, 8, 12, 0.85); align-items: center; justify-content: center; position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none; z-index: 500;">
+            <ui:VisualElement class="hologram-border" style="width: 450px; padding: 40px; background-color: rgba(20, 10, 10, 0.95); border-radius: 8px; border-width: 2px; border-color: rgb(255, 50, 50); align-items: center;">
+                <ui:Label text="WAR DECLARED!" style="font-size: 32px; color: rgb(255, 50, 50); -unity-font-style: bold; letter-spacing: 4px; margin-bottom: 20px;" />
+                <ui:Label name="WarDeclaredMessage" text="[COUNTRY] has formally declared war upon our nation." style="font-size: 16px; color: white; -unity-text-align: middle-center; white-space: normal; margin-bottom: 30px; padding-left: 20px; padding-right: 20px;" />
+                <ui:Button name="BtnAckWar" text="ACKNOWLEDGE" class="standard-button action-btn-red" style="font-size: 16px; height: 45px; letter-spacing: 1px; width: 100%;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        
+        <!-- President Profile Modal -->
+        <ui:VisualElement name="PresidentProfileModal" style="display: none; position: absolute; left: 20px; top: 60px; width: 350px; padding: 20px; background-color: rgba(10, 14, 20, 0.95); border-radius: 8px; border-width: 1px; border-color: rgba(0, 200, 255, 0.3); z-index: 100;" class="hologram-border">
+            <ui:Label text="PRESIDENTIAL PROFILE" style="font-size: 16px; color: rgb(0, 200, 255); -unity-font-style: bold; letter-spacing: 2px; margin-bottom: 15px; -unity-text-align: middle-center;" />
+            <ui:Label name="PresidentNameLabel" text="President: [Name]" style="font-size: 14px; color: white; margin-bottom: 8px;" />
+            <ui:Label name="PresidentCountryLabel" text="Country: [Country]" style="font-size: 14px; color: white; margin-bottom: 8px;" />
+            <ui:Label name="PresidentCapitalLabel" text="Capital: [Capital]" style="font-size: 14px; color: white; margin-bottom: 15px;" />
+            
+            <ui:Label text="NATION FACTS &amp; STATUS" style="font-size: 12px; color: rgb(0, 210, 255); -unity-font-style: bold; margin-bottom: 5px;" />
+            <ui:Label name="PresidentScenarioLabel" text="Scenario: [Context]" style="font-size: 13px; color: rgb(200,200,200); white-space: normal; margin-bottom: 20px;" />
+            
+            <ui:Button name="BtnClosePresidentProfile" text="CLOSE" class="button-premium" style="height: 35px; font-size: 14px; color: rgb(0, 210, 255); border-color: rgba(0, 210, 255, 0.5); background-color: rgba(0, 210, 255, 0.08); -unity-font-style: bold; letter-spacing: 1px;" />
+        </ui:VisualElement>
         
     </ui:VisualElement>
 </ui:UXML>

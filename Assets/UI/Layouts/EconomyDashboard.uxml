@@ -1,10 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/Styles/Global.uss" />
-    <ui:Style>
-        .tax-donut { position: relative; width: 90px; height: 90px; align-items: center; justify-content: center; border-width: 0; }
-        .donut-hole { position: absolute; width: 70%; height: 70%; background-color: rgb(18, 22, 30); border-radius: 50%; align-items: center; justify-content: center; }
-        .donut-center-label { font-size: 13px; -unity-text-align: middle-center; color: white; white-space: normal; }
-    </ui:Style>
+
     <ui:VisualElement name="EconomyDashboard" class="economy-command standard-dashboard" style="display: none;">
         <ui:VisualElement name="Header" class="econ-topbar">
             <ui:VisualElement class="econ-country-block">
@@ -366,12 +362,12 @@
                             <ui:VisualElement class="industry-composition">
                                 <ui:VisualElement class="industry-card-header"><ui:Label text="SECTOR COMPOSITION (by Contribution to GDP)" class="industry-card-title" /><ui:Label text="VIEW FULL BREAKDOWN ›" class="market" /></ui:VisualElement>
                                 <ui:VisualElement class="industry-ring-row">
-                                    <ui:VisualElement class="industry-ring"><ui:Label name="RingOil" text="34%&#10;Oil &amp; Gas" /></ui:VisualElement>
-                                    <ui:VisualElement class="industry-ring"><ui:Label name="RingAgri" text="6%&#10;Agriculture" /></ui:VisualElement>
-                                    <ui:VisualElement class="industry-ring"><ui:Label name="RingMfg" text="3%&#10;Manufacturing" /></ui:VisualElement>
-                                    <ui:VisualElement class="industry-ring"><ui:Label name="RingMining" text="2%&#10;Mining" /></ui:VisualElement>
-                                    <ui:VisualElement class="industry-ring"><ui:Label name="RingTech" text="0%&#10;Tech" /></ui:VisualElement>
-                                    <ui:VisualElement class="industry-ring"><ui:Label name="RingOther" text="2%&#10;Other" /></ui:VisualElement>
+                                    <ui:VisualElement name="RingElemOil" class="industry-ring"><ui:Label name="RingOil" text="34%&#10;Oil &amp; Gas" /></ui:VisualElement>
+                                    <ui:VisualElement name="RingElemAgri" class="industry-ring"><ui:Label name="RingAgri" text="6%&#10;Agriculture" /></ui:VisualElement>
+                                    <ui:VisualElement name="RingElemMfg" class="industry-ring"><ui:Label name="RingMfg" text="3%&#10;Manufacturing" /></ui:VisualElement>
+                                    <ui:VisualElement name="RingElemMining" class="industry-ring"><ui:Label name="RingMining" text="2%&#10;Mining" /></ui:VisualElement>
+                                    <ui:VisualElement name="RingElemTech" class="industry-ring"><ui:Label name="RingTech" text="0%&#10;Tech" /></ui:VisualElement>
+                                    <ui:VisualElement name="RingElemOther" class="industry-ring"><ui:Label name="RingOther" text="2%&#10;Other" /></ui:VisualElement>
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>

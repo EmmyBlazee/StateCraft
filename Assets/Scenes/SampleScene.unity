@@ -3338,7 +3338,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 802677652}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: 
@@ -3994,7 +3994,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 968617545}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: 
@@ -4010,7 +4010,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 968617545}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 95c035ab7bf31384e912811fa32519e7, type: 3}
   m_Name: 
@@ -4755,6 +4755,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1c40cac3e0e6b554ead47b84f27825ba, type: 2}
   - {fileID: 11400000, guid: 00ede9675ce7ce24c874adcdd7c7130e, type: 2}
   playerCountry: {fileID: 0}
+  playerName: Leader
   playerBudget: 1000
   EconomyDatabase: {fileID: 11400000, guid: 106a0430210390a4b92f508a3c000738, type: 2}
   worldTension: 20

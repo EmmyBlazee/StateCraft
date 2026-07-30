@@ -1,27 +1,107 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/Styles/Global.uss" />
-    <ui:VisualElement name="MainMenuRoot" style="flex-grow: 1; background-color: rgba(5, 8, 12, 0.98); align-items: center; justify-content: center;">
-        
-        <ui:VisualElement name="BackgroundGlow" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: rgba(0, 150, 255, 0.05); align-items: center; justify-content: center;" />
 
-        <ui:VisualElement name="MenuContainer" class="hologram-border" style="width: 450px; padding: 40px; background-color: rgba(10, 14, 20, 0.85); border-radius: 8px; border-width: 1px; border-color: rgba(0, 200, 255, 0.3);">
-            
-            <ui:Label text="STATE CRAFT" style="font-size: 42px; color: rgb(0, 200, 255); -unity-font-style: bold; -unity-text-align: middle-center; letter-spacing: 4px; margin-bottom: 5px; text-shadow: 0 0 10px rgba(0, 200, 255, 0.5);" />
-            <ui:Label text="GLOBAL STRATEGY SIMULATOR" style="font-size: 14px; color: rgb(150, 150, 150); -unity-font-style: italic; -unity-text-align: middle-center; letter-spacing: 2px; margin-bottom: 40px;" />
+    <!-- Full-screen transparent root — sits directly on top of the Africa map splash image -->
+    <ui:VisualElement name="MainMenuRoot" style="flex-grow: 1; background-color: rgba(0,0,0,0); align-items: center; justify-content: center;">
 
-            <ui:Button name="BtnNewGame" text="NEW GAME" class="standard-button action-btn-green" style="margin-bottom: 15px; font-size: 18px; height: 50px; letter-spacing: 2px;" />
-            
-            <ui:Button name="BtnLoadGame" text="LOAD GAME" class="standard-button action-btn-blue" style="margin-bottom: 15px; font-size: 18px; height: 50px; letter-spacing: 2px;" />
-            
-            <ui:Button name="BtnHowToPlay" text="HOW TO PLAY" class="standard-button action-btn-orange" style="margin-bottom: 15px; font-size: 18px; height: 50px; letter-spacing: 2px;" />
+        <!-- Top spacing offset since background image has the title on the left -->
+        <ui:VisualElement name="Spacer" style="height: 60px;" />
 
-            <ui:Button name="BtnSettings" text="SETTINGS" class="standard-button" style="margin-bottom: 15px; font-size: 18px; height: 50px; letter-spacing: 2px;" />
-            
-            <ui:Button name="BtnQuit" text="QUIT TO DESKTOP" class="standard-button action-btn-red" style="margin-bottom: 0px; font-size: 18px; height: 50px; letter-spacing: 2px;" />
-
+        <!-- Buttons — no box, semi-transparent backgrounds only -->
+        <ui:VisualElement name="ButtonStack" style="align-items: stretch; width: 320px; margin-top: 40px;">
+            <ui:Button name="BtnNewGame"   text="NEW GAME"       class="button-premium action-btn-green" style="margin-bottom: 14px; font-size: 17px; height: 48px; letter-spacing: 2px;" />
+            <ui:Button name="BtnLoadGame"  text="LOAD GAME"      class="button-premium action-btn-blue"  style="margin-bottom: 14px; font-size: 17px; height: 48px; letter-spacing: 2px;" />
+            <ui:Button name="BtnHowToPlay" text="HOW TO PLAY"    class="button-premium action-btn-orange" style="margin-bottom: 14px; font-size: 17px; height: 48px; letter-spacing: 2px;" />
+            <ui:Button name="BtnSettings"  text="SETTINGS"       class="button-premium"                  style="margin-bottom: 14px; font-size: 17px; height: 48px; letter-spacing: 2px;" />
+            <ui:Button name="BtnQuit"      text="QUIT TO DESKTOP" class="button-premium action-btn-red"   style="font-size: 17px; height: 48px; letter-spacing: 2px;" />
         </ui:VisualElement>
+
+        <!-- No-save feedback label (hidden by default) -->
+        <ui:Label name="LblNoSave" text="⚠  No save file found." style="display: none; color: rgba(255,80,80,0.9); font-size: 12px; -unity-font-style: bold; margin-top: 12px; letter-spacing: 1px;" />
 
         <ui:Label text="v1.0.0-alpha" style="position: absolute; bottom: 20px; right: 20px; color: rgba(255,255,255,0.2); font-size: 12px; letter-spacing: 1px;" />
 
     </ui:VisualElement>
+
+    <!-- ── Player Name Input Modal (Hidden by Default) ────────────────────────── -->
+    <ui:VisualElement name="PlayerNameModal" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.75); align-items: center; justify-content: center; display: none;">
+        <ui:VisualElement style="width: 400px; padding: 30px; border-radius: 8px; background-color: rgba(10, 15, 25, 0.95); border-width: 1px; border-color: #00d2ff;">
+            <ui:Label text="ENTER PRESIDENT'S NAME" style="font-size: 18px; color: #00d2ff; -unity-font-style: bold; margin-bottom: 20px; -unity-text-align: middle-center;" />
+            <ui:TextField name="InputPlayerName" value="Leader" style="font-size: 16px; margin-bottom: 25px; height: 35px; -unity-text-align: middle-center;" />
+            <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                <ui:Button name="BtnCancelName"  text="CANCEL"  class="button-premium"               style="width: 150px;" />
+                <ui:Button name="BtnConfirmName" text="CONFIRM" class="button-premium action-btn-green" style="width: 150px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- ── Overwrite Save Confirmation Modal (Hidden by Default) ───────────── -->
+    <ui:VisualElement name="OverwriteSaveModal" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.85); align-items: center; justify-content: center; display: none;">
+        <ui:VisualElement style="width: 440px; padding: 25px; border-radius: 8px; background-color: rgba(12, 16, 24, 0.98); border-width: 1px; border-color: rgba(255, 180, 0, 0.6);">
+            <ui:Label text="⚠️ OVERWRITE EXISTING SAVE?" style="font-size: 16px; color: rgb(255, 180, 0); -unity-font-style: bold; margin-bottom: 12px; -unity-text-align: middle-center; letter-spacing: 1px;" />
+            <ui:Label text="An existing saved campaign was found. Starting a new game will permanently overwrite your saved progress. Are you sure you want to continue?" style="font-size: 12px; color: rgba(220, 220, 230, 0.9); margin-bottom: 22px; white-space: normal; -unity-text-align: middle-center; line-height: 16px;" />
+            <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                <ui:Button name="BtnCancelOverwrite" text="CANCEL" class="button-premium" style="width: 180px; height: 40px; font-size: 13px;" />
+                <ui:Button name="BtnConfirmOverwrite" text="OVERWRITE &amp; START" class="button-premium action-btn-red" style="width: 180px; height: 40px; font-size: 13px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- ── Settings Modal (Hidden by Default) ────────────────────────────────── -->
+    <ui:VisualElement name="SettingsModal" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.82); align-items: center; justify-content: center; display: none;">
+        <ui:VisualElement style="width: 480px; background-color: rgba(8, 12, 18, 0.98); border-radius: 10px; border-width: 1px; border-color: rgba(0, 210, 255, 0.25); overflow: hidden;">
+
+            <!-- Header -->
+            <ui:VisualElement style="background-color: rgba(0,210,255,0.06); padding: 18px 24px; flex-direction: row; justify-content: space-between; align-items: center; border-bottom-width: 1px; border-bottom-color: rgba(0,210,255,0.15);">
+                <ui:Label text="SETTINGS" style="font-size: 18px; color: rgb(0,210,255); -unity-font-style: bold; letter-spacing: 4px;" />
+                <ui:Button name="BtnCloseSettings" text="✕" class="button-premium action-btn-red" style="width: 32px; height: 32px; font-size: 14px;" />
+            </ui:VisualElement>
+
+            <!-- Body -->
+            <ui:VisualElement style="padding: 24px 28px;">
+
+                <!-- Display -->
+                <ui:Label text="DISPLAY" style="font-size: 11px; color: rgba(0,210,255,0.7); -unity-font-style: bold; letter-spacing: 2px; margin-bottom: 14px;" />
+
+                <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+                    <ui:Label text="Fullscreen" style="font-size: 13px; color: rgba(200,215,230,1);" />
+                    <ui:Toggle name="ToggleFullscreen" />
+                </ui:VisualElement>
+
+                <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                    <ui:Label text="Resolution" style="font-size: 13px; color: rgba(200,215,230,1);" />
+                    <ui:DropdownField name="DropResolution" choices="1920x1080,2560x1440,3840x2160" index="0"
+                        style="width: 160px;" />
+                </ui:VisualElement>
+
+                <!-- Audio divider -->
+                <ui:VisualElement style="height: 1px; background-color: rgba(255,255,255,0.07); margin-bottom: 18px;" />
+                <ui:Label text="AUDIO" style="font-size: 11px; color: rgba(0,210,255,0.7); -unity-font-style: bold; letter-spacing: 2px; margin-bottom: 14px;" />
+
+                <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <ui:Label text="Master Volume" style="font-size: 13px; color: rgba(200,215,230,1); width: 130px;" />
+                    <ui:Slider name="SliderMasterVol" low-value="0" high-value="100" value="80" style="flex-grow: 1; margin-left: 12px;" />
+                    <ui:Label name="LblMasterVol" text="80" style="font-size: 12px; color: rgba(200,215,230,1); width: 30px; -unity-text-align: middle-right;" />
+                </ui:VisualElement>
+
+                <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                    <ui:Label text="Music Volume" style="font-size: 13px; color: rgba(200,215,230,1); width: 130px;" />
+                    <ui:Slider name="SliderMusicVol" low-value="0" high-value="100" value="60" style="flex-grow: 1; margin-left: 12px;" />
+                    <ui:Label name="LblMusicVol" text="60" style="font-size: 12px; color: rgba(200,215,230,1); width: 30px; -unity-text-align: middle-right;" />
+                </ui:VisualElement>
+
+                <!-- Footer buttons -->
+                <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                    <ui:Button name="BtnResetSettings" text="RESET DEFAULTS" class="button-premium" style="font-size: 12px; height: 36px; flex-grow: 1; margin-right: 10px;" />
+                    <ui:Button name="BtnSaveSettings"  text="SAVE &amp; CLOSE"   class="button-premium action-btn-green" style="font-size: 12px; height: 36px; flex-grow: 1;" />
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- ── How To Play overlay (template embed, hidden by default) ────────────── -->
+    <ui:Template name="HowToPlay" src="project://database/Assets/UI/Layouts/HowToPlay.uxml" />
+    <ui:Instance template="HowToPlay" name="HowToPlayOverlay" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;" />
+
 </ui:UXML>

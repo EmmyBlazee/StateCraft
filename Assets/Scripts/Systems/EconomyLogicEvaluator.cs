@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Linq;
 using StateCraft.Data;
 using StateCraft.Data.Economy;
 
@@ -135,6 +136,28 @@ namespace StateCraft.Systems
         }
 
         // ── INDUSTRY ─────────────────────────────────────────────────────────
+        
+        public static bool HasRequiredResource(CountryDataSO c, string industryId, out string missingResourceName)
+        {
+            missingResourceName = string.Empty;
+            if (industryId == "Oil")
+            {
+                if (c.resources == null || !c.resources.Any(r => r.type == MineralType.Oil || r.type == MineralType.NaturalGas))
+                {
+                    missingResourceName = "Oil / Natural Gas";
+                    return false;
+                }
+            }
+            else if (industryId == "Mining")
+            {
+                if (c.resources == null || !c.resources.Any(r => r.type != MineralType.Oil && r.type != MineralType.NaturalGas && r.type != MineralType.None))
+                {
+                    missingResourceName = "Mineral Deposits (e.g., Gold, Iron, Copper)";
+                    return false;
+                }
+            }
+            return true;
+        }
 
         public static int GetIndustryLevel(CountryDataSO c, string id) => id switch
         {
@@ -324,6 +347,16 @@ namespace StateCraft.Systems
 
         public static bool TryStartProject(CountryDataSO c, BlueprintDataSO bp, out string message)
         {
+            if (bp.targetId == "PowerNuclear")
+            {
+                bool hasUranium = c.resources != null && c.resources.Any(r => r.type == MineralType.Uranium);
+                if (!hasUranium && !c.isImportingUranium)
+                {
+                    message = "Requires domestic Uranium deposits or active imports.";
+                    return false;
+                }
+            }
+
             int inPipeline = 0;
             foreach (var p in c.activeProjects)
             {
@@ -381,6 +414,12 @@ namespace StateCraft.Systems
 
         public static bool TryUpgradeIndustry(CountryDataSO c, IndustryDataSO def, out string message)
         {
+            if (!HasRequiredResource(c, def.id, out string missing))
+            {
+                message = $"Missing prerequisite resource: {missing}";
+                return false;
+            }
+
             int level = GetIndustryLevel(c, def.id);
             if (level >= 10)
             {

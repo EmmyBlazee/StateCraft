@@ -17,8 +17,10 @@
                 <ui:Label name="GameOverStats" text="• Prestige: 42\n• Stability: 0%\n• Treasury: -$12B" style="font-size: 14px; color: rgb(0, 200, 255); white-space: normal; line-height: 24px;" />
             </ui:VisualElement>
 
-            <ui:Button name="BtnQuitToMenuFromGameOver" text="QUIT TO MAIN MENU" class="standard-button action-btn-blue" style="margin-bottom: 0px; font-size: 16px; height: 50px; letter-spacing: 2px;" />
-
+            <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                <ui:Button name="BtnSaveScreenshot" text="SAVE SCREENSHOT" class="button-premium" style="margin-bottom: 0px; font-size: 14px; height: 50px; letter-spacing: 1px; flex-grow: 1; margin-right: 10px; color: rgb(0, 230, 118); border-color: rgba(0, 230, 118, 0.5); background-color: rgba(0, 230, 118, 0.08); -unity-font-style: bold;" />
+                <ui:Button name="BtnQuitToMenuFromGameOver" text="QUIT TO MAIN MENU" class="button-premium" style="margin-bottom: 0px; font-size: 14px; height: 50px; letter-spacing: 1px; flex-grow: 1; color: rgb(0, 210, 255); border-color: rgba(0, 210, 255, 0.5); background-color: rgba(0, 210, 255, 0.08); -unity-font-style: bold;" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
     </ui:VisualElement>

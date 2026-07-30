@@ -36,6 +36,12 @@ namespace StateCraft.UI
         private Button _btnAccept;
         private Button _btnReject;
 
+        private Label _lblStockOil;
+        private Label _lblStockGas;
+        private Label _lblStockMinerals;
+        private Label _lblStockUranium;
+        private Label _lblStockFood;
+
         private string _currentProposalId = null;
 
         private void Awake()
@@ -113,6 +119,12 @@ namespace StateCraft.UI
             _btnAccept = _panel.Q<Button>("BtnAccept");
             _btnReject = _panel.Q<Button>("BtnReject");
 
+            _lblStockOil = _panel.Q<Label>("LblStockOil");
+            _lblStockGas = _panel.Q<Label>("LblStockGas");
+            _lblStockMinerals = _panel.Q<Label>("LblStockMinerals");
+            _lblStockUranium = _panel.Q<Label>("LblStockUranium");
+            _lblStockFood = _panel.Q<Label>("LblStockFood");
+
             _btnPropose.clicked += OnPropose;
             if (_btnClose != null) _btnClose.clicked += Hide;
             _btnAccept.clicked += OnAccept;
@@ -142,6 +154,7 @@ namespace StateCraft.UI
             
             UpdateMarketValue();
             PopulateActiveAgreements();
+            UpdateStockpiles();
         }
 
         /// <summary>
@@ -182,6 +195,7 @@ namespace StateCraft.UI
 
             UpdateMarketValue();
             PopulateActiveAgreements();
+            UpdateStockpiles();
         }
 
         public void Hide()
@@ -193,6 +207,21 @@ namespace StateCraft.UI
             {
                 OnReject(); // Auto-reject if closed while proposing
             }
+        }
+
+        private void UpdateStockpiles()
+        {
+            var gm = GameManager.Instance;
+            if (gm == null || gm.playerCountry == null) return;
+            var player = gm.playerCountry;
+
+            if (_lblStockOil != null) _lblStockOil.text = $"{player.invOilBarrels:N0}";
+            if (_lblStockGas != null) _lblStockGas.text = $"{player.invGasUnits:N0}";
+            if (_lblStockMinerals != null) _lblStockMinerals.text = $"{player.invMineralsTonnes:N0}";
+            if (_lblStockUranium != null) _lblStockUranium.text = $"{player.invUraniumUnits:N0}";
+            
+            float food = player.invRiceTonnes + player.invCassavaTonnes + player.invCocoaTonnes;
+            if (_lblStockFood != null) _lblStockFood.text = $"{food:N0}";
         }
 
         private void PopulateDropdowns()
@@ -273,8 +302,11 @@ namespace StateCraft.UI
             {
                 if (country == gm.playerCountry) continue;
 
-                // ── GATE: only show countries with a signed Trade Agreement ──
-                if (!StateCraft.Systems.DiplomacySystem.HasSignedTradeAgreementTreaty(gm.playerCountry, country))
+                // ── GATE: only show countries with a signed Trade Agreement OR in the same Faction ──
+                bool hasTreaty = StateCraft.Systems.DiplomacySystem.HasSignedTradeAgreementTreaty(gm.playerCountry, country);
+                bool sameFaction = (gm.playerCountry.globalFaction == country.globalFaction && gm.playerCountry.globalFaction != "Independent" && gm.playerCountry.globalFaction != "Non-Aligned");
+                
+                if (!hasTreaty && !sameFaction)
                     continue;
 
                 bool validPartner = false;
@@ -325,12 +357,8 @@ namespace StateCraft.UI
             switch (resource)
             {
                 case TradeResourceType.Oil: return player.invOilBarrels;
-                case TradeResourceType.Gas: 
-                    int idxGas = player.resources.FindIndex(r => r.type == MineralType.NaturalGas);
-                    return idxGas >= 0 ? player.resources[idxGas].abundance * 100000f : 0f;
-                case TradeResourceType.Uranium:
-                    int idxUra = player.resources.FindIndex(r => r.type == MineralType.Uranium);
-                    return idxUra >= 0 ? player.resources[idxUra].abundance * 500f : 0f;
+                case TradeResourceType.Gas: return player.invGasUnits;
+                case TradeResourceType.Uranium: return player.invUraniumUnits;
                 case TradeResourceType.Food: return player.invRiceTonnes + player.invCassavaTonnes + player.invCocoaTonnes;
                 case TradeResourceType.Minerals: return player.invMineralsTonnes;
                 default: return 0f;
@@ -371,8 +399,8 @@ namespace StateCraft.UI
                     float stock = GetPlayerStock(resource);
                     if (qty > stock)
                     {
-                        _inputQuantity.SetValueWithoutNotify(stock.ToString("F0"));
-                        NotificationManager.Instance?.AddNotification("Quantity exceeds available inventory!", Color.yellow);
+                        // Just warn, don't hard block.
+                        NotificationManager.Instance?.AddNotification("Warning: Export quantity exceeds current inventory.", Color.yellow);
                     }
                 }
             }
@@ -417,7 +445,7 @@ namespace StateCraft.UI
                     box.Add(title);
 
                     float localVal = route.monthlyPaymentUSD * player.exchangeRate;
-                    string valString = UiFormat.Money(localVal, player.currencySymbol);
+                    string valString = UiFormat.MoneyRaw(localVal, player.currencySymbol);
                     
                     var stats = new Label($"{route.resource} : {UiFormat.MoneyRaw(route.resourceQuantity, "")} Units\nValue: {valString}/m | {route.durationMonths} mo. left");
                     stats.style.color = new StyleColor(Color.white);
@@ -469,7 +497,7 @@ namespace StateCraft.UI
                     {
                         var p = gm.playerCountry;
                         localVal = totalValUSD * p.exchangeRate;
-                        localStr = $"{UiFormat.Money(localVal, p.currencySymbol)}";
+                        localStr = $"{UiFormat.MoneyRaw(localVal, p.currencySymbol)}";
                     }
                     
                     _lblMarketValue.text = $"{localStr} / Month";
@@ -504,9 +532,51 @@ namespace StateCraft.UI
 
                     if (_lblAdviserRecommendation != null)
                     {
-                        if (qty == 0) _lblAdviserRecommendation.text = "Adjust the volume slider.";
-                        else if (isSelling) _lblAdviserRecommendation.text = $"Exporting {resource} will strengthen ties and inject {localStr}/month into our treasury. Recommended.";
-                        else _lblAdviserRecommendation.text = $"Importing this secures vital stock but costs {localStr}/month. Assess if the deficit is sustainable.";
+                        if (qty == 0) 
+                        {
+                            _lblAdviserRecommendation.text = "Adjust the volume slider.";
+                            _lblAdviserRecommendation.style.color = new StyleColor(Color.white);
+                        }
+                        else if (isSelling) 
+                        {
+                            float production = 0f;
+                            switch(resource)
+                            {
+                                case TradeResourceType.Oil: production = gm.playerCountry.indMiningOil * 2000000f; break;
+                                case TradeResourceType.Gas: production = gm.playerCountry.resources.Exists(r => r.type == MineralType.NaturalGas) ? gm.playerCountry.indMiningOil * 500000f : 0f; break;
+                                case TradeResourceType.Uranium: production = gm.playerCountry.resources.Exists(r => r.type == MineralType.Uranium) ? gm.playerCountry.indMiningLocal * 5000f : 0f; break;
+                                case TradeResourceType.Minerals: production = gm.playerCountry.indMiningLocal * 100000f; break;
+                                case TradeResourceType.Food: production = (gm.playerCountry.indAgriRice * 50000f) + (gm.playerCountry.indAgriCassava * 80000f) + (gm.playerCountry.indAgriCocoa * 20000f); break;
+                            }
+                            float consumption = (resource == TradeResourceType.Food) ? gm.playerCountry.population * 0.001f : 0f;
+                            float surplus = production - consumption;
+                            
+                            // Subtract other active export deals from surplus to be accurate
+                            if (gm.playerCountry.activeTradeAgreements != null)
+                            {
+                                foreach (var deal in gm.playerCountry.activeTradeAgreements)
+                                {
+                                    if (deal.status == StateCraft.Interfaces.TradeAgreementStatus.Active && deal.isSeller && deal.resource == resource)
+                                        surplus -= deal.resourceQuantity;
+                                }
+                            }
+
+                            if (qty > surplus)
+                            {
+                                _lblAdviserRecommendation.text = $"⚠ WARNING: Export ({qty:N0}) exceeds your monthly surplus ({surplus:N0}). Your stockpile will drain.";
+                                _lblAdviserRecommendation.style.color = new StyleColor(Color.yellow);
+                            }
+                            else
+                            {
+                                _lblAdviserRecommendation.text = $"Exporting {resource} will strengthen ties and inject {localStr}/month into our treasury. Recommended.";
+                                _lblAdviserRecommendation.style.color = new StyleColor(Color.white);
+                            }
+                        }
+                        else 
+                        {
+                            _lblAdviserRecommendation.text = $"Importing this secures vital stock but costs {localStr}/month. Assess if the deficit is sustainable.";
+                            _lblAdviserRecommendation.style.color = new StyleColor(Color.white);
+                        }
                     }
                 }
             }
@@ -583,11 +653,7 @@ namespace StateCraft.UI
                 duration = 12;
 
             bool isSelling = _dropdownTradeDirection == null || _dropdownTradeDirection.value == "Export (Sell)";
-            if (isSelling && quantity > GetPlayerStock(resource))
-            {
-                ShowErrorOnButton("ERROR: INSUFFICIENT STOCK");
-                return;
-            }
+            // We removed the hard block: if (isSelling && quantity > GetPlayerStock(resource)) return;
 
             bool isBulk = false;
             
@@ -612,6 +678,23 @@ namespace StateCraft.UI
             }
         }
 
+
+        private void ShowErrorOnButton(Button btn, string errorMsg, string originalText)
+        {
+            if (btn != null)
+            {
+                btn.text = errorMsg;
+                btn.style.backgroundColor = new StyleColor(UnityEngine.Color.red);
+                
+                // Reset after 3 seconds
+                btn.schedule.Execute(() => 
+                {
+                    btn.text = originalText;
+                    btn.style.backgroundColor = new StyleColor(new UnityEngine.Color(0, 0, 0, 0)); // Revert to stylesheet default
+                }).StartingIn(3000);
+            }
+        }
+
         private void OnReceiveCounterOffer(TradeAgreementProposal proposal)
         {
             _currentProposalId = proposal.id;
@@ -628,19 +711,46 @@ namespace StateCraft.UI
 
         private void OnAccept()
         {
-            if (string.IsNullOrEmpty(_currentProposalId)) return;
+            if (string.IsNullOrEmpty(_currentProposalId)) 
+            {
+                ShowErrorOnButton(_btnAccept, "ERROR: INVALID ID", "ACCEPT");
+                return;
+            }
 
             var gm = GameManager.Instance;
-            if (gm != null && gm.DiplomacySystem is DiplomacySystem diplo)
+            if (gm == null)
             {
-                diplo.AcceptProposal(_currentProposalId);
-                _currentProposalId = null;
-                _counterOfferArea.style.display = DisplayStyle.None;
-                
-                // Refresh diplomacy dashboard to show the new agreement
-                var dashboard = FindObjectOfType<DiplomacyDashboardController>();
-                if (dashboard != null) dashboard.RefreshDiplomacyData();
-                Hide();
+                ShowErrorOnButton(_btnAccept, "ERROR: NO GM", "ACCEPT");
+                return;
+            }
+
+            if (gm.DiplomacySystem is DiplomacySystem diplo)
+            {
+                try
+                {
+                    var agreement = diplo.AcceptProposal(_currentProposalId);
+                    if (agreement == null)
+                    {
+                        ShowErrorOnButton(_btnAccept, "ERROR: EXPIRED", "ACCEPT");
+                        return;
+                    }
+                    
+                    _currentProposalId = null;
+                    _counterOfferArea.style.display = DisplayStyle.None;
+                    
+                    // Refresh diplomacy dashboard to show the new agreement
+                    var dashboard = UnityEngine.Object.FindObjectOfType<DiplomacyDashboardController>();
+                    if (dashboard != null) dashboard.RefreshDiplomacyData();
+                }
+                catch (System.Exception ex)
+                {
+                    UnityEngine.Debug.LogError($"[TradeAgreementController] Exception in OnAccept: {ex}");
+                    ShowErrorOnButton(_btnAccept, "ERROR: EXCEPTION", "ACCEPT");
+                }
+            }
+            else
+            {
+                ShowErrorOnButton(_btnAccept, "ERROR: TYPE MISMATCH", "ACCEPT");
             }
         }
 

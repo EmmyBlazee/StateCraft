@@ -87,6 +87,7 @@ namespace StateCraft.UI
         {
             public Label Tier, Stat1, Stat2, Stat3, Stat4, Growth, Outlook, Pressure, Benefits, Ring;
             public Button Btn;
+            public ProgressRingElement RingElem;
         }
         private readonly Dictionary<string, IndustryRowRefs> _industryRowRefs = new Dictionary<string, IndustryRowRefs>();
         private readonly HashSet<string> _industryIdsLogged = new HashSet<string>();

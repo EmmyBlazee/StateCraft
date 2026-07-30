@@ -143,15 +143,34 @@ namespace StateCraft.UI
                 if (refs.Pressure == null) refs.Pressure = panel.Q<Label>($"Industry{ind.id}_Pressure");
                 if (refs.Benefits == null) refs.Benefits = panel.Q<Label>($"Industry{ind.id}_Benefits");
                 if (refs.Ring     == null) refs.Ring     = panel.Q<Label>($"Ring{ind.id}");
+                
+                if (refs.RingElem == null)
+                {
+                    var container = panel.Q<VisualElement>($"RingElem{ind.id}");
+                    if (container != null)
+                    {
+                        refs.RingElem = new ProgressRingElement();
+                        refs.RingElem.style.position = Position.Absolute;
+                        refs.RingElem.style.left = 0;
+                        refs.RingElem.style.right = 0;
+                        refs.RingElem.style.top = 0;
+                        refs.RingElem.style.bottom = 0;
+                        container.Insert(0, refs.RingElem);
+                    }
+                }
 
                 if (refs.Tier != null) refs.Tier.text = $"Tier {level}/10  •  Workforce {workforce:F1}k";
                 bool atMax = level >= 10;
+                bool hasResource = StateCraft.Systems.EconomyLogicEvaluator.HasRequiredResource(country, ind.id, out string missingRes);
                 if (refs.Btn != null)
                 {
-                    refs.Btn.SetEnabled(!atMax);
-                    refs.Btn.text = atMax
-                        ? "MAX TIER REACHED"
-                        : $"UPGRADE TO TIER {level + 1}\nCost: {UiFormat.Money(cost, sym)}";
+                    refs.Btn.SetEnabled(!atMax && hasResource);
+                    if (atMax)
+                        refs.Btn.text = "MAX TIER REACHED";
+                    else if (!hasResource)
+                        refs.Btn.text = $"NO DEPOSITS\nNeed: {missingRes}";
+                    else
+                        refs.Btn.text = $"UPGRADE TO TIER {level + 1}\nCost: {UiFormat.Money(cost, sym)}";
                 }
                 if (refs.Stat1 != null) refs.Stat1.text = $"Contribution to GDP\n{contrib:F1}%";
                 if (refs.Stat2 != null) refs.Stat2.text = $"Synergy\n{synergy}";
@@ -181,6 +200,7 @@ namespace StateCraft.UI
                     else
                     {
                         var constraints = new List<string>();
+                        if (!hasResource) constraints.Add($"Resource: {missingRes}");
                         if (ind.id == "Oil")
                         {
                             if (country.electricityLevel <= 50f) constraints.Add($"Power Grid ({country.electricityLevel:F0}%/50%)");
@@ -222,6 +242,7 @@ namespace StateCraft.UI
 
                 if (refs.Benefits != null) refs.Benefits.text = $"Benefits: +1 Tier, increased workforce & capacity.";
                 if (refs.Ring     != null) refs.Ring.text     = $"{contrib:F0}%\n{ind.title}";
+                if (refs.RingElem != null) refs.RingElem.SetValue(contrib);
             }
 
             // Adviser

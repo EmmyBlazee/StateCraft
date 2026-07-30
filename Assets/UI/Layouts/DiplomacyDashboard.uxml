@@ -142,9 +142,6 @@
                 <ui:ScrollView style="flex-grow: 1; margin-bottom: 12px;">
                     <ui:VisualElement name="TreatiesCardsList" style="flex-direction: column;" />
                 </ui:ScrollView>
-                <ui:VisualElement style="flex-direction: row; justify-content: center;">
-                    <ui:Button name="BtnProposeTreaty" text="PROPOSE TREATY" class="econ-small-button" style="width: 250px; height: 36px; font-size: 14px; background-color: rgba(35, 140, 237, 0.3); border-color: rgb(35, 140, 237);" />
-                </ui:VisualElement>
             </ui:VisualElement>
 
             <!-- 4. INTERNATIONAL ORGANIZATIONS TAB -->

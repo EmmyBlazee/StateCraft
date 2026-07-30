@@ -23,9 +23,13 @@ namespace StateCraft.Editor
         private const string RT_PATH          = "Assets/Splash screens/VideoRT.renderTexture";
         private const string VIDEO_PATH       = "Assets/Splash screens/Devolution 1.mp4";
         private const string SPLASH_IMG_PATH  = "Assets/Splash screens/Splash.png";
-        private const string UXML_PATH        = "Assets/UI/Layouts/SplashScreen.uxml";
-        private const string PANEL_SETTINGS   = "Assets/UI Toolkit/UnityThemes/UnityDefaultRuntimeTheme.asset";
-        private const string MAIN_SCENE_NAME  = "SampleScene";
+        private const string UXML_SPLASH      = "Assets/UI/Layouts/SplashScreen.uxml";
+        private const string UXML_MENU        = "Assets/UI/Layouts/MainMenu.uxml";
+        private const string UXML_SELECTOR    = "Assets/UI/Layouts/CountrySelector.uxml";
+        private const string PANEL_SETTINGS          = "Assets/Scripts/UI/StateCraftPanelSetting.asset";
+        private const string PANEL_SETTINGS_MENU     = "Assets/Scripts/UI/MenuPanelSettings.asset";
+        private const string PANEL_SETTINGS_SELECTOR = "Assets/Scripts/UI/SelectorPanelSettings.asset";
+        private const string MAIN_SCENE_NAME         = "SampleScene";
 
         // ── Entry point ────────────────────────────────────────────────
         [MenuItem("StateCraft/Build Splash Scene")]
@@ -37,11 +41,27 @@ namespace StateCraft.Editor
             // 2. Create / open a blank scene
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
+            // ── Camera ─────────────────────────────────────────────────
+            // UIToolkit UIDocuments need a camera to render to the Game view.
+            var camGO = new GameObject("MainCamera");
+            camGO.tag = "MainCamera";
+            var cam = camGO.AddComponent<Camera>();
+            cam.clearFlags       = CameraClearFlags.SolidColor;
+            cam.backgroundColor  = Color.black;
+            cam.orthographic     = true;
+            cam.depth            = 0;
+
+            // ── EventSystem ────────────────────────────────────────────
+            // Required for UI Toolkit pointer raycasting & input processing
+            var eventSysGO = new GameObject("EventSystem");
+            eventSysGO.AddComponent<UnityEngine.EventSystems.EventSystem>();
+            eventSysGO.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+
             // ── Render Texture ─────────────────────────────────────────
             var rt = EnsureRenderTexture();
 
             // ── Video Canvas (Sort 10) ─────────────────────────────────
-            var videoCanvas    = CreateCanvas("VideoCanvas", sortOrder: 10);
+            var videoCanvas    = CreateCanvas("VideoCanvas", sortOrder: 10, cam: cam);
             var videoCanvasGrp = videoCanvas.gameObject.AddComponent<CanvasGroup>();
 
             var videoDisplay = CreateRawImage(videoCanvas.transform, "VideoDisplay", rt);
@@ -50,7 +70,7 @@ namespace StateCraft.Editor
             // We create VideoCanvas just for display; VideoPlayer goes on controller.
 
             // ── Splash Canvas (Sort 5) ─────────────────────────────────
-            var splashCanvas    = CreateCanvas("SplashCanvas", sortOrder: 5);
+            var splashCanvas    = CreateCanvas("SplashCanvas", sortOrder: 5, cam: cam);
             var splashCanvasGrp = splashCanvas.gameObject.AddComponent<CanvasGroup>();
             splashCanvasGrp.alpha = 0f;   // starts hidden
 
@@ -75,7 +95,46 @@ namespace StateCraft.Editor
             ctrl.splashUIDocument   = uiDoc;
             ctrl.mainSceneName      = MAIN_SCENE_NAME;
             ctrl.fadeDuration       = 0.8f;
-            ctrl.minSplashTime      = 2.0f;
+            ctrl.minLoaderTime      = 2.5f;
+
+            // ── Menu UI Document ───────────────────────────────────────────
+            var menuDocGO = new GameObject("MenuUI");
+            var menuDoc = menuDocGO.AddComponent<UIDocument>();
+            AssignUIDocumentAssets(menuDoc, UXML_MENU, PANEL_SETTINGS_MENU, sortOrder: 25);
+            ctrl.menuUIDocument = menuDoc;
+
+            // ── Country Selector UI Document ───────────────────────────────
+            var selectorDocGO = new GameObject("SelectorUI");
+            var selectorDoc = selectorDocGO.AddComponent<UIDocument>();
+            AssignUIDocumentAssets(selectorDoc, UXML_SELECTOR, PANEL_SETTINGS_SELECTOR, sortOrder: 30);
+            ctrl.selectorUIDocument = selectorDoc;
+
+            // ── Auto-assign CountryDataSO list ────────────────────────────
+            var countryGuids = AssetDatabase.FindAssets("t:CountryDataSO", new[] { "Assets/Data/Countries" });
+            var countryList  = new System.Collections.Generic.List<StateCraft.Data.CountryDataSO>();
+            foreach (var guid in countryGuids)
+            {
+                var path  = AssetDatabase.GUIDToAssetPath(guid);
+                var asset = AssetDatabase.LoadAssetAtPath<StateCraft.Data.CountryDataSO>(path);
+                if (asset != null) countryList.Add(asset);
+            }
+            countryList.Sort((a, b) => string.Compare(a.countryName, b.countryName, System.StringComparison.OrdinalIgnoreCase));
+            ctrl.countryDataList = countryList.ToArray();
+            Debug.Log($"[SplashSceneBuilder] Auto-assigned {ctrl.countryDataList.Length} countries to SplashController.");
+
+            // ── Create / update CountryRegistry in Resources/ ─────────────
+            // This is the runtime asset loaded by builds (no AssetDatabase available).
+            const string registryPath = "Assets/Resources/CountryRegistry.asset";
+            var registry = AssetDatabase.LoadAssetAtPath<StateCraft.Data.CountryRegistry>(registryPath);
+            if (registry == null)
+            {
+                registry = ScriptableObject.CreateInstance<StateCraft.Data.CountryRegistry>();
+                AssetDatabase.CreateAsset(registry, registryPath);
+            }
+            registry.countries = countryList.ToArray();
+            EditorUtility.SetDirty(registry);
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[SplashSceneBuilder] CountryRegistry saved at {registryPath} with {registry.countries.Length} countries.");
 
             // ── Save scene ─────────────────────────────────────────────
             EditorSceneManager.SaveScene(scene, SCENE_PATH);
@@ -105,12 +164,24 @@ namespace StateCraft.Editor
             return rt;
         }
 
-        /// Creates a full-screen Screen Space — Overlay Canvas.
-        private static Canvas CreateCanvas(string name, int sortOrder)
+        /// Creates a full-screen Screen Space — Camera Canvas (requires a camera so UIToolkit
+        /// UIDocuments can also render in the Game view).
+        private static Canvas CreateCanvas(string name, int sortOrder, Camera cam = null)
         {
             var go = new GameObject(name);
             var canvas = go.AddComponent<Canvas>();
-            canvas.renderMode  = RenderMode.ScreenSpaceOverlay;
+
+            if (cam != null)
+            {
+                canvas.renderMode  = RenderMode.ScreenSpaceCamera;
+                canvas.worldCamera = cam;
+                canvas.planeDistance = 1f;
+            }
+            else
+            {
+                canvas.renderMode  = RenderMode.ScreenSpaceOverlay;
+            }
+
             canvas.sortingOrder = sortOrder;
 
             var scaler = go.AddComponent<CanvasScaler>();
@@ -164,21 +235,23 @@ namespace StateCraft.Editor
         }
 
         /// Assigns the UXML and PanelSettings to a UIDocument component.
-        private static void AssignUIDocumentAssets(UIDocument doc)
+        private static void AssignUIDocumentAssets(UIDocument doc, string uxmlPath = null, string panelSettingsPath = null, int sortOrder = 20)
         {
-            var uxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(UXML_PATH);
+            string path = uxmlPath ?? UXML_SPLASH;
+            var uxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(path);
             if (uxml != null)
                 doc.visualTreeAsset = uxml;
             else
-                Debug.LogWarning("[SplashSceneBuilder] SplashScreen.uxml not found at " + UXML_PATH);
+                Debug.LogWarning("[SplashSceneBuilder] UXML not found at " + path);
 
-            var panel = AssetDatabase.LoadAssetAtPath<PanelSettings>(PANEL_SETTINGS);
+            string panelPath = panelSettingsPath ?? PANEL_SETTINGS;
+            var panel = AssetDatabase.LoadAssetAtPath<PanelSettings>(panelPath);
             if (panel != null)
                 doc.panelSettings = panel;
             else
-                Debug.LogWarning("[SplashSceneBuilder] PanelSettings not found. Assign it manually on SplashUI.");
+                Debug.LogWarning("[SplashSceneBuilder] PanelSettings not found at " + panelPath + ". Assign it manually.");
 
-            doc.sortingOrder = 20;
+            doc.sortingOrder = sortOrder;
         }
 
         /// Configures the VideoPlayer to use the render texture and the intro clip.

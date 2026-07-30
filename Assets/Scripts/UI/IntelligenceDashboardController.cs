@@ -243,11 +243,6 @@ namespace StateCraft.UI
 
             string sym = string.IsNullOrEmpty(country.currencySymbol) ? "$" : country.currencySymbol;
 
-            // --- DEV BOOST: Ensure player has enough funds to test new assets immediately ---
-            if (country.intelligenceFunds < 2000f)
-            {
-                country.intelligenceFunds = 2000f;
-            }
 
             if (gm.TurnSystem != null && gm.TurnSystem.CurrentTurn != _lastSeenTurn)
             {
@@ -409,11 +404,11 @@ namespace StateCraft.UI
                             string coverage = type == "UAV" ? "Regional" : "Global";
                             
                             var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 8, paddingBottom = 4, borderBottomWidth = 1, borderBottomColor = new Color(1, 1, 1, 0.1f) } };
-                            row.Add(new Label(assetName) { style = { flexGrow = 2, width = Length.Percent(30), color = Color.white, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
-                            row.Add(new Label(type) { style = { flexGrow = 1, width = Length.Percent(15), color = Color.gray, fontSize = 10 } });
-                            row.Add(new Label(isOnline ? "ONLINE" : "OFFLINE") { style = { flexGrow = 1, width = Length.Percent(20), color = isOnline ? new Color(0.14f, 0.93f, 0.34f) : Color.gray, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
-                            row.Add(new Label(coverage) { style = { flexGrow = 1, width = Length.Percent(20), color = Color.gray, fontSize = 10 } });
-                            row.Add(new Label(isOnline ? $"{70 + i * 4}%" : "0%") { style = { flexGrow = 1, width = Length.Percent(15), color = Color.white, fontSize = 10, unityTextAlign = TextAnchor.MiddleRight } });
+                            row.Add(new Label(assetName) { style = { flexGrow = 2, width = Length.Percent(30), color = Color.white, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
+                            row.Add(new Label(type) { style = { flexGrow = 1, width = Length.Percent(15), color = Color.gray, fontSize = 12 } });
+                            row.Add(new Label(isOnline ? "ONLINE" : "OFFLINE") { style = { flexGrow = 1, width = Length.Percent(20), color = isOnline ? new Color(0.14f, 0.93f, 0.34f) : Color.gray, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
+                            row.Add(new Label(coverage) { style = { flexGrow = 1, width = Length.Percent(20), color = Color.gray, fontSize = 12 } });
+                            row.Add(new Label(isOnline ? $"{70 + i * 4}%" : "0%") { style = { flexGrow = 1, width = Length.Percent(15), color = Color.white, fontSize = 12, unityTextAlign = TextAnchor.MiddleRight } });
                             assetsList.Add(row);
                         }
                     }
@@ -439,12 +434,12 @@ namespace StateCraft.UI
                         foreach (var op in country.activeCovertOps)
                         {
                             var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 8, paddingBottom = 4, borderBottomWidth = 1, borderBottomColor = new Color(1, 1, 1, 0.1f) } };
-                            row.Add(new Label(op.opName) { style = { flexGrow = 2, width = Length.Percent(25), color = Color.white, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold, whiteSpace = WhiteSpace.Normal } });
-                            row.Add(new Label(op.operativeName) { style = { flexGrow = 1, width = Length.Percent(15), color = Color.gray, fontSize = 10 } });
-                            row.Add(new Label(op.type) { style = { flexGrow = 2, width = Length.Percent(20), color = new Color(0.14f, 0.93f, 0.34f), fontSize = 10 } });
-                            row.Add(new Label(op.target) { style = { flexGrow = 1, width = Length.Percent(15), color = Color.gray, fontSize = 10 } });
-                            row.Add(new Label(op.status.ToUpper()) { style = { flexGrow = 1, width = Length.Percent(15), color = op.status == "ACTIVE" ? new Color(0.14f, 0.93f, 0.34f) : new Color(1f, 0.67f, 0.25f), fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
-                            row.Add(new Label($"Phase {op.currentPhase}/{op.totalPhases}") { style = { flexGrow = 1, width = Length.Percent(10), color = Color.white, fontSize = 10, unityTextAlign = TextAnchor.MiddleRight } });
+                            row.Add(new Label(op.opName) { style = { flexGrow = 2, width = Length.Percent(25), color = Color.white, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold, whiteSpace = WhiteSpace.Normal } });
+                            row.Add(new Label(op.operativeName) { style = { flexGrow = 1, width = Length.Percent(15), color = Color.gray, fontSize = 12 } });
+                            row.Add(new Label(op.type) { style = { flexGrow = 2, width = Length.Percent(20), color = new Color(0.14f, 0.93f, 0.34f), fontSize = 12 } });
+                            row.Add(new Label(op.target) { style = { flexGrow = 1, width = Length.Percent(15), color = Color.gray, fontSize = 12 } });
+                            row.Add(new Label(op.status.ToUpper()) { style = { flexGrow = 1, width = Length.Percent(15), color = op.status == "ACTIVE" ? new Color(0.14f, 0.93f, 0.34f) : new Color(1f, 0.67f, 0.25f), fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
+                            row.Add(new Label($"Phase {op.currentPhase}/{op.totalPhases}") { style = { flexGrow = 1, width = Length.Percent(10), color = Color.white, fontSize = 12, unityTextAlign = TextAnchor.MiddleRight } });
                             missionsList.Add(row);
                         }
                     }
@@ -462,7 +457,7 @@ namespace StateCraft.UI
                             var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 6 } };
                             
                             var rL = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, width = 110 } };
-                            rL.Add(new Label(reg.regionName) { style = { color = Color.gray, fontSize = 8, whiteSpace = WhiteSpace.Normal } });
+                            rL.Add(new Label(reg.regionName) { style = { color = Color.gray, fontSize = 10, whiteSpace = WhiteSpace.Normal } });
                             row.Add(rL);
                             
                             var barBg = new VisualElement { style = { flexGrow = 1, height = 4, backgroundColor = new Color(1, 1, 1, 0.1f), borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, marginRight = 8, marginLeft = 8 } };
@@ -470,13 +465,40 @@ namespace StateCraft.UI
                             barBg.Add(new VisualElement { style = { width = Length.Percent(cov), height = 4, backgroundColor = cov > 70f ? new Color(0.14f, 0.93f, 0.34f) : cov > 40f ? new Color(0.95f, 0.77f, 0.06f) : new Color(1f, 0.32f, 0.32f), borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } });
                             row.Add(barBg);
                             
-                            row.Add(new Label($"{cov:F0}%") { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold, width = 30, unityTextAlign = TextAnchor.MiddleRight } });
+                            row.Add(new Label($"{cov:F0}%") { style = { color = Color.white, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold, width = 30, unityTextAlign = TextAnchor.MiddleRight } });
                             sensorList.Add(row);
                         }
                     }
                 }
-                AddPlaceholder(panel.Q<VisualElement>("RS_DonutBreakdownList"), "No data.");
-                AddPlaceholder(panel.Q<VisualElement>("RS_AnalyticsList"), "Insufficient data for analytics.");
+                var donutList = panel.Q<VisualElement>("RS_DonutBreakdownList");
+                if (donutList != null) {
+                    donutList.Clear();
+                    string[] colTypes = { "SIGINT", "HUMINT", "OSINT", "CYBER" };
+                    float baseVal = 20f + (country.intelligenceLevel * 0.2f);
+                    float[] colVals = { baseVal + 10f, baseVal, baseVal - 5f, baseVal - 5f };
+                    Color[] colColors = { new Color(0.18f, 0.6f, 0.95f), new Color(0.95f, 0.77f, 0.06f), new Color(0.137f, 0.929f, 0.337f), new Color(0.73f, 0.41f, 0.78f) };
+                    
+                    for(int i = 0; i < 4; i++) {
+                        var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 4 } };
+                        var labelCont = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
+                        labelCont.Add(new VisualElement { style = { width = 8, height = 8, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, backgroundColor = colColors[i], marginRight = 6 } });
+                        labelCont.Add(new Label(colTypes[i]) { style = { color = Color.white, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
+                        row.Add(labelCont);
+                        row.Add(new Label($"{colVals[i]:F0}%") { style = { color = Color.gray, fontSize = 12 } });
+                        donutList.Add(row);
+                    }
+                }
+                
+                var donutVal = panel.Q<Label>("RS_DonutTotalValue");
+                string daSym2 = string.IsNullOrEmpty(country.currencySymbol) ? "$" : country.currencySymbol;
+                if (donutVal != null) donutVal.text = $"{daSym2}{(country.intelligenceBudget * 0.25f * country.exchangeRate):F1}B";
+
+                // Ensure no placeholders exist for analytics list
+                var aList = panel.Q<VisualElement>("RS_AnalyticsList");
+                if (aList != null) {
+                    aList.Clear();
+                    AddPlaceholder(aList, "Gathering active intelligence data...");
+                }
                 var recentActivityList = panel.Q<VisualElement>("RS_RecentActivityContainer");
                 if (recentActivityList != null)
                 {
@@ -485,7 +507,7 @@ namespace StateCraft.UI
                     {
                         foreach (var report in country.recentReconReports)
                         {
-                            var reportLabel = new Label(report) { style = { color = new Color(0.8f, 0.8f, 0.8f), fontSize = 10, whiteSpace = WhiteSpace.Normal, marginBottom = 4, borderBottomWidth = 1, borderBottomColor = new Color(1, 1, 1, 0.1f), paddingBottom = 4 } };
+                            var reportLabel = new Label(report) { style = { color = new Color(0.8f, 0.8f, 0.8f), fontSize = 12, whiteSpace = WhiteSpace.Normal, marginBottom = 4, borderBottomWidth = 1, borderBottomColor = new Color(1, 1, 1, 0.1f), paddingBottom = 4 } };
                             recentActivityList.Add(reportLabel);
                         }
                     }
@@ -540,7 +562,7 @@ namespace StateCraft.UI
         {
             if (container == null) return;
             container.Clear();
-            var label = new Label(text) { style = { color = Color.gray, unityTextAlign = TextAnchor.MiddleCenter, flexGrow = 1, marginTop = 20, fontSize = 12 } };
+            var label = new Label(text) { style = { color = Color.gray, unityTextAlign = TextAnchor.MiddleCenter, flexGrow = 1, marginTop = 20, fontSize = 14 } };
             container.Add(label);
         }
 
@@ -590,9 +612,9 @@ namespace StateCraft.UI
                 stripe.style.marginBottom = 8;
                 cell.Add(stripe);
 
-                cell.Add(new Label(name) { style = { color = new Color(0.82f, 0.55f, 0.95f), fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold, letterSpacing = 1.2f } });
+                cell.Add(new Label(name) { style = { color = new Color(0.82f, 0.55f, 0.95f), fontSize = 11, unityFontStyleAndWeight = FontStyle.Bold, letterSpacing = 1.2f } });
                 cell.Add(new ProgressBar() { value = val, highValue = 100, style = { height = 3, marginTop = 6 } });
-                cell.Add(new Label($"{val:F0}% effective") { style = { color = new Color(0.55f, 0.55f, 0.65f), fontSize = 8, marginTop = 5 } });
+                cell.Add(new Label($"{val:F0}% effective") { style = { color = new Color(0.55f, 0.55f, 0.65f), fontSize = 10, marginTop = 5 } });
                 _intelGridList.Add(cell);
             }
 
@@ -625,7 +647,7 @@ namespace StateCraft.UI
                 satHeader.style.marginBottom = 6;
 
                 satHeader.Add(new Label("🛰  SATELLITE CONSTELLATION") {
-                    style = { color = new Color(0.82f, 0.55f, 0.95f), fontSize = 10,
+                    style = { color = new Color(0.82f, 0.55f, 0.95f), fontSize = 12,
                               unityFontStyleAndWeight = FontStyle.Bold, letterSpacing = 1f }
                 });
 
@@ -634,7 +656,7 @@ namespace StateCraft.UI
                     ? "FULL COVERAGE"
                     : $"{country.satelliteCount}/{maxSats} ACTIVE";
                 var satStatusLabel = new Label(satStatus);
-                satStatusLabel.style.fontSize = 9;
+                satStatusLabel.style.fontSize = 11;
                 satStatusLabel.style.color = country.satelliteCount >= maxSats
                     ? new Color(0f, 0.82f, 0.39f)
                     : new Color(0.82f, 0.55f, 0.95f);
@@ -670,7 +692,7 @@ namespace StateCraft.UI
                     ? "Maximum constellation reached or queued. Full IMINT coverage assured."
                     : $"Next satellite: +{nextGain:F0}% IMINT coverage · Passive +1.5% intel/turn · Cost: $0.5B (Takes 6 Months)");
                 satDesc.style.color = new Color(0.6f, 0.6f, 0.7f);
-                satDesc.style.fontSize = 8;
+                satDesc.style.fontSize = 10;
                 satDesc.style.whiteSpace = WhiteSpace.Normal;
                 satDesc.style.marginBottom = 10;
                 satSection.Add(satDesc);
@@ -679,7 +701,7 @@ namespace StateCraft.UI
                 {
                     var constructionLbl = new Label($"🚀 {country.satellitesUnderConstruction} SATELLITE(S) IN BUILD QUEUE ({country.satelliteBuildMonthsRemaining} MO REMAINING)");
                     constructionLbl.style.color = new Color(0.95f, 0.77f, 0.06f);
-                    constructionLbl.style.fontSize = 9;
+                    constructionLbl.style.fontSize = 11;
                     constructionLbl.style.unityFontStyleAndWeight = FontStyle.Bold;
                     constructionLbl.style.marginBottom = 8;
                     satSection.Add(constructionLbl);
@@ -690,7 +712,7 @@ namespace StateCraft.UI
                     var launchBtn = new Button(LaunchSatellite) { text = "🚀  LAUNCH SPY SATELLITE  ($0.5B)" };
                     launchBtn.AddToClassList("button-premium");
                     launchBtn.style.height = 30;
-                    launchBtn.style.fontSize = 10;
+                    launchBtn.style.fontSize = 12;
                     launchBtn.style.unityFontStyleAndWeight = FontStyle.Bold;
                     launchBtn.style.backgroundColor = new Color(0.3f, 0.1f, 0.5f, 0.9f);
                     launchBtn.style.borderTopWidth = 1; launchBtn.style.borderBottomWidth = 1;
@@ -728,11 +750,11 @@ namespace StateCraft.UI
             row.style.borderBottomLeftRadius = 3; row.style.borderBottomRightRadius = 3;
 
             var header = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween } };
-            header.Add(new Label(region) { style = { color = new Color(0.92f, 0.92f, 0.95f), fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
+            header.Add(new Label(region) { style = { color = new Color(0.92f, 0.92f, 0.95f), fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
 
             var tagLabel = new Label(tag);
             tagLabel.style.color = new Color(0.82f, 0.55f, 0.95f);
-            tagLabel.style.fontSize = 8;
+            tagLabel.style.fontSize = 10;
             tagLabel.style.backgroundColor = new Color(0.45f, 0.18f, 0.65f, 0.2f);
             tagLabel.style.paddingLeft = 6; tagLabel.style.paddingRight = 6;
             tagLabel.style.paddingTop = 2; tagLabel.style.paddingBottom = 2;
@@ -777,7 +799,7 @@ namespace StateCraft.UI
             agentsList.Clear();
             if (country.activeCovertOps.Count == 0)
             {
-                agentsList.Add(new Label("NO ACTIVE OPERATIONS") { style = { color = Color.grey, fontSize = 10, marginTop = 10, unityTextAlign = TextAnchor.MiddleCenter } });
+                agentsList.Add(new Label("NO ACTIVE OPERATIONS") { style = { color = Color.grey, fontSize = 12, marginTop = 10, unityTextAlign = TextAnchor.MiddleCenter } });
             }
             else
             {
@@ -793,7 +815,7 @@ namespace StateCraft.UI
             var realEvents = DashboardLiveContent.BuildIntelFeed(country, GameManager.Instance);
             if (realEvents == null || realEvents.Count == 0)
             {
-                eventsList.Add(new Label("NO RECENT EVENTS") { style = { color = Color.grey, fontSize = 10, marginTop = 10, unityTextAlign = TextAnchor.MiddleCenter } });
+                eventsList.Add(new Label("NO RECENT EVENTS") { style = { color = Color.grey, fontSize = 12, marginTop = 10, unityTextAlign = TextAnchor.MiddleCenter } });
             }
             else
             {
@@ -802,10 +824,10 @@ namespace StateCraft.UI
                 {
                     if (count >= 10) break;
                     var evRow = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 8 } };
-                    var iconLbl = new Label("\uf192") { style = { color = new Color(0.137f, 0.929f, 0.337f), marginRight = 8, fontSize = 8, marginTop = 2 } };
+                    var iconLbl = new Label("\uf192") { style = { color = new Color(0.137f, 0.929f, 0.337f), marginRight = 8, fontSize = 10, marginTop = 2 } };
                     iconLbl.AddToClassList("fa-icon");
                     evRow.Add(iconLbl);
-                    evRow.Add(new Label(ev.Message) { style = { color = new Color(0.8f, 0.8f, 0.8f), fontSize = 9, whiteSpace = WhiteSpace.Normal, flexShrink = 1 } });
+                    evRow.Add(new Label(ev.Message) { style = { color = new Color(0.8f, 0.8f, 0.8f), fontSize = 11, whiteSpace = WhiteSpace.Normal, flexShrink = 1 } });
                     eventsList.Add(evRow);
                     count++;
                 }
@@ -816,7 +838,7 @@ namespace StateCraft.UI
             assetsList.Clear();
             if (country.recruitedAssets.Count == 0)
             {
-                assetsList.Add(new Label("NO FOREIGN ASSETS") { style = { color = Color.grey, fontSize = 10, marginTop = 10, unityTextAlign = TextAnchor.MiddleCenter } });
+                assetsList.Add(new Label("NO FOREIGN ASSETS") { style = { color = Color.grey, fontSize = 12, marginTop = 10, unityTextAlign = TextAnchor.MiddleCenter } });
             }
             else
             {
@@ -825,8 +847,8 @@ namespace StateCraft.UI
                     var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, paddingBottom = 8, paddingTop = 8, borderBottomWidth = 1, borderBottomColor = new Color(1,1,1,0.05f) } };
                     
                     var info = new VisualElement();
-                    info.Add(new Label(asset.assetName) { style = { color = Color.white, fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
-                    info.Add(new Label(asset.targetCountry) { style = { color = Color.grey, fontSize = 8, marginTop = 2 } });
+                    info.Add(new Label(asset.assetName) { style = { color = Color.white, fontSize = 11, unityFontStyleAndWeight = FontStyle.Bold } });
+                    info.Add(new Label(asset.targetCountry) { style = { color = Color.grey, fontSize = 10, marginTop = 2 } });
                     row.Add(info);
 
                     var stats = new VisualElement { style = { flexDirection = FlexDirection.Row, width = 120, justifyContent = Justify.SpaceBetween, alignItems = Align.Center } };
@@ -838,7 +860,7 @@ namespace StateCraft.UI
                     var relContainer = new VisualElement { style = { flexDirection = FlexDirection.Row } };
                     for (int i=1; i<=5; i++)
                     {
-                        relContainer.Add(new Label("★") { style = { color = i <= asset.intelLevelProvided ? new Color(0.137f, 0.929f, 0.337f) : new Color(1,1,1,0.2f), fontSize = 8 } });
+                        relContainer.Add(new Label("★") { style = { color = i <= asset.intelLevelProvided ? new Color(0.137f, 0.929f, 0.337f) : new Color(1,1,1,0.2f), fontSize = 10 } });
                     }
                     stats.Add(relContainer);
                     
@@ -862,8 +884,8 @@ namespace StateCraft.UI
             {
                 var row = new VisualElement { style = { marginBottom = 6 } };
                 var header = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, marginBottom = 4 } };
-                header.Add(new Label(capNames[i]) { style = { color = Color.grey, fontSize = 9 } });
-                header.Add(new Label($"{capVals[i]:F0}%") { style = { color = Color.white, fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
+                header.Add(new Label(capNames[i]) { style = { color = Color.grey, fontSize = 11 } });
+                header.Add(new Label($"{capVals[i]:F0}%") { style = { color = Color.white, fontSize = 11, unityFontStyleAndWeight = FontStyle.Bold } });
                 row.Add(header);
 
                 var pb = new ProgressBar { value = capVals[i], highValue = 100 };
@@ -883,8 +905,8 @@ namespace StateCraft.UI
             {
                 var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 4 } };
                 row.Add(new VisualElement { style = { width = 6, height = 6, borderTopLeftRadius = 3, borderTopRightRadius = 3, borderBottomLeftRadius = 3, borderBottomRightRadius = 3, backgroundColor = brkColors[i], marginRight = 8 } });
-                row.Add(new Label(brkNames[i]) { style = { color = Color.grey, fontSize = 9, width = 100 } });
-                row.Add(new Label($"{brkPcts[i]:F0}%") { style = { color = Color.white, fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
+                row.Add(new Label(brkNames[i]) { style = { color = Color.grey, fontSize = 11, width = 100 } });
+                row.Add(new Label($"{brkPcts[i]:F0}%") { style = { color = Color.white, fontSize = 11, unityFontStyleAndWeight = FontStyle.Bold } });
                 brkList.Add(row);
             }
 
@@ -896,16 +918,16 @@ namespace StateCraft.UI
             for (int i=0; i<recNames.Length; i++)
             {
                 var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, backgroundColor = new Color(1,1,1,0.03f), paddingBottom = 6, paddingTop = 6, paddingLeft = 8, paddingRight = 8, marginBottom = 4, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } };
-                row.Add(new Label(recNames[i]) { style = { color = Color.white, fontSize = 9 } });
+                row.Add(new Label(recNames[i]) { style = { color = Color.white, fontSize = 11 } });
                 
                 var right = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
                 
                 string sym = string.IsNullOrEmpty(country.currencySymbol) ? "$" : country.currencySymbol;
                 float localCost = recCosts[i] * country.exchangeRate;
                 
-                right.Add(new Label($"{sym}{localCost:F0}M") { style = { color = new Color(0.137f, 0.929f, 0.337f), fontSize = 9, marginRight = 8 } });
+                right.Add(new Label($"{sym}{localCost:F0}M") { style = { color = new Color(0.137f, 0.929f, 0.337f), fontSize = 11, marginRight = 8 } });
                 
-                var hireBtn = new Button { text = "HIRE", style = { height = 18, fontSize = 8, backgroundColor = new Color(0.137f, 0.929f, 0.337f, 0.2f), color = new Color(0.137f, 0.929f, 0.337f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = new Color(0.137f, 0.929f, 0.337f, 0.5f), borderBottomColor = new Color(0.137f, 0.929f, 0.337f, 0.5f), borderLeftColor = new Color(0.137f, 0.929f, 0.337f, 0.5f), borderRightColor = new Color(0.137f, 0.929f, 0.337f, 0.5f) } };
+                var hireBtn = new Button { text = "HIRE", style = { height = 18, fontSize = 10, backgroundColor = new Color(0.137f, 0.929f, 0.337f, 0.2f), color = new Color(0.137f, 0.929f, 0.337f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = new Color(0.137f, 0.929f, 0.337f, 0.5f), borderBottomColor = new Color(0.137f, 0.929f, 0.337f, 0.5f), borderLeftColor = new Color(0.137f, 0.929f, 0.337f, 0.5f), borderRightColor = new Color(0.137f, 0.929f, 0.337f, 0.5f) } };
                 
                 int index = i;
                 hireBtn.clicked += () => 
@@ -942,7 +964,7 @@ namespace StateCraft.UI
                 btn.style.width = Length.Percent(48);
                 btn.style.height = 24;
                 btn.style.marginBottom = 4;
-                btn.style.fontSize = 8;
+                btn.style.fontSize = 10;
                 btn.style.backgroundColor = new Color(1,1,1,0.05f);
                 btn.style.borderTopWidth = 1; btn.style.borderBottomWidth = 1; btn.style.borderLeftWidth = 1; btn.style.borderRightWidth = 1;
                 btn.style.borderTopColor = new Color(1,1,1,0.1f); btn.style.borderBottomColor = new Color(1,1,1,0.1f); btn.style.borderLeftColor = new Color(1,1,1,0.1f); btn.style.borderRightColor = new Color(1,1,1,0.1f);
@@ -983,33 +1005,33 @@ namespace StateCraft.UI
             card.style.borderTopColor = new Color(1,1,1,0.05f); card.style.borderBottomColor = new Color(1,1,1,0.05f); card.style.borderLeftColor = new Color(1,1,1,0.05f); card.style.borderRightColor = new Color(1,1,1,0.05f);
 
             var avatar = new VisualElement { style = { width = 36, height = 36, borderTopLeftRadius = 18, borderTopRightRadius = 18, borderBottomLeftRadius = 18, borderBottomRightRadius = 18, backgroundColor = new Color(1,1,1,0.1f), marginRight = 10, alignItems = Align.Center, justifyContent = Justify.Center } };
-            var lbl = new Label("\uf21b") { style = { color = Color.white, fontSize = 16 } };
+            var lbl = new Label("\uf21b") { style = { color = Color.white, fontSize = 18 } };
             lbl.AddToClassList("fa-icon");
             avatar.Add(lbl);
             card.Add(avatar);
 
             var mid = new VisualElement { style = { flexGrow = 1, justifyContent = Justify.Center } };
             var header = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 4 } };
-            header.Add(new Label(string.IsNullOrEmpty(op.operativeName) ? "UNKNOWN" : op.operativeName) { style = { color = Color.white, fontSize = 11, unityFontStyleAndWeight = FontStyle.Bold, marginRight = 6 } });
-            header.Add(new Label(op.status.ToUpper()) { style = { color = new Color(0.18f, 0.6f, 0.95f), fontSize = 7, backgroundColor = new Color(0.18f, 0.6f, 0.95f, 0.2f), paddingLeft = 4, paddingRight = 4, paddingTop = 2, paddingBottom = 2, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } });
+            header.Add(new Label(string.IsNullOrEmpty(op.operativeName) ? "UNKNOWN" : op.operativeName) { style = { color = Color.white, fontSize = 13, unityFontStyleAndWeight = FontStyle.Bold, marginRight = 6 } });
+            header.Add(new Label(op.status.ToUpper()) { style = { color = new Color(0.18f, 0.6f, 0.95f), fontSize = 9, backgroundColor = new Color(0.18f, 0.6f, 0.95f, 0.2f), paddingLeft = 4, paddingRight = 4, paddingTop = 2, paddingBottom = 2, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } });
             mid.Add(header);
 
             var details = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
-            details.Add(new Label($"Loc: {op.target}") { style = { color = Color.grey, fontSize = 8, marginRight = 8 } });
-            details.Add(new Label($"Asg: {op.type}") { style = { color = Color.grey, fontSize = 8 } });
+            details.Add(new Label($"Loc: {op.target}") { style = { color = Color.grey, fontSize = 10, marginRight = 8 } });
+            details.Add(new Label($"Asg: {op.type}") { style = { color = Color.grey, fontSize = 10 } });
             mid.Add(details);
 
             card.Add(mid);
 
             var right = new VisualElement { style = { width = 60, justifyContent = Justify.Center } };
-            var progLbl = new Label($"Phase {op.currentPhase}/{op.totalPhases}") { style = { color = Color.white, fontSize = 8, marginBottom = 2, unityTextAlign = TextAnchor.MiddleRight } };
+            var progLbl = new Label($"Phase {op.currentPhase}/{op.totalPhases}") { style = { color = Color.white, fontSize = 10, marginBottom = 2, unityTextAlign = TextAnchor.MiddleRight } };
             right.Add(progLbl);
             
             float progPct = (float)op.currentPhase / op.totalPhases * 100f;
             var pb = new ProgressBar { value = progPct, highValue = 100, style = { height = 4 } };
             right.Add(pb);
             
-            var expLbl = new Label($"Exp: {op.detectionRisk}%") { style = { color = op.detectionRisk > 50 ? new Color(1f, 0.3f, 0.3f) : new Color(0.137f, 0.929f, 0.337f), fontSize = 7, marginTop = 2, unityTextAlign = TextAnchor.MiddleRight } };
+            var expLbl = new Label($"Exp: {op.detectionRisk}%") { style = { color = op.detectionRisk > 50 ? new Color(1f, 0.3f, 0.3f) : new Color(0.137f, 0.929f, 0.337f), fontSize = 9, marginTop = 2, unityTextAlign = TextAnchor.MiddleRight } };
             right.Add(expLbl);
 
             card.Add(right);
@@ -1092,12 +1114,12 @@ namespace StateCraft.UI
             header.style.marginBottom = 6;
 
             header.Add(new Label($"🎯  {region.regionName.ToUpper()} — INSURGENT BASE") {
-                style = { color = new Color(1f, 0.45f, 0.45f), fontSize = 10,
+                style = { color = new Color(1f, 0.45f, 0.45f), fontSize = 12,
                           unityFontStyleAndWeight = FontStyle.Bold }
             });
 
             var badge = new Label("CONFIRMED") {
-                style = { color = new Color(1f, 0.3f, 0.3f), fontSize = 8,
+                style = { color = new Color(1f, 0.3f, 0.3f), fontSize = 10,
                           backgroundColor = new Color(0.6f, 0.1f, 0.1f, 0.4f),
                           paddingLeft = 6, paddingRight = 6, paddingTop = 2, paddingBottom = 2 }
             };
@@ -1120,8 +1142,8 @@ namespace StateCraft.UI
                 var cell = new VisualElement();
                 cell.style.width = Length.Percent(48);
                 cell.style.marginBottom = 6;
-                cell.Add(new Label(label) { style = { color = new Color(0.5f, 0.5f, 0.6f), fontSize = 8 } });
-                cell.Add(new Label(value) { style = { color = valColor, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
+                cell.Add(new Label(label) { style = { color = new Color(0.5f, 0.5f, 0.6f), fontSize = 10 } });
+                cell.Add(new Label(value) { style = { color = valColor, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
                 dataGrid.Add(cell);
             }
 
@@ -1141,7 +1163,7 @@ namespace StateCraft.UI
                 : "⚠  Awaiting strike authorisation from Intelligence Command";
             var statusLabel = new Label(statusText);
             statusLabel.style.color = strikeOrdered ? new Color(0.4f, 1f, 0.4f) : new Color(1f, 0.75f, 0.2f);
-            statusLabel.style.fontSize = 8;
+            statusLabel.style.fontSize = 10;
             statusLabel.style.whiteSpace = WhiteSpace.Normal;
             statusLabel.style.marginBottom = 10;
             card.Add(statusLabel);
@@ -1151,7 +1173,7 @@ namespace StateCraft.UI
             {
                 var warn = new Label("🔴 CAMP APPROACHING FULL STRENGTH — strike window closing");
                 warn.style.color = new Color(1f, 0.35f, 0.35f);
-                warn.style.fontSize = 8;
+                warn.style.fontSize = 10;
                 warn.style.marginBottom = 8;
                 card.Add(warn);
             }
@@ -1193,7 +1215,7 @@ namespace StateCraft.UI
                 flagBtn.AddToClassList("fa-icon");
 
                 flagBtn.style.height = 32;
-                flagBtn.style.fontSize = 9;
+                flagBtn.style.fontSize = 11;
                 flagBtn.style.unityFontStyleAndWeight = FontStyle.Bold;
                 flagBtn.style.backgroundColor = new Color(0.55f, 0.1f, 0.1f, 0.9f);
                 flagBtn.style.borderTopWidth = 1; flagBtn.style.borderBottomWidth = 1;
@@ -1232,7 +1254,7 @@ namespace StateCraft.UI
                 cinBtn.AddToClassList("fa-icon");
 
                 cinBtn.style.height = 26;
-                cinBtn.style.fontSize = 8;
+                cinBtn.style.fontSize = 10;
                 cinBtn.style.backgroundColor = new Color(0.05f, 0.2f, 0.35f, 0.9f);
                 cinBtn.style.borderTopLeftRadius = 4; cinBtn.style.borderTopRightRadius = 4;
                 cinBtn.style.borderBottomLeftRadius = 4; cinBtn.style.borderBottomRightRadius = 4;
@@ -1244,7 +1266,7 @@ namespace StateCraft.UI
                 var reminder = new Label("\uf061 Go to MILITARY \uf061 OPERATIONS to execute the strike");
                 reminder.AddToClassList("fa-icon");
                 reminder.style.color = new Color(0.6f, 0.6f, 0.7f);
-                reminder.style.fontSize = 8;
+                reminder.style.fontSize = 10;
                 reminder.style.marginTop = 4;
                 card.Add(reminder);
             }
@@ -1262,7 +1284,7 @@ namespace StateCraft.UI
             box.style.borderTopWidth = 1; box.style.borderBottomWidth = 1; box.style.borderLeftWidth = 1; box.style.borderRightWidth = 1;
             box.style.borderTopColor = new Color(0.2f, 0.2f, 0.3f, 0.3f); box.style.borderBottomColor = new Color(0.2f, 0.2f, 0.3f, 0.3f); box.style.borderLeftColor = new Color(0.2f, 0.2f, 0.3f, 0.3f); box.style.borderRightColor = new Color(0.2f, 0.2f, 0.3f, 0.3f);
             box.style.borderTopLeftRadius = 4; box.style.borderTopRightRadius = 4; box.style.borderBottomLeftRadius = 4; box.style.borderBottomRightRadius = 4;
-            var lbl = new Label(text) { style = { color = new Color(0.4f, 0.4f, 0.5f), fontSize = 9, unityFontStyleAndWeight = FontStyle.Italic } };
+            var lbl = new Label(text) { style = { color = new Color(0.4f, 0.4f, 0.5f), fontSize = 11, unityFontStyleAndWeight = FontStyle.Italic } };
             box.Add(lbl);
             return box;
         }
@@ -1289,16 +1311,16 @@ namespace StateCraft.UI
             item.style.borderBottomLeftRadius = 3; item.style.borderBottomRightRadius = 3;
 
             var headerContainer = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween } };
-            headerContainer.Add(new Label(threat.threatName) { style = { color = new Color(0.95f, 0.95f, 1f), unityFontStyleAndWeight = FontStyle.Bold, fontSize = 10 } });
+            headerContainer.Add(new Label(threat.threatName) { style = { color = new Color(0.95f, 0.95f, 1f), unityFontStyleAndWeight = FontStyle.Bold, fontSize = 12 } });
             
-            var badge = new Label(threat.severity.ToUpper()) { style = { fontSize = 8 } };
+            var badge = new Label(threat.severity.ToUpper()) { style = { fontSize = 10 } };
             badge.style.color = threat.severity == "Critical" ? new Color(255/255f, 82/255f, 82/255f) : new Color(241/255f, 196/255f, 15/255f);
             badge.style.alignSelf = Align.FlexStart;
             headerContainer.Add(badge);
             item.Add(headerContainer);
 
             if (!string.IsNullOrEmpty(threat.description))
-                item.Add(new Label(threat.description) { style = { color = Color.grey, fontSize = 8, marginTop = 4, whiteSpace = WhiteSpace.Normal } });
+                item.Add(new Label(threat.description) { style = { color = Color.grey, fontSize = 10, marginTop = 4, whiteSpace = WhiteSpace.Normal } });
 
             if (threat.category == "Insurgent Activity")
             {
@@ -1309,7 +1331,7 @@ namespace StateCraft.UI
                 warningBox.style.paddingLeft = 8; warningBox.style.paddingRight = 8;
                 warningBox.style.borderTopLeftRadius = 4; warningBox.style.borderTopRightRadius = 4;
                 warningBox.style.borderBottomLeftRadius = 4; warningBox.style.borderBottomRightRadius = 4;
-                var warningText = new Label("⚠ CRITICAL WARNING: INSURGENT CAMP LOCATED") { style = { color = new Color(1f, 0.4f, 0.4f), unityFontStyleAndWeight = FontStyle.Bold, fontSize = 9 } };
+                var warningText = new Label("⚠ CRITICAL WARNING: INSURGENT CAMP LOCATED") { style = { color = new Color(1f, 0.4f, 0.4f), unityFontStyleAndWeight = FontStyle.Bold, fontSize = 11 } };
                 warningBox.Add(warningText);
                 item.Add(warningBox);
             }
@@ -1406,7 +1428,7 @@ namespace StateCraft.UI
                             proxyBtn.AddToClassList("button-premium");
                             proxyBtn.style.marginTop = 6;
                             proxyBtn.style.height = 22;
-                            proxyBtn.style.fontSize = 8;
+                            proxyBtn.style.fontSize = 10;
                             item.Add(proxyBtn);
                         }
                     }
@@ -1431,7 +1453,7 @@ namespace StateCraft.UI
             actionBtn.AddToClassList("button-premium");
             actionBtn.style.marginTop = 10;
             actionBtn.style.height = 20;
-            actionBtn.style.fontSize = 8;
+            actionBtn.style.fontSize = 10;
             item.Add(actionBtn);
             return item;
         }
@@ -1521,6 +1543,32 @@ namespace StateCraft.UI
             string sym = string.IsNullOrEmpty(country.currencySymbol) ? "$" : country.currencySymbol;
             
             if (panel.Q<Label>("CO_IntelFundsLabel") != null) panel.Q<Label>("CO_IntelFundsLabel").text = $"FUNDS: {UiFormat.Money((country.intelligenceFunds / 1000f) * country.exchangeRate, sym)}";
+
+            // --- Budget Summary Strip ---
+            float annualBudgetLocal = country.intelligenceBudget * country.exchangeRate; // intelligenceBudget is in Billions
+            float availableFundsLocal = (country.intelligenceFunds / 1000f) * country.exchangeRate;
+            float monthlyUpkeepM = (country.satelliteCount * 50f) + (country.droneCount * 10f) + (country.operativeCount * 5f);
+            float monthlyUpkeepLocal = (monthlyUpkeepM / 1000f) * country.exchangeRate;
+
+            var annualLbl = panel.Q<Label>("CO_AnnualBudgetLabel");
+            if (annualLbl != null)
+            {
+                annualLbl.text = UiFormat.Money(annualBudgetLocal, sym);
+                annualLbl.style.color = new Color(100/255f, 180/255f, 255/255f);
+            }
+
+            var availLbl = panel.Q<Label>("CO_AvailableFundsLabel");
+            if (availLbl != null)
+            {
+                availLbl.text = UiFormat.Money(availableFundsLocal, sym);
+                availLbl.style.color = availableFundsLocal >= monthlyUpkeepLocal
+                    ? new Color(35/255f, 237/255f, 86/255f)  // green — healthy
+                    : new Color(1f, 0.32f, 0.32f);            // red — depleted
+            }
+
+            var upkeepLbl = panel.Q<Label>("CO_MonthlyUpkeepLabel");
+            if (upkeepLbl != null) upkeepLbl.text = UiFormat.Money(monthlyUpkeepLocal, sym);
+
             
             float successRate = Mathf.Clamp(40f + (country.intelligenceLevel * 0.4f) + (country.operativeCount * 2f), 10f, 95f);
             if (panel.Q<Label>("CO_SuccessRate") != null) panel.Q<Label>("CO_SuccessRate").text = $"{successRate:F0}%";
@@ -1558,11 +1606,11 @@ namespace StateCraft.UI
                     
                     var leftBox = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
                     leftBox.Add(new VisualElement { style = { width = 8, height = 8, backgroundColor = bColors[i], marginRight = 8, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4 } });
-                    leftBox.Add(new Label(bNames[i]) { style = { color = Color.white, fontSize = 9, unityFontStyleAndWeight = (i == 3 ? FontStyle.Bold : FontStyle.Normal) } });
+                    leftBox.Add(new Label(bNames[i]) { style = { color = Color.white, fontSize = 11, unityFontStyleAndWeight = (i == 3 ? FontStyle.Bold : FontStyle.Normal) } });
                     row.Add(leftBox);
                     
                     float localVal = (bVals[i] / 1000f) * country.exchangeRate; // Convert Millions to Billions
-                    row.Add(new Label(UiFormat.Money(localVal, sym)) { style = { color = bColors[i], fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
+                    row.Add(new Label(UiFormat.Money(localVal, sym)) { style = { color = bColors[i], fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
                     budgetList.Add(row);
                 }
             }
@@ -1582,33 +1630,33 @@ namespace StateCraft.UI
                 
                 var nameCol = new VisualElement { style = { width = 140, flexDirection = FlexDirection.Row, alignItems = Align.Center } };
                 var iconBox = new VisualElement { style = { width = 24, height = 24, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, backgroundColor = new Color(cCol.r, cCol.g, cCol.b, 0.1f), alignItems = Align.Center, justifyContent = Justify.Center, marginRight = 8 } };
-                iconBox.Add(new Label(cIcn) { style = { color = cCol, fontSize = 10 } }.WithClass("fa-icon"));
+                iconBox.Add(new Label(cIcn) { style = { color = cCol, fontSize = 12 } }.WithClass("fa-icon"));
                 nameCol.Add(iconBox);
                 
                 var nameText = new VisualElement { style = { flexDirection = FlexDirection.Column } };
-                nameText.Add(new Label(op.opName) { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } });
-                nameText.Add(new Label(op.type) { style = { color = Color.grey, fontSize = 7 } });
+                nameText.Add(new Label(op.opName) { style = { color = Color.white, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
+                nameText.Add(new Label(op.type) { style = { color = Color.grey, fontSize = 9 } });
                 nameCol.Add(nameText);
                 row.Add(nameCol);
 
-                row.Add(new Label(op.target) { style = { color = Color.grey, fontSize = 8, flexGrow = 1, whiteSpace = WhiteSpace.Normal } });
-                row.Add(new Label("Unknown") { style = { color = Color.white, fontSize = 8, width = 80 } }); // Add region later if in data
+                row.Add(new Label(op.target) { style = { color = Color.grey, fontSize = 10, flexGrow = 1, whiteSpace = WhiteSpace.Normal } });
+                row.Add(new Label("Unknown") { style = { color = Color.white, fontSize = 10, width = 80 } }); // Add region later if in data
                 
                 var rCol = op.riskLevel == "Extreme" ? cRed : op.riskLevel == "High" ? cRed : (op.riskLevel == "Medium" ? cOrange : cGreen);
-                row.Add(new Label(op.riskLevel.ToUpper()) { style = { color = rCol, fontSize = 7, width = 50 } });
+                row.Add(new Label(op.riskLevel.ToUpper()) { style = { color = rCol, fontSize = 9, width = 50 } });
                 
                 var sCol = op.status == "In Progress" ? cGreen : cBlue;
-                row.Add(new Label(op.status.ToUpper()) { style = { color = sCol, fontSize = 7, width = 70 } });
+                row.Add(new Label(op.status.ToUpper()) { style = { color = sCol, fontSize = 9, width = 70 } });
 
                 float progPct = op.totalPhases > 0 ? (op.currentPhase / (float)op.totalPhases) * 100f : 0f;
                 var progCol = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, width = 60 } };
                 var pBarBg = new VisualElement { style = { flexGrow = 1, height = 3, backgroundColor = cWhiteAlpha, borderTopLeftRadius = 1, borderTopRightRadius = 1, borderBottomLeftRadius = 1, borderBottomRightRadius = 1, marginRight = 6 } };
                 pBarBg.Add(new VisualElement { style = { width = Length.Percent(progPct), height = 3, backgroundColor = sCol, borderTopLeftRadius = 1, borderTopRightRadius = 1, borderBottomLeftRadius = 1, borderBottomRightRadius = 1 } });
                 progCol.Add(pBarBg);
-                progCol.Add(new Label($"{Mathf.RoundToInt(progPct)}%") { style = { color = Color.white, fontSize = 7 } });
+                progCol.Add(new Label($"{Mathf.RoundToInt(progPct)}%") { style = { color = Color.white, fontSize = 9 } });
                 row.Add(progCol);
 
-                row.Add(new Label($"{op.monthsRemaining} MONTHS") { style = { color = Color.white, fontSize = 8, width = 60, unityTextAlign = TextAnchor.MiddleRight } });
+                row.Add(new Label($"{op.monthsRemaining} MONTHS") { style = { color = Color.white, fontSize = 10, width = 60, unityTextAlign = TextAnchor.MiddleRight } });
                 
                 activeList.Add(row);
             }
@@ -1622,8 +1670,8 @@ namespace StateCraft.UI
                 detailsContainer.style.flexDirection = FlexDirection.Column;
                 detailsContainer.style.justifyContent = Justify.Center;
                 detailsContainer.style.alignItems = Align.Center;
-                detailsContainer.Add(new Label("\uf059") { style = { color = cWhiteAlpha, fontSize = 24, marginBottom = 8 } }.WithClass("fa-icon"));
-                detailsContainer.Add(new Label("NO OPERATION SELECTED") { style = { color = Color.grey, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold, letterSpacing = 1f } });
+                detailsContainer.Add(new Label("\uf059") { style = { color = cWhiteAlpha, fontSize = 26, marginBottom = 8 } }.WithClass("fa-icon"));
+                detailsContainer.Add(new Label("NO OPERATION SELECTED") { style = { color = Color.grey, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold, letterSpacing = 1f } });
             }
             else
             {
@@ -1638,16 +1686,16 @@ namespace StateCraft.UI
                 
                 var dHeader = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 12 } };
                 var dIcon = new VisualElement { style = { width = 36, height = 36, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, backgroundColor = new Color(oCol.r, oCol.g, oCol.b, 0.1f), alignItems = Align.Center, justifyContent = Justify.Center, marginRight = 12 } };
-                dIcon.Add(new Label(oIcn) { style = { color = oCol, fontSize = 16 } }.WithClass("fa-icon"));
+                dIcon.Add(new Label(oIcn) { style = { color = oCol, fontSize = 18 } }.WithClass("fa-icon"));
                 dHeader.Add(dIcon);
                 var dTitle = new VisualElement();
-                dTitle.Add(new Label(op.opName) { style = { color = Color.white, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
-                dTitle.Add(new Label($"{op.type} Operation") { style = { color = Color.grey, fontSize = 8 } });
+                dTitle.Add(new Label(op.opName) { style = { color = Color.white, fontSize = 14, unityFontStyleAndWeight = FontStyle.Bold } });
+                dTitle.Add(new Label($"{op.type} Operation") { style = { color = Color.grey, fontSize = 10 } });
                 dHeader.Add(dTitle);
                 dLeft.Add(dHeader);
 
-                dLeft.Add(new Label("DESCRIPTION") { style = { color = Color.grey, fontSize = 7, marginBottom = 2 } });
-                dLeft.Add(new Label($"Targeting {op.target} with priority '{op.priority}'. Currently in phase {op.currentPhase} of {op.totalPhases}.") { style = { color = Color.white, fontSize = 8, whiteSpace = WhiteSpace.Normal, marginBottom = 12 } });
+                dLeft.Add(new Label("DESCRIPTION") { style = { color = Color.grey, fontSize = 9, marginBottom = 2 } });
+                dLeft.Add(new Label($"Targeting {op.target} with priority '{op.priority}'. Currently in phase {op.currentPhase} of {op.totalPhases}.") { style = { color = Color.white, fontSize = 10, whiteSpace = WhiteSpace.Normal, marginBottom = 12 } });
 
                 var dGrid = new VisualElement { style = { flexDirection = FlexDirection.Row, flexWrap = Wrap.Wrap } };
                 dGrid.Add(CreateDetailStat("TARGET", op.target));
@@ -1658,11 +1706,11 @@ namespace StateCraft.UI
                 
                 var dBtns = new VisualElement { style = { flexDirection = FlexDirection.Row, marginTop = 12 } };
                 
-                var btnView = new Button { text = "VIEW INTEL", style = { height = 24, fontSize = 8, flexGrow = 1, backgroundColor = new Color(0.18f, 0.6f, 0.95f, 0.1f), color = cBlue, borderTopColor = cBlue, borderBottomColor = cBlue, borderLeftColor = cBlue, borderRightColor = cBlue, borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, marginRight = 6 } };
+                var btnView = new Button { text = "VIEW INTEL", style = { height = 24, fontSize = 10, flexGrow = 1, backgroundColor = new Color(0.18f, 0.6f, 0.95f, 0.1f), color = cBlue, borderTopColor = cBlue, borderBottomColor = cBlue, borderLeftColor = cBlue, borderRightColor = cBlue, borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, marginRight = 6 } };
                 btnView.clicked += () => NotificationManager.Instance?.AddNotification($"INTEL REPORT: {op.opName} is progressing as expected.", cBlue);
                 dBtns.Add(btnView);
                 
-                var btnPause = new Button { text = "PAUSE OPERATION", style = { height = 24, fontSize = 8, flexGrow = 1, backgroundColor = new Color(0.95f, 0.77f, 0.06f, 0.1f), color = cOrange, borderTopColor = cOrange, borderBottomColor = cOrange, borderLeftColor = cOrange, borderRightColor = cOrange, borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, marginRight = 6 } };
+                var btnPause = new Button { text = "PAUSE OPERATION", style = { height = 24, fontSize = 10, flexGrow = 1, backgroundColor = new Color(0.95f, 0.77f, 0.06f, 0.1f), color = cOrange, borderTopColor = cOrange, borderBottomColor = cOrange, borderLeftColor = cOrange, borderRightColor = cOrange, borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, marginRight = 6 } };
                 btnPause.clicked += () => {
                     op.status = "On Hold";
                     NotificationManager.Instance?.AddNotification($"OPERATION PAUSED: Agents ordered to stand down.", cOrange);
@@ -1670,7 +1718,7 @@ namespace StateCraft.UI
                 };
                 dBtns.Add(btnPause);
                 
-                var btnTerm = new Button { text = "TERMINATE", style = { height = 24, fontSize = 8, flexGrow = 1, backgroundColor = new Color(1f, 0.32f, 0.32f, 0.1f), color = cRed, borderTopColor = cRed, borderBottomColor = cRed, borderLeftColor = cRed, borderRightColor = cRed, borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1 } };
+                var btnTerm = new Button { text = "TERMINATE", style = { height = 24, fontSize = 10, flexGrow = 1, backgroundColor = new Color(1f, 0.32f, 0.32f, 0.1f), color = cRed, borderTopColor = cRed, borderBottomColor = cRed, borderLeftColor = cRed, borderRightColor = cRed, borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1 } };
                 btnTerm.clicked += () => {
                     country.activeCovertOps.Remove(op);
                     country.operativeCount++;
@@ -1685,14 +1733,14 @@ namespace StateCraft.UI
 
                 // Details Right
                 var dRight = new VisualElement { style = { width = Length.Percent(50), paddingLeft = 12, flexDirection = FlexDirection.Column } };
-                dRight.Add(new Label("OBJECTIVES") { style = { color = Color.grey, fontSize = 8, marginBottom = 6 } });
+                dRight.Add(new Label("OBJECTIVES") { style = { color = Color.grey, fontSize = 10, marginBottom = 6 } });
                 string[] objTxt = { "Initial reconnaissance", "Deploy assets", "Execute primary directive" };
                 for(int i=0; i<3; i++)
                 {
                     bool isDone = i < op.currentPhase;
                     var oRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 4, flexShrink = 0 } };
-                    oRow.Add(new Label(isDone ? "\uF058" : "\uF111") { style = { color = isDone ? cGreen : Color.grey, fontSize = 10, marginRight = 6 } }.WithClass("fa-icon"));
-                    oRow.Add(new Label(objTxt[i]) { style = { color = isDone ? Color.white : Color.grey, fontSize = 8 } });
+                    oRow.Add(new Label(isDone ? "\uF058" : "\uF111") { style = { color = isDone ? cGreen : Color.grey, fontSize = 12, marginRight = 6 } }.WithClass("fa-icon"));
+                    oRow.Add(new Label(objTxt[i]) { style = { color = isDone ? Color.white : Color.grey, fontSize = 10 } });
                     dRight.Add(oRow);
                 }
 
@@ -1700,16 +1748,16 @@ namespace StateCraft.UI
                 
                 Color rCol = op.riskLevel == "Extreme" || op.riskLevel == "High" ? cRed : op.riskLevel == "Medium" ? cOrange : cGreen;
                 var mRisk = new VisualElement { style = { width = Length.Percent(30) } };
-                mRisk.Add(new Label("RISK LEVEL") { style = { color = Color.grey, fontSize = 7, marginBottom = 2 } });
+                mRisk.Add(new Label("RISK LEVEL") { style = { color = Color.grey, fontSize = 9, marginBottom = 2 } });
                 var mrRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
-                mrRow.Add(new Label("\uf071") { style = { color = rCol, fontSize = 12, marginRight = 4 } }.WithClass("fa-icon"));
-                mrRow.Add(new Label(string.IsNullOrEmpty(op.riskLevel) ? "UNKNOWN" : op.riskLevel.ToUpper()) { style = { color = rCol, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
+                mrRow.Add(new Label("\uf071") { style = { color = rCol, fontSize = 14, marginRight = 4 } }.WithClass("fa-icon"));
+                mrRow.Add(new Label(string.IsNullOrEmpty(op.riskLevel) ? "UNKNOWN" : op.riskLevel.ToUpper()) { style = { color = rCol, fontSize = 14, unityFontStyleAndWeight = FontStyle.Bold } });
                 mRisk.Add(mrRow);
                 dMetrics.Add(mRisk);
                 
                 var mDet = new VisualElement { style = { width = Length.Percent(30) } };
-                mDet.Add(new Label("DETECTION RISK") { style = { color = Color.grey, fontSize = 7, marginBottom = 2 } });
-                mDet.Add(new Label($"{Mathf.RoundToInt(op.detectionRisk)}%") { style = { color = Color.white, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
+                mDet.Add(new Label("DETECTION RISK") { style = { color = Color.grey, fontSize = 9, marginBottom = 2 } });
+                mDet.Add(new Label($"{Mathf.RoundToInt(op.detectionRisk)}%") { style = { color = Color.white, fontSize = 14, unityFontStyleAndWeight = FontStyle.Bold } });
                 var dbBar1 = new VisualElement { style = { height = 3, backgroundColor = cWhiteAlpha, marginTop = 4 } };
                 dbBar1.Add(new VisualElement { style = { width = Length.Percent(op.detectionRisk), height = 3, backgroundColor = cOrange } });
                 mDet.Add(dbBar1);
@@ -1717,8 +1765,8 @@ namespace StateCraft.UI
 
                 var mSuc = new VisualElement { style = { width = Length.Percent(30) } };
                 float sucChance = Mathf.Clamp(100f - op.detectionRisk, 0, 100f);
-                mSuc.Add(new Label("SUCCESS CHANCE") { style = { color = Color.grey, fontSize = 7, marginBottom = 2 } });
-                mSuc.Add(new Label($"{Mathf.RoundToInt(sucChance)}%") { style = { color = Color.white, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
+                mSuc.Add(new Label("SUCCESS CHANCE") { style = { color = Color.grey, fontSize = 9, marginBottom = 2 } });
+                mSuc.Add(new Label($"{Mathf.RoundToInt(sucChance)}%") { style = { color = Color.white, fontSize = 14, unityFontStyleAndWeight = FontStyle.Bold } });
                 var dbBar2 = new VisualElement { style = { height = 3, backgroundColor = cWhiteAlpha, marginTop = 4 } };
                 dbBar2.Add(new VisualElement { style = { width = Length.Percent(sucChance), height = 3, backgroundColor = cGreen } });
                 mSuc.Add(dbBar2);
@@ -1742,18 +1790,18 @@ namespace StateCraft.UI
                 var card = new VisualElement { style = { flexDirection = FlexDirection.Row, backgroundColor = new Color(1,1,1,0.03f), paddingBottom = 8, paddingTop = 8, paddingLeft = 8, paddingRight = 8, marginBottom = 6, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, borderLeftWidth = 2, borderLeftColor = uCol } };
                 
                 var cIcon = new VisualElement { style = { width = 24, height = 24, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, backgroundColor = new Color(uCol.r, uCol.g, uCol.b, 0.1f), alignItems = Align.Center, justifyContent = Justify.Center, marginRight = 8 } };
-                cIcon.Add(new Label(uIcn) { style = { color = uCol, fontSize = 10 } }.WithClass("fa-icon"));
+                cIcon.Add(new Label(uIcn) { style = { color = uCol, fontSize = 12 } }.WithClass("fa-icon"));
                 card.Add(cIcon);
                 
                 var cMid = new VisualElement { style = { flexGrow = 1, justifyContent = Justify.Center } };
-                cMid.Add(new Label(op.opName) { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } });
-                cMid.Add(new Label(op.type) { style = { color = Color.grey, fontSize = 7 } });
-                cMid.Add(new Label($"Target: {op.target}") { style = { color = Color.grey, fontSize = 7, marginTop = 2 } });
-                cMid.Add(new Label($"Start In: {op.monthsRemaining} Months") { style = { color = Color.white, fontSize = 7, marginTop = 2 } });
+                cMid.Add(new Label(op.opName) { style = { color = Color.white, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
+                cMid.Add(new Label(op.type) { style = { color = Color.grey, fontSize = 9 } });
+                cMid.Add(new Label($"Target: {op.target}") { style = { color = Color.grey, fontSize = 9, marginTop = 2 } });
+                cMid.Add(new Label($"Start In: {op.monthsRemaining} Months") { style = { color = Color.white, fontSize = 9, marginTop = 2 } });
                 card.Add(cMid);
                 
                 var cRight = new VisualElement { style = { alignItems = Align.FlexEnd, justifyContent = Justify.SpaceBetween } };
-                cRight.Add(new Label(op.riskLevel.ToUpper()) { style = { color = dots >= 3 ? cRed : cOrange, fontSize = 7, marginBottom = 12 } });
+                cRight.Add(new Label(op.riskLevel.ToUpper()) { style = { color = dots >= 3 ? cRed : cOrange, fontSize = 9, marginBottom = 12 } });
                 var dotRow = new VisualElement { style = { flexDirection = FlexDirection.Row } };
                 for(int d=0; d<4; d++)
                 {
@@ -1776,12 +1824,12 @@ namespace StateCraft.UI
             {
                 var row = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 6 } };
                 var iconBox = new VisualElement { style = { width = 16, height = 16, borderTopLeftRadius = 8, borderTopRightRadius = 8, borderBottomLeftRadius = 8, borderBottomRightRadius = 8, backgroundColor = new Color(raCol[i].r, raCol[i].g, raCol[i].b, 0.2f), alignItems = Align.Center, justifyContent = Justify.Center, marginRight = 8 } };
-                iconBox.Add(new Label("\uf023") { style = { color = raCol[i], fontSize = 8 } }.WithClass("fa-icon"));
+                iconBox.Add(new Label("\uf023") { style = { color = raCol[i], fontSize = 10 } }.WithClass("fa-icon"));
                 row.Add(iconBox);
                 
                 var rtRow = new VisualElement { style = { flexGrow = 1, flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween } };
-                rtRow.Add(new Label(raTxt[i]) { style = { color = Color.grey, fontSize = 8, whiteSpace = WhiteSpace.Normal, width = Length.Percent(70) } });
-                rtRow.Add(new Label(raTime[i]) { style = { color = Color.grey, fontSize = 7 } });
+                rtRow.Add(new Label(raTxt[i]) { style = { color = Color.grey, fontSize = 10, whiteSpace = WhiteSpace.Normal, width = Length.Percent(70) } });
+                rtRow.Add(new Label(raTime[i]) { style = { color = Color.grey, fontSize = 9 } });
                 row.Add(rtRow);
                 actList.Add(row);
             }
@@ -1821,20 +1869,20 @@ namespace StateCraft.UI
                 card.Add(img);
 
                 var infoCol = new VisualElement { style = { flexGrow = 1, justifyContent = Justify.Center } };
-                infoCol.Add(new Label(hw.assetName) { style = { color = UnityEngine.Color.white, fontSize = 11, unityFontStyleAndWeight = UnityEngine.FontStyle.Bold } });
-                infoCol.Add(new Label(hw.type) { style = { color = UnityEngine.Color.grey, fontSize = 9 } });
+                infoCol.Add(new Label(hw.assetName) { style = { color = UnityEngine.Color.white, fontSize = 13, unityFontStyleAndWeight = UnityEngine.FontStyle.Bold } });
+                infoCol.Add(new Label(hw.type) { style = { color = UnityEngine.Color.grey, fontSize = 11 } });
                 card.Add(infoCol);
 
                 var statusCol = new VisualElement { style = { justifyContent = Justify.Center, alignItems = Align.FlexEnd } };
                 if (hw.status == "Building")
                 {
-                    statusCol.Add(new Label("CONSTRUCTING") { style = { color = new UnityEngine.Color(0.95f, 0.77f, 0.06f), fontSize = 9, unityFontStyleAndWeight = UnityEngine.FontStyle.Bold } });
-                    statusCol.Add(new Label($"{hw.monthsRemaining} mo remaining") { style = { color = UnityEngine.Color.grey, fontSize = 8 } });
+                    statusCol.Add(new Label("CONSTRUCTING") { style = { color = new UnityEngine.Color(0.95f, 0.77f, 0.06f), fontSize = 11, unityFontStyleAndWeight = UnityEngine.FontStyle.Bold } });
+                    statusCol.Add(new Label($"{hw.monthsRemaining} mo remaining") { style = { color = UnityEngine.Color.grey, fontSize = 10 } });
                 }
                 else
                 {
-                    statusCol.Add(new Label("ACTIVE") { style = { color = new UnityEngine.Color(0.137f, 0.929f, 0.337f), fontSize = 9, unityFontStyleAndWeight = UnityEngine.FontStyle.Bold } });
-                    statusCol.Add(new Label("Operational") { style = { color = UnityEngine.Color.grey, fontSize = 8 } });
+                    statusCol.Add(new Label("ACTIVE") { style = { color = new UnityEngine.Color(0.137f, 0.929f, 0.337f), fontSize = 11, unityFontStyleAndWeight = UnityEngine.FontStyle.Bold } });
+                    statusCol.Add(new Label("Operational") { style = { color = UnityEngine.Color.grey, fontSize = 10 } });
                 }
                 card.Add(statusCol);
 
@@ -1845,8 +1893,8 @@ namespace StateCraft.UI
         private VisualElement CreateDetailStat(string label, string value)
         {
             var box = new VisualElement { style = { width = Length.Percent(50), marginBottom = 8, flexShrink = 0 } };
-            box.Add(new Label(label) { style = { color = Color.grey, fontSize = 7, marginBottom = 2 } });
-            box.Add(new Label(value) { style = { color = Color.white, fontSize = 8, whiteSpace = WhiteSpace.Normal } });
+            box.Add(new Label(label) { style = { color = Color.grey, fontSize = 9, marginBottom = 2 } });
+            box.Add(new Label(value) { style = { color = Color.white, fontSize = 10, whiteSpace = WhiteSpace.Normal } });
             return box;
         }
 
@@ -1975,7 +2023,8 @@ namespace StateCraft.UI
         private void PopulateOverviewTab(CountryDataSO country)
         {
             var panel = _dashboardRoot?.Q<VisualElement>("PanelOverview");
-            if (panel == null) return;
+            Debug.Log($"[Overview] PanelOverview found: {panel != null}");
+            if (panel == null) { Debug.LogError("[Overview] PanelOverview is NULL — check UXML name matches 'PanelOverview'"); return; }
 
             // Colors
             var cGreen = new Color(0.137f, 0.929f, 0.337f);
@@ -1983,12 +2032,14 @@ namespace StateCraft.UI
             var cOrange = new Color(0.95f, 0.77f, 0.06f);
 
             // 1. OVERALL THREAT LEVEL
-            var threatCard = panel.Q<VisualElement>("OverviewThreatCard");
-            var threatTitle = panel.Q<Label>("OverviewThreatTitle");
-            var threatIcon = panel.Q<Label>("OverviewThreatIcon");
+            var threatCard     = panel.Q<VisualElement>("OverviewThreatCard");
+            var threatTitle    = panel.Q<Label>("OverviewThreatTitle");
+            var threatIcon     = panel.Q<Label>("OverviewThreatIcon");
             var threatLevelLbl = panel.Q<Label>("OverviewThreatLevel");
-            var threatSubLbl = panel.Q<Label>("OverviewThreatSubtext");
-            
+            var threatSubLbl   = panel.Q<Label>("OverviewThreatSubtext");
+            Debug.Log($"[Overview] Threat Level block — ThreatCard:{threatCard != null} | ThreatTitle:{threatTitle != null} | ThreatIcon:{threatIcon != null} | ThreatLevel:{threatLevelLbl != null} | ThreatSub:{threatSubLbl != null}");
+            Debug.Log($"[Overview] ExposureRisk = {country.exposureRisk:F1}");
+
             if (threatLevelLbl != null)
             {
                 if (country.exposureRisk > 60)
@@ -2014,76 +2065,94 @@ namespace StateCraft.UI
                     threatLevelLbl.text = "STABLE";
                     threatLevelLbl.style.color = cGreen;
                     if (threatSubLbl != null) { threatSubLbl.text = "No Immediate Danger Detected"; threatSubLbl.style.color = new Color(cGreen.r, cGreen.g, cGreen.b, 0.6f); }
-                    if (threatIcon != null) { threatIcon.text = "\uf058"; threatIcon.style.color = cGreen; } // Check-circle icon
+                    if (threatIcon != null) { threatIcon.text = "\uf058"; threatIcon.style.color = cGreen; }
                     if (threatTitle != null) threatTitle.style.color = new Color(cGreen.r, cGreen.g, cGreen.b, 0.8f);
                     if (threatCard != null) threatCard.style.borderTopColor = threatCard.style.borderBottomColor = threatCard.style.borderLeftColor = threatCard.style.borderRightColor = new Color(cGreen.r, cGreen.g, cGreen.b, 0.3f);
                 }
             }
+            else
+            {
+                Debug.LogWarning("[Overview] OverviewThreatLevel label is NULL — Threat Level block will be blank");
+            }
 
             // 2. THREAT MATRIX
             var threatList = panel.Q<ScrollView>("OverviewThreatMatrixList");
+            Debug.Log($"[Overview] OverviewThreatMatrixList found: {threatList != null}");
             if (threatList != null)
             {
                 threatList.Clear();
                 var threats = GameManager.Instance.ThreatAssessmentSystem?.GenerateThreats(country, GameManager.Instance);
+                Debug.Log($"[Overview] GenerateThreats returned: {(threats == null ? "NULL" : threats.Count.ToString())} threats");
                 if (threats != null && threats.Count > 0)
                 {
                     foreach (var th in threats)
-                    {
                         AddThreatMatrixItem(threatList, th.title, th.region, th.probability, th.impact, th.color);
-                    }
                 }
                 else
                 {
-                    threatList.Add(new Label("No significant threats detected in the current operational theater.") { style = { fontSize = 10, color = Color.grey, whiteSpace = WhiteSpace.Normal, marginTop = 12 } });
+                    threatList.Add(new Label("No significant threats detected in the current operational theater.") { style = { fontSize = 12, color = Color.grey, whiteSpace = WhiteSpace.Normal, marginTop = 12 } });
                 }
+            }
+            else
+            {
+                Debug.LogWarning("[Overview] OverviewThreatMatrixList is NULL — Threat Matrix column will be blank");
             }
 
             // 3. INTEL FEED
             var intelFeed = panel.Q<ScrollView>("OverviewIntelFeedList");
+            Debug.Log($"[Overview] OverviewIntelFeedList found: {intelFeed != null}");
             if (intelFeed != null)
             {
                 intelFeed.Clear();
                 var feedLines = DashboardLiveContent.BuildIntelFeed(country, GameManager.Instance);
-                foreach (var feed in feedLines)
+                Debug.Log($"[Overview] BuildIntelFeed returned {feedLines?.Count ?? 0} items");
+                if (feedLines != null)
                 {
-                    AddIntelFeedItem(intelFeed, feed.Tag, feed.Message, feed.Color);
+                    foreach (var feed in feedLines)
+                        AddIntelFeedItem(intelFeed, feed.Tag, feed.Message, feed.Color);
                 }
+            }
+            else
+            {
+                Debug.LogWarning("[Overview] OverviewIntelFeedList is NULL — Intel Feed column will be blank");
             }
 
             // 4. BLINDSPOTS
             var blindspotList = panel.Q<ScrollView>("OverviewBlindspotsList");
+            Debug.Log($"[Overview] OverviewBlindspotsList found: {blindspotList != null}");
+            Debug.Log($"[Overview] Stats — Satellites:{country.satelliteCount} | Operatives:{country.operativeCount} | IntelLevel:{country.intelligenceLevel:F1} | Funds:{country.intelligenceFunds:F1}");
             if (blindspotList != null)
             {
                 blindspotList.Clear();
-                // Mock blindspots based on country stats
                 if (country.satelliteCount == 0) AddBlindspotItem(blindspotList, "ORBITAL COVERAGE", "No active spy satellites. Global troop movements cannot be tracked.", cRed);
-                if (country.operativeCount < 5) AddBlindspotItem(blindspotList, "HUMINT (HUMAN INTELLIGENCE)", "Insufficient field agents. High risk of missing localized radicalization or political plots.", cOrange);
+                if (country.operativeCount < 5)  AddBlindspotItem(blindspotList, "HUMINT (HUMAN INTELLIGENCE)", "Insufficient field agents. High risk of missing localized radicalization or political plots.", cOrange);
                 if (country.intelligenceLevel < 30) AddBlindspotItem(blindspotList, "CYBER NETWORK", "Weak digital surveillance. Vulnerable to foreign cyber intrusions and disinformation.", cRed);
-                
-                // Budget Check
+
                 float totalUpkeep = (country.satelliteCount * 50f) + (country.droneCount * 10f) + (country.operativeCount * 5f);
-                if (country.intelligenceFunds < totalUpkeep) 
-                {
+                if (country.intelligenceFunds < totalUpkeep)
                     AddBlindspotItem(blindspotList, "CRITICAL SHORTAGE", "Intelligence funds are depleted. Operations are halting and Agency Integrity is dropping. Increase the Intelligence Budget immediately.", cRed);
-                }
-                
+
+                Debug.Log($"[Overview] Blindspots populated: {blindspotList.childCount} items");
                 if (blindspotList.childCount == 0)
-                {
-                    blindspotList.Add(new Label("Coverage optimal. No critical blindspots currently identified.") { style = { fontSize = 10, color = cGreen, whiteSpace = WhiteSpace.Normal, marginTop = 12 } });
-                }
+                    blindspotList.Add(new Label("Coverage optimal. No critical blindspots currently identified.") { style = { fontSize = 12, color = cGreen, whiteSpace = WhiteSpace.Normal, marginTop = 12 } });
             }
+            else
+            {
+                Debug.LogWarning("[Overview] OverviewBlindspotsList is NULL — Blindspots column will be blank");
+            }
+
+            Debug.Log("[Overview] PopulateOverviewTab COMPLETE");
         }
 
         private void AddThreatMatrixItem(VisualElement container, string title, string region, float prob, string impact, Color color)
         {
             var card = new VisualElement { style = { backgroundColor = new Color(0.05f, 0.07f, 0.1f, 0.95f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = new Color(0.2f, 0.25f, 0.35f, 0.5f), borderBottomColor = new Color(0.2f, 0.25f, 0.35f, 0.5f), borderLeftColor = new Color(0.2f, 0.25f, 0.35f, 0.5f), borderRightColor = new Color(0.2f, 0.25f, 0.35f, 0.5f), borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, paddingBottom = 10, paddingTop = 10, paddingLeft = 10, paddingRight = 10, marginBottom = 8 } };
-            card.Add(new Label(title) { style = { fontSize = 11, color = Color.white, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 2 } });
-            card.Add(new Label($"Target Region: {region}") { style = { fontSize = 9, color = Color.grey, marginBottom = 6 } });
+            card.Add(new Label(title) { style = { fontSize = 13, color = Color.white, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 2 } });
+            card.Add(new Label($"Target Region: {region}") { style = { fontSize = 11, color = Color.grey, marginBottom = 6 } });
             
             var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween } };
-            row.Add(new Label($"Probability: {prob}%") { style = { fontSize = 8, color = color } });
-            row.Add(new Label($"Impact: {impact}") { style = { fontSize = 8, color = color } });
+            row.Add(new Label($"Probability: {prob}%") { style = { fontSize = 10, color = color } });
+            row.Add(new Label($"Impact: {impact}") { style = { fontSize = 10, color = color } });
             card.Add(row);
             
             container.Add(card);
@@ -2092,8 +2161,8 @@ namespace StateCraft.UI
         private void AddIntelFeedItem(VisualElement container, string tag, string message, Color color)
         {
             var row = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 8, borderBottomWidth = 1, borderBottomColor = new Color(1,1,1,0.05f), paddingBottom = 8 } };
-            var tagLbl = new Label(tag) { style = { width = 50, fontSize = 9, color = color, unityFontStyleAndWeight = FontStyle.Bold } };
-            var msgLbl = new Label(message) { style = { flexGrow = 1, fontSize = 9, color = Color.white, whiteSpace = WhiteSpace.Normal } };
+            var tagLbl = new Label(tag) { style = { width = 50, fontSize = 11, color = color, unityFontStyleAndWeight = FontStyle.Bold } };
+            var msgLbl = new Label(message) { style = { flexGrow = 1, fontSize = 11, color = Color.white, whiteSpace = WhiteSpace.Normal } };
             row.Add(tagLbl);
             row.Add(msgLbl);
             container.Add(row);
@@ -2103,13 +2172,13 @@ namespace StateCraft.UI
         {
             var card = new VisualElement { style = { flexDirection = FlexDirection.Row, backgroundColor = new Color(color.r, color.g, color.b, 0.05f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = new Color(color.r, color.g, color.b, 0.3f), borderBottomColor = new Color(color.r, color.g, color.b, 0.3f), borderLeftColor = new Color(color.r, color.g, color.b, 0.3f), borderRightColor = new Color(color.r, color.g, color.b, 0.3f), borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, paddingBottom = 10, paddingTop = 10, paddingLeft = 10, paddingRight = 10, marginBottom = 8 } };
             
-            var iconLabel = new Label("\uf06e") { style = { fontSize = 16, color = color, marginRight = 12 } };
+            var iconLabel = new Label("\uf06e") { style = { fontSize = 18, color = color, marginRight = 12 } };
             iconLabel.AddToClassList("fa-icon");
             card.Add(iconLabel);
             
             var mid = new VisualElement { style = { flexGrow = 1, flexDirection = FlexDirection.Column } };
-            mid.Add(new Label(title) { style = { fontSize = 10, color = color, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 2 } });
-            mid.Add(new Label(desc) { style = { fontSize = 9, color = Color.grey, whiteSpace = WhiteSpace.Normal } });
+            mid.Add(new Label(title) { style = { fontSize = 12, color = color, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 2 } });
+            mid.Add(new Label(desc) { style = { fontSize = 11, color = Color.grey, whiteSpace = WhiteSpace.Normal } });
             card.Add(mid);
             
             container.Add(card);
@@ -2206,7 +2275,55 @@ namespace StateCraft.UI
             int criticals = 0;
             foreach (var t in threats) if (t.impact == "Critical") criticals++;
             panel.Q<Label>("TA_CriticalThreats").text = criticals.ToString();
-            panel.Q<Label>("TA_CountriesConcern").text = gm.allCountries != null ? (gm.allCountries.Count / 3).ToString() : "0";
+            
+            int concernCount = 0;
+            if (gm.allCountries != null)
+            {
+                foreach(var c in gm.allCountries) {
+                    if (c != country && gm.WarSystem != null && gm.WarSystem.GetWarStage(c) >= WarStage.Tension)
+                        concernCount++;
+                }
+            }
+            panel.Q<Label>("TA_CountriesConcern").text = concernCount.ToString();
+
+            // Dynamic Trends for KPIs
+            bool isHighThreat = threats.Count >= 3 || criticals > 0;
+            bool isMediumThreat = threats.Count > 0 && !isHighThreat;
+            
+            var overallLvl = panel.Q<Label>("TA_OverallLevel");
+            var overallTrend = panel.Q<Label>("TA_OverallTrend");
+            if (overallLvl != null) {
+                overallLvl.text = isHighThreat ? "HIGH" : (isMediumThreat ? "ELEVATED" : "LOW");
+                overallLvl.style.color = isHighThreat ? cRed : (isMediumThreat ? cOrange : cGreen);
+            }
+            if (overallTrend != null) {
+                overallTrend.text = isHighThreat ? "↗ vs last month" : (isMediumThreat ? "→ stable" : "↘ vs last month");
+                overallTrend.style.color = isHighThreat ? cRed : (isMediumThreat ? Color.gray : cGreen);
+            }
+
+            var activeTrend = panel.Q<Label>("TA_ActiveTrend");
+            if (activeTrend != null) {
+                activeTrend.text = threats.Count > 0 ? $"↗ {Mathf.Max(1, threats.Count/2)} new" : "No change";
+                activeTrend.style.color = threats.Count > 0 ? cRed : Color.gray;
+            }
+
+            var critTrend = panel.Q<Label>("TA_CriticalTrend");
+            if (critTrend != null) {
+                critTrend.text = criticals > 0 ? $"↗ {criticals} new" : "No change";
+                critTrend.style.color = criticals > 0 ? cRed : Color.gray;
+            }
+
+            var concernTrend = panel.Q<Label>("TA_CountriesTrend");
+            if (concernTrend != null) {
+                concernTrend.text = concernCount > 0 ? $"↗ {Mathf.Max(1, concernCount/3)} new" : "No change";
+                concernTrend.style.color = concernCount > 0 ? cRed : Color.gray;
+            }
+
+            var trend30 = panel.Q<Label>("TA_Trend30");
+            if (trend30 != null) {
+                trend30.text = isHighThreat ? "RISING" : (isMediumThreat ? "STABLE" : "DECLINING");
+                trend30.style.color = isHighThreat ? cRed : (isMediumThreat ? cOrange : cGreen);
+            }
 
             // --- THREAT MATRIX ---
             var matrixContainer = panel.Q<VisualElement>("TA_MatrixGrid")?.parent;
@@ -2224,32 +2341,32 @@ namespace StateCraft.UI
 
                 // Column axis header (Probability →)
                 var colAxisRow = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 2, marginLeft = 55 } };
-                colAxisRow.Add(new Label("← IMPACT →") { style = { color = new Color(1,1,1,0.35f), fontSize = 7, flexGrow = 1, unityTextAlign = TextAnchor.MiddleCenter } });
+                colAxisRow.Add(new Label("← IMPACT →") { style = { color = new Color(1,1,1,0.35f), fontSize = 9, flexGrow = 1, unityTextAlign = TextAnchor.MiddleCenter } });
                 matrix.Add(colAxisRow);
 
                 // Column header labels
                 var colLabelRow = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 4, marginLeft = 55 } };
                 foreach (var h in colHeaders)
-                    colLabelRow.Add(new Label(h) { style = { color = new Color(1,1,1,0.4f), fontSize = 7, width = Length.Percent(23), marginRight = Length.Percent(2), unityTextAlign = TextAnchor.MiddleCenter } });
+                    colLabelRow.Add(new Label(h) { style = { color = new Color(1,1,1,0.4f), fontSize = 9, width = Length.Percent(23), marginRight = Length.Percent(2), unityTextAlign = TextAnchor.MiddleCenter } });
                 matrix.Add(colLabelRow);
 
                 // Grid rows with row axis label
                 for (int row = 0; row < 4; row++)
                 {
                     var rowEl = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 5, alignItems = Align.Center } };
-                    rowEl.Add(new Label(rowHeaders[row]) { style = { color = new Color(1,1,1,0.4f), fontSize = 6, width = 50, unityTextAlign = TextAnchor.MiddleRight, marginRight = 5 } });
+                    rowEl.Add(new Label(rowHeaders[row]) { style = { color = new Color(1,1,1,0.4f), fontSize = 8, width = 50, unityTextAlign = TextAnchor.MiddleRight, marginRight = 5 } });
                     for (int col = 0; col < 4; col++)
                     {
                         int i = row * 4 + col;
                         var box = new VisualElement { style = { width = Length.Percent(23), height = 22, marginRight = col < 3 ? Length.Percent(2) : new Length(0), backgroundColor = mColors[i], borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, alignItems = Align.Center, justifyContent = Justify.Center } };
-                        box.Add(new Label($"{i+1}") { style = { color = new Color(1,1,1,0.6f), fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } });
+                        box.Add(new Label($"{i+1}") { style = { color = new Color(1,1,1,0.6f), fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
                         rowEl.Add(box);
                     }
                     matrix.Add(rowEl);
                 }
 
                 // Row axis label (Probability ↑)
-                var rowAxisLbl = new Label("← PROBABILITY →") { style = { color = new Color(1,1,1,0.35f), fontSize = 7, marginTop = 2, unityTextAlign = TextAnchor.MiddleCenter } };
+                var rowAxisLbl = new Label("← PROBABILITY →") { style = { color = new Color(1,1,1,0.35f), fontSize = 9, marginTop = 2, unityTextAlign = TextAnchor.MiddleCenter } };
                 matrix.Add(rowAxisLbl);
             }
 
@@ -2260,9 +2377,9 @@ namespace StateCraft.UI
             {
                 var t = threats[i];
                 var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, paddingBottom = 6, paddingTop = 6, borderBottomWidth = 1, borderBottomColor = cWhiteAlpha } };
-                row.Add(new Label((i+1).ToString()) { style = { color = Color.grey, fontSize = 8, width = 16 } });
-                row.Add(new Label(t.title) { style = { color = Color.white, fontSize = 8, width = 124 } });
-                row.Add(new Label(t.region) { style = { color = Color.grey, fontSize = 8, flexGrow = 1 } });
+                row.Add(new Label((i+1).ToString()) { style = { color = Color.grey, fontSize = 10, width = 16 } });
+                row.Add(new Label(t.title) { style = { color = Color.white, fontSize = 10, width = 124 } });
+                row.Add(new Label(t.region) { style = { color = Color.grey, fontSize = 10, flexGrow = 1 } });
                 
                 // Impact dots
                 var impCol = new VisualElement { style = { flexDirection = FlexDirection.Row, width = 60 } };
@@ -2275,10 +2392,10 @@ namespace StateCraft.UI
                 row.Add(likCol);
                 
                 // Trend
-                row.Add(new Label(t.impact == "Medium" ? "->" : "^") { style = { color = t.impact == "Medium" ? cOrange : cRed, fontSize = 10, width = 40, unityTextAlign = TextAnchor.MiddleCenter, unityFontStyleAndWeight = FontStyle.Bold } });
+                row.Add(new Label(t.impact == "Medium" ? "->" : "^") { style = { color = t.impact == "Medium" ? cOrange : cRed, fontSize = 12, width = 40, unityTextAlign = TextAnchor.MiddleCenter, unityFontStyleAndWeight = FontStyle.Bold } });
                 
                 // Risk Level
-                row.Add(new Label(t.impact.ToUpper()) { style = { color = t.impact == "Critical" ? cRed : cOrange, fontSize = 8, width = 60, unityTextAlign = TextAnchor.MiddleRight, unityFontStyleAndWeight = FontStyle.Bold } });
+                row.Add(new Label(t.impact.ToUpper()) { style = { color = t.impact == "Critical" ? cRed : cOrange, fontSize = 10, width = 60, unityTextAlign = TextAnchor.MiddleRight, unityFontStyleAndWeight = FontStyle.Bold } });
                 tList.Add(row);
             }
 
@@ -2288,15 +2405,32 @@ namespace StateCraft.UI
             cList.Clear();
             string[] cNames = { "Terrorism", "Political", "Economic", "Cyber" };
             Color[] cColors = { cRed, cOrange, cOrange, cPurple };
-            string[] cVals = { $"{criticals} ({(threats.Count>0?criticals*100/threats.Count:0)}%)", "0 (0%)", "0 (0%)", "0 (0%)" };
+            
+            int cTerrorism = threats.FindAll(t => t.title.Contains("Insurgency") || t.title.Contains("Terror")).Count;
+            int cPolitical = threats.FindAll(t => t.title.Contains("Conflict") || t.title.Contains("Clash") || t.title.Contains("Build-up")).Count;
+            int cEconomic = threats.FindAll(t => t.title.Contains("Crime") || t.title.Contains("Smuggling")).Count;
+            int cCyber = threats.FindAll(t => t.title.Contains("Cyber") || t.title.Contains("Exposure")).Count;
+            
+            // Assign leftovers to Political
+            int totalCategorized = cTerrorism + cPolitical + cEconomic + cCyber;
+            if (threats.Count > totalCategorized) cPolitical += (threats.Count - totalCategorized);
+
+            int GetPct(int val) => threats.Count > 0 ? (val * 100 / threats.Count) : 0;
+
+            string[] cVals = { 
+                $"{cTerrorism} ({GetPct(cTerrorism)}%)", 
+                $"{cPolitical} ({GetPct(cPolitical)}%)", 
+                $"{cEconomic} ({GetPct(cEconomic)}%)", 
+                $"{cCyber} ({GetPct(cCyber)}%)" 
+            };
             for(int i=0; i<4; i++)
             {
                 var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 4 } };
                 var rL = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
                 rL.Add(new VisualElement { style = { width = 6, height = 6, backgroundColor = cColors[i], marginRight = 6 } });
-                rL.Add(new Label(cNames[i]) { style = { color = Color.white, fontSize = 8 } });
+                rL.Add(new Label(cNames[i]) { style = { color = Color.white, fontSize = 10 } });
                 row.Add(rL);
-                row.Add(new Label(cVals[i]) { style = { color = Color.grey, fontSize = 8 } });
+                row.Add(new Label(cVals[i]) { style = { color = Color.grey, fontSize = 10 } });
                 cList.Add(row);
             }
 
@@ -2311,7 +2445,7 @@ namespace StateCraft.UI
                     var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 6 } };
                     
                     var rL = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, width = 110 } };
-                    rL.Add(new Label(reg.regionName) { style = { color = Color.grey, fontSize = 8, whiteSpace = WhiteSpace.Normal } });
+                    rL.Add(new Label(reg.regionName) { style = { color = Color.grey, fontSize = 10, whiteSpace = WhiteSpace.Normal } });
                     row.Add(rL);
                     
                     var barBg = new VisualElement { style = { flexGrow = 1, height = 4, backgroundColor = cWhiteAlpha, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, marginRight = 8, marginLeft = 8 } };
@@ -2320,54 +2454,97 @@ namespace StateCraft.UI
                     row.Add(barBg);
                     
                     string rLvl = risk > 70f ? "HIGH" : risk > 40f ? "MEDIUM" : "LOW";
-                    row.Add(new Label(rLvl) { style = { color = risk > 70f ? cRed : risk > 40f ? cOrange : cGreen, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold, width = 50, unityTextAlign = TextAnchor.MiddleRight } });
+                    row.Add(new Label(rLvl) { style = { color = risk > 70f ? cRed : risk > 40f ? cOrange : cGreen, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold, width = 50, unityTextAlign = TextAnchor.MiddleRight } });
                     rList.Add(row);
                 }
             }
 
-              AddPlaceholder(panel.Q<VisualElement>("TA_TrendChart"), "Trend visualization offline.");
+              // --- THREAT LEVEL OVER TIME (TREND CHART) ---
+              var chart = panel.Q<VisualElement>("TA_TrendChart");
+              if (chart != null)
+              {
+                  chart.Clear();
+                  int baseThreats = Mathf.Max(1, threats.Count);
+                  for(int i=0; i<30; i++)
+                  {
+                      var barCont = new VisualElement { style = { height = Length.Percent(100), width = 12, justifyContent = Justify.FlexEnd, alignItems = Align.Center } };
+                      
+                      float noise = UnityEngine.Random.Range(0.5f, 1.5f);
+                      float trendVal = baseThreats * noise * 12f; 
+                      if (trendVal < 10f) trendVal = 10f;
+                      if (trendVal > 95f) trendVal = 95f;
+
+                      var bar = new VisualElement { style = { width = 8, height = Length.Percent(trendVal), backgroundColor = trendVal > 70f ? cRed : trendVal > 40f ? cOrange : cBlue, borderTopLeftRadius = 2, borderTopRightRadius = 2 } };
+                      barCont.Add(bar);
+                      
+                      if (i % 6 == 0) barCont.Add(new Label($"{i+1} DAY") { style = { color = Color.grey, fontSize = 8, marginTop = 4 } });
+                      else barCont.Add(new Label("") { style = { fontSize = 8, marginTop = 4 } });
+                      
+                      chart.Add(barCont);
+                  }
+              }
                 
-                var cConcernList = panel.Q<ScrollView>("TA_CountriesList");
-                if (cConcernList != null)
-                {
-                    cConcernList.Clear();
-                    int numCountries = gm.allCountries != null ? (gm.allCountries.Count / 3) : 0;
-                    if (numCountries == 0) AddPlaceholder(cConcernList, "No countries of concern monitored.");
-                    else
-                    {
-                        for (int k = 0; k < numCountries; k++)
-                        {
-                            var c = gm.allCountries[k];
-                            var r = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 8, paddingBottom = 4, borderBottomWidth = 1, borderBottomColor = cWhiteAlpha } };
-                            r.Add(new Label(c.countryName) { style = { flexGrow = 2, width = Length.Percent(30), color = Color.white, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
-                            r.Add(new Label(c.militaryReadiness > 70 ? "HIGH" : "MEDIUM") { style = { flexGrow = 1, width = Length.Percent(20), color = c.militaryReadiness > 70 ? cRed : cOrange, fontSize = 10 } });
-                            r.Add(new Label("Ideological Divergence") { style = { flexGrow = 2, width = Length.Percent(30), color = Color.gray, fontSize = 10 } });
-                            r.Add(new Label(c.militaryReadiness > 70 ? "RISING" : "STABLE") { style = { flexGrow = 1, width = Length.Percent(20), color = c.militaryReadiness > 70 ? cRed : cOrange, fontSize = 10 } });
-                            cConcernList.Add(r);
-                        }
-                    }
-                }
+              // --- MITIGATION PROGRESS ---
+              var mitList = panel.Q<VisualElement>("TA_MitigationList");
+              if (mitList != null)
+              {
+                  mitList.Clear();
+                  int activeOps = 0;
+                  
+                  if (country.activeOperations != null) {
+                      foreach (var op in country.activeOperations) {
+                          var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 6, paddingBottom=4, borderBottomWidth=1, borderBottomColor=cWhiteAlpha } };
+                          row.Add(new Label($"Mil Op: {op.opName}") { style = { color = Color.white, fontSize = 12, width=120 } });
+                          row.Add(new Label(op.regionName) { style = { color = Color.grey, fontSize = 10, flexGrow=1 } });
+                          row.Add(new Label($"{op.objectiveProgress:F0}%") { style = { color = cGreen, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
+                          mitList.Add(row);
+                          activeOps++;
+                      }
+                  }
+                  
+                  if (country.activeCovertOps != null) {
+                      foreach (var op in country.activeCovertOps) {
+                          var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 6, paddingBottom=4, borderBottomWidth=1, borderBottomColor=cWhiteAlpha } };
+                          row.Add(new Label($"Intel: {op.opName}") { style = { color = Color.white, fontSize = 12, width=120 } });
+                          row.Add(new Label(op.target) { style = { color = Color.grey, fontSize = 10, flexGrow=1 } });
+                          float prog = op.totalPhases > 0 ? (float)op.currentPhase / op.totalPhases * 100f : 0f;
+                          row.Add(new Label($"{prog:F0}%") { style = { color = cBlue, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
+                          mitList.Add(row);
+                          activeOps++;
+                      }
+                  }
+                  
+                  if (activeOps == 0) {
+                      AddPlaceholder(mitList, "No active mitigation operations.");
+                  }
+              }
 
-                var critCards = panel.Q<VisualElement>("TA_CriticalCards");
-                if (critCards != null)
-                {
-                    critCards.Clear();
-                    var crits = threats.FindAll(x => x.impact == "Critical");
-                    if (crits.Count == 0) AddPlaceholder(critCards, "No critical threats detected.");
-                    else
-                    {
-                        foreach (var t in crits)
-                        {
-                            var card = new VisualElement { style = { backgroundColor = new Color(1f, 0.32f, 0.32f, 0.1f), paddingLeft = 8, paddingRight = 8, paddingTop = 8, paddingBottom = 8, marginBottom = 8, width = Length.Percent(48) } };
-                            card.Add(new Label(t.title) { style = { color = cRed, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold, whiteSpace = WhiteSpace.Normal } });
-                            card.Add(new Label(t.region) { style = { color = Color.white, fontSize = 10, marginTop = 4 } });
-                            critCards.Add(card);
-                        }
-                    }
-                }
-
-              AddPlaceholder(panel.Q<VisualElement>("TA_MitigationList"), "No active mitigation progress.");
-              AddPlaceholder(panel.Q<VisualElement>("TA_RecommendationsList"), "No recommendations available.");
+              // --- RECOMMENDATIONS ---
+              var recList = panel.Q<VisualElement>("TA_RecommendationsList");
+              if (recList != null)
+              {
+                  recList.Clear();
+                  if (threats.Count == 0) {
+                      AddPlaceholder(recList, "No immediate recommendations. Maintain vigilance.");
+                  } else {
+                      foreach (var t in threats) {
+                          string recText = "";
+                          if (t.title.Contains("Conflict") || t.title.Contains("Build-up"))
+                              recText = $"Deploy additional military forces near {t.region}.";
+                          else if (t.title.Contains("Crime") || t.title.Contains("Insurgency"))
+                              recText = $"Increase internal security budget in {t.region}.";
+                          else if (t.title.Contains("Exposure") || t.title.Contains("Cyber"))
+                              recText = "Initiate counter-intelligence sweeps to identify leaks.";
+                          else 
+                              recText = $"Monitor {t.region} closely for escalating tensions.";
+                              
+                          var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 6, paddingBottom=4, borderBottomWidth=1, borderBottomColor=cWhiteAlpha } };
+                          row.Add(new Label("\uf0a9") { style = { color = cOrange, fontSize = 12, marginRight = 8 } }.WithClass("fa-icon")); // arrow-right
+                          row.Add(new Label(recText) { style = { color = Color.white, fontSize = 11, whiteSpace = WhiteSpace.Normal, flexGrow=1 } });
+                          recList.Add(row);
+                      }
+                  }
+              }
 
         }
 
@@ -2423,13 +2600,13 @@ namespace StateCraft.UI
             for(int i=0; i<7; i++)
             {
                 var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 6 } };
-                row.Add(new Label(sNames[i]) { style = { color = Color.grey, fontSize = 8, width = 110, whiteSpace = WhiteSpace.Normal } });
+                row.Add(new Label(sNames[i]) { style = { color = Color.grey, fontSize = 10, width = 110, whiteSpace = WhiteSpace.Normal } });
                 
                 var barBg = new VisualElement { style = { flexGrow = 1, height = 4, backgroundColor = cWhiteAlpha, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, marginRight = 8, marginLeft = 8 } };
                 barBg.Add(new VisualElement { style = { width = Length.Percent(sVals[i]), height = 4, backgroundColor = sCols[i], borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } });
                 row.Add(barBg);
                 
-                row.Add(new Label($"{sVals[i]}%") { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold, width = 25, unityTextAlign = TextAnchor.MiddleRight } });
+                row.Add(new Label($"{sVals[i]}%") { style = { color = Color.white, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold, width = 25, unityTextAlign = TextAnchor.MiddleRight } });
                 srcList.Add(row);
             }
 
@@ -2453,8 +2630,8 @@ namespace StateCraft.UI
                 colStack.Add(new VisualElement { style = { height = Length.Percent(v1), backgroundColor = cGreen } });
                 barCont.Add(colStack);
                 
-                if (i % 6 == 0) barCont.Add(new Label($"{i+1} JAN") { style = { color = Color.grey, fontSize = 6, marginTop = 4 } });
-                else barCont.Add(new Label("") { style = { fontSize = 6, marginTop = 4 } });
+                if (i % 6 == 0) barCont.Add(new Label($"{i+1} JAN") { style = { color = Color.grey, fontSize = 8, marginTop = 4 } });
+                else barCont.Add(new Label("") { style = { fontSize = 8, marginTop = 4 } });
                 chart.Add(barCont);
             }
 
@@ -2473,35 +2650,41 @@ namespace StateCraft.UI
                 
                 var topRow = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 6 } };
                 var iconBox = new VisualElement { style = { width = 24, height = 24, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, backgroundColor = new Color(iCols[i].r, iCols[i].g, iCols[i].b, 0.1f), alignItems = Align.Center, justifyContent = Justify.Center, marginRight = 8 } };
-                iconBox.Add(new Label(iIco[i]) { style = { color = iCols[i], fontSize = 10 } }.WithClass("fa-icon"));
+                iconBox.Add(new Label(iIco[i]) { style = { color = iCols[i], fontSize = 12 } }.WithClass("fa-icon"));
                 topRow.Add(iconBox);
                 
                 var tRight = new VisualElement { style = { flexGrow = 1, flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween } };
-                tRight.Add(new Label(iNames[i]) { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } });
-                tRight.Add(new Label(iDates[i]) { style = { color = Color.grey, fontSize = 7 } });
+                tRight.Add(new Label(iNames[i]) { style = { color = Color.white, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
+                tRight.Add(new Label(iDates[i]) { style = { color = Color.grey, fontSize = 9 } });
                 topRow.Add(tRight);
                 card.Add(topRow);
                 
-                card.Add(new Label(iDesc[i]) { style = { color = Color.grey, fontSize = 8, whiteSpace = WhiteSpace.Normal, marginBottom = 6 } });
-                card.Add(new Label(iPri[i]) { style = { color = iPri[i] == "HIGH PRIORITY" ? cRed : cOrange, fontSize = 7, unityFontStyleAndWeight = FontStyle.Bold } });
+                card.Add(new Label(iDesc[i]) { style = { color = Color.grey, fontSize = 10, whiteSpace = WhiteSpace.Normal, marginBottom = 6 } });
+                card.Add(new Label(iPri[i]) { style = { color = iPri[i] == "HIGH PRIORITY" ? cRed : cOrange, fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
                 inList.Add(card);
             }
 
             // --- DATA QUALITY ---
-            panel.Q<Label>("DA_QualityDonut").text = "76%";
+            // --- DATA QUALITY ---
+            float highQ = Mathf.Clamp(20f + (country.intelligenceLevel * 0.5f), 10f, 60f);
+            float medQ = Mathf.Clamp(50f - (country.intelligenceLevel * 0.2f), 20f, 50f);
+            float lowQ = Mathf.Clamp(20f - (country.intelligenceLevel * 0.2f), 5f, 20f);
+            float unvQ = 100f - (highQ + medQ + lowQ);
+            
+            panel.Q<Label>("DA_QualityDonut").text = $"{(highQ + medQ):F0}%";
             var qList = panel.Q<VisualElement>("DA_QualityList");
             qList.Clear();
             string[] qNames = { "High Quality", "Medium Quality", "Low Quality", "Unverified" };
             Color[] qCols = { cGreen, cOrange, cRed, Color.grey };
-            int[] qVals = { 41, 35, 16, 8 };
+            float[] qVals = { highQ, medQ, lowQ, unvQ };
             for(int i=0; i<4; i++)
             {
                 var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 4 } };
                 var rL = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
                 rL.Add(new VisualElement { style = { width = 6, height = 6, backgroundColor = qCols[i], marginRight = 6 } });
-                rL.Add(new Label(qNames[i]) { style = { color = Color.white, fontSize = 8 } });
+                rL.Add(new Label(qNames[i]) { style = { color = Color.white, fontSize = 10 } });
                 row.Add(rL);
-                row.Add(new Label($"{qVals[i]}%") { style = { color = Color.grey, fontSize = 8 } });
+                row.Add(new Label($"{qVals[i]}%") { style = { color = Color.grey, fontSize = 10 } });
                 qList.Add(row);
             }
 
@@ -2514,16 +2697,16 @@ namespace StateCraft.UI
             for(int i=0; i<5; i++)
             {
                 var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 6 } };
-                row.Add(new Label(gNames[i]) { style = { color = Color.grey, fontSize = 8, width = 80 } });
+                row.Add(new Label(gNames[i]) { style = { color = Color.grey, fontSize = 10, width = 80 } });
                 
                 var rCol = gLvls[i] == "Very High Activity" ? cRed : (gLvls[i] == "High Activity" ? cRed : (gLvls[i] == "Medium Activity" ? cOrange : cGreen));
-                row.Add(new Label(gLvls[i]) { style = { color = rCol, fontSize = 7, width = 70, unityFontStyleAndWeight = FontStyle.Bold } });
+                row.Add(new Label(gLvls[i]) { style = { color = rCol, fontSize = 9, width = 70, unityFontStyleAndWeight = FontStyle.Bold } });
                 
                 var barBg = new VisualElement { style = { flexGrow = 1, height = 4, backgroundColor = cWhiteAlpha, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, marginRight = 8, marginLeft = 8 } };
                 barBg.Add(new VisualElement { style = { width = Length.Percent(gVals[i]), height = 4, backgroundColor = rCol, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } });
                 row.Add(barBg);
                 
-                row.Add(new Label($"{gVals[i]}%") { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold, width = 25, unityTextAlign = TextAnchor.MiddleRight } });
+                row.Add(new Label($"{gVals[i]}%") { style = { color = Color.white, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold, width = 25, unityTextAlign = TextAnchor.MiddleRight } });
                 gList.Add(row);
             }
 
@@ -2537,12 +2720,12 @@ namespace StateCraft.UI
             {
                 var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, paddingBottom = 6, paddingTop = 6, borderBottomWidth = 1, borderBottomColor = cWhiteAlpha } };
                 var rL = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, flexGrow = 1 } };
-                rL.Add(new Label(pIco[i]) { style = { color = Color.white, fontSize = 10, marginRight = 8, width = 14 } }.WithClass("fa-icon"));
-                rL.Add(new Label(pNames[i]) { style = { color = Color.white, fontSize = 8 } });
+                rL.Add(new Label(pIco[i]) { style = { color = Color.white, fontSize = 12, marginRight = 8, width = 14 } }.WithClass("fa-icon"));
+                rL.Add(new Label(pNames[i]) { style = { color = Color.white, fontSize = 10 } });
                 row.Add(rL);
                 
                 var sCol = pStat[i] == "DETECTED" ? cRed : cOrange;
-                row.Add(new Label(pStat[i]) { style = { color = sCol, fontSize = 7, unityFontStyleAndWeight = FontStyle.Bold, paddingTop = 4, paddingBottom = 4, paddingLeft = 4, paddingRight = 4, backgroundColor = new Color(sCol.r, sCol.g, sCol.b, 0.1f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = new Color(sCol.r, sCol.g, sCol.b, 0.3f), borderBottomColor = new Color(sCol.r, sCol.g, sCol.b, 0.3f), borderLeftColor = new Color(sCol.r, sCol.g, sCol.b, 0.3f), borderRightColor = new Color(sCol.r, sCol.g, sCol.b, 0.3f), borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } });
+                row.Add(new Label(pStat[i]) { style = { color = sCol, fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold, paddingTop = 4, paddingBottom = 4, paddingLeft = 4, paddingRight = 4, backgroundColor = new Color(sCol.r, sCol.g, sCol.b, 0.1f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = new Color(sCol.r, sCol.g, sCol.b, 0.3f), borderBottomColor = new Color(sCol.r, sCol.g, sCol.b, 0.3f), borderLeftColor = new Color(sCol.r, sCol.g, sCol.b, 0.3f), borderRightColor = new Color(sCol.r, sCol.g, sCol.b, 0.3f), borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } });
                 pList.Add(row);
             }
 
@@ -2555,15 +2738,15 @@ namespace StateCraft.UI
             {
                 var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 12 } };
                 var iconBox = new VisualElement { style = { width = 24, height = 24, borderTopLeftRadius = 12, borderTopRightRadius = 12, borderBottomLeftRadius = 12, borderBottomRightRadius = 12, backgroundColor = new Color(cGreen.r, cGreen.g, cGreen.b, 0.1f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = cGreen, borderBottomColor = cGreen, borderLeftColor = cGreen, borderRightColor = cGreen, alignItems = Align.Center, justifyContent = Justify.Center, marginRight = 12 } };
-                iconBox.Add(new Label("\uf00c") { style = { color = cGreen, fontSize = 10 } }.WithClass("fa-icon"));
+                iconBox.Add(new Label("\uf00c") { style = { color = cGreen, fontSize = 12 } }.WithClass("fa-icon"));
                 row.Add(iconBox);
                 
                 var tRight = new VisualElement { style = { flexGrow = 1 } };
-                tRight.Add(new Label(prNames[i]) { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } });
-                tRight.Add(new Label(prDesc[i]) { style = { color = Color.grey, fontSize = 7 } });
+                tRight.Add(new Label(prNames[i]) { style = { color = Color.white, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
+                tRight.Add(new Label(prDesc[i]) { style = { color = Color.grey, fontSize = 9 } });
                 row.Add(tRight);
                 
-                row.Add(new Label("ACTIVE") { style = { color = cGreen, fontSize = 7, unityFontStyleAndWeight = FontStyle.Bold } });
+                row.Add(new Label("ACTIVE") { style = { color = cGreen, fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
                 prList.Add(row);
             }
 
@@ -2577,11 +2760,11 @@ namespace StateCraft.UI
             for(int i=0; i<5; i++)
             {
                 var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, paddingBottom = 6, paddingTop = 6, borderBottomWidth = 1, borderBottomColor = cWhiteAlpha } };
-                row.Add(new Label(rTits[i]) { style = { color = Color.white, fontSize = 8, flexGrow = 1 } });
-                row.Add(new Label(rCats[i]) { style = { color = Color.grey, fontSize = 7, width = 70 } });
-                row.Add(new Label(rPris[i]) { style = { color = rPris[i] == "HIGH" ? cRed : cOrange, fontSize = 7, unityFontStyleAndWeight = FontStyle.Bold, width = 60 } });
-                row.Add(new Label(rDats[i]) { style = { color = Color.grey, fontSize = 7, width = 60 } });
-                row.Add(new Label("Completed") { style = { color = cGreen, fontSize = 7, width = 60, unityTextAlign = TextAnchor.MiddleRight } });
+                row.Add(new Label(rTits[i]) { style = { color = Color.white, fontSize = 10, flexGrow = 1 } });
+                row.Add(new Label(rCats[i]) { style = { color = Color.grey, fontSize = 9, width = 70 } });
+                row.Add(new Label(rPris[i]) { style = { color = rPris[i] == "HIGH" ? cRed : cOrange, fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold, width = 60 } });
+                row.Add(new Label(rDats[i]) { style = { color = Color.grey, fontSize = 9, width = 60 } });
+                row.Add(new Label("Completed") { style = { color = cGreen, fontSize = 9, width = 60, unityTextAlign = TextAnchor.MiddleRight } });
                 repList.Add(row);
             }
 
@@ -2595,13 +2778,13 @@ namespace StateCraft.UI
             for(int i=0; i<6; i++)
             {
                 var btn = new Button { style = { width = Length.Percent(48), height = 36, flexDirection = FlexDirection.Row, justifyContent = Justify.FlexStart, alignItems = Align.Center, backgroundColor = new Color(1,1,1,0.02f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = cWhiteAlpha, borderBottomColor = cWhiteAlpha, borderLeftColor = cWhiteAlpha, borderRightColor = cWhiteAlpha, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, marginBottom = 6, paddingLeft = 12 } };
-                btn.Add(new Label(tlIco[i]) { style = { color = Color.white, fontSize = 14, marginRight = 10, width = 16 } }.WithClass("fa-icon"));
+                btn.Add(new Label(tlIco[i]) { style = { color = Color.white, fontSize = 16, marginRight = 10, width = 16 } }.WithClass("fa-icon"));
                 var txts = new VisualElement();
                 
                 float actionCost = tlCosts[i] * country.exchangeRate;
                 
-                txts.Add(new Label(tlNames[i]) { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } });
-                txts.Add(new Label($"{tlDesc[i]} ({daSym}{actionCost:F0}M)") { style = { color = Color.grey, fontSize = 7 } });
+                txts.Add(new Label(tlNames[i]) { style = { color = Color.white, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
+                txts.Add(new Label($"{tlDesc[i]} ({daSym}{actionCost:F0}M)") { style = { color = Color.grey, fontSize = 9 } });
                 btn.Add(txts);
                 
                 int index = i;
@@ -2632,11 +2815,11 @@ namespace StateCraft.UI
             for(int i=0; i<4; i++)
             {
                 var btn = new Button { style = { height = 28, flexDirection = FlexDirection.Row, justifyContent = Justify.FlexStart, alignItems = Align.Center, backgroundColor = new Color(1,1,1,0.05f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = cWhiteAlpha, borderBottomColor = cWhiteAlpha, borderLeftColor = cWhiteAlpha, borderRightColor = cWhiteAlpha, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, paddingLeft = 12 } };
-                btn.Add(new Label(qIcos[i]) { style = { color = cGreen, fontSize = 10, marginRight = 8, width = 16 } }.WithClass("fa-icon"));
+                btn.Add(new Label(qIcos[i]) { style = { color = cGreen, fontSize = 12, marginRight = 8, width = 16 } }.WithClass("fa-icon"));
                 
                 float actionCost = qCosts[i] * country.exchangeRate;
                 
-                btn.Add(new Label($"{qTxts[i]} ({daSym}{actionCost:F0}M)") { style = { color = Color.white, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } });
+                btn.Add(new Label($"{qTxts[i]} ({daSym}{actionCost:F0}M)") { style = { color = Color.white, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
                 
                 int index = i;
                 btn.clicked += () => 

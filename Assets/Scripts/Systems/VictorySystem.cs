@@ -60,7 +60,7 @@ namespace StateCraft.Systems
                 _collapseMonths++;
                 if (_collapseMonths >= COLLAPSE_MONTHS)
                 {
-                    AnnounceDefeat(player, gm,
+                    AnnounceDefeat(player, gm, currentMonth,
                         "Your nation has collapsed. Stability fell to zero for three consecutive months. " +
                         "Mass civil unrest, institutional breakdown, and economic ruin have ended your government.");
                     return;
@@ -74,7 +74,7 @@ namespace StateCraft.Systems
             // ─── DEFEAT: Bankruptcy ───────────────────────────
             if (player.treasury < -50f && player.creditRating == "D")
             {
-                AnnounceDefeat(player, gm,
+                AnnounceDefeat(player, gm, currentMonth,
                     "Sovereign default and credit collapse have paralysed the state. " +
                     "International creditors have seized assets. Your government has fallen.");
                 return;
@@ -96,7 +96,7 @@ namespace StateCraft.Systems
 
                 if (_prestigeLeadMonths >= PRESTIGE_LEAD_MONTHS)
                 {
-                    AnnounceVictory(player, gm,
+                    AnnounceVictory(player, gm, currentMonth,
                         $"DIPLOMATIC SUPREMACY: {player.countryName} has maintained continental prestige " +
                         $"leadership for {PRESTIGE_LEAD_MONTHS} consecutive months. " +
                         $"Final prestige score: {player.globalPrestige:F0}.\n\n" +
@@ -127,7 +127,7 @@ namespace StateCraft.Systems
             // Reach 4+ allied nations while holding the prestige lead
             if (isLeading && AllyCount >= DOMINATED_ALLY_COUNT)
             {
-                AnnounceVictory(player, gm,
+                AnnounceVictory(player, gm, currentMonth,
                     $"REGIONAL DOMINATION: {player.countryName} has forged a continent-spanning alliance " +
                     $"of {AllyCount} nations while holding the highest regional prestige.\n\n" +
                     $"No nation can challenge your diplomatic and military supremacy.");
@@ -183,13 +183,18 @@ namespace StateCraft.Systems
             }
         }
 
-        private void AnnounceVictory(CountryDataSO player, GameManager gm, string detail)
+        private void AnnounceVictory(CountryDataSO player, GameManager gm, int currentMonth, string detail)
         {
             if (_victoryAnnounced) return;
             _victoryAnnounced = true;
             VictoryStatus     = "VICTORY";
 
-            string stats = $"• Prestige: {player.globalPrestige:F0}\n" +
+            int years = currentMonth / 12;
+            int months = currentMonth % 12;
+            string timeInOffice = years > 0 ? $"{years} Years, {months} Months" : $"{months} Months";
+
+            string stats = $"• Time in Office: {timeInOffice}\n" +
+                           $"• Prestige: {player.globalPrestige:F0}\n" +
                            $"• Allies: {AllyCount}\n" +
                            $"• GDP: ${player.gdp:N0}B\n" +
                            $"• Stability: {player.stability:F0}%";
@@ -210,13 +215,18 @@ namespace StateCraft.Systems
             if (gm != null) gm.TriggerGameOver(true, "VICTORY", detail, stats);
         }
 
-        private void AnnounceDefeat(CountryDataSO player, GameManager gm, string reason)
+        private void AnnounceDefeat(CountryDataSO player, GameManager gm, int currentMonth, string reason)
         {
             if (_defeatAnnounced) return;
             _defeatAnnounced = true;
             VictoryStatus    = "DEFEATED";
 
-            string stats = $"• Prestige: {player.globalPrestige:F0}\n" +
+            int years = currentMonth / 12;
+            int months = currentMonth % 12;
+            string timeInOffice = years > 0 ? $"{years} Years, {months} Months" : $"{months} Months";
+
+            string stats = $"• Time in Office: {timeInOffice}\n" +
+                           $"• Prestige: {player.globalPrestige:F0}\n" +
                            $"• Stability: {player.stability:F0}%\n" +
                            $"• Treasury: ${player.treasury:F1}B";
 

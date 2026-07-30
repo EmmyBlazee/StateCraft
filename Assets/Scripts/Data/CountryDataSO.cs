@@ -89,6 +89,8 @@ namespace StateCraft.Data
         public float invCocoaTonnes = 0f;
         public float invMineralsTonnes = 0f;
         public float invOilBarrels = 0f;
+        public float invGasUnits = 0f;
+        public float invUraniumUnits = 0f;
         public float invTechGoods = 0f;
 
         [Header("Intelligence Dashboard Data")]
@@ -373,6 +375,7 @@ namespace StateCraft.Data
         
         // KIA & Casualty Tracking (Phase 2)
         public int totalKIA = 0;              // Cumulative killed in action
+        public int totalCivilianCasualties = 0; // Cumulative civilians killed
         public int totalWounded = 0;          // Cumulative wounded
         public float warFatigueStabilityDrain = 0f; // How much stability is bleeding per turn due to war casualties
 
@@ -425,6 +428,9 @@ namespace StateCraft.Data
 
         [Header("Geography")]
         public List<RegionDataSO> regions = new List<RegionDataSO>();
+
+        [Header("Global Faction")]
+        public string globalFaction = "Independent";
 
         [Header("Factions")]
         public List<FactionDataSO> activeFactions = new List<FactionDataSO>();

@@ -157,7 +157,7 @@ namespace StateCraft.UI
             root.Q<Button>("BtnBackToCountries")?.RegisterCallback<ClickEvent>(_ => ShowBilateralGrid());
 
             // Propose Treaty (Treaties tab bottom button)
-            root.Q<Button>("BtnProposeTreaty")?.RegisterCallback<ClickEvent>(_ => ShowProposeTreatyModal());
+            // Propose Treaty removed, replaced by Faction system
 
             // Open Trade Desk standalone button (if present in UXML)
             root.Q<Button>("BtnOpenTrade")?.RegisterCallback<ClickEvent>(_ =>
@@ -547,12 +547,16 @@ namespace StateCraft.UI
             if (_detailTreatiesList != null)
             {
                 _detailTreatiesList.Clear();
-                var shared = player.activeTreaties.Where(t => t.partnerCountry == target.countryName).ToList();
-                if (shared.Count == 0)
-                    _detailTreatiesList.Add(new Label("No active agreements.") { style = { color = Color.grey, fontSize = 10, unityFontStyleAndWeight = FontStyle.Italic } });
+                if (target.globalFaction != "Independent")
+                {
+                    _detailTreatiesList.Add(new Label($"🛡 Member of: {target.globalFaction}") { style = { color = new Color(0.14f, 0.93f, 0.34f), fontSize = 11, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 4 } });
+                    if (player.globalFaction == target.globalFaction)
+                        _detailTreatiesList.Add(new Label($"✓ Free Trade Active\n✓ Mutual Defence Active") { style = { color = new Color(0.14f, 0.93f, 0.34f), fontSize = 10, marginBottom = 4 } });
+                }
                 else
-                    foreach (var t in shared)
-                        _detailTreatiesList.Add(new Label($"✓ {t.treatyName}") { style = { color = new Color(0.14f, 0.93f, 0.34f), fontSize = 10, marginBottom = 4 } });
+                {
+                    _detailTreatiesList.Add(new Label("No active faction alignment.") { style = { color = Color.grey, fontSize = 10, unityFontStyleAndWeight = FontStyle.Italic } });
+                }
             }
 
             // Actions
@@ -560,12 +564,39 @@ namespace StateCraft.UI
             {
                 _detailActionsList.Clear();
 
-                AddAction("PROPOSE TREATY",   new Color(0.18f, 0.6f, 0.95f), () =>
+                if (player.globalFaction != target.globalFaction && target.globalFaction != "Independent" && target.globalFaction != "Non-Aligned")
                 {
-                    ShowBilateralGrid();   // close detail, re-open from Treaties tab
-                    SwitchTab(2);
-                    ShowProposeTreatyModal(target);
-                });
+                    AddAction($"JOIN {target.globalFaction.ToUpper()}", new Color(0.18f, 0.6f, 0.95f), () =>
+                    {
+                        if (relation >= 30)
+                        {
+                            if (gm?.DiplomacySystem is StateCraft.Systems.DiplomacySystem dipSys)
+                                dipSys.JoinFaction(player, target.globalFaction);
+                            OpenBilateralDetail(player, target, DashboardLiveContent.ComputeRelation(player, target, gm), gm);
+                        }
+                        else
+                        {
+                            NotificationManager.Instance?.AddNotification($"Requires at least 30 Relations. Current: {relation:F0}", Color.red);
+                        }
+                    });
+                }
+                if (player.globalFaction != "Independent" && target.globalFaction == "Independent")
+                {
+                    AddAction($"INVITE TO {player.globalFaction.ToUpper()}", new Color(0.18f, 0.6f, 0.95f), () =>
+                    {
+                        if (relation >= 50)
+                        {
+                            if (gm?.DiplomacySystem is StateCraft.Systems.DiplomacySystem dipSys)
+                                dipSys.JoinFaction(target, player.globalFaction);
+                            OpenBilateralDetail(player, target, DashboardLiveContent.ComputeRelation(player, target, gm), gm);
+                        }
+                        else
+                        {
+                            NotificationManager.Instance?.AddNotification($"Requires at least 50 Relations. Current: {relation:F0}", Color.red);
+                        }
+                    });
+                }
+
 
                 AddAction("TRADE RESOURCES", new Color(0.95f, 0.72f, 0.05f), () =>
                 {
@@ -738,163 +769,6 @@ namespace StateCraft.UI
             _dashboardRoot?.Add(overlay);
         }
 
-        // ─── PROPOSE TREATY modal ─────────────────────────────────────────────
-        private void ShowProposeTreatyModal(CountryDataSO preselectedTarget = null)
-        {
-            var gm     = GameManager.Instance;
-            var player = gm?.playerCountry;
-            if (gm == null || player == null) return;
-
-            var cBlue = new Color(0.18f, 0.6f, 0.95f);
-            var overlay = MakeOverlay();
-            var modal   = new VisualElement
-            {
-                style =
-                {
-                    width = 520, maxHeight = Length.Percent(90),
-                    backgroundColor = new Color(0.05f, 0.07f, 0.13f, 1f),
-                    borderTopLeftRadius = 10, borderTopRightRadius = 10,
-                    borderBottomLeftRadius = 10, borderBottomRightRadius = 10,
-                    paddingTop = 26, paddingBottom = 26, paddingLeft = 26, paddingRight = 26
-                }
-            };
-            SetBorder(modal, cBlue, 1);
-            overlay.Add(modal);
-
-            // Header
-            var headerRow = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 20 } };
-            headerRow.Add(new Label("PROPOSE TREATY") { style = { color = cBlue, fontSize = 18, unityFontStyleAndWeight = FontStyle.Bold } });
-            var closeX = new Button(() => overlay.parent?.Remove(overlay)) { text = "×" };
-            closeX.AddToClassList("econ-small-button"); closeX.style.width = 28; closeX.style.height = 28; closeX.style.fontSize = 16;
-            headerRow.Add(closeX);
-            modal.Add(headerRow);
-
-            // State
-            CountryDataSO selectedPartner = preselectedTarget;
-            string selectedTreatyType     = null;
-
-            // Section label helper
-            void SectionLabel(string text) => modal.Add(new Label(text) { style = { color = new Color(0.6f, 0.6f, 0.7f), fontSize = 9, letterSpacing = 1, marginBottom = 8, marginTop = 12 } });
-
-            // ── Step 1: Partner nation picker ──────────────────────────────────
-            SectionLabel("STEP 1 — SELECT PARTNER NATION");
-            var partnerScroll = new ScrollView { style = { maxHeight = 130, marginBottom = 4 } };
-            var partnerStatus = new Label(preselectedTarget != null ? $"Partner: {preselectedTarget.countryName}" : "No partner selected.")
-                { style = { color = preselectedTarget != null ? cBlue : Color.grey, fontSize = 10, marginBottom = 10, unityFontStyleAndWeight = FontStyle.Bold } };
-
-            modal.Add(partnerStatus);
-            modal.Add(partnerScroll);
-
-            var countries = gm.allCountries?.Where(c => c != player).OrderBy(c => c.countryName).ToList() ?? new List<CountryDataSO>();
-            foreach (var c in countries)
-            {
-                CountryDataSO capture = c;
-                bool alreadyPartner   = player.activeTreaties.Any(t => t.partnerCountry == c.countryName);
-
-                var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, paddingTop = 5, paddingBottom = 5, paddingLeft = 6, paddingRight = 6, marginBottom = 2, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4 } };
-                row.Add(new Label(c.countryName) { style = { color = Color.white, fontSize = 10 } });
-
-                if (alreadyPartner)
-                {
-                    row.Add(new Label("TREATY EXISTS") { style = { color = Color.grey, fontSize = 9, unityFontStyleAndWeight = FontStyle.Italic } });
-                }
-                else
-                {
-                    var selectBtn = new Button(() =>
-                    {
-                        selectedPartner        = capture;
-                        partnerStatus.text     = $"Partner: {capture.countryName}";
-                        partnerStatus.style.color = cBlue;
-                    }) { text = "SELECT" };
-                    selectBtn.AddToClassList("econ-small-button");
-                    selectBtn.style.height = 20; selectBtn.style.fontSize = 8; selectBtn.style.width = 60;
-                    row.Add(selectBtn);
-                }
-
-                if (preselectedTarget != null && c.countryName == preselectedTarget.countryName)
-                    row.style.backgroundColor = new Color(cBlue.r, cBlue.g, cBlue.b, 0.15f);
-
-                partnerScroll.Add(row);
-            }
-
-            // ── Step 2: Treaty type picker ─────────────────────────────────────
-            SectionLabel("STEP 2 — SELECT TREATY TYPE");
-
-            var treatyTypes = new[]
-            {
-                ("Mutual Defence Pact",        "Both nations defend each other if attacked. Triggers coalition obligations.", cBlue),
-                ("Non-Aggression Pact",         "Both nations pledge not to initiate hostilities.",                          new Color(0.14f, 0.93f, 0.34f)),
-                ("Free Trade Agreement",        "Reduces tariffs; boosts GDP for both parties.",                             new Color(1f, 0.8f, 0.2f)),
-                ("Intelligence Sharing Pact",  "Grants intelligence reports from partner nation's regions.",                new Color(0.7f, 0.4f, 1f)),
-                ("Military Access Rights",     "Grants basing rights and overflight in partner territory.",                 new Color(1f, 0.5f, 0.2f)),
-            };
-
-
-            var typeContainer = new VisualElement { style = { flexDirection = FlexDirection.Column, marginBottom = 4 } };
-            modal.Add(typeContainer);
-
-            var treatyStatusLbl = new Label("No treaty type selected.") { style = { color = Color.grey, fontSize = 10, marginBottom = 10 } };
-            modal.Add(treatyStatusLbl);
-
-            foreach (var (tName, tDesc, tColor) in treatyTypes)
-            {
-                string capName = tName; string capDesc = tDesc;
-                var typeRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, paddingTop = 6, paddingBottom = 6, paddingLeft = 8, paddingRight = 8, marginBottom = 4, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, backgroundColor = new Color(1, 1, 1, 0.03f) } };
-
-                var textBlock = new VisualElement { style = { flexGrow = 1 } };
-                textBlock.Add(new Label(capName) { style = { color = tColor, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 2 } });
-                textBlock.Add(new Label(capDesc) { style = { color = Color.grey, fontSize = 9, whiteSpace = WhiteSpace.Normal } });
-                typeRow.Add(textBlock);
-
-                var pickBtn = new Button(() =>
-                {
-                    selectedTreatyType      = capName;
-                    treatyStatusLbl.text     = $"Treaty type: {capName}";
-                    treatyStatusLbl.style.color = tColor;
-                }) { text = "PICK" };
-                pickBtn.AddToClassList("econ-small-button");
-                pickBtn.style.height = 22; pickBtn.style.fontSize = 8; pickBtn.style.width = 52;
-                typeRow.Add(pickBtn);
-
-                typeContainer.Add(typeRow);
-            }
-
-            // ── Confirm / Cancel ───────────────────────────────────────────────
-            var actionRow = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, marginTop = 10 } };
-
-            var cancelBtn = new Button(() => overlay.parent?.Remove(overlay)) { text = "CANCEL" };
-            cancelBtn.AddToClassList("econ-small-button");
-            cancelBtn.style.width = Length.Percent(35); cancelBtn.style.height = 34;
-            actionRow.Add(cancelBtn);
-
-            var confirmBtn = new Button(() =>
-            {
-                if (selectedPartner == null)
-                { NotificationManager.Instance?.AddNotification("Select a partner nation first.", Color.red); return; }
-                if (string.IsNullOrEmpty(selectedTreatyType))
-                { NotificationManager.Instance?.AddNotification("Select a treaty type first.", Color.red); return; }
-
-                // Route through the DiplomacySystem backend — handles AI acceptance/rejection,
-                // mirror treaty on partner side, effects, relations bump and all feedback messages.
-                bool accepted = false;
-                if (gm.DiplomacySystem is StateCraft.Systems.DiplomacySystem dipSys)
-                    accepted = dipSys.ProposeTreaty(player, selectedPartner, selectedTreatyType);
-                
-                overlay.parent?.Remove(overlay);
-                RefreshDiplomacyData();
-            })
-            { text = "📜  SUBMIT PROPOSAL" };
-            confirmBtn.AddToClassList("econ-small-button");
-            confirmBtn.style.width = Length.Percent(60); confirmBtn.style.height = 34;
-            confirmBtn.style.color = cBlue;
-            confirmBtn.style.backgroundColor = new Color(cBlue.r, cBlue.g, cBlue.b, 0.2f);
-            SetBorder(confirmBtn, cBlue, 1);
-            actionRow.Add(confirmBtn);
-            modal.Add(actionRow);
-
-            _dashboardRoot?.Add(overlay);
-        }
-
         // ─── RECALL confirmation modal ─────────────────────────────────────────
         private void ShowRecallConfirmModal(CountryDataSO player, Embassy emb)
         {
@@ -960,86 +834,199 @@ namespace StateCraft.UI
         {
             if (_treatiesCardsList == null) return;
             _treatiesCardsList.Clear();
-
-            // Separate treaties by status for ordered rendering
-            var active   = player.activeTreaties.Where(t => t.status == "Active").ToList();
-            var pending  = player.activeTreaties.Where(t => t.status == "Pending").ToList();
-            var rejected = player.activeTreaties.Where(t => t.status == "Rejected").ToList();
-            var expired  = player.activeTreaties.Where(t => t.status == "Expired").ToList();
-
-            if (player.activeTreaties.Count == 0)
+            
+            var label = new Label("The Treaties system has been replaced by the Global Factions system.\n\nAllies in the same faction automatically receive Free Trade and Mutual Defence.") 
+            { 
+                style = { color = Color.white, fontSize = 14, whiteSpace = WhiteSpace.Normal, marginTop = 20, marginLeft = 20, marginRight = 20 } 
+            };
+            _treatiesCardsList.Add(label);
+            
+            if (player.globalFaction != "Independent" && player.globalFaction != "Non-Aligned")
             {
-                _treatiesCardsList.Add(new Label("No active treaties. Use PROPOSE TREATY below to initiate negotiations.") { style = { color = Color.grey, fontSize = 10, unityFontStyleAndWeight = FontStyle.Italic, marginTop = 20, unityTextAlign = TextAnchor.MiddleCenter } });
-                return;
+                var factionLabel = new Label($"You are currently a member of: {player.globalFaction}") 
+                { 
+                    style = { color = new Color(0.14f, 0.93f, 0.34f), fontSize = 14, unityFontStyleAndWeight = FontStyle.Bold, marginTop = 20, marginLeft = 20 } 
+                };
+                _treatiesCardsList.Add(factionLabel);
+
+                var btnLeave = new Button(() => {
+                    if (gm?.DiplomacySystem is StateCraft.Systems.DiplomacySystem dipSys)
+                    {
+                        dipSys.LeaveFaction(player);
+                        RefreshDiplomacyData();
+                    }
+                }) { text = "LEAVE FACTION" };
+                btnLeave.AddToClassList("econ-small-button");
+                btnLeave.style.width = 200; btnLeave.style.height = 36;
+                btnLeave.style.marginTop = 20; btnLeave.style.marginLeft = 20;
+                btnLeave.style.backgroundColor = new Color(0.95f, 0.2f, 0.2f, 0.8f);
+                SetBorder(btnLeave, new Color(0.95f, 0.2f, 0.2f), 1);
+                _treatiesCardsList.Add(btnLeave);
+            }
+            else
+            {
+                var row = new VisualElement { style = { flexDirection = FlexDirection.Row, marginTop = 20, marginLeft = 20 } };
+
+                var btnCreate = new Button(() => ShowCreateFactionModal(player, gm)) { text = "CREATE NEW FACTION" };
+                btnCreate.AddToClassList("econ-small-button");
+                btnCreate.style.width = 200; btnCreate.style.height = 36;
+                btnCreate.style.backgroundColor = new Color(0.18f, 0.6f, 0.95f, 0.8f);
+                SetBorder(btnCreate, new Color(0.18f, 0.6f, 0.95f), 1);
+                row.Add(btnCreate);
+
+                var btnJoin = new Button(() => ShowJoinFactionModal(player, gm)) { text = "JOIN FACTION" };
+                btnJoin.AddToClassList("econ-small-button");
+                btnJoin.style.width = 200; btnJoin.style.height = 36;
+                btnJoin.style.marginLeft = 10;
+                btnJoin.style.backgroundColor = new Color(0.2f, 0.75f, 0.4f, 0.8f);
+                SetBorder(btnJoin, new Color(0.2f, 0.75f, 0.4f), 1);
+                row.Add(btnJoin);
+
+                _treatiesCardsList.Add(row);
+            }
+        }
+        
+        private void ShowCreateFactionModal(CountryDataSO player, GameManager gm)
+        {
+            var overlay = MakeOverlay();
+            var modal = new VisualElement
+            {
+                style =
+                {
+                    width = 400,
+                    backgroundColor = new Color(0.07f, 0.04f, 0.04f, 1f),
+                    borderTopLeftRadius = 8, borderTopRightRadius = 8,
+                    borderBottomLeftRadius = 8, borderBottomRightRadius = 8,
+                    paddingTop = 24, paddingBottom = 24, paddingLeft = 24, paddingRight = 24
+                }
+            };
+            SetBorder(modal, new Color(0.18f, 0.6f, 0.95f), 1);
+            overlay.Add(modal);
+
+            modal.Add(new Label("CREATE A GLOBAL FACTION") { style = { color = new Color(0.18f, 0.6f, 0.95f), fontSize = 16, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 8 } });
+            modal.Add(new Label("Founding a new faction will establish your nation as its leader. You can invite other Independent nations to join your faction from their diplomacy page.") { style = { color = Color.grey, fontSize = 10, marginBottom = 16, whiteSpace = WhiteSpace.Normal } });
+
+            var inputField = new UnityEngine.UIElements.TextField("Faction Name:");
+            inputField.style.marginBottom = 20;
+            modal.Add(inputField);
+
+            var btnRow = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween } };
+
+            var cancelBtn = new Button(() => overlay.parent?.Remove(overlay)) { text = "CANCEL" };
+            cancelBtn.AddToClassList("econ-small-button");
+            cancelBtn.style.width = Length.Percent(45); cancelBtn.style.height = 34;
+            btnRow.Add(cancelBtn);
+
+            var confirmBtn = new Button(() =>
+            {
+                if (string.IsNullOrWhiteSpace(inputField.value))
+                {
+                    NotificationManager.Instance?.AddNotification("Faction name cannot be empty.", Color.red);
+                    return;
+                }
+                
+                string factionName = inputField.value.Trim();
+                
+                if (gm?.DiplomacySystem is StateCraft.Systems.DiplomacySystem dipSys)
+                {
+                    dipSys.JoinFaction(player, factionName);
+                    NotificationManager.Instance?.AddNotification($"You have founded the {factionName}.", new Color(0.18f, 0.6f, 0.95f));
+                    player.globalPrestige = UnityEngine.Mathf.Min(100f, player.globalPrestige + 10f); // Leader bonus
+                }
+                
+                overlay.parent?.Remove(overlay);
+                RefreshDiplomacyData();
+            })
+            { text = "FOUND FACTION" };
+            confirmBtn.AddToClassList("econ-small-button");
+            confirmBtn.style.width = Length.Percent(50); confirmBtn.style.height = 34;
+            confirmBtn.style.color = new Color(0.18f, 0.6f, 0.95f);
+            confirmBtn.style.backgroundColor = new Color(0.1f, 0.3f, 0.5f, 0.9f);
+            btnRow.Add(confirmBtn);
+
+            modal.Add(btnRow);
+            _dashboardRoot?.Add(overlay);
+        }
+
+        private void ShowJoinFactionModal(CountryDataSO player, GameManager gm)
+        {
+            var overlay = MakeOverlay();
+            var modal = new VisualElement
+            {
+                style =
+                {
+                    width = 400,
+                    backgroundColor = new Color(0.07f, 0.04f, 0.04f, 1f),
+                    borderTopLeftRadius = 8, borderTopRightRadius = 8,
+                    borderBottomLeftRadius = 8, borderBottomRightRadius = 8,
+                    paddingTop = 24, paddingBottom = 24, paddingLeft = 24, paddingRight = 24
+                }
+            };
+            SetBorder(modal, new Color(0.2f, 0.75f, 0.4f), 1);
+            overlay.Add(modal);
+
+            modal.Add(new Label("JOIN A GLOBAL FACTION") { style = { color = new Color(0.2f, 0.75f, 0.4f), fontSize = 16, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 8 } });
+            
+            System.Collections.Generic.HashSet<string> existingFactions = new System.Collections.Generic.HashSet<string>();
+            foreach (var c in gm.allCountries)
+            {
+                if (c.globalFaction != "Independent" && c.globalFaction != "Non-Aligned" && !string.IsNullOrEmpty(c.globalFaction))
+                {
+                    existingFactions.Add(c.globalFaction);
+                }
             }
 
-            // ── PENDING ─────────────────────────────────────────────────────
-            foreach (var t in pending)
-                _treatiesCardsList.Add(BuildTreatyCard(t,
-                    statusText:  "⏳ PENDING RESPONSE",
-                    statusColor: new Color(1f, 0.75f, 0.2f),
-                    accentColor: new Color(1f, 0.75f, 0.2f),
-                    detail:      $"Awaiting response from {t.partnerCountry}. Expected in ~{Mathf.Max(1, t.turnsUntilResolution)} more month(s)."));
+            if (existingFactions.Count == 0)
+            {
+                modal.Add(new Label("There are no global factions currently established in the world. You must create one.") { style = { color = Color.grey, fontSize = 12, marginBottom = 16, whiteSpace = WhiteSpace.Normal } });
+                
+                var cancelBtn = new Button(() => overlay.parent?.Remove(overlay)) { text = "CLOSE" };
+                cancelBtn.AddToClassList("econ-small-button");
+                cancelBtn.style.width = Length.Percent(100); cancelBtn.style.height = 34;
+                modal.Add(cancelBtn);
+            }
+            else
+            {
+                modal.Add(new Label("Select an existing global faction to join.") { style = { color = Color.grey, fontSize = 10, marginBottom = 16, whiteSpace = WhiteSpace.Normal } });
+                
+                var dropdown = new UnityEngine.UIElements.DropdownField("Faction:");
+                dropdown.choices = new System.Collections.Generic.List<string>(existingFactions);
+                dropdown.index = 0;
+                dropdown.style.marginBottom = 20;
+                modal.Add(dropdown);
 
-            // ── ACTIVE ──────────────────────────────────────────────────────
-            foreach (var t in active)
-                _treatiesCardsList.Add(BuildTreatyCard(t,
-                    statusText:  "✅ ACTIVE",
-                    statusColor: new Color(0.14f, 0.93f, 0.34f),
-                    accentColor: new Color(0.14f, 0.93f, 0.34f),
-                    detail:      $"{t.terms}\nDuration remaining: {t.monthsRemaining} months."));
+                var btnRow = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween } };
 
-            // ── REJECTED ────────────────────────────────────────────────────
-            foreach (var t in rejected)
-                _treatiesCardsList.Add(BuildTreatyCard(t,
-                    statusText:  "❌ REJECTED",
-                    statusColor: new Color(1f, 0.3f, 0.3f),
-                    accentColor: new Color(0.4f, 0.1f, 0.1f),
-                    detail:      $"Reason: {t.rejectionReason ?? "Unknown"}\nYou may propose again after improving relations."));
+                var cancelBtn = new Button(() => overlay.parent?.Remove(overlay)) { text = "CANCEL" };
+                cancelBtn.AddToClassList("econ-small-button");
+                cancelBtn.style.width = Length.Percent(45); cancelBtn.style.height = 34;
+                btnRow.Add(cancelBtn);
 
-            // ── EXPIRED ─────────────────────────────────────────────────────
-            foreach (var t in expired)
-                _treatiesCardsList.Add(BuildTreatyCard(t,
-                    statusText:  "💀 EXPIRED",
-                    statusColor: Color.grey,
-                    accentColor: new Color(0.2f, 0.2f, 0.2f),
-                    detail:      t.terms));
+                var confirmBtn = new Button(() =>
+                {
+                    string factionName = dropdown.value;
+                    
+                    if (gm?.DiplomacySystem is StateCraft.Systems.DiplomacySystem dipSys)
+                    {
+                        dipSys.JoinFaction(player, factionName);
+                    }
+                    
+                    overlay.parent?.Remove(overlay);
+                    RefreshDiplomacyData();
+                })
+                { text = "JOIN" };
+                confirmBtn.AddToClassList("econ-small-button");
+                confirmBtn.style.width = Length.Percent(50); confirmBtn.style.height = 34;
+                confirmBtn.style.color = new Color(0.2f, 0.75f, 0.4f);
+                confirmBtn.style.backgroundColor = new Color(0.1f, 0.4f, 0.2f, 0.9f);
+                btnRow.Add(confirmBtn);
+
+                modal.Add(btnRow);
+            }
+
+            _dashboardRoot?.Add(overlay);
         }
 
-        private VisualElement BuildTreatyCard(DiplomaticTreaty t, string statusText, Color statusColor, Color accentColor, string detail)
-        {
-            var card = MakeCard(100, 12);
-            card.style.marginRight = 0;
-            card.style.borderLeftWidth = 3;
-            card.style.borderLeftColor = accentColor;
-
-            // Title row
-            var titleRow = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 4 } };
-            titleRow.Add(new Label(t.treatyName) { style = { color = Color.white, unityFontStyleAndWeight = FontStyle.Bold, fontSize = 14, flexGrow = 1 } });
-
-            // Status badge
-            var badge = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, backgroundColor = new Color(statusColor.r, statusColor.g, statusColor.b, 0.15f), paddingLeft = 6, paddingRight = 6, paddingTop = 3, paddingBottom = 3, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4 } };
-            badge.Add(new Label(statusText) { style = { color = statusColor, fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
-            titleRow.Add(badge);
-            card.Add(titleRow);
-
-            // Partner row
-            var partnerRow = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 8 } };
-            partnerRow.Add(new Label("Partner:") { style = { color = Color.grey, fontSize = 10, marginRight = 4 } });
-            partnerRow.Add(new Label(t.partnerCountry) { style = { color = Color.white, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
-            card.Add(partnerRow);
-
-            // Divider
-            card.Add(new VisualElement { style = { height = 1, backgroundColor = new Color(1, 1, 1, 0.08f), marginBottom = 8 } });
-
-            // Detail text
-            card.Add(new Label(detail) { style = { color = new Color(0.75f, 0.75f, 0.8f), fontSize = 10, whiteSpace = WhiteSpace.Normal } });
-
-            return card;
-        }
-
-
-        // ─── Organizations tab ────────────────────────────────────────────────
         private void PopulateOrganizationsTab(CountryDataSO player)
         {
             if (_organizationsCardsGrid == null) return;

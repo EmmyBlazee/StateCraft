@@ -153,6 +153,54 @@ namespace StateCraft.Systems
         };
 
         // ─── Public API ───────────────────────────────────────────────────────
+        
+        // ─── GEOGRAPHICAL WAR PROGRESSION ───────────────────────────────────────
+        public List<string> GetInvasionPath(CountryDataSO targetCountry)
+        {
+            var path = new List<string> { "Border Defense" };
+            string capital = targetCountry.capitalCity;
+            bool foundCapitalRegion = false;
+            
+            if (targetCountry.regions != null)
+            {
+                foreach (var region in targetCountry.regions)
+                {
+                    if (region.regionName == capital)
+                    {
+                        foundCapitalRegion = true;
+                    }
+                    else
+                    {
+                        path.Add(region.regionName);
+                    }
+                }
+            }
+            
+            if (foundCapitalRegion || !string.IsNullOrEmpty(capital))
+            {
+                path.Add(!string.IsNullOrEmpty(capital) ? capital : "Capital");
+            }
+            else 
+            {
+                path.Add("Capital");
+            }
+            
+            return path;
+        }
+
+        public string GetActiveCombatZone(CountryDataSO defender, float frontProgress)
+        {
+            var path = GetInvasionPath(defender);
+            // frontProgress is -100 to 100. If we are analyzing defender, 
+            // progress < 0 means enemy is pushing into defender.
+            // Let's map 0 to -100 across the path elements.
+            if (frontProgress >= 0) return "Border Defense";
+            
+            float step = 100f / path.Count;
+            int index = Mathf.Clamp(Mathf.FloorToInt(Mathf.Abs(frontProgress) / step), 0, path.Count - 1);
+            return path[index];
+        }
+
         public void UpdateWarStatus(CountryDataSO country)
         {
             if (!countryWarStages.ContainsKey(country))
@@ -211,48 +259,17 @@ namespace StateCraft.Systems
                 return;
             }
 
-            // ── Treaty Violation Check ────────────────────────────────────────────
-            // If aggressor has a NAP or Mutual Defence Pact with the defender, violating it
-            // incurs severe prestige and relations penalties, and voids the treaty.
-            if (aggressor.activeTreaties != null)
+            // ── Faction Friendly Fire Check ────────────────────────────────────────────
+            if (aggressor.globalFaction == defender.globalFaction && 
+                aggressor.globalFaction != "Independent" && 
+                aggressor.globalFaction != "Non-Aligned")
             {
-                for (int ti = aggressor.activeTreaties.Count - 1; ti >= 0; ti--)
-                {
-                    var tr = aggressor.activeTreaties[ti];
-                    if (tr.partnerCountry == defender.countryName && tr.blocksWar && tr.status == "Active")
-                    {
-                        // Violation — void the treaty on both sides
-                        tr.status = "Violated";
-                        aggressor.activeTreaties.RemoveAt(ti);
-                        if (defender.activeTreaties != null)
-                        {
-                            var mirrorIdx = defender.activeTreaties.FindIndex(
-                                x => x.partnerCountry == aggressor.countryName && x.treatyName == tr.treatyName);
-                            if (mirrorIdx >= 0) defender.activeTreaties.RemoveAt(mirrorIdx);
-                        }
-
-                        // Severe prestige and relations penalty
-                        aggressor.globalPrestige = Mathf.Max(0f, aggressor.globalPrestige - 20f);
-                        var gm1 = GameManager.Instance;
-                        if (gm1?.Relations != null)
-                            gm1.Relations.Adjust(aggressor.countryName, defender.countryName, -30f,
-                                $"Treaty violation: {tr.treatyName} broken", gm1.TurnSystem?.CurrentTurn ?? 0);
-
-                        NewsSystem.Instance?.PublishNews(
-                            $"WAR CRIME: {aggressor.countryName} VIOLATES {tr.treatyName.ToUpper()} with {defender.countryName} " +
-                            $"and launches military offensive! International condemnation follows. Prestige −20.");
-
-                        if (gm1?.playerCountry == defender)
-                            NotificationManager.Instance?.AddNotification(
-                                $"⚠ TREATY BETRAYAL: {aggressor.countryName} has violated the {tr.treatyName} and declared war! World outcry is strong.",
-                                Color.red);
-                        else if (gm1?.playerCountry != aggressor)
-                            NotificationManager.Instance?.AddNotification(
-                                $"⚠ {aggressor.countryName} violates {tr.treatyName} with {defender.countryName}. Regional stability at risk.",
-                                new Color(1f, 0.5f, 0f));
-                        break; // only one treaty can be violated per war declaration
-                    }
-                }
+                var gm1 = GameManager.Instance;
+                if (gm1?.playerCountry == aggressor)
+                    UI.NotificationManager.Instance?.AddNotification(
+                        $"CANNOT DECLARE WAR: {defender.countryName} is a member of your Faction ({aggressor.globalFaction}).",
+                        UnityEngine.Color.red);
+                return; // Block the war declaration completely
             }
 
             countryWarStages[aggressor] = WarStage.Conflict;
@@ -289,20 +306,40 @@ namespace StateCraft.Systems
 
             var gm = GameManager.Instance;
 
-            // ── Coalition Obligations ──
+            // ── Faction Mutual Defence Obligations ──
             if (gm?.allCountries != null)
             {
                 foreach (var ally in gm.allCountries)
                 {
                     if (ally == defender || ally == aggressor) continue;
-                    bool hasDefencePact = ally.activeTreaties.Any(t =>
-                        t.partnerCountry == defender.countryName &&
-                        (t.treatyName == "Coalition Force Pact" || t.treatyName == "Mutual Defence Pact"));
+                    
+                    bool inSameFaction = (ally.globalFaction == defender.globalFaction && 
+                                          defender.globalFaction != "Independent" && 
+                                          defender.globalFaction != "Non-Aligned");
 
-                    if (!hasDefencePact) continue;
+                    if (!inSameFaction) continue;
 
                     int reinforceInfantry = Mathf.RoundToInt(ally.unitInfantry * 0.10f);
                     int reinforceTanks    = Mathf.RoundToInt(ally.unitTanks    * 0.08f);
+
+                    if (reinforceInfantry == 0 && reinforceTanks == 0)
+                    {
+                        string oldFaction = ally.globalFaction;
+                        ally.globalFaction = "Independent";
+                        ally.globalPrestige = Mathf.Max(0f, ally.globalPrestige - 15f);
+
+                        NewsSystem.Instance?.PublishNews(
+                            $"FACTION EXPULSION: {ally.countryName} failed to provide military support to {defender.countryName} and has been expelled from the {oldFaction}.");
+
+                        if (gm.playerCountry == ally)
+                        {
+                            UI.NotificationManager.Instance?.AddNotification(
+                                $"DISGRACED: You failed to defend {defender.countryName} and have been expelled from the {oldFaction}.",
+                                new Color(1f, 0.32f, 0.32f));
+                        }
+                        continue;
+                    }
+
                     defender.unitInfantry += reinforceInfantry;
                     defender.unitTanks    += reinforceTanks;
                     ally.unitInfantry     -= reinforceInfantry;
@@ -819,6 +856,20 @@ namespace StateCraft.Systems
 
                     int enemyTanksEst = Mathf.RoundToInt(tanks * (myPower / Mathf.Max(enemyPower, 1f)));
                     int enemyApcsEst = Mathf.RoundToInt(apcs * (myPower / Mathf.Max(enemyPower, 1f)));
+
+                    // Calculate civilian casualties if fighting inside country
+                    string combatZone = GetActiveCombatZone(country, frontProgress.ContainsKey(key) ? frontProgress[key] : 0f);
+                    if (combatZone != "Border Defense") {
+                        int civCas = Mathf.RoundToInt(totalInfantryKIA * 0.2f * UnityEngine.Random.Range(0.5f, 1.5f));
+                        country.totalCivilianCasualties += civCas;
+                        
+                        // Warn player
+                        if (isPlayer && civCas > 0) {
+                            NotificationManager.Instance?.AddNotification($"CIVILIAN CASUALTIES: {civCas} civilians killed in {combatZone} crossfire.", UnityEngine.Color.red);
+                        }
+                        NewsSystem.Instance?.PublishNews($"TRAGEDY: {civCas:N0} civilians reported dead in {country.countryName} ({combatZone}) crossfire.");
+                    }
+
                     var enemyEqList = new System.Collections.Generic.List<string>();
                     if (enemyTanksEst > 0) enemyEqList.Add($"{enemyTanksEst} Tank{(enemyTanksEst > 1 ? "s" : "")}");
                     if (enemyApcsEst > 0) enemyEqList.Add($"{enemyApcsEst} APC{(enemyApcsEst > 1 ? "s" : "")}");
@@ -1402,13 +1453,29 @@ namespace StateCraft.Systems
                 $"SUPPLIES: Ammo {country.reserveAmmo:F0} | Fuel {country.reserveFuel:F0} | Food {country.reserveFood:F0}",
                 "Important");
 
-            NewsSystem.Instance?.PublishNews($"{headline}. Front momentum: {frontTrend.Split(' ')[1]}.");
+            NewsSystem.Instance?.PublishNews($"{headline}. {country.countryName} suffered ~{casualties:N0} military casualties and lost {(int)tanksLost:N0} Tanks.");
         }
 
         // ─── Monthly War Report ───────────────────────────────────────────────
         private void SendMonthlyWarReport(CountryDataSO country, List<CountryDataSO> enemies,
             int newKIA, int newWounded, float tanksLost, float apcsLost, float fightersLost, GameManager gm)
         {
+            // ── CASUALTY AND BANKRUPTCY CAPITULATION ──
+            if (country.treasury <= 0 && gm?.playerCountry == country) {
+                NotificationManager.Instance?.AddNotification("FINANCE MINISTER: We are out of funds! Take out an emergency loan immediately or we will capitulate!", UnityEngine.Color.red);
+            }
+            if (country.treasury <= 0 && country.debt >= country.gdp * 0.8f) {
+                // Bankrupt and high debt
+                EndWar(enemies[0], country, $"{enemies[0].countryName} Victory — Complete Economic Collapse");
+                return;
+            }
+            
+            if (country.totalKIA > country.population * 0.05f) {
+                // Casualties exceeded 5% of population
+                EndWar(enemies[0], country, $"{enemies[0].countryName} Victory — Military Annihilation");
+                return;
+            }
+
             string supplyWarn = "";
             if (country.reserveAmmo < 30f) supplyWarn += "\n⚠ AMMO CRITICAL";
             if (country.reserveFuel < 20f) supplyWarn += "\n⚠ FUEL CRITICAL";
@@ -1685,6 +1752,62 @@ namespace StateCraft.Systems
 
             var gm = GameManager.Instance;
             if (gm != null) gm.worldTension = Mathf.Max(0f, gm.worldTension - 15f);
+
+            
+            CountryDataSO winner = null;
+            CountryDataSO loser = null;
+
+            if (outcome.Contains($"{a.countryName} Victory"))
+            {
+                winner = a;
+                loser = b;
+            }
+            else if (outcome.Contains($"{b.countryName} Victory"))
+            {
+                winner = b;
+                loser = a;
+            }
+            
+            float spoilsMoney = 0f;
+            int spoilsTanks = 0, spoilsAPCs = 0, spoilsArtillery = 0, spoilsFighters = 0;
+
+            if (winner != null && loser != null)
+            {
+                // Take 60% of treasury
+                if (loser.treasury > 0)
+                {
+                    spoilsMoney = loser.treasury * 0.6f;
+                    loser.treasury -= spoilsMoney;
+                    winner.treasury += spoilsMoney;
+                }
+
+                // Take 60% of military hardware
+                spoilsTanks = UnityEngine.Mathf.FloorToInt(loser.unitTanks * 0.6f);
+                winner.unitTanks += spoilsTanks;
+                loser.unitTanks -= spoilsTanks;
+
+                spoilsAPCs = UnityEngine.Mathf.FloorToInt(loser.unitAPCs * 0.6f);
+                winner.unitAPCs += spoilsAPCs;
+                loser.unitAPCs -= spoilsAPCs;
+
+                spoilsArtillery = UnityEngine.Mathf.FloorToInt(loser.unitArtillery * 0.6f);
+                winner.unitArtillery += spoilsArtillery;
+                loser.unitArtillery -= spoilsArtillery;
+
+                spoilsFighters = UnityEngine.Mathf.FloorToInt(loser.unitFighters * 0.6f);
+                winner.unitFighters += spoilsFighters;
+                loser.unitFighters -= spoilsFighters;
+                
+                int spoilsBombers = UnityEngine.Mathf.FloorToInt(loser.unitBombers * 0.6f);
+                winner.unitBombers += spoilsBombers;
+                loser.unitBombers -= spoilsBombers;
+                
+                int spoilsHelis = UnityEngine.Mathf.FloorToInt(loser.unitAttackHelis * 0.6f);
+                winner.unitAttackHelis += spoilsHelis;
+                loser.unitAttackHelis -= spoilsHelis;
+                
+                outcome += $"\nSpoils of War Taken: ${(spoilsMoney/1000f):F1}B, {spoilsTanks} Tanks, {spoilsAPCs} APCs, {spoilsFighters} Fighters.";
+            }
 
             NewsSystem.Instance?.PublishNews($"WAR ENDS: {outcome}. {a.countryName} and {b.countryName} observe ceasefire.");
 

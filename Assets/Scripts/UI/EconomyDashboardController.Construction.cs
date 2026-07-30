@@ -347,9 +347,9 @@ namespace StateCraft.UI
                     card.Add(new Label(bp.description)
                         { style = { color = new Color(0.6f, 0.6f, 0.6f), fontSize = 8, marginTop = 4, whiteSpace = WhiteSpace.Normal } });
 
-                if (bp.targetId == "PowerNuclear" && country != null &&
-                    !country.isImportingUranium &&
-                    !country.resources.Exists(r => r.type == MineralType.Uranium))
+                bool hasUranium = bp.targetId != "PowerNuclear" || country == null || country.isImportingUranium || (country.resources != null && country.resources.Exists(r => r.type == MineralType.Uranium));
+
+                if (!hasUranium)
                 {
                     card.Add(new Label("⚠ Requires domestic uranium or import deal")
                         { style = { color = new Color(255f/255f, 171f/255f, 64f/255f), fontSize = 7, marginTop = 4 } });
@@ -371,7 +371,7 @@ namespace StateCraft.UI
                 commBtn.style.height    = 26;
                 commBtn.style.fontSize  = 8;
                 commBtn.style.marginTop = 8;
-                commBtn.SetEnabled(!alreadyQueued && !queueFull && canAfford);
+                commBtn.SetEnabled(!alreadyQueued && !queueFull && canAfford && hasUranium);
                 card.Add(commBtn);
 
                 _liveBlueprintGrid.Add(card);
@@ -486,8 +486,8 @@ namespace StateCraft.UI
                 card.Add(new Label(bp.description)
                     { style = { color = Color.grey, fontSize = 8, marginTop = 4, whiteSpace = WhiteSpace.Normal } });
 
-                if (bp.targetId == "PowerNuclear" && !country.isImportingUranium &&
-                    !country.resources.Exists(r => r.type == MineralType.Uranium))
+                bool hasUranium = bp.targetId != "PowerNuclear" || country == null || country.isImportingUranium || (country.resources != null && country.resources.Exists(r => r.type == MineralType.Uranium));
+                if (!hasUranium)
                     card.Add(new Label("Requires domestic uranium or import deal")
                         { style = { color = new Color(255f/255f, 171f/255f, 64f/255f), fontSize = 7, marginTop = 4 } });
 
@@ -495,6 +495,7 @@ namespace StateCraft.UI
                 var startBtn = new Button(() => CommissionBlueprintFromCard(bpCopy)) { text = "COMMISSION" };
                 startBtn.AddToClassList("button-premium");
                 startBtn.style.height = 24; startBtn.style.fontSize = 8; startBtn.style.marginTop = 8;
+                startBtn.SetEnabled(hasUranium);
                 card.Add(startBtn);
 
                 _blueprintCatalog.Add(card);

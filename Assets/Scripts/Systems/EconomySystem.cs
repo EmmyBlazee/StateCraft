@@ -372,85 +372,83 @@ namespace StateCraft.Systems
                     {
                         NewsSystem.Instance?.PublishNews($"TRADE EXPIRED: Supply of {deal.resource} with {deal.partnerCountry} has concluded.");
                     }
-                    continue; // Skip processing since it's expired
+                    continue;
                 }
+
+                float actualPayment = deal.monthlyPaymentUSD;
 
                 if (deal.isSeller)
                 {
                     float amt = deal.resourceQuantity;
-                    bool hasEnough = false;
+                    float available = 0f;
                     switch (deal.resource)
                     {
-                        case TradeResourceType.Oil: hasEnough = country.invOilBarrels >= amt; break;
-                        case TradeResourceType.Gas: 
-                            int idxGas = country.resources.FindIndex(r => r.type == MineralType.NaturalGas);
-                            hasEnough = idxGas >= 0 && (country.resources[idxGas].abundance * 100000f) >= amt; 
-                            break;
-                        case TradeResourceType.Uranium: 
-                            int idxUra = country.resources.FindIndex(r => r.type == MineralType.Uranium);
-                            hasEnough = idxUra >= 0 && (country.resources[idxUra].abundance * 500f) >= amt; 
-                            break;
-                        case TradeResourceType.Minerals: hasEnough = country.invMineralsTonnes >= amt; break;
-                        case TradeResourceType.Food: hasEnough = (country.invRiceTonnes + country.invCassavaTonnes + country.invCocoaTonnes) >= amt; break;
+                        case TradeResourceType.Oil: available = country.invOilBarrels; break;
+                        case TradeResourceType.Gas: available = country.invGasUnits; break;
+                        case TradeResourceType.Uranium: available = country.invUraniumUnits; break;
+                        case TradeResourceType.Minerals: available = country.invMineralsTonnes; break;
+                        case TradeResourceType.Food: available = country.invRiceTonnes + country.invCassavaTonnes + country.invCocoaTonnes; break;
                     }
 
-                    if (!hasEnough)
+                    if (available < amt)
                     {
-                        deal.status = TradeAgreementStatus.Expired;
-                        country.globalPrestige = Mathf.Max(0, country.globalPrestige - 5f);
-                        NewsSystem.Instance?.PublishNews($"BREACH OF CONTRACT: {country.countryName.ToUpper()} FAILS TO DELIVER {deal.resource.ToString().ToUpper()} TO {deal.partnerCountry.ToUpper()}!");
+                        country.globalPrestige = Mathf.Max(0, country.globalPrestige - 1f);
+                        if (country == Core.GameManager.Instance?.playerCountry)
+                            NotificationManager.Instance?.AddNotification($"PARTIAL DELIVERY: Unable to fulfill full {deal.resource} export to {deal.partnerCountry}.", Color.yellow);
                         
-                        // Ultimatum Crisis
-                        country.activeCrises.Add(new GlobalCrisis { 
-                            crisisName = $"Diplomatic Ultimatum: Broken Contract", 
-                            affectedRegion = deal.partnerCountry, 
-                            severity = "Critical", 
-                            internationalPressure = 95f 
-                        });
-
-                        NotificationManager.Instance?.AddNotification($"ULTIMATUM RECEIVED: Failure to deliver {deal.resource} to {deal.partnerCountry}.", Color.red);
-                        continue; // Skip money transfer
+                        if (available <= 0f)
+                        {
+                            deal.status = TradeAgreementStatus.Expired;
+                        }
+                        
+                        float deliveryRatio = amt > 0f ? available / amt : 0f;
+                        actualPayment *= deliveryRatio;
+                        amt = available;
                     }
 
-                    // Deduct physical inventory since we have enough
                     switch (deal.resource)
                     {
                         case TradeResourceType.Oil: country.invOilBarrels = Mathf.Max(0, country.invOilBarrels - amt); break;
+                        case TradeResourceType.Gas: country.invGasUnits = Mathf.Max(0, country.invGasUnits - amt); break;
+                        case TradeResourceType.Uranium: country.invUraniumUnits = Mathf.Max(0, country.invUraniumUnits - amt); break;
                         case TradeResourceType.Minerals: country.invMineralsTonnes = Mathf.Max(0, country.invMineralsTonnes - amt); break;
                         case TradeResourceType.Food:
-                            if (country.invRiceTonnes >= amt) country.invRiceTonnes -= amt;
-                            else if (country.invCassavaTonnes >= amt) country.invCassavaTonnes -= amt;
-                            else country.invCocoaTonnes = Mathf.Max(0, country.invCocoaTonnes - amt);
+                            float remaining = amt;
+                            float riceTake = Mathf.Min(country.invRiceTonnes, remaining);
+                            country.invRiceTonnes -= riceTake; remaining -= riceTake;
+                            float cassTake = Mathf.Min(country.invCassavaTonnes, remaining);
+                            country.invCassavaTonnes -= cassTake; remaining -= cassTake;
+                            country.invCocoaTonnes = Mathf.Max(0, country.invCocoaTonnes - remaining);
                             break;
                     }
                 }
                 else
                 {
-                    // Buyer: Receives the physical goods!
                     float amt = deal.resourceQuantity;
                     switch (deal.resource)
                     {
                         case TradeResourceType.Oil: country.invOilBarrels += amt; break;
+                        case TradeResourceType.Gas: country.invGasUnits += amt; break;
+                        case TradeResourceType.Uranium: country.invUraniumUnits += amt; break;
                         case TradeResourceType.Minerals: country.invMineralsTonnes += amt; break;
                         case TradeResourceType.Food: country.invRiceTonnes += amt; break;
                     }
                 }
                 
-                // If it was a bulk transfer, we instantly process it only ONCE.
                 if (deal.isBulkTransfer)
                 {
                     deal.status = TradeAgreementStatus.Expired;
                     if (deal.isSeller)
-                        country.treasury += (deal.monthlyPaymentUSD * country.exchangeRate) / 1e9f;
+                        country.treasury += (actualPayment * country.exchangeRate) / 1e9f;
                     else
-                        country.treasury -= (deal.monthlyPaymentUSD * country.exchangeRate) / 1e9f;
+                        country.treasury -= (actualPayment * country.exchangeRate) / 1e9f;
                 }
                 else
                 {
                     if (deal.isSeller)
-                        country.treasury += (deal.monthlyPaymentUSD * country.exchangeRate) / 1e9f;
+                        country.treasury += (actualPayment * country.exchangeRate) / 1e9f;
                     else
-                        country.treasury -= (deal.monthlyPaymentUSD * country.exchangeRate) / 1e9f;
+                        country.treasury -= (actualPayment * country.exchangeRate) / 1e9f;
                 }
             }
 
@@ -493,6 +491,14 @@ namespace StateCraft.Systems
 
             country.invMineralsTonnes += country.indMiningLocal * 100000f; // 100k tonnes
             country.invOilBarrels += country.indMiningOil * 2000000f; // 2M barrels
+            
+            if (country.resources != null)
+            {
+                if (country.resources.Exists(r => r.type == MineralType.NaturalGas))
+                    country.invGasUnits += country.indMiningOil * 500000f;
+                if (country.resources.Exists(r => r.type == MineralType.Uranium))
+                    country.invUraniumUnits += country.indMiningLocal * 5000f;
+            }
             
             // Tech Output modified by Productivity Multiplier
             float techOutput = (country.indTechIT + country.indTechFintech) * 5000f;

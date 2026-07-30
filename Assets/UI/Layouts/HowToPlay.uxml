@@ -56,6 +56,14 @@
                         <ui:Label text="🔔" style="font-size: 14px; width: 24px;" />
                         <ui:Label text="EVENTS — Pop-up events require your decision. Some pause the game. Choose carefully — they have economic and stability consequences." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; flex-grow: 1;" />
                     </ui:VisualElement>
+                    <ui:VisualElement style="margin-bottom: 6px; flex-direction: row;">
+                        <ui:Label text="👤" style="font-size: 14px; width: 24px;" />
+                        <ui:Label text="PRESIDENT PROFILE — Click your country's flag in the top left to view your Presidential Profile and current scenario details." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; flex-grow: 1;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement style="margin-bottom: 6px; flex-direction: row;">
+                        <ui:Label text="⚙️" style="font-size: 14px; width: 24px;" />
+                        <ui:Label text="SYSTEM MENU — Click the gear icon in the top right to pause the game, Save your progress, or Load a previous game." style="font-size: 12px; color: rgba(200,200,210,1); white-space: normal; flex-grow: 1;" />
+                    </ui:VisualElement>
 
                     <ui:VisualElement style="height: 1px; background-color: rgba(255,255,255,0.07); margin-top: 18px; margin-bottom: 18px;" />
 

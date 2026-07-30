@@ -75,6 +75,9 @@ namespace StateCraft.UI
             _incomeList.Clear();
             _expenseList.Clear();
 
+            float totalIncome = 0f;
+            float totalExpense = 0f;
+
             // All base estimates (GDP, income, debt, spending) are stored in Billions of USD.
             // We multiply by exchangeRate to get Billions of Local Currency, ready for AddLedgerRow.
 
@@ -89,52 +92,53 @@ namespace StateCraft.UI
             float resourceEstUSD = Mathf.Max(0f, country.income - taxEstUSD - tariffEstUSD);
             float resourceEstB = resourceEstUSD * country.exchangeRate;
 
+            totalIncome += taxEstB;
+            totalIncome += resourceEstB;
             AddLedgerRow(_incomeList, "Tax Revenue", taxEstB, true, sym);
             AddLedgerRow(_incomeList, "Resource Dividends", resourceEstB, true, sym);
-            if (country.importTariffRate > 0) AddLedgerRow(_incomeList, "Import Tariff Yield", tariffEstB, true, sym);
+            
+            if (country.importTariffRate > 0)
+            {
+                totalIncome += tariffEstB;
+                AddLedgerRow(_incomeList, "Import Tariff Yield", tariffEstB, true, sym);
+            }
             
             if (country.foreignAidReceived > 0f)
             {
                 // foreignAidReceived is mostly stored in Billions in CountryDataSO as well
                 float aidB = country.foreignAidReceived * country.exchangeRate;
+                totalIncome += aidB;
                 AddLedgerRow(_incomeList, "Foreign Aid", aidB, true, sym);
-            }
-
-            if (gm.DiplomacySystem is DiplomacySystem diplo)
-            {
-                foreach (var deal in diplo.ActiveDeals)
-                {
-                    // ActiveDeals monthlyPaymentUSD is stored in absolute string dollars, so we DO divide by 1e9f here
-                    float dealB = (deal.monthlyPaymentUSD * country.exchangeRate) / 1e9f;
-                    if (deal.sellerCountry == country.countryName)
-                        AddLedgerRow(_incomeList, $"Trade: {deal.resource} export", dealB, true, sym);
-                    else if (deal.buyerCountry == country.countryName)
-                        AddLedgerRow(_expenseList, $"Trade: {deal.resource} import", dealB, false, sym);
-                }
             }
 
             if (country.activeTradeAgreements != null)
             {
-                foreach (var agr in country.activeTradeAgreements)
+                // Group duplicates (e.g. multiple deals of the same resource to the same country)
+                var activeDeals = country.activeTradeAgreements
+                    .Where(a => a.status == TradeAgreementStatus.Active)
+                    .GroupBy(a => new { a.isSeller, a.resource, a.partnerCountry });
+
+                foreach (var group in activeDeals)
                 {
-                    if (agr.status == TradeAgreementStatus.Active)
+                    float totalValueUSD = group.Sum(a => a.monthlyPaymentUSD);
+                    float valueInBillions = (totalValueUSD * country.exchangeRate) / 1e9f;
+                    
+                    if (group.Key.isSeller)
                     {
-                        // monthlyPaymentUSD is absolute dollars, so we divide by 1e9f to match Billions
-                        float valueInBillions = (agr.monthlyPaymentUSD * country.exchangeRate) / 1e9f;
-                        if (agr.isSeller)
-                        {
-                            AddLedgerRow(_incomeList, $"Agrmt: {agr.resource} (to {agr.partnerCountry})", valueInBillions, true, sym);
-                        }
-                        else
-                        {
-                            AddLedgerRow(_expenseList, $"Agrmt: {agr.resource} (from {agr.partnerCountry})", valueInBillions, false, sym);
-                        }
+                        totalIncome += valueInBillions;
+                        AddLedgerRow(_incomeList, $"Agrmt: {group.Key.resource} (to {group.Key.partnerCountry})", valueInBillions, true, sym);
+                    }
+                    else
+                    {
+                        totalExpense += valueInBillions;
+                        AddLedgerRow(_expenseList, $"Agrmt: {group.Key.resource} (from {group.Key.partnerCountry})", valueInBillions, false, sym);
                     }
                 }
             }
 
             // Military budget is directly in Billions USD
             float militaryB = country.militaryBudgetUSD * country.exchangeRate;
+            totalExpense += militaryB;
             AddLedgerRow(_expenseList, "Military Budget", militaryB, false, sym);
 
             if (country.activeOperations != null && country.activeOperations.Count > 0)
@@ -145,18 +149,21 @@ namespace StateCraft.UI
                     totalOpCostUSD += (op.costPerMonth > 0f) ? (op.costPerMonth / 1000f) : 0.05f;
                 }
                 float totalOpCostLocal = totalOpCostUSD * country.exchangeRate;
+                totalExpense += totalOpCostLocal;
                 AddLedgerRow(_expenseList, "Active Operations", totalOpCostLocal, false, sym);
             }
 
             // Welfare Subsidies: country.gdp is in Billions. 
             float subsidyCostUSD = (country.gdp / 12f) * (country.subsidyLevel / 100f);
             float subsidyCostB = subsidyCostUSD * country.exchangeRate;
+            totalExpense += subsidyCostB;
             AddLedgerRow(_expenseList, "Welfare Subsidies", subsidyCostB, false, sym);
 
             if (country.isImportingUranium)
             {
                 // Uranium imports is 0.05f Billions of USD.
                 float uraniumCostB = 0.05f * country.exchangeRate;
+                totalExpense += uraniumCostB;
                 AddLedgerRow(_expenseList, "Uranium Imports", uraniumCostB, false, sym);
             }
 
@@ -167,7 +174,19 @@ namespace StateCraft.UI
                 float totalMonthlyUSD = interestUSD + principalPaymentUSD;
                 
                 float totalDebtCostB = totalMonthlyUSD * country.exchangeRate;
+                totalExpense += totalDebtCostB;
                 AddLedgerRow(_expenseList, "Central Bank Debt Servicing", totalDebtCostB, false, sym);
+            }
+
+            // Update Total Mirror Labels
+            var root = _dashboardRoot;
+            if (root != null)
+            {
+                var incMirror = root.Q<Label>("HeaderIncomeMirror");
+                if (incMirror != null) incMirror.text = "+" + UiFormat.Money(totalIncome, sym);
+                
+                var expMirror = root.Q<Label>("HeaderExpenseMirror");
+                if (expMirror != null) expMirror.text = "-" + UiFormat.Money(totalExpense, sym);
             }
         }
 

@@ -15,6 +15,7 @@ namespace StateCraft.Core
         [Header("Global Data")]
         public List<CountryDataSO> allCountries;
         public CountryDataSO playerCountry;
+        public string playerName = "Leader"; // Player's chosen name / president name
         public float playerBudget = 1000f;
 
         [Header("Economy Database")]
@@ -142,6 +143,8 @@ Destroy(gameObject);
                 }
             }
 
+            SeedHistoricalFactions();
+
             TurnSystem = new TurnSystem();
             EconomySystem = new EconomySystem();
             SecuritySystem = new SecuritySystem(TurnSystem);
@@ -166,6 +169,58 @@ Destroy(gameObject);
 
             // Cleanly acquire NewsSystem — rely wholly on the Instance since it is a static singleton initialized in Awake.
             NewsSystem = Systems.NewsSystem.Instance;
+        }
+
+        private void SeedHistoricalFactions()
+        {
+            if (allCountries == null) return;
+
+            foreach (var country in allCountries)
+            {
+                if (country != null && (string.IsNullOrEmpty(country.globalFaction) || country.globalFaction == "Independent" || country.globalFaction == "Non-Aligned"))
+                {
+                    switch (country.countryName)
+                    {
+                        // ECOWAS (West Africa)
+                        case "Nigeria": case "Ghana": case "Senegal": case "Ivory Coast": 
+                        case "Mali": case "Niger": case "Burkina Faso": case "Guinea":
+                        case "Togo": case "Benin": case "Sierra Leone": case "Liberia":
+                        case "Gambia": case "Cape Verde": case "Guinea-Bissau":
+                            country.globalFaction = "ECOWAS";
+                            break;
+
+                        // SADC (Southern Africa)
+                        case "South Africa": case "Angola": case "Botswana": case "Lesotho":
+                        case "Madagascar": case "Malawi": case "Mauritius": case "Mozambique":
+                        case "Namibia": case "Seychelles": case "Eswatini": case "Zambia":
+                        case "Zimbabwe":
+                            country.globalFaction = "SADC";
+                            break;
+
+                        // EAC (East African Community)
+                        case "Kenya": case "Uganda": case "Tanzania": case "Rwanda":
+                        case "Burundi": case "South Sudan": case "DRC": case "Democratic Republic of the Congo":
+                            country.globalFaction = "EAC";
+                            break;
+                            
+                        // AMU (Arab Maghreb Union - North Africa)
+                        case "Algeria": case "Libya": case "Mauritania": case "Morocco": case "Tunisia":
+                            country.globalFaction = "AMU";
+                            break;
+                            
+                        // ECCAS (Central Africa)
+                        case "Cameroon": case "Central African Republic": case "Chad": 
+                        case "Republic of the Congo": case "Equatorial Guinea": case "Gabon": case "Sao Tome and Principe":
+                            country.globalFaction = "ECCAS";
+                            break;
+
+                        // IGAD (Horn of Africa)
+                        case "Djibouti": case "Eritrea": case "Ethiopia": case "Somalia": case "Sudan":
+                            country.globalFaction = "IGAD";
+                            break;
+                    }
+                }
+            }
         }
 
         private void SafeClearActiveOperations(CountryDataSO country)
@@ -743,9 +798,22 @@ foreach (var country in allCountries)
 
         private void OnApplicationQuit()
         {
-            SaveGame();
+            SaveGame(false);
         }
-        public void SaveGame()
+
+        /// <summary>Returns the full path to the save file, stored in Documents/StateCraft/saves/.</summary>
+        public static string SaveFilePath
+        {
+            get
+            {
+                string docs = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+                string dir  = System.IO.Path.Combine(docs, "StateCraft", "saves");
+                System.IO.Directory.CreateDirectory(dir); // creates the folder if it doesn't exist
+                return System.IO.Path.Combine(dir, "savegame.json");
+            }
+        }
+
+        public void SaveGame(bool autoSave = false)
         {
             var data = new StateCraft.Data.GameSaveData();
             if (TurnSystem is TurnSystem ts) {
@@ -754,6 +822,7 @@ foreach (var country in allCountries)
             }
             data.worldTension = this.worldTension;
             data.playerCountryName = this.playerCountry != null ? this.playerCountry.countryName : "";
+            data.playerName = this.playerName;
 
             foreach (var c in allCountries) {
                 if (c != null) data.countryJsonData.Add(UnityEngine.JsonUtility.ToJson(c));
@@ -792,17 +861,25 @@ foreach (var country in allCountries)
             }
 
             string json = UnityEngine.JsonUtility.ToJson(data);
-            System.IO.File.WriteAllText(UnityEngine.Application.persistentDataPath + "/savegame.json", json);
+            System.IO.File.WriteAllText(SaveFilePath, json);
             
-            if (Systems.NewsSystem.Instance != null)
-                Systems.NewsSystem.Instance.PublishNews("SYSTEM: Quick Save Successful.");
-            if (UI.NotificationManager.Instance != null)
-                UI.NotificationManager.Instance.AddNotification("GAME SAVED TO DISK", Color.green);
+            if (autoSave)
+            {
+                if (Systems.NewsSystem.Instance != null)
+                    Systems.NewsSystem.Instance.PublishNews("SYSTEM: Autosave Complete.");
+            }
+            else
+            {
+                if (Systems.NewsSystem.Instance != null)
+                    Systems.NewsSystem.Instance.PublishNews("SYSTEM: Quick Save Successful.");
+                if (UI.NotificationManager.Instance != null)
+                    UI.NotificationManager.Instance.AddNotification("GAME SAVED TO DISK", Color.green);
+            }
         }
 
         public void LoadGame()
         {
-            string path = UnityEngine.Application.persistentDataPath + "/savegame.json";
+            string path = SaveFilePath;
             if (!System.IO.File.Exists(path)) return;
 
             string json = System.IO.File.ReadAllText(path);
@@ -814,6 +891,7 @@ foreach (var country in allCountries)
             }
             this.worldTension = data.worldTension;
             this.playerCountry = GetCountryByName(data.playerCountryName);
+            if (!string.IsNullOrEmpty(data.playerName)) this.playerName = data.playerName;
 
             // Restore countries
             for(int i=0; i < data.countryJsonData.Count; i++) {
@@ -896,6 +974,10 @@ foreach (var country in allCountries)
             {
                 currentDay = 1;
                 CurrentTurn++;
+                
+                // Autosave at the end of every month
+                GameManager.Instance?.SaveGame(true);
+
                 OnMonthEnded?.Invoke();
                 OnTurnEnded?.Invoke();
             }
@@ -917,6 +999,7 @@ namespace StateCraft.Data
         public int currentDay;
         public float worldTension;
         public string playerCountryName;
+        public string playerName;
         public System.Collections.Generic.List<string> countryJsonData = new System.Collections.Generic.List<string>();
         public System.Collections.Generic.List<string> relationsMatrix = new System.Collections.Generic.List<string>();
         public System.Collections.Generic.List<string> economyLedgers = new System.Collections.Generic.List<string>();

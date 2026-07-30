@@ -22,6 +22,7 @@ namespace StateCraft.Data
                     _missions.Add(CreateDef("aerial_strike", "Aerial Strike", "Precision air strike to destroy hostile infrastructure.", MilitaryBranch.AirForce, new List<MilitaryBranch> { MilitaryBranch.AirForce }, 70f, 1f));
                     _missions.Add(CreateDef("coastal_patrol", "Coastal Patrol", "Secure national waters against piracy and smuggling.", MilitaryBranch.Navy, new List<MilitaryBranch> { MilitaryBranch.Navy }, 45f, 0f));
                     _missions.Add(CreateDef("special_ops", "Special Operations", "Infiltrate and eliminate high-value targets behind enemy lines.", MilitaryBranch.RDF, new List<MilitaryBranch> { MilitaryBranch.RDF }, 75f, 2f));
+                    _missions.Add(CreateDef("border_defense", "Border Defense", "Deploy a joint defensive line to halt enemy invasion at the border.", MilitaryBranch.Army, new List<MilitaryBranch> { MilitaryBranch.Army, MilitaryBranch.AirForce }, 80f, 1f));
                     
                     // Joint Missions
                     _missions.Add(CreateDef("amphibious_landing", "Amphibious Landing", "Conduct coordinated beachhead operations requiring Army and Navy cooperation.", MilitaryBranch.Navy, new List<MilitaryBranch> { MilitaryBranch.Army, MilitaryBranch.Navy }, 80f, 2f));

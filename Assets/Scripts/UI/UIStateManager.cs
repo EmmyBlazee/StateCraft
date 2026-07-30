@@ -3,6 +3,7 @@ using UnityEngine.UIElements;
 using System.Collections;
 using System.Collections.Generic;
 using StateCraft.Core;
+using StateCraft.Data;
 
 namespace StateCraft.UI
 {
@@ -105,13 +106,12 @@ namespace StateCraft.UI
                 _newsTicker.style.opacity = 0;
             }
             
-            // Selector starts visible
+            // Selector always starts hidden — selection now happens in SplashScene.
+            // It will only be shown manually if needed (e.g., in-editor fallback).
             if (_selector != null) {
-                _selector.style.display = DisplayStyle.Flex;
-                _selector.style.opacity = 1;
-            }
-            else {
-                Debug.LogWarning("UI: SelectorRoot not found in any UIDocument!");
+                _selector.style.display = DisplayStyle.None;
+                _selector.style.opacity = 0;
+                _selector.pickingMode = PickingMode.Ignore;
             }
 
             // Cleanup Legacy UI
@@ -151,15 +151,73 @@ doc.gameObject.SetActive(false);
 
         private IEnumerator GameStartSequence()
         {
-// Phase 0: Wait for selection (GameManager.Instance.playerCountry)
-            while (GameManager.Instance.playerCountry == null) yield return null;
+            // ── Bootstrap from GameContext (set by SplashScene) ───────────────
+            if (GameManager.Instance != null)
+            {
+                // Apply player name
+                if (!string.IsNullOrEmpty(GameContext.PlayerName))
+                    GameManager.Instance.playerName = GameContext.PlayerName;
 
-            // Selection confirmed - Hide Selector
-            if (_selector != null) ApplySafeTransition(_selector, false, 0.5f);
-            yield return new WaitForSeconds(0.5f);
+                // Apply selected country
+                if (GameManager.Instance.playerCountry == null && !string.IsNullOrEmpty(GameContext.SelectedCountryName))
+                {
+                    CountryDataSO found = null;
 
-            // Phase 1: Fade in HUD
-            var root = _uiDoc.rootVisualElement;
+#if UNITY_EDITOR
+                    // Editor: scan Assets/Data/Countries directly
+                    var guids = UnityEditor.AssetDatabase.FindAssets("t:CountryDataSO", new[] { "Assets/Data/Countries" });
+                    foreach (var guid in guids)
+                    {
+                        var path  = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+                        var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<CountryDataSO>(path);
+                        if (asset != null && asset.countryName == GameContext.SelectedCountryName)
+                        { found = asset; break; }
+                    }
+#else
+                    // Build: load via CountryRegistry (created by SplashSceneBuilder)
+                    var registry = Resources.Load<StateCraft.Data.CountryRegistry>("CountryRegistry");
+                    if (registry != null)
+                        found = registry.FindByName(GameContext.SelectedCountryName);
+                    else
+                        Debug.LogError("[UIStateManager] CountryRegistry not found in Resources/! Run StateCraft → Build Splash Scene in the editor first.");
+#endif
+                    if (found != null)
+                    {
+                        GameManager.Instance.playerCountry = found;
+                        Debug.Log($"[UIStateManager] Player country set to: {found.countryName}");
+                    }
+                    else
+                    {
+                        Debug.LogError($"[UIStateManager] Could not find CountryDataSO for '{GameContext.SelectedCountryName}'! Check Assets/Data/Countries.");
+                    }
+                }
+
+                // Handle Load Game
+                if (GameContext.ShouldLoadSave)
+                {
+                    GameContext.ShouldLoadSave = false;
+                    GameManager.Instance.LoadGame();
+                    yield return null; // allow LoadGame to set playerCountry
+                }
+
+                // ── Editor fallback: if no country set, show selector ─────────
+                if (GameManager.Instance.playerCountry == null)
+                {
+                    Debug.LogWarning("[UIStateManager] No country in GameContext. Showing selector as fallback.");
+                    if (_selector != null)
+                    {
+                        _selector.style.display  = DisplayStyle.Flex;
+                        _selector.style.opacity  = 1;
+                        _selector.pickingMode    = PickingMode.Position;
+                    }
+                    while (GameManager.Instance.playerCountry == null) yield return null;
+                    if (_selector != null) ApplySafeTransition(_selector, false, 0.5f);
+                    yield return new WaitForSeconds(0.5f);
+                }
+            }
+
+            // ── Phase 1: Fade in HUD ──────────────────────────────────────────
+            var root    = _uiDoc.rootVisualElement;
             var topBar  = root.Q<VisualElement>("TopBar");
             var sidebar = root.Q<VisualElement>("Sidebar");
 
@@ -168,18 +226,17 @@ doc.gameObject.SetActive(false);
 
             yield return new WaitForSeconds(0.5f);
 
-            // Phase 2: Scenario Briefing — shown once per country per session
-            var player = GameManager.Instance.playerCountry;
+            // ── Phase 2: Scenario Briefing ────────────────────────────────────
+            var player = GameManager.Instance?.playerCountry;
             if (player != null && !player.hasShownBriefing)
             {
                 yield return StartCoroutine(ShowScenarioBriefing(root, player));
                 player.hasShownBriefing = true;
             }
 
-            // Phase 3: Fade in Ticker
+            // ── Phase 3: Fade in News Ticker ──────────────────────────────────
             if (_newsTicker != null) ApplySafeTransition(_newsTicker, true, 0.8f);
-
-}
+        }
 
         // ─── Scenario Briefing Screen ─────────────────────────────────────────
         // Full-screen overlay shown once at game start. Pulls text from

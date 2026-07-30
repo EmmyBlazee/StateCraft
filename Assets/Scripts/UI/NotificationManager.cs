@@ -13,8 +13,23 @@ namespace StateCraft.UI
 
         public event Action<string, Color> OnNotificationAdded;
 
+        public struct NotificationData
+        {
+            public string title;
+            public string message;
+            public Color color;
+            public bool isCritical;
+            public DateTime time;
+        }
+
         private UIDocument _uiDocument;
         private VisualElement _stack;
+
+        private List<NotificationData> _history = new List<NotificationData>();
+        private VisualElement _historyModal;
+        private ScrollView _historyScrollView;
+        private Button _btnCloseHistory;
+        private Button _btnClearHistory;
 
         private void Awake()
         {
@@ -27,23 +42,36 @@ namespace StateCraft.UI
             {
                 doc.sortingOrder = 105;
                 _stack = doc.rootVisualElement.Q<VisualElement>("NotificationStack");
+                _historyModal = doc.rootVisualElement.Q<VisualElement>("NotificationHistoryModal");
+                _historyScrollView = doc.rootVisualElement.Q<ScrollView>("HistoryScrollView");
+                _btnCloseHistory = doc.rootVisualElement.Q<Button>("BtnCloseHistory");
+                _btnClearHistory = doc.rootVisualElement.Q<Button>("BtnClearHistory");
                 doc.rootVisualElement.pickingMode = PickingMode.Ignore;
             }
 
             // FALLBACK: Global search if not found locally
-            if (_stack == null)
+            if (_stack == null || _historyModal == null)
             {
                 var allDocs = FindObjectsOfType<UIDocument>();
 
                 foreach (var d in allDocs)
                 {
-                    var found = d.rootVisualElement?.Q<VisualElement>("NotificationStack");
-
-                    if (found != null)
+                    if (d == null || d.rootVisualElement == null) continue;
+                    
+                    if (_stack == null) _stack = d.rootVisualElement.Q<VisualElement>("NotificationStack");
+                    if (_historyModal == null)
                     {
-                        _stack = found;
-                        break;
+                        var modal = d.rootVisualElement.Q<VisualElement>("NotificationHistoryModal");
+                        if (modal != null)
+                        {
+                            _historyModal = modal;
+                            _historyScrollView = d.rootVisualElement.Q<ScrollView>("HistoryScrollView");
+                            _btnCloseHistory = d.rootVisualElement.Q<Button>("BtnCloseHistory");
+                            _btnClearHistory = d.rootVisualElement.Q<Button>("BtnClearHistory");
+                        }
                     }
+
+                    if (_stack != null && _historyModal != null) break;
                 }
             }
 
@@ -51,7 +79,25 @@ namespace StateCraft.UI
             {
                 Debug.LogWarning("[UI] NotificationManager: Could not find 'NotificationStack' in any UIDocument.");
             }
+
+            BindHistoryControls();
         }
+
+        private void BindHistoryControls()
+        {
+            if (_btnCloseHistory != null)
+            {
+                _btnCloseHistory.clicked -= OnCloseClicked;
+                _btnCloseHistory.clicked += OnCloseClicked;
+            }
+            if (_btnClearHistory != null)
+            {
+                _btnClearHistory.clicked -= ClearHistory;
+                _btnClearHistory.clicked += ClearHistory;
+            }
+        }
+
+        private void OnCloseClicked() => ToggleHistoryModal(false);
 
         // =========================
         // EVENT BUS CONNECTION
@@ -113,6 +159,22 @@ namespace StateCraft.UI
                 : isWarBulletin
                 ? "WAR REPORT"
                 : "INTELLIGENCE REPORT";
+
+            // Add to history
+            _history.Insert(0, new NotificationData
+            {
+                title = title,
+                message = message,
+                color = color,
+                isCritical = isCritical,
+                time = DateTime.Now
+            });
+
+            if (_history.Count > 100) _history.RemoveAt(_history.Count - 1);
+            if (_historyModal != null && _historyModal.style.display == DisplayStyle.Flex)
+            {
+                RefreshHistoryModal();
+            }
 
             ShowAlert(title, message, isCritical, displaySeconds);
 
@@ -242,6 +304,121 @@ namespace StateCraft.UI
             yield return new WaitForSeconds(0.5f);
 
             _stack.Remove(element);
+        }
+
+        // =========================
+        // HISTORY MODAL
+        // =========================
+
+        public void ToggleHistoryModal(bool? state = null)
+        {
+            if (_historyModal == null)
+            {
+                var allDocs = FindObjectsOfType<UIDocument>();
+                foreach (var d in allDocs)
+                {
+                    if (d?.rootVisualElement == null) continue;
+                    var modal = d.rootVisualElement.Q<VisualElement>("NotificationHistoryModal");
+                    if (modal != null)
+                    {
+                        _historyModal = modal;
+                        _historyScrollView = d.rootVisualElement.Q<ScrollView>("HistoryScrollView");
+                        _btnCloseHistory = d.rootVisualElement.Q<Button>("BtnCloseHistory");
+                        _btnClearHistory = d.rootVisualElement.Q<Button>("BtnClearHistory");
+                        BindHistoryControls();
+                        break;
+                    }
+                }
+            }
+
+            if (_historyModal == null) return;
+
+            bool isVisible = _historyModal.style.display == DisplayStyle.Flex;
+            bool newState = state ?? !isVisible;
+
+            if (newState)
+            {
+                _historyModal.style.display = DisplayStyle.Flex;
+                RefreshHistoryModal();
+            }
+            else
+            {
+                _historyModal.style.display = DisplayStyle.None;
+            }
+        }
+
+        private void ClearHistory()
+        {
+            _history.Clear();
+            RefreshHistoryModal();
+        }
+
+        private void RefreshHistoryModal()
+        {
+            if (_historyScrollView == null) return;
+            _historyScrollView.Clear();
+
+            if (_history.Count == 0)
+            {
+                var lbl = new Label("No recent notifications.");
+                lbl.style.color = new Color(0.5f, 0.5f, 0.5f);
+                lbl.style.marginTop = 20;
+                lbl.style.unityTextAlign = TextAnchor.MiddleCenter;
+                _historyScrollView.Add(lbl);
+                return;
+            }
+
+            foreach (var notif in _history)
+            {
+                var card = new VisualElement();
+                
+                card.style.backgroundColor = notif.isCritical
+                    ? new Color(0.15f, 0.05f, 0.05f, 0.95f)
+                    : new Color(0.05f, 0.1f, 0.15f, 0.95f);
+
+                card.style.borderLeftWidth = 4;
+                card.style.borderLeftColor = notif.color;
+                card.style.marginBottom = 10;
+                card.style.paddingTop = 15;
+                card.style.paddingBottom = 15;
+                card.style.paddingLeft = 15;
+                card.style.paddingRight = 15;
+                
+                card.style.borderTopWidth = 1;
+                card.style.borderBottomWidth = 1;
+                card.style.borderRightWidth = 1;
+                var borderColor = new Color(1f, 1f, 1f, 0.1f);
+                card.style.borderTopColor = borderColor;
+                card.style.borderBottomColor = borderColor;
+                card.style.borderRightColor = borderColor;
+
+                var headerRow = new VisualElement();
+                headerRow.style.flexDirection = FlexDirection.Row;
+                headerRow.style.justifyContent = Justify.SpaceBetween;
+
+                var titleLabel = new Label(notif.title.ToUpper());
+                titleLabel.style.fontSize = 11;
+                titleLabel.style.color = notif.color;
+                titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+
+                var timeLabel = new Label(notif.time.ToString("HH:mm"));
+                timeLabel.style.fontSize = 10;
+                timeLabel.style.color = new Color(0.6f, 0.6f, 0.6f);
+
+                headerRow.Add(titleLabel);
+                headerRow.Add(timeLabel);
+
+                var msgLabel = new Label(notif.message);
+                msgLabel.style.fontSize = 10;
+                msgLabel.style.color = Color.white;
+                msgLabel.style.whiteSpace = WhiteSpace.Normal;
+                msgLabel.style.marginTop = 5;
+
+                card.Add(headerRow);
+                card.Add(msgLabel);
+                
+                _historyScrollView.Add(card);
+            }
         }
     }
 }

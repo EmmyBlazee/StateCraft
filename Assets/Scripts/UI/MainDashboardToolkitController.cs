@@ -18,6 +18,7 @@ namespace StateCraft.UI
         private VisualElement _topBar;
         private VisualElement _panelContainer;
         private System.Collections.Generic.Dictionary<string, VisualElement> _panels = new System.Collections.Generic.Dictionary<string, VisualElement>();
+        private VisualElement _bottomNavBar;
         
         // Navigation Buttons
         private Button _btnEconomy;
@@ -39,12 +40,38 @@ namespace StateCraft.UI
         // Time Controls
         private Label _dateLabel;
         private Button _btnPause, _btn1x, _btn2x, _btn3x;
+        private Button _btnNotificationHistory;
+        private Button _btnSystemMenu;
 
+        // System Menu Modal
+        private VisualElement _systemMenuRoot;
+        private Button _btnResume;
+        private VisualElement _howToPlayRoot;
+        
+        // War Declared Modal
+        private VisualElement _warDeclaredModal;
+        private Label _warDeclaredMessage;
+        private Button _btnAckWar;
 
+        // Game Over Screen
+        private VisualElement _gameOverRoot;
+        private Label _gameOverTitle;
+        private Label _gameOverSummary;
+        private Label _gameOverStats;
+        private Button _btnQuitToMenuFromGameOver;
+        private Button _btnSaveScreenshot;
 
         // Event Log
         private VisualElement _eventLogPanel;
         private ScrollView _eventLogScrollView;
+
+        // President Profile Modal
+        private VisualElement _presidentProfileModal;
+        private Label _presidentNameLabel;
+        private Label _presidentCountryLabel;
+        private Label _presidentCapitalLabel;
+        private Label _presidentScenarioLabel;
+        private Button _btnClosePresidentProfile;
 
 
         private void Awake()
@@ -75,15 +102,177 @@ namespace StateCraft.UI
             _btn1x = _root.Q<Button>("Time1x");
             _btn2x = _root.Q<Button>("Time2x");
             _btn3x = _root.Q<Button>("Time3x");
+            _btnNotificationHistory = _root.Q<Button>("BtnNotificationHistory");
+            _btnSystemMenu = _root.Q<Button>("BtnSystemMenu");
+
+            _systemMenuRoot = _root.Q<VisualElement>("SystemMenuRoot");
+            if (_systemMenuRoot != null)
+            {
+                _systemMenuRoot.style.display = DisplayStyle.None;
+                
+                _btnResume = _systemMenuRoot.Q<Button>("BtnResume");
+                if (_btnResume != null) _btnResume.clicked += () => ToggleSystemMenu(false);
+
+                var btnQuit = _systemMenuRoot.Q<Button>("BtnQuitToMenu");
+                if (btnQuit != null) btnQuit.clicked += () =>
+                {
+                    GameContext.ReturningToMainMenu = true;
+                    UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+                };
+                
+                var btnSave = _systemMenuRoot.Q<Button>("BtnSave");
+                if (btnSave != null) btnSave.clicked += () =>
+                {
+                    GameManager.Instance?.SaveGame();
+                    ToggleSystemMenu(false);
+                };
+
+                var btnLoad = _systemMenuRoot.Q<Button>("BtnLoad");
+                if (btnLoad != null) btnLoad.clicked += () =>
+                {
+                    string path = GameManager.SaveFilePath;
+                    if (System.IO.File.Exists(path))
+                    {
+                        GameManager.Instance?.LoadGame();
+                        ToggleSystemMenu(false);
+                    }
+                    else
+                    {
+                        NotificationManager.Instance?.AddNotification("NO SAVE FILE FOUND — Start a game first.", Color.red);
+                        ToggleSystemMenu(false);
+                    }
+                };
+
+                var btnHowToPlay = _systemMenuRoot.Q<Button>("BtnHowToPlay");
+                if (btnHowToPlay != null) btnHowToPlay.clicked += () =>
+                {
+                    ToggleSystemMenu(false);
+                    if (_howToPlayRoot != null) _howToPlayRoot.style.display = DisplayStyle.Flex;
+                };
+            }
+
+            // How To Play panel
+            _howToPlayRoot = _root.Q<VisualElement>("HowToPlayRoot");
+            if (_howToPlayRoot != null)
+            {
+                _howToPlayRoot.pickingMode = PickingMode.Position;
+                var btnCloseHTP = _howToPlayRoot.Q<Button>("BtnCloseHTP");
+                if (btnCloseHTP != null)
+                {
+                    btnCloseHTP.pickingMode = PickingMode.Position;
+                    btnCloseHTP.clicked += () => _howToPlayRoot.style.display = DisplayStyle.None;
+                }
+
+                void SwitchInGameHTPTab(int activeIdx)
+                {
+                    for (int i = 0; i <= 5; i++)
+                    {
+                        var page = _howToPlayRoot.Q<VisualElement>($"HTPPage{i}");
+                        var tabBtn = _howToPlayRoot.Q<Button>($"HTPTab{i}");
+
+                        if (page != null) page.style.display = (i == activeIdx) ? DisplayStyle.Flex : DisplayStyle.None;
+                        if (tabBtn != null)
+                        {
+                            if (i == activeIdx) tabBtn.AddToClassList("htp-tab-active");
+                            else tabBtn.RemoveFromClassList("htp-tab-active");
+                        }
+                    }
+                }
+
+                for (int i = 0; i <= 5; i++)
+                {
+                    int tabIdx = i;
+                    var tabBtn = _howToPlayRoot.Q<Button>($"HTPTab{i}");
+                    if (tabBtn != null)
+                    {
+                        tabBtn.pickingMode = PickingMode.Position;
+                        tabBtn.clicked += () => SwitchInGameHTPTab(tabIdx);
+                    }
+                }
+            }
+
+            // President Profile Modal
+            _presidentProfileModal = _root.Q<VisualElement>("PresidentProfileModal");
+            if (_presidentProfileModal != null)
+            {
+                _presidentNameLabel = _presidentProfileModal.Q<Label>("PresidentNameLabel");
+                _presidentCountryLabel = _presidentProfileModal.Q<Label>("PresidentCountryLabel");
+                _presidentCapitalLabel = _presidentProfileModal.Q<Label>("PresidentCapitalLabel");
+                _presidentScenarioLabel = _presidentProfileModal.Q<Label>("PresidentScenarioLabel");
+                
+                _btnClosePresidentProfile = _presidentProfileModal.Q<Button>("BtnClosePresidentProfile");
+                if (_btnClosePresidentProfile != null)
+                    _btnClosePresidentProfile.clicked += () => _presidentProfileModal.style.display = DisplayStyle.None;
+            }
+
+            if (_playerFlag != null)
+            {
+                _playerFlag.RegisterCallback<ClickEvent>(evt => ShowPresidentProfile());
+            }
+
+            _warDeclaredModal = _root.Q<VisualElement>("WarDeclaredModal");
+            if (_warDeclaredModal != null)
+            {
+                _warDeclaredMessage = _warDeclaredModal.Q<Label>("WarDeclaredMessage");
+                _btnAckWar = _warDeclaredModal.Q<Button>("BtnAckWar");
+                if (_btnAckWar != null) _btnAckWar.clicked += () => 
+                {
+                    _warDeclaredModal.style.display = DisplayStyle.None;
+                };
+            }
 
             if (_btnPause != null) _btnPause.clicked += () => SetTimeSpeed(0);
             if (_btn1x != null) _btn1x.clicked += () => SetTimeSpeed(1);
             if (_btn2x != null) _btn2x.clicked += () => SetTimeSpeed(2);
             if (_btn3x != null) _btn3x.clicked += () => SetTimeSpeed(3);
+            if (_btnNotificationHistory != null) _btnNotificationHistory.clicked += () => {
+                if (NotificationManager.Instance != null) NotificationManager.Instance.ToggleHistoryModal();
+            };
+            if (_btnSystemMenu != null) _btnSystemMenu.clicked += () => ToggleSystemMenu(true);
 
             // Navigation (Modern Age Style - Bottom Bar)
             _topBar = _root.Q<VisualElement>("TopBar");
+            _bottomNavBar = _root.Q<VisualElement>("BottomNavBar");
             _panelContainer = _root.Q<VisualElement>("PanelContainer");
+
+            // Game Over Screen Setup
+            _gameOverRoot = _root.Q<VisualElement>("GameOverRoot");
+            if (_gameOverRoot != null)
+            {
+                _gameOverTitle = _gameOverRoot.Q<Label>("GameOverTitle");
+                _gameOverSummary = _gameOverRoot.Q<Label>("GameOverSummary");
+                _gameOverStats = _gameOverRoot.Q<Label>("GameOverStats");
+                _btnQuitToMenuFromGameOver = _gameOverRoot.Q<Button>("BtnQuitToMenuFromGameOver");
+                _btnSaveScreenshot = _gameOverRoot.Q<Button>("BtnSaveScreenshot");
+                
+                if (_btnQuitToMenuFromGameOver != null)
+                {
+                    _btnQuitToMenuFromGameOver.clicked += () => 
+                    {
+                        GameContext.ReturningToMainMenu = true;
+                        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+                    };
+                }
+
+                if (_btnSaveScreenshot != null)
+                {
+                    _btnSaveScreenshot.clicked += () =>
+                    {
+                        string filename = $"StateCraft_GameOver_{System.DateTime.Now:yyyyMMdd_HHmmss}.png";
+                        UnityEngine.ScreenCapture.CaptureScreenshot(filename);
+                        if (NotificationManager.Instance != null)
+                        {
+                            NotificationManager.Instance.AddNotification($"Screenshot saved to {filename}", Color.green);
+                        }
+                    };
+                }
+            }
+
+            // Register for Game Over
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.OnGameOver += HandleGameOver;
+            }
             
             _btnEconomy = _root.Q<Button>("NavEconomy");
             if (_btnEconomy != null) _btnEconomy.clicked += () => ShowPanel("Economy");
@@ -212,10 +401,20 @@ namespace StateCraft.UI
             HideAllPanels();
         }
 
+        private void OnDisable()
+        {
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.OnGameOver -= HandleGameOver;
+            }
+        }
 
+        
         public void ShowPanel(string name)
         {
             HideAllPanels();
+            if (_systemMenuRoot != null) _systemMenuRoot.style.display = DisplayStyle.None;
+
             if (_panels.ContainsKey(name) && _panels[name] != null)
             {
                 SetDashboardHeaderMode(true);
@@ -284,6 +483,37 @@ namespace StateCraft.UI
             if (activeBtn != null)
             {
                 activeBtn.AddToClassList("modern-nav-btn-active");
+            }
+        }
+
+        private void ShowPresidentProfile()
+        {
+            if (_presidentProfileModal == null || GameManager.Instance == null || GameManager.Instance.playerCountry == null) return;
+            
+            var c = GameManager.Instance.playerCountry;
+            if (_presidentNameLabel != null) _presidentNameLabel.text = $"PRESIDENT: {GameManager.Instance.playerName.ToUpper()}";
+            if (_presidentCountryLabel != null) _presidentCountryLabel.text = $"NATION: {c.countryName.ToUpper()}";
+            if (_presidentCapitalLabel != null) _presidentCapitalLabel.text = $"CAPITAL: {c.capitalCity.ToUpper()}";
+            if (_presidentScenarioLabel != null) _presidentScenarioLabel.text = c.scenarioContext;
+            
+            _presidentProfileModal.style.display = DisplayStyle.Flex;
+        }
+
+        private void ToggleSystemMenu(bool show)
+        {
+            if (_systemMenuRoot == null) return;
+            
+            _systemMenuRoot.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
+            
+            if (show)
+            {
+                // Pause the game when opening the menu
+                if (GameManager.Instance != null) SetTimeSpeed(0);
+            }
+            else
+            {
+                // Resume the game at 1x when closing the menu
+                if (GameManager.Instance != null) SetTimeSpeed(1);
             }
         }
 
@@ -513,8 +743,38 @@ namespace StateCraft.UI
 
         public void ShowWarDeclaredModal(StateCraft.Data.CountryDataSO aggressor)
         {
-            // TODO: Implement War Declared UI Modal
-            Debug.LogWarning($"[UI] War Declared by {aggressor.countryName}! Modal UI not yet implemented.");
+            if (_warDeclaredModal != null && _warDeclaredMessage != null)
+            {
+                _warDeclaredMessage.text = $"{aggressor.countryName.ToUpper()} HAS FORMALLY DECLARED WAR UPON OUR NATION.";
+                _warDeclaredModal.style.display = DisplayStyle.Flex;
+                
+                // Force pause when war is declared
+                if (GameManager.Instance != null)
+                {
+                    SetTimeSpeed(0);
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"[UI] War Declared by {aggressor.countryName}! Modal UI not wired up properly.");
+            }
+        }
+
+        private void HandleGameOver(bool isVictory, string title, string summary, string stats)
+        {
+            if (_gameOverRoot == null) return;
+            
+            _gameOverRoot.style.display = DisplayStyle.Flex;
+            if (_gameOverTitle != null)
+            {
+                _gameOverTitle.text = title;
+                _gameOverTitle.style.color = isVictory ? new Color(0.2f, 0.8f, 0.2f) : new Color(1f, 0.2f, 0.2f);
+                _gameOverTitle.style.textShadow = isVictory 
+                    ? new StyleTextShadow(new TextShadow { color = new Color(0.2f, 0.8f, 0.2f, 0.5f), blurRadius = 10 })
+                    : new StyleTextShadow(new TextShadow { color = new Color(1f, 0.2f, 0.2f, 0.5f), blurRadius = 10 });
+            }
+            if (_gameOverSummary != null) _gameOverSummary.text = summary;
+            if (_gameOverStats != null) _gameOverStats.text = stats;
         }
     }
 }

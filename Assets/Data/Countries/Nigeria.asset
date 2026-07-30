@@ -80,20 +80,20 @@ MonoBehaviour:
   hasShownBriefing: 1
   countryFlag: {fileID: 0}
   mapColor: {r: 0.37807375, g: 0.8165946, b: 0.7795663, a: 1}
-  population: 230785205
+  population: 231747811
   populationGrowthRate: 0.025
-  populationChangeLastTurn: 479802
-  invRiceTonnes: 380631.34
+  populationChangeLastTurn: 481804
+  invRiceTonnes: 395425.8
   invCassavaTonnes: 0
-  invCocoaTonnes: 1660000
-  invMineralsTonnes: 1900000
-  invOilBarrels: 1.699e+9
+  invCocoaTonnes: 1700000
+  invMineralsTonnes: 2100000
+  invOilBarrels: 1.739e+9
   invTechGoods: 0
-  intelligenceLevel: 74.11604
-  cyberDefenseLevel: 100
+  intelligenceLevel: 72.57225
+  cyberDefenseLevel: 99.97224
   signalInterceptCapability: 100
   intelligenceBudget: 0.3513129
-  intelligenceFunds: 2005.2698
+  intelligenceFunds: 1735.9724
   satelliteCount: 2
   satellitesUnderConstruction: 0
   satelliteBuildMonthsRemaining: 0
@@ -103,7 +103,7 @@ MonoBehaviour:
   operativeCount: 5
   globalIntelCoverage: 100
   foreignAgentsDetected: 0
-  agencyIntegrity: 35.5
+  agencyIntegrity: 32.5
   activeCovertOps: []
   recentReconReports: []
   detectedThreats: []
@@ -124,18 +124,18 @@ MonoBehaviour:
   - resourceName: Cyber Tools
     allocatedAmount: 70
     maxAmount: 100
-  gdp: 190.92024
-  income: 4.9420295
+  gdp: 188.1555
+  income: 4.493784
   spending: 5.5206313
-  treasury: 999.4
+  treasury: 3997.1929
   inflationRate: 0
   gdpGrowthRate: 0.040000003
   playerBudget: 0
-  exchangeRate: 1550
+  exchangeRate: 1360.7295
   baseExchangeRate: 1550
-  debt: 167.98642
-  domesticDebt: 87.42777
-  foreignDebt: 81.33905
+  debt: 177.9682
+  domesticDebt: 90.84286
+  foreignDebt: 87.12535
   taxRate: 19.35
   subsidyLevel: 0
   importTariffRate: 19.6
@@ -217,14 +217,14 @@ MonoBehaviour:
   prevPublicApproval: 0
   prevMonthlyTaxRevenue: 5.2591376
   prevMonthBalance: 0
-  taxArrears: 34.47585
+  taxArrears: 36.179226
   budgetHistory:
-  - -1357.9548
-  - -1974.6678
   - -1730.7404
   - -1885.7811
   - -1705.8695
   - -2097.6008
+  - -2241.0847
+  - -2062.758
   resources:
   - type: 0
     abundance: 85
@@ -272,26 +272,26 @@ MonoBehaviour:
   workforceMining: 30000
   workforceAgri: 150000
   workforceManufacturing: 5000
-  stability: 56.166664
-  security: 40.718105
+  stability: 60
+  security: 39.564137
   nationalPoliceSize: 55000
   militaryStrength: 3.0044074
   armyStrength: 6
   navyStrength: 0.014441828
   airForceStrength: 0.0050632954
-  unitInfantry: 0
-  unitTanks: 0
-  unitAPCs: 0
+  unitInfantry: 12000
+  unitTanks: 138
+  unitAPCs: 515
   unitArtillery: 0
   unitRifles: 24000
   unitFighters: 0
-  unitBombers: 0
+  unitBombers: 9
   unitAttackHelis: 0
   unitUAVs: 0
   unitFrigates: 1
   unitDestroyers: 0
   unitSubmarines: 0
-  unitPatrolBoats: 0
+  unitPatrolBoats: 8
   oosRifles: 0
   oosTanks: 0
   oosAPCs: 0
@@ -317,23 +317,23 @@ MonoBehaviour:
   militaryProjects: []
   militaryBudgetUSD: 1.5056268
   militaryUpkeepUSD: 2.2773275
-  militaryReadiness: 78
+  militaryReadiness: 74
   armyStats:
     branchName: Army
-    personnel: 0
-    equipment: 0
+    personnel: 12000
+    equipment: 653
     readiness: 95
     morale: 80
   navyStats:
     branchName: Navy
-    personnel: 450
-    equipment: 1
+    personnel: 4250
+    equipment: 9
     readiness: 92
     morale: 75
   airForceStats:
     branchName: Air Force
-    personnel: 0
-    equipment: 0
+    personnel: 1551
+    equipment: 9
     readiness: 65
     morale: 85
   rdfStats:
@@ -347,65 +347,36 @@ MonoBehaviour:
   reserveMedical: 100
   reserveFood: 84
   activeOperations:
-  - operationId: ca90f6b3-4238-4d50-8b31-0747dfeb58de
-    missionId: theater_strike
+  - operationId: eb3be470-c5aa-4a1d-a9ff-42bf8131f1e7
+    missionId: ground_assault
     contributions:
     - branch: 0
       unitCounts:
       - unitName: Tanks
-        count: 193
+        count: 55
       - unitName: APCs
-        count: 565
-      personnelAssigned: 20000
+        count: 50
+      personnelAssigned: 8000
       casualtiesSuffered: 0
       equipmentLost: 0
-    - branch: 1
-      unitCounts:
-      - unitName: Fighters
-        count: 0
-      - unitName: Bombers
-        count: 9
-      - unitName: Helicopters
-        count: 0
-      - unitName: Drones
-        count: 0
-      personnelAssigned: 1551
-      casualtiesSuffered: 0
-      equipmentLost: 0
-    - branch: 2
-      unitCounts:
-      - unitName: Frigates
-        count: 0
-      - unitName: Submarines
-        count: 0
-      - unitName: Patrol Boats
-        count: 8
-      personnelAssigned: 3800
-      casualtiesSuffered: 0
-      equipmentLost: 0
-    - branch: 3
-      unitCounts: []
-      personnelAssigned: 0
-      casualtiesSuffered: 0
-      equipmentLost: 0
-    opName: OPERATION MOZAMBIQUE SHIELD
-    regionName: Mozambique
-    type: theater_strike
+    opName: OPERATION ENUGU SHIELD
+    regionName: Enugu
+    type: ground_assault
     status: Active
-    costPerMonth: 2743.5103
-    deployedTroops: 20000
+    costPerMonth: 464.99997
+    deployedTroops: 8000
     deployedHelis: 0
-    deployedTanks: 193
-    deployedAPCs: 565
+    deployedTanks: 55
+    deployedAPCs: 50
     deployedFighters: 0
     deployedFrigates: 0
     deployedSubmarines: 0
     deployedRDF: 0
     deployedUAVs: 0
-    deployedBombers: 9
-    deployedAirForce: 1551
-    deployedNavy: 3800
-    deployedPatrolBoats: 8
+    deployedBombers: 0
+    deployedAirForce: 0
+    deployedNavy: 0
+    deployedPatrolBoats: 0
     deployedArtillery: 0
     deployedDestroyers: 0
     casualtyRisk: 
@@ -415,7 +386,7 @@ MonoBehaviour:
     turnsToDeploy: 1
     phase: Preparing
     commander: 
-    objective: Establish security presence in Mozambique
+    objective: Conduct offensive land operations
     turnsActive: 0
     morale: 80
     territoryCaptured: 0
@@ -451,98 +422,66 @@ MonoBehaviour:
     durationMonths: 0
     rewards: None
   operationalLogs: []
-  activeRecommendations: []
+  activeRecommendations:
+  - regionName: Lagos
+    threatType: Civil Unrest
+    urgency: Medium
+    justification: Security deterioration detected (50%). Riot warning active.
+    turnsActive: 1
+    isAddressed: 0
+  - regionName: Kano
+    threatType: Civil Unrest
+    urgency: Medium
+    justification: Security deterioration detected (50%). Riot warning active.
+    turnsActive: 1
+    isAddressed: 0
+  - regionName: Rivers
+    threatType: Civil Unrest
+    urgency: Medium
+    justification: Security deterioration detected (50%). Riot warning active.
+    turnsActive: 1
+    isAddressed: 0
+  - regionName: Borno
+    threatType: Civil Unrest
+    urgency: Medium
+    justification: Security deterioration detected (50%). Riot warning active.
+    turnsActive: 1
+    isAddressed: 0
+  - regionName: Abuja (FCT)
+    threatType: Civil Unrest
+    urgency: Medium
+    justification: Security deterioration detected (50%). Riot warning active.
+    turnsActive: 1
+    isAddressed: 0
+  - regionName: Enugu
+    threatType: Civil Unrest
+    urgency: Medium
+    justification: Security deterioration detected (50%). Riot warning active.
+    turnsActive: 1
+    isAddressed: 0
   activeInsurgentCamps: []
   trainingPipelines: []
   productionOrders: []
   completedProductions: []
   availableOffers:
-  - id: OFF_ART_2_457
-    title: 30 Caesar Howitzers
-    subtitle: Self-Propelled Howitzer
+  - id: OFF_APC_1_548
+    title: 100 APCs (Rooikat Mk1D)
+    subtitle: Armored Personnel Carrier
     tags:
-    - 155mm
-    - Wheeled
-    supplier: Nexter
-    country: France
-    unitCost: "\u20A61.6B"
-    totalCost: "\u20A647.4B"
-    quantity: 30 Units
-    deliveryTime: 7 Months
-    flagEmoji: "\U0001F1EB\U0001F1F7"
-    produceType: ARTILLERY
-    unitQuantity: 30
-    deliveryMonths: 7
-    totalCostB: 47.442165
-  - id: OFF_PATROL_1_677
-    title: 8 Offshore Patrol Boats
-    subtitle: Offshore Patrol Vessel
-    tags:
-    - Coastal Ops
-    - Fast
-    supplier: ASFAT
-    country: Turkey
-    unitCost: "\u20A611.8B"
-    totalCost: "\u20A694.7B"
-    quantity: 8 Units
-    deliveryTime: 6 Months
-    flagEmoji: "\U0001F1F9\U0001F1F7"
-    produceType: PATROL_BOAT
-    unitQuantity: 8
-    deliveryMonths: 6
-    totalCostB: 94.66843
-  - id: OFF_TNK_1_496
-    title: 50 Main Battle Tanks (T-90)
-    subtitle: Main Battle Tank
-    tags:
-    - 125mm Gun
-    - ERA Armor
-    supplier: Uralvagonzavod
-    country: Russia
-    unitCost: "\u20A61.4B"
-    totalCost: "\u20A668.3B"
-    quantity: 50 Units
-    deliveryTime: 6 Months
-    flagEmoji: "\U0001F1F7\U0001F1FA"
-    produceType: TNK
-    unitQuantity: 50
-    deliveryMonths: 6
-    totalCostB: 68.2518
-  - id: OFF_FRG_1_817
-    title: 2 Multi-Role Frigates
-    subtitle: Frigate
-    tags:
-    - ASW
-    - AAW
-    supplier: Naval Group
-    country: France
-    unitCost: "\u20A6239.3B"
-    totalCost: "\u20A6478.6B"
-    quantity: 2 Units
-    deliveryTime: 25 Months
-    flagEmoji: "\U0001F1EB\U0001F1F7"
-    produceType: FRG
-    unitQuantity: 2
-    deliveryMonths: 25
-    totalCostB: 478.58728
-  - id: OFF_FTR_2_398
-    title: 10 F-16 Block 70/72
-    subtitle: Multi-Role Combat Aircraft
-    tags:
-    - 4.5 Gen
-    - AESA Radar
-    supplier: Lockheed Martin
-    country: USA
-    unitCost: "\u20A628.6B"
-    totalCost: "\u20A6285.9B"
-    quantity: 10 Units
-    deliveryTime: 13 Months
-    flagEmoji: "\U0001F1FA\U0001F1F8"
-    produceType: FTR
-    unitQuantity: 10
-    deliveryMonths: 13
-    totalCostB: 285.85
-  - id: OFF_RIFLE_1_423
+    - 8x8
+    - Mine Resistant
+    supplier: Denel Land Systems
+    country: South Africa
+    unitCost: "\u20A6404.2M"
+    totalCost: "\u20A640.4B"
+    quantity: 100 Units
+    deliveryTime: 5 Months
+    flagEmoji: "\U0001F1FF\U0001F1E6"
+    produceType: APC
+    unitQuantity: 100
+    deliveryMonths: 5
+    totalCostB: 40.420734
+  - id: OFF_RIFLE_1_772
     title: 10,000 Assault Rifles
     subtitle: Infantry Weapons
     tags:
@@ -551,32 +490,15 @@ MonoBehaviour:
     supplier: FN Herstal
     country: Belgium
     unitCost: "\u20A64.6M"
-    totalCost: "\u20A645.8B"
+    totalCost: "\u20A646.0B"
     quantity: 10k Units
     deliveryTime: 2 Months
     flagEmoji: "\U0001F1E7\U0001F1EA"
     produceType: RIFLE
     unitQuantity: 10000
     deliveryMonths: 2
-    totalCostB: 45.773727
-  - id: OFF_FTR_1_960
-    title: 12 Fighter Jets (JF-17)
-    subtitle: Multi-Role Combat Aircraft
-    tags:
-    - 4.5 Gen
-    - Avionics
-    supplier: PAC
-    country: Pakistan
-    unitCost: "\u20A614.4B"
-    totalCost: "\u20A6172.7B"
-    quantity: 12 Units
-    deliveryTime: 7 Months
-    flagEmoji: "\U0001F1F5\U0001F1F0"
-    produceType: FTR
-    unitQuantity: 12
-    deliveryMonths: 7
-    totalCostB: 172.73804
-  - id: OFF_ART_1_735
+    totalCostB: 45.993973
+  - id: OFF_ART_1_622
     title: 24 Mobile Artillery (M109)
     subtitle: Self-Propelled Howitzer
     tags:
@@ -584,16 +506,118 @@ MonoBehaviour:
     - Tracked
     supplier: BAE Systems
     country: USA
-    unitCost: "\u20A62.2B"
-    totalCost: "\u20A653.9B"
+    unitCost: "\u20A62.0B"
+    totalCost: "\u20A648.0B"
     quantity: 24 Units
-    deliveryTime: 6 Months
+    deliveryTime: 4 Months
     flagEmoji: "\U0001F1FA\U0001F1F8"
     produceType: ARTILLERY
     unitQuantity: 24
-    deliveryMonths: 6
-    totalCostB: 53.945698
-  - id: OFF_BOMBER_1_484
+    deliveryMonths: 4
+    totalCostB: 47.994385
+  - id: OFF_PATROL_1_585
+    title: 8 Offshore Patrol Boats
+    subtitle: Offshore Patrol Vessel
+    tags:
+    - Coastal Ops
+    - Fast
+    supplier: ASFAT
+    country: Turkey
+    unitCost: "\u20A610.7B"
+    totalCost: "\u20A685.9B"
+    quantity: 8 Units
+    deliveryTime: 5 Months
+    flagEmoji: "\U0001F1F9\U0001F1F7"
+    produceType: PATROL_BOAT
+    unitQuantity: 8
+    deliveryMonths: 5
+    totalCostB: 85.86533
+  - id: OFF_DES_1_401
+    title: 1 Guided Missile Destroyer
+    subtitle: Destroyer
+    tags:
+    - Aegis
+    - Heavy Strike
+    supplier: BAE Systems
+    country: UK
+    unitCost: "\u20A6661.2B"
+    totalCost: "\u20A6661.2B"
+    quantity: 1 Unit
+    deliveryTime: 47 Months
+    flagEmoji: "\U0001F1EC\U0001F1E7"
+    produceType: DESTROYER
+    unitQuantity: 1
+    deliveryMonths: 47
+    totalCostB: 661.2466
+  - id: OFF_APC_2_584
+    title: 150 Stryker IFVs
+    subtitle: Infantry Fighting Vehicle
+    tags:
+    - Mobile
+    - Networked
+    supplier: General Dynamics
+    country: USA
+    unitCost: "\u20A6446.8M"
+    totalCost: "\u20A667.0B"
+    quantity: 150 Units
+    deliveryTime: 4 Months
+    flagEmoji: "\U0001F1FA\U0001F1F8"
+    produceType: APC
+    unitQuantity: 150
+    deliveryMonths: 4
+    totalCostB: 67.02113
+  - id: OFF_FTR_1_518
+    title: 12 Fighter Jets (JF-17)
+    subtitle: Multi-Role Combat Aircraft
+    tags:
+    - 4.5 Gen
+    - Avionics
+    supplier: PAC
+    country: Pakistan
+    unitCost: "\u20A613.5B"
+    totalCost: "\u20A6161.9B"
+    quantity: 12 Units
+    deliveryTime: 8 Months
+    flagEmoji: "\U0001F1F5\U0001F1F0"
+    produceType: FTR
+    unitQuantity: 12
+    deliveryMonths: 8
+    totalCostB: 161.88522
+  - id: OFF_UAV_1_487
+    title: 20 Combat Drones (TB2)
+    subtitle: Unmanned Combat Aerial Vehicle
+    tags:
+    - Recon
+    - Precision
+    supplier: Baykar
+    country: Turkey
+    unitCost: "\u20A62.4B"
+    totalCost: "\u20A648.9B"
+    quantity: 20 Units
+    deliveryTime: 3 Months
+    flagEmoji: "\U0001F1F9\U0001F1F7"
+    produceType: UAV
+    unitQuantity: 20
+    deliveryMonths: 3
+    totalCostB: 48.871223
+  - id: OFF_FTR_2_229
+    title: 10 F-16 Block 70/72
+    subtitle: Multi-Role Combat Aircraft
+    tags:
+    - 4.5 Gen
+    - AESA Radar
+    supplier: Lockheed Martin
+    country: USA
+    unitCost: "\u20A625.7B"
+    totalCost: "\u20A6256.9B"
+    quantity: 10 Units
+    deliveryTime: 12 Months
+    flagEmoji: "\U0001F1FA\U0001F1F8"
+    produceType: FTR
+    unitQuantity: 10
+    deliveryMonths: 12
+    totalCostB: 256.9347
+  - id: OFF_BOMBER_1_770
     title: 4 Strategic Bombers (H-6K)
     subtitle: Strategic Bomber
     tags:
@@ -601,32 +625,15 @@ MonoBehaviour:
     - Payload
     supplier: Xian Aircraft
     country: China
-    unitCost: "\u20A630.3B"
-    totalCost: "\u20A6121.3B"
+    unitCost: "\u20A629.9B"
+    totalCost: "\u20A6119.6B"
     quantity: 4 Units
-    deliveryTime: 11 Months
+    deliveryTime: 13 Months
     flagEmoji: "\U0001F1E8\U0001F1F3"
     produceType: BOMBER
     unitQuantity: 4
-    deliveryMonths: 11
-    totalCostB: 121.34924
-  - id: OFF_SUB_1_172
-    title: 1 Attack Submarine
-    subtitle: Diesel-Electric Submarine
-    tags:
-    - Stealth
-    - Torpedoes
-    supplier: ThyssenKrupp
-    country: Germany
-    unitCost: "\u20A6300.3B"
-    totalCost: "\u20A6300.3B"
-    quantity: 1 Unit
-    deliveryTime: 37 Months
-    flagEmoji: "\U0001F1E9\U0001F1EA"
-    produceType: SUB
-    unitQuantity: 1
-    deliveryMonths: 37
-    totalCostB: 300.3321
+    deliveryMonths: 13
+    totalCostB: 119.64123
   activeContracts: []
   activeSupplyContracts:
   - id: 48a23dcd-063f-4785-8a5b-931b9ac044ea
@@ -1201,6 +1208,57 @@ MonoBehaviour:
   sanctionIssuedCount: 1
   sanctionReceivedCount: 0
   inboxMessages:
+  - id: b5af0ec5-459a-4216-8585-547a75d3b3b8
+    sender: NATIONAL SECURITY COUNCIL
+    subject: "TERRORIST ATTACK REPORT \u2014 LAGOS"
+    body: "CRITICAL SECURITY DISPATCH FOR NIGERIA\n\nA violent terrorist attack has
+      occurred in Lagos.\n\u2022 Casualties: 21 people killed (KIA), 52 wounded.\n\u2022
+      Target Region: Lagos\n\u2022 Current Region Security: 50%\n\u2022 Insurgency
+      Level: 0%\n\nImmediate military or security deployment is recommended to restore
+      order."
+    dateReceived: 01 MAR 2026
+    isRead: 0
+    turnReceived: 3
+    urgency: Critical
+  - id: 0dc13217-483a-4fc1-b300-ead130145b55
+    sender: NATIONAL SECURITY COUNCIL
+    subject: "TERRORIST ATTACK REPORT \u2014 KANO"
+    body: "CRITICAL SECURITY DISPATCH FOR NIGERIA\n\nA violent terrorist attack has
+      occurred in Kano.\n\u2022 Casualties: 25 people killed (KIA), 54 wounded.\n\u2022
+      Target Region: Kano\n\u2022 Current Region Security: 50%\n\u2022 Insurgency
+      Level: 0%\n\nImmediate military or security deployment is recommended to restore
+      order."
+    dateReceived: 01 FEB 2026
+    isRead: 0
+    turnReceived: 2
+    urgency: Critical
+  - id: 61ae1950-e521-4842-99a9-ec35268b44fe
+    sender: SITUATION ROOM
+    subject: "\U0001F480 GOVERNMENT COLLAPSED"
+    body: "Sovereign default and credit collapse have paralysed the state. International
+      creditors have seized assets. Your government has fallen.\n\nFINAL STATISTICS:\n\u2022
+      Prestige: 6\n\u2022 Stability: 60%\n\u2022 Treasury: $-840.4B\n\nA caretaker
+      government has been established. The people demand change."
+    dateReceived: 01 FEB 2026
+    isRead: 0
+    turnReceived: 2
+    urgency: Critical
+  - id: 56caa0c5-b033-4e51-9581-94cf23288954
+    sender: "FOREIGN MINISTRY \u2014 ANGOLA"
+    subject: "Treaty Proposal Submitted \u2014 Free Trade Agreement"
+    body: 'Your proposal for a Free Trade Agreement has been formally submitted to
+      the Government of Angola.
+
+
+      Current bilateral relations: 0.
+
+      The
+      response is expected within 2-3 months. You can track the status in the TREATIES
+      tab.'
+    dateReceived: 06 JAN 2026
+    isRead: 0
+    turnReceived: 1
+    urgency: Important
   - id: 54f99102-fe7a-4ca0-ba07-08a5e04d3e34
     sender: CHIEF OF DEFENCE STAFF
     subject: "\u2694\uFE0F WAR DECLARED \u2014 COMMAND YOUR FORCES"
@@ -1791,8 +1849,8 @@ MonoBehaviour:
   embassyBudget: 1.2
   battleResults: []
   covertBudget: 0
-  counterIntelligence: 38.453938
-  exposureRisk: 30.225
+  counterIntelligence: 37.85394
+  exposureRisk: 20.900002
   recruitedAssets: []
   intelHardware:
   - id: 9b33c488-3f09-4cf9-ae6e-1751d0e5bd9b
@@ -1822,7 +1880,7 @@ MonoBehaviour:
     regionName: Abuja
     targetID: PowerHydro
     totalCost: 55
-    monthsRemaining: 76
+    monthsRemaining: 74
     totalMonths: 30
     stage: 3
     description: 
@@ -1831,7 +1889,7 @@ MonoBehaviour:
     regionName: Abuja
     targetID: PowerHydro
     totalCost: 55
-    monthsRemaining: 76
+    monthsRemaining: 74
     totalMonths: 30
     stage: 3
     description: 
@@ -1840,7 +1898,7 @@ MonoBehaviour:
     regionName: Abuja
     targetID: PowerHydro
     totalCost: 55
-    monthsRemaining: 120
+    monthsRemaining: 118
     totalMonths: 30
     stage: 3
     description: 
@@ -1849,7 +1907,7 @@ MonoBehaviour:
     regionName: Abuja
     targetID: Roads
     totalCost: 45
-    monthsRemaining: 107
+    monthsRemaining: 105
     totalMonths: 18
     stage: 3
     description: 
@@ -1858,7 +1916,7 @@ MonoBehaviour:
     regionName: Abuja
     targetID: PowerSolar
     totalCost: 22
-    monthsRemaining: 120
+    monthsRemaining: 118
     totalMonths: 10
     stage: 3
     description: 

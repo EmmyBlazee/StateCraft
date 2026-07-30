@@ -2,14 +2,14 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <ui:VisualElement name="TradeAgreementPanel" class="panel premium-card" style="height: 100%; display: flex; background-color: rgba(14, 18, 28, 0.98); border-radius: 8px; border-width: 1px; border-color: rgba(0, 210, 255, 0.3);">
         <ui:VisualElement class="header" style="flex-direction: row; justify-content: space-between; padding: 12px; background-color: rgba(0, 0, 0, 0.4); border-bottom-width: 1px; border-bottom-color: rgba(0, 210, 255, 0.2);">
-            <ui:Label text="GLOBAL TRADE DESK" class="header-title" style="color: rgb(255, 255, 255); -unity-font-style: bold; font-size: 17px; letter-spacing: 2px;" />
+            <ui:Label text="GLOBAL TRADE DESK" class="header-title" style="color: rgb(255, 255, 255); -unity-font-style: bold; font-size: 22px; letter-spacing: 2px;" />
         </ui:VisualElement>
         
         <ui:VisualElement style="flex-direction: row; flex-grow: 1; padding: 10px;">
             
             <!-- LEFT COLUMN: Active Agreements -->
             <ui:VisualElement style="width: 30%; border-right-width: 1px; border-right-color: rgba(255, 255, 255, 0.1); padding-right: 15px;">
-                <ui:Label text="ACTIVE AGREEMENTS" style="color: rgb(0, 210, 255); -unity-font-style: bold; font-size: 14px; margin-bottom: 10px; letter-spacing: 1px;" />
+                <ui:Label text="ACTIVE AGREEMENTS" style="color: rgb(0, 210, 255); -unity-font-style: bold; font-size: 18px; margin-bottom: 10px; letter-spacing: 1px;" />
                 <ui:ScrollView name="ActiveAgreementsScroll" mode="Vertical" style="flex-grow: 1;">
                     <!-- Controller will populate active trades here -->
                 </ui:ScrollView>
@@ -17,71 +17,95 @@
 
             <!-- CENTER COLUMN: Proposal Form -->
             <ui:VisualElement style="width: 40%; padding-left: 15px; padding-right: 15px; border-right-width: 1px; border-right-color: rgba(255, 255, 255, 0.1);">
-                <ui:Label text="DRAFT NEW PROPOSAL" style="color: rgb(0, 210, 255); -unity-font-style: bold; font-size: 14px; margin-bottom: 10px; letter-spacing: 1px;" />
+                <ui:Label text="DRAFT NEW PROPOSAL" style="color: rgb(0, 210, 255); -unity-font-style: bold; font-size: 18px; margin-bottom: 10px; letter-spacing: 1px;" />
                 <ui:ScrollView mode="Vertical" style="flex-grow: 1;">
-                    <ui:Label text="TRANSIT DIRECTION" style="color: rgb(150, 150, 150); font-size: 12px; margin-bottom: 4px;" />
+                    <ui:Label text="TRANSIT DIRECTION" style="color: rgb(150, 150, 150); font-size: 14px; margin-bottom: 4px;" />
                     <ui:DropdownField name="DropdownTradeDirection" class="premium-dropdown" choices="Export (Sell),Import (Buy)" value="Export (Sell)" style="margin-bottom: 12px;" />
 
-                    <ui:Label text="COMMODITY / RESOURCE" style="color: rgb(150, 150, 150); font-size: 12px; margin-bottom: 4px;" />
+                    <ui:Label text="COMMODITY / RESOURCE" style="color: rgb(150, 150, 150); font-size: 14px; margin-bottom: 4px;" />
                     <ui:DropdownField name="DropdownResource" class="premium-dropdown" style="margin-bottom: 12px;" />
 
-                    <ui:Label text="NEGOTIATING PARTNER" style="color: rgb(150, 150, 150); font-size: 12px; margin-bottom: 4px;" />
+                    <ui:Label text="NEGOTIATING PARTNER" style="color: rgb(150, 150, 150); font-size: 14px; margin-bottom: 4px;" />
                     <ui:DropdownField name="DropdownPartner" class="premium-dropdown" style="margin-bottom: 12px;" />
                     
-                    <ui:Label text="VOLUME (UNITS/MONTH)" style="color: rgb(150, 150, 150); font-size: 12px; margin-bottom: 4px;" />
+                    <ui:Label text="VOLUME (UNITS/MONTH)" style="color: rgb(150, 150, 150); font-size: 14px; margin-bottom: 4px;" />
                     <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 12px;">
                         <ui:TextField name="InputQuantity" class="premium-textfield" value="1000" style="flex-grow: 1; margin-right: 5px;" />
                         <ui:Button name="BtnMaxQuantity" text="MAX" class="button-premium" style="width: 50px; height: 26px;" />
                     </ui:VisualElement>
                     
-                    <ui:Label text="CONTRACT DURATION (MONTHS)" style="color: rgb(150, 150, 150); font-size: 12px; margin-bottom: 4px;" />
+                    <ui:Label text="CONTRACT DURATION (MONTHS)" style="color: rgb(150, 150, 150); font-size: 14px; margin-bottom: 4px;" />
                     <ui:TextField name="InputDuration" class="premium-textfield" value="12" style="margin-bottom: 12px;" />
+                    
+                    <ui:VisualElement style="background-color: rgba(0, 0, 0, 0.2); border-color: rgba(255, 255, 255, 0.1); border-width: 1px; border-radius: 4px; padding: 10px; margin-top: 10px;">
+                        <ui:Label text="AVAILABLE STOCKPILES" style="color: rgb(0, 210, 255); -unity-font-style: bold; font-size: 14px; margin-bottom: 8px; letter-spacing: 1px;" />
+                        <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 4px;">
+                            <ui:Label text="Oil (Barrels):" style="color: rgb(150, 150, 150); font-size: 14px;" />
+                            <ui:Label name="LblStockOil" text="-" style="color: rgb(255, 255, 255); font-size: 14px; -unity-font-style: bold;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 4px;">
+                            <ui:Label text="Gas (Units):" style="color: rgb(150, 150, 150); font-size: 14px;" />
+                            <ui:Label name="LblStockGas" text="-" style="color: rgb(255, 255, 255); font-size: 14px; -unity-font-style: bold;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 4px;">
+                            <ui:Label text="Minerals (Tonnes):" style="color: rgb(150, 150, 150); font-size: 14px;" />
+                            <ui:Label name="LblStockMinerals" text="-" style="color: rgb(255, 255, 255); font-size: 14px; -unity-font-style: bold;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 4px;">
+                            <ui:Label text="Uranium (Units):" style="color: rgb(150, 150, 150); font-size: 14px;" />
+                            <ui:Label name="LblStockUranium" text="-" style="color: rgb(255, 255, 255); font-size: 14px; -unity-font-style: bold;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                            <ui:Label text="Food (Tonnes):" style="color: rgb(150, 150, 150); font-size: 14px;" />
+                            <ui:Label name="LblStockFood" text="-" style="color: rgb(255, 255, 255); font-size: 14px; -unity-font-style: bold;" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
                 </ui:ScrollView>
             </ui:VisualElement>
 
             <!-- RIGHT COLUMN: Impact Preview & Adviser -->
             <ui:VisualElement style="width: 30%; padding-left: 15px; justify-content: space-between;">
                 <ui:VisualElement>
-                    <ui:Label text="ESTIMATED OUTCOME" style="color: rgb(0, 210, 255); -unity-font-style: bold; font-size: 14px; margin-bottom: 10px; letter-spacing: 1px;" />
+                    <ui:Label text="ESTIMATED OUTCOME" style="color: rgb(0, 210, 255); -unity-font-style: bold; font-size: 18px; margin-bottom: 10px; letter-spacing: 1px;" />
                     
                     <ui:VisualElement style="background-color: rgba(0, 0, 0, 0.2); border-color: rgba(255, 255, 255, 0.1); border-width: 1px; border-radius: 4px; padding: 10px; margin-bottom: 15px;">
                         <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
-                            <ui:Label text="Value:" style="color: rgb(150, 150, 150); font-size: 14px;" />
-                            <ui:Label name="LblMarketValue" text="₦0.0 / Month" style="color: rgb(0, 210, 255); -unity-font-style: bold; font-size: 14px;" />
+                            <ui:Label text="Value:" style="color: rgb(150, 150, 150); font-size: 16px;" />
+                            <ui:Label name="LblMarketValue" text="₦0.0 / Month" style="color: rgb(0, 210, 255); -unity-font-style: bold; font-size: 16px;" />
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
-                            <ui:Label text="Relations Impact:" style="color: rgb(150, 150, 150); font-size: 14px;" />
-                            <ui:Label name="LblRelationsImpact" text="-" style="color: rgb(200, 200, 200); font-size: 14px;" />
+                            <ui:Label text="Relations Impact:" style="color: rgb(150, 150, 150); font-size: 16px;" />
+                            <ui:Label name="LblRelationsImpact" text="-" style="color: rgb(200, 200, 200); font-size: 16px;" />
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 6px;">
-                            <ui:Label text="Treasury Delta:" style="color: rgb(150, 150, 150); font-size: 14px;" />
-                            <ui:Label name="LblTreasuryDelta" text="-" style="color: rgb(200, 200, 200); font-size: 14px;" />
+                            <ui:Label text="Treasury Delta:" style="color: rgb(150, 150, 150); font-size: 16px;" />
+                            <ui:Label name="LblTreasuryDelta" text="-" style="color: rgb(200, 200, 200); font-size: 16px;" />
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
-                            <ui:Label text="Strategic Risk:" style="color: rgb(150, 150, 150); font-size: 14px;" />
-                            <ui:Label name="LblStrategicRisk" text="Low" style="color: rgb(100, 255, 100); font-size: 14px;" />
+                            <ui:Label text="Strategic Risk:" style="color: rgb(150, 150, 150); font-size: 16px;" />
+                            <ui:Label name="LblStrategicRisk" text="Low" style="color: rgb(100, 255, 100); font-size: 16px;" />
                         </ui:VisualElement>
                     </ui:VisualElement>
 
                     <ui:VisualElement name="AdviserPanel" style="flex-direction: row; background-color: rgba(0, 210, 255, 0.05); border-color: rgba(0, 210, 255, 0.2); border-width: 1px; border-radius: 4px; padding: 8px;">
                         <ui:VisualElement name="AdviserPortrait" style="width: 50px; height: 50px; border-radius: 25px; background-color: rgb(0, 0, 0); overflow: hidden; background-image: url('project://database/Assets/UI/Sprites/Portraits/adviser_foreign_affairs.png');" />
                         <ui:VisualElement style="margin-left: 10px; justify-content: center;">
-                            <ui:Label text="FOREIGN AFFAIRS ADVISER" style="color: rgb(0, 210, 255); font-size: 11px; -unity-font-style: bold; letter-spacing: 1px;" />
-                            <ui:Label name="LblAdviserRecommendation" text="Awaiting proposal..." style="color: rgb(200, 200, 200); font-size: 13px; margin-top: 2px; white-space: normal;" />
+                            <ui:Label text="FOREIGN AFFAIRS ADVISER" style="color: rgb(0, 210, 255); font-size: 13px; -unity-font-style: bold; letter-spacing: 1px;" />
+                            <ui:Label name="LblAdviserRecommendation" text="Awaiting proposal..." style="color: rgb(200, 200, 200); font-size: 15px; margin-top: 2px; white-space: normal;" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
 
                 <ui:VisualElement>
-                    <ui:Button name="BtnPropose" text="SUBMIT PROPOSAL" class="button-premium" style="height: 35px; background-color: rgba(0, 210, 255, 0.1); border-color: rgb(0, 210, 255); color: rgb(0, 210, 255); -unity-font-style: bold;" />
+                    <ui:Button name="BtnPropose" text="SUBMIT PROPOSAL" class="button-premium" style="height: 35px; background-color: rgba(0, 210, 255, 0.1); border-color: rgb(0, 210, 255); color: rgb(0, 210, 255); font-size: 16px; -unity-font-style: bold;" />
                     
                     <!-- Counter-Offer Overlay (hidden by default) -->
                     <ui:VisualElement name="CounterOfferArea" style="position: absolute; bottom: 45px; left: 0; right: 0; padding: 12px; background-color: rgba(30, 20, 10, 0.95); display: none; border-radius: 4px; border-width: 1px; border-color: rgb(255, 171, 64);">
-                        <ui:Label text="COUNTER-OFFER RECEIVED" style="color: rgb(255, 171, 64); -unity-font-style: bold; font-size: 14px; margin-bottom: 5px; text-align: center;" />
-                        <ui:Label name="LblCounterDetails" text="Payment: ₦12M | Duration: 14 Months" style="color: rgb(255, 255, 255); font-size: 13px; margin-bottom: 10px; text-align: center; white-space: normal;" />
+                        <ui:Label text="COUNTER-OFFER RECEIVED" style="color: rgb(255, 171, 64); -unity-font-style: bold; font-size: 16px; margin-bottom: 5px; text-align: center;" />
+                        <ui:Label name="LblCounterDetails" text="Payment: ₦12M | Duration: 14 Months" style="color: rgb(255, 255, 255); font-size: 15px; margin-bottom: 10px; text-align: center; white-space: normal;" />
                         <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
-                            <ui:Button name="BtnAccept" text="ACCEPT" class="button-premium" style="flex-grow: 1; margin-right: 5px; background-color: rgba(0, 150, 50, 0.3); border-color: rgb(0, 200, 50); height: 26px; font-size: 13px;" />
-                            <ui:Button name="BtnReject" text="REJECT" class="button-premium" style="flex-grow: 1; margin-left: 5px; background-color: rgba(150, 0, 0, 0.3); border-color: rgb(200, 0, 0); height: 26px; font-size: 13px;" />
+                            <ui:Button name="BtnAccept" text="ACCEPT" class="button-premium" style="flex-grow: 1; margin-right: 5px; background-color: rgba(0, 150, 50, 0.3); border-color: rgb(0, 200, 50); height: 32px; font-size: 15px; color: rgb(255, 255, 255); -unity-font-style: bold;" />
+                            <ui:Button name="BtnReject" text="REJECT" class="button-premium" style="flex-grow: 1; margin-left: 5px; background-color: rgba(150, 0, 0, 0.3); border-color: rgb(200, 0, 0); height: 32px; font-size: 15px; color: rgb(255, 255, 255); -unity-font-style: bold;" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
