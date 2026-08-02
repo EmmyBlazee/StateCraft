@@ -63,6 +63,12 @@ namespace StateCraft.UI
 
         public void Show()
         {
+            if (_dashboardRoot == null || _dashboardRoot.panel == null)
+            {
+                _dashboardRoot = MainDashboardToolkitController.Instance?.GetPanelVisualElement("Global")
+                              ?? _root?.Q<VisualElement>("GlobalDashboard");
+            }
+
             var panel = _dashboardRoot;
             if (panel != null)
             {
@@ -81,6 +87,13 @@ namespace StateCraft.UI
 
         public void RefreshDashboard()
         {
+            if (_dashboardRoot == null || _dashboardRoot.panel == null)
+            {
+                _dashboardRoot = MainDashboardToolkitController.Instance?.GetPanelVisualElement("Global")
+                              ?? _root?.Q<VisualElement>("GlobalDashboard")
+                              ?? _dashboardRoot;
+            }
+
             if (GameManager.Instance == null || GameManager.Instance.allCountries == null) return;
             var all = GameManager.Instance.allCountries;
 

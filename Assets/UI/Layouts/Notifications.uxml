@@ -9,7 +9,7 @@
             <ui:Label text="NOTIFICATION HISTORY" style="color: white; font-size: 14px; -unity-font-style: bold; letter-spacing: 1px;" />
             <ui:Button name="BtnCloseHistory" text="×" class="econ-icon-button" style="width: 20px; height: 20px; font-size: 16px; margin: 0; padding: 0;" />
         </ui:VisualElement>
-        <ui:ScrollView name="HistoryScrollView" class="unity-scroller--vertical" style="flex-grow: 1;">
+        <ui:ScrollView name="HistoryScrollView" mode="Vertical" style="flex-grow: 1;">
             <!-- History items go here -->
         </ui:ScrollView>
         <ui:Button name="BtnClearHistory" text="CLEAR HISTORY" class="modern-button" style="margin-top: 10px;" />

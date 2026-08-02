@@ -39,7 +39,6 @@
                 </ui:VisualElement>
             </ui:VisualElement>
             
-            <ui:Button name="BtnSettings" text="⚙" class="econ-icon-button" style="margin-right: 5px;" />
             <ui:Button name="CloseMilitary" text="×" class="econ-icon-button" />
         </ui:VisualElement>
 

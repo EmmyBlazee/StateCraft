@@ -63,9 +63,24 @@ namespace StateCraft.Data
 
         [Header("General Info")]
         public string countryName;
+        public string presidentName;
         public string capitalCity;
         public string currencyName = "Dollar";
         public string currencySymbol = "$";
+
+        public string GetPresidentName()
+        {
+            if (!string.IsNullOrWhiteSpace(presidentName)) return presidentName;
+
+            // Deterministic procedural fallback name based on country name
+            int hash = Mathf.Abs(!string.IsNullOrEmpty(countryName) ? countryName.GetHashCode() : 0);
+            string[] firstNames = { "Emmanuel", "Ibrahim", "Kwame", "Amadou", "Moussa", "Tariq", "Kofi", "Samuel", "Abdoulaye", "Ousmane", "Jean-Baptiste", "David", "Paul", "Felix" };
+            string[] lastNames  = { "Nguema", "Traore", "Mensah", "Diallo", "Sankara", "Toure", "Keita", "Osei", "Bongo", "Kabore", "Camara", "Sow", "Diop", "Cisse" };
+            
+            string fn = firstNames[hash % firstNames.Length];
+            string ln = lastNames[(hash / firstNames.Length) % lastNames.Length];
+            return $"{fn} {ln}";
+        }
 
         [Header("Scenario Briefing")]
         [TextArea(4, 8)]

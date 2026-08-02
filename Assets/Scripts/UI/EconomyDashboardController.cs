@@ -974,7 +974,16 @@ namespace StateCraft.UI
             return UnityEngine.Color.white;
         }
 
-        private void SwitchTab(int index)
+        public void SwitchTabByName(string name)
+        {
+            if (name == "TabDashboard") SwitchTab(0);
+            else if (name == "TabProduction") SwitchTab(1);
+            else if (name == "TabIndustry") SwitchTab(2);
+            else if (name == "TabInfrastructure") SwitchTab(3);
+            else if (name == "TabConstruction") SwitchTab(4);
+        }
+
+        public void SwitchTab(int index)
         {
             for (int i = 0; i < _allPanels.Count; i++)
             {
@@ -1038,6 +1047,13 @@ namespace StateCraft.UI
 
         public void Show()
         {
+            if (_dashboardRoot == null || _dashboardRoot.panel == null)
+            {
+                _dashboardRoot = MainDashboardToolkitController.Instance?.GetPanelVisualElement("Economy")
+                              ?? _root?.Q<VisualElement>("EconomyDashboard");
+                if (_dashboardRoot != null) _root = _dashboardRoot;
+            }
+
             var panel = _dashboardRoot;
             if (panel != null)
             {
@@ -1056,6 +1072,14 @@ namespace StateCraft.UI
 
         public void RefreshDisplay()
         {
+            if (_dashboardRoot == null || _dashboardRoot.panel == null)
+            {
+                _dashboardRoot = MainDashboardToolkitController.Instance?.GetPanelVisualElement("Economy")
+                              ?? _root?.Q<VisualElement>("EconomyDashboard")
+                              ?? _dashboardRoot;
+                if (_dashboardRoot != null) _root = _dashboardRoot;
+            }
+
             if (GameManager.Instance == null || GameManager.Instance.playerCountry == null) return;
             var gm = GameManager.Instance;
             var country = gm.playerCountry;

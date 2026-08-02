@@ -24,6 +24,7 @@ namespace StateCraft.UI
         // Header
         private Label _headerCountryName;
         private Label _headerBudget, _headerReadiness, _threatLevelBadge, _headerKIA;
+        private Label _headerFirepower, _headerTotalPersonnel, _headerBasesCount, _headerOperationsCount;
 
         // Forces
         private ScrollView _generalsContainer, _blockadesContainer;
@@ -65,20 +66,31 @@ namespace StateCraft.UI
         private void Awake()
         {
             _uiDoc = GetComponent<UIDocument>();
-            if (_uiDoc != null) _root = _uiDoc.rootVisualElement;
-            
-            var dashboard = _root?.Q<VisualElement>("MilitaryDashboard");
-            if (dashboard != null)
+        }
+
+        private void Start()
+        {
+            BindActiveDashboardRoot();
+        }
+
+        private void BindActiveDashboardRoot()
+        {
+            var activePanel = MainDashboardToolkitController.Instance?.GetPanelVisualElement("Military");
+            if (activePanel != null)
             {
-                _dashboardRoot = dashboard;
-                InitializeElements(dashboard);
-                dashboard.style.display = DisplayStyle.None;
-                
-                // IMPORTANT: MainDashboardToolkitController removes 'dashboard' from this UIDocument's hierarchy
-                // and injects it into its own. If we leave _root as the original UIDocument root, all future
-                // _root.Q() queries will fail and return null because the dashboard is no longer a child of it!
-                // Reassign _root to point to the dashboard itself so queries continue to work.
-                _root = dashboard;
+                _dashboardRoot = activePanel;
+                _root = activePanel;
+            }
+            else
+            {
+                if (_uiDoc == null) _uiDoc = GetComponent<UIDocument>();
+                if (_uiDoc != null) _root = _uiDoc.rootVisualElement;
+                _dashboardRoot = _root?.Q<VisualElement>("MilitaryDashboard");
+            }
+
+            if (_dashboardRoot != null)
+            {
+                InitializeElements(_dashboardRoot);
             }
         }
 
@@ -88,6 +100,7 @@ namespace StateCraft.UI
             {
                 GameManager.Instance.TurnSystem.OnTurnEnded += RefreshMilitaryData;
             }
+            BindActiveDashboardRoot();
             RefreshMilitaryData();
         }
 
@@ -139,8 +152,12 @@ namespace StateCraft.UI
 
             // Header
             _headerCountryName = root.Q<Label>("CountryName");
-            _headerBudget = root.Q<Label>("HeaderMilBudget");
-            _headerReadiness = root.Q<Label>("HeaderReadiness");
+            _headerFirepower = root.Q<Label>("HdrMilRank");
+            _headerTotalPersonnel = root.Q<Label>("HdrPersonnel");
+            _headerBudget = root.Q<Label>("HdrDefBudget") ?? root.Q<Label>("HeaderMilBudget");
+            _headerBasesCount = root.Q<Label>("HdrBases");
+            _headerOperationsCount = root.Q<Label>("HdrOperations");
+            _headerReadiness = root.Q<Label>("HdrReadiness") ?? root.Q<Label>("HeaderReadiness");
             _threatLevelBadge = root.Q<Label>("ThreatLevelBadge");
             _headerKIA = root.Q<Label>("HeaderKIA");
 
@@ -267,7 +284,20 @@ namespace StateCraft.UI
             root.Q<Button>("CloseMilitary").clicked += Hide;
         }
 
-        private void SwitchTab(int index)
+        public void SwitchTabByName(string name)
+        {
+            if (name == "TabForces") SwitchTab(0);
+            else if (name == "TabRecruit") SwitchTab(1);
+            else if (name == "TabWeapons" || name == "WTabArsenal") { SwitchTab(2); SwitchWeaponsTab(0); }
+            else if (name == "TabBases") SwitchTab(3);
+            else if (name == "TabOperations") SwitchTab(4);
+            else if (name == "TabLogistics") SwitchTab(5);
+            else if (name == "TabBudget") SwitchTab(6);
+            else if (name == "WTabProduction") { SwitchTab(2); SwitchWeaponsTab(1); }
+            else if (name == "WTabProcurement") { SwitchTab(2); SwitchWeaponsTab(2); }
+        }
+
+        public void SwitchTab(int index)
         {
             for (int i = 0; i < _allPanels.Count; i++)
             {
@@ -363,6 +393,13 @@ namespace StateCraft.UI
 
         public void Show()
         {
+            if (_dashboardRoot == null || _dashboardRoot.panel == null)
+            {
+                _dashboardRoot = MainDashboardToolkitController.Instance?.GetPanelVisualElement("Military") 
+                              ?? _root?.Q<VisualElement>("MilitaryDashboard");
+                if (_dashboardRoot != null) _root = _dashboardRoot;
+            }
+
             var panel = _dashboardRoot;
             if (panel != null)
             {
@@ -381,6 +418,14 @@ namespace StateCraft.UI
 
         public void RefreshMilitaryData()
         {
+            if (_dashboardRoot == null || _dashboardRoot.panel == null)
+            {
+                _dashboardRoot = MainDashboardToolkitController.Instance?.GetPanelVisualElement("Military") 
+                              ?? _root?.Q<VisualElement>("MilitaryDashboard")
+                              ?? _dashboardRoot;
+                if (_dashboardRoot != null) _root = _dashboardRoot;
+            }
+
             if (GameManager.Instance == null || GameManager.Instance.playerCountry == null) return;
             var gm = GameManager.Instance;
             var country = gm.playerCountry;
@@ -500,13 +545,48 @@ namespace StateCraft.UI
                 _threatLevelBadge.style.borderRightColor = stageColor;
             }
 
-            if (_headerBudget != null) _headerBudget.text = $"Allocated: {UiFormat.Money(country.militaryBudgetUSD * country.exchangeRate, sym)}  |  Upkeep: {UiFormat.Money(country.CalculateMilitaryUpkeep() * country.exchangeRate, sym)} / Turn";
-            if (_headerReadiness != null)
+            // ── Top Bar KPIs ──────────────────────────────────────────
+            var hdrRank = _headerFirepower ?? _dashboardRoot?.Q<Label>("HdrMilRank") ?? _root?.Q<Label>("HdrMilRank");
+            if (hdrRank != null)
             {
-                _headerReadiness.text = $"{country.militaryReadiness:F0}%";
-                _headerReadiness.style.color = country.militaryReadiness >= 70f
-                    ? new Color(0, 230/255f, 118/255f)
-                    : new Color(241/255f, 196/255f, 15/255f);
+                float fp = country.GetMilitaryFirepowerScore();
+                hdrRank.text = fp >= 1000f ? $"{fp / 1000f:F1}k" : $"{fp:F0}";
+                hdrRank.style.color = fp > 5000 ? new Color(0.14f, 0.93f, 0.34f) : fp > 1000 ? new Color(1f, 0.83f, 0.2f) : Color.white;
+            }
+
+            var hdrPers = _headerTotalPersonnel ?? _dashboardRoot?.Q<Label>("HdrPersonnel") ?? _root?.Q<Label>("HdrPersonnel");
+            if (hdrPers != null)
+            {
+                int totalPers = country.armyStats.personnel + country.navyStats.personnel + country.airForceStats.personnel + country.rdfStats.personnel;
+                hdrPers.text = totalPers >= 1000000 ? $"{totalPers / 1000000f:F2}M" : totalPers >= 1000 ? $"{totalPers / 1000f:F1}k" : $"{totalPers}";
+            }
+
+            if (_headerBudget != null) _headerBudget.text = $"Allocated: {UiFormat.Money(country.militaryBudgetUSD * country.exchangeRate, sym)}  |  Upkeep: {UiFormat.Money(country.CalculateMilitaryUpkeep() * country.exchangeRate, sym)} / Turn";
+
+            var hdrBases = _headerBasesCount ?? _dashboardRoot?.Q<Label>("HdrBases") ?? _root?.Q<Label>("HdrBases");
+            if (hdrBases != null)
+            {
+                int totalBases = (country.militaryBases != null ? country.militaryBases.Count : 0) + (country.defenseFactories != null ? country.defenseFactories.Count : 0);
+                hdrBases.text = totalBases.ToString();
+            }
+
+            var hdrOps = _headerOperationsCount ?? _dashboardRoot?.Q<Label>("HdrOperations") ?? _root?.Q<Label>("HdrOperations");
+            var hdrOpsSub = _dashboardRoot?.Q<Label>("HdrOperationsSub") ?? _root?.Q<Label>("HdrOperationsSub");
+            if (hdrOps != null)
+            {
+                int activeOps = country.activeOperations?.Count ?? 0;
+                hdrOps.text = activeOps.ToString();
+                hdrOps.style.color = activeOps > 0 ? new Color(1f, 0.83f, 0.2f) : Color.white;
+                if (hdrOpsSub != null)
+                    hdrOpsSub.text = activeOps == 1 ? "Deployed" : "Deployed";
+            }
+
+            float avgReady = (country.armyStats.readiness + country.navyStats.readiness + country.airForceStats.readiness + country.rdfStats.readiness) / 4f;
+            var hdrReady = _headerReadiness ?? _dashboardRoot?.Q<Label>("HdrReadiness") ?? _root?.Q<Label>("HdrReadiness");
+            if (hdrReady != null)
+            {
+                hdrReady.text = $"{avgReady:F0}%";
+                hdrReady.style.color = avgReady >= 80f ? new Color(0.14f, 0.93f, 0.34f) : avgReady >= 60f ? new Color(1f, 0.83f, 0.2f) : new Color(1f, 0.3f, 0.3f);
             }
 
             if (_headerKIA != null)
@@ -594,72 +674,6 @@ namespace StateCraft.UI
             }
 
             PopulateSupplyRoutes(country);
-
-            // ── Military Top Bar KPIs ──────────────────────────────────────────
-            string currencySym = string.IsNullOrEmpty(country.currencySymbol) ? "₦" : country.currencySymbol;
-
-            // 1. Firepower Score
-            var hdrRank = _root?.Q<Label>("HdrMilRank");
-            if (hdrRank != null)
-            {
-                float fp = country.GetMilitaryFirepowerScore();
-                hdrRank.text = fp >= 1000f ? $"{fp / 1000f:F1}k" : $"{fp:F0}";
-                hdrRank.style.color = fp > 5000 ? new Color(0.14f, 0.93f, 0.34f) : fp > 1000 ? new Color(1f, 0.83f, 0.2f) : Color.white;
-            }
-
-            // 2. Total Personnel
-            var hdrPers = _root?.Q<Label>("HdrPersonnel");
-            if (hdrPers != null)
-            {
-                int totalPers = country.armyStats.personnel + country.navyStats.personnel + country.airForceStats.personnel + country.rdfStats.personnel;
-                hdrPers.text = totalPers >= 1000000 ? $"{totalPers / 1000000f:F2}M" : totalPers >= 1000 ? $"{totalPers / 1000f:F1}k" : $"{totalPers}";
-            }
-
-            // 3. Defence Budget
-            var hdrBudget = _root?.Q<Label>("HdrDefBudget");
-            var hdrBudgetPct = _root?.Q<Label>("HdrDefBudgetPct");
-            if (hdrBudget != null)
-            {
-                float annualBudgetUSD = country.income * (country.budgetMilitaryShare / 100f) * 12f;
-                hdrBudget.text = UiFormat.Money(annualBudgetUSD * country.exchangeRate, currencySym) + " / Yr";
-                if (hdrBudgetPct != null && country.gdp > 0)
-                {
-                    float pct = (annualBudgetUSD / country.gdp) * 100f;
-                    hdrBudgetPct.text = $"{pct:F1}% of GDP";
-                    hdrBudgetPct.style.color = pct > 5f ? new Color(1f, 0.3f, 0.3f) : pct > 3f ? new Color(1f, 0.83f, 0.2f) : new Color(0.14f, 0.93f, 0.34f);
-                }
-            }
-
-            // 4. Bases
-            var hdrBases = _root?.Q<Label>("HdrBases");
-            if (hdrBases != null)
-            {
-                int totalBases = (country.militaryBases != null ? country.militaryBases.Count : 0) + (country.defenseFactories != null ? country.defenseFactories.Count : 0);
-                hdrBases.text = totalBases.ToString();
-            }
-
-            // 5. Active Operations
-            var hdrOps = _root?.Q<Label>("HdrOperations");
-            var hdrOpsSub = _root?.Q<Label>("HdrOperationsSub");
-            if (hdrOps != null)
-            {
-                int activeOps = country.activeOperations?.Count ?? 0;
-                hdrOps.text = activeOps.ToString();
-                hdrOps.style.color = activeOps > 0 ? new Color(1f, 0.83f, 0.2f) : Color.white;
-                if (hdrOpsSub != null)
-                    hdrOpsSub.text = activeOps == 1 ? "Deployed" : "Deployed";
-            }
-
-            // 6. Average Readiness
-            var hdrReady = _root?.Q<Label>("HdrReadiness");
-            var hdrReadySub = _root?.Q<Label>("HdrReadinessSub");
-            if (hdrReady != null)
-            {
-                float avgReady = (country.armyStats.readiness + country.navyStats.readiness + country.airForceStats.readiness + country.rdfStats.readiness) / 4f;
-                hdrReady.text = $"{avgReady:F0}%";
-                hdrReady.style.color = avgReady >= 80f ? new Color(0.14f, 0.93f, 0.34f) : avgReady >= 60f ? new Color(1f, 0.83f, 0.2f) : new Color(1f, 0.3f, 0.3f);
-                if (hdrReadySub != null) hdrReadySub.text = avgReady >= 80f ? "Combat Ready" : avgReady >= 60f ? "Partial Readiness" : "LOW READINESS";
-            }
         }
 
 

@@ -59,6 +59,7 @@ namespace StateCraft.Interfaces
     public interface IDiplomacySystem
     {
         void UpdateRelations(Data.CountryDataSO country);
+        bool JoinFaction(Data.CountryDataSO country, string factionName);
         void SignTradeDeal(Data.CountryDataSO seller, Data.CountryDataSO buyer, TradeResourceType resource, float paymentUSD);
         void CancelTradeDeal(string dealId);
         void ProcessTradeDeals(Data.CountryDataSO country);

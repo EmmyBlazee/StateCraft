@@ -14,7 +14,7 @@ namespace StateCraft.UI
         private CountryDataSO _currentCountry;
 
         // Header
-        private Label _nameLabel, _typeLabel, _capitalLabel, _relationBadge, _populationValue;
+        private Label _nameLabel, _presidentLabel, _typeLabel, _capitalLabel, _relationBadge, _populationValue;
         private Image _flagImage;
         private Label _intelText;
 
@@ -26,6 +26,7 @@ namespace StateCraft.UI
 
         // Military stats
         private Label _milPersonnel, _milStrength, _milTanks, _milJets;
+        private VisualElement _milEquipContainer;
 
         // Crisis container
         private VisualElement _crisisContainer;
@@ -57,7 +58,7 @@ namespace StateCraft.UI
                 foreach (var doc in FindObjectsOfType<UIDocument>())
                 {
                     panel = doc.rootVisualElement?.Q<VisualElement>("CountryInfoPanel");
-                    if (panel != null) { _root = doc.rootVisualElement; break; }
+                    if (panel != null) { _root = doc.rootVisualElement; _uiDocument = doc; break; }
                 }
             }
 
@@ -92,7 +93,17 @@ namespace StateCraft.UI
             if (!mouseOverDossier) return;
             float scroll = Input.GetAxis("Mouse ScrollWheel");
             if (Mathf.Abs(scroll) > 0.001f)
+            {
                 _scrollView.scrollOffset += new Vector2(0, -scroll * 300f);
+            }
+        }
+        
+        // This is a static method we can call from MapCameraController to see if it should ignore zoom
+        public static bool IsPointerOverDossierStatic()
+        {
+            var inst = FindObjectOfType<CountryInfoToolkitController>();
+            if (inst == null || !inst.IsPanelVisible()) return false;
+            return Input.mousePosition.x > Screen.width - 440f;
         }
 
         private void OnEnable()
@@ -109,31 +120,27 @@ namespace StateCraft.UI
 
         private void HandleCountrySelected(CountryDataSO country)
         {
-            if (GameManager.Instance == null || GameManager.Instance.playerCountry == null || GameManager.Instance.playerCountry == country)
-            {
-                // Hide the panel — set display none AND picking ignore so nothing bleeds through
-                var p = _root?.Q<VisualElement>("CountryInfoPanel");
-                if (p != null)
-                {
-                    p.pickingMode = PickingMode.Ignore;
-                    p.Query<VisualElement>().ForEach(ve => ve.pickingMode = PickingMode.Ignore);
-                    if (UIStateManager.Instance != null)
-                        UIStateManager.Instance.ApplySafeTransition(p, false, 0.3f);
-                    else
-                    {
-                        p.style.opacity = 0;
-                        p.style.display = DisplayStyle.None;
-                    }
-                }
-                return;
-            }
+            if (country == null) return;
+            string currentPlayerName = GameManager.Instance?.playerCountry != null ? GameManager.Instance.playerCountry.countryName : "NONE (NULL)";
+            Debug.Log($"[CountryInfo Log] Map clicked: '{country.countryName}' | Current Player Country: '{currentPlayerName}'");
+
+            if (_root == null && _uiDocument != null) _root = _uiDocument.rootVisualElement;
+            if (_nameLabel == null || _btnAlly == null) InitializeElements();
 
             RefreshDisplay(country);
+
+            // Hide action buttons when inspecting own country
+            bool isOwnCountry = GameManager.Instance != null && GameManager.Instance.playerCountry == country;
+            if (_btnAlly != null) _btnAlly.style.display = isOwnCountry ? DisplayStyle.None : DisplayStyle.Flex;
+            if (_btnWar != null)  _btnWar.style.display  = isOwnCountry ? DisplayStyle.None : DisplayStyle.Flex;
+
             var panel = _root?.Q<VisualElement>("CountryInfoPanel");
             if (panel == null) panel = _root?.Query<VisualElement>().Name("CountryInfoPanel").First();
             if (panel != null)
             {
+                if (_uiDocument != null) _uiDocument.sortingOrder = 10;
                 panel.style.display = DisplayStyle.Flex;
+                panel.style.opacity = 1;
                 // Re-enable picking on the panel and its children
                 panel.pickingMode = PickingMode.Position;
                 panel.Query<VisualElement>().ForEach(ve =>
@@ -148,54 +155,84 @@ namespace StateCraft.UI
             }
         }
 
+        public void HideDossier()
+        {
+            if (_uiDocument != null) _uiDocument.sortingOrder = -1;
+            var p = _root?.Q<VisualElement>("CountryInfoPanel");
+            if (p == null && _uiDocument != null) p = _uiDocument.rootVisualElement?.Q<VisualElement>("CountryInfoPanel");
+            if (p != null)
+            {
+                p.pickingMode = PickingMode.Ignore;
+                p.Query<VisualElement>().ForEach(ve => ve.pickingMode = PickingMode.Ignore);
+                if (UIStateManager.Instance != null)
+                    UIStateManager.Instance.ApplySafeTransition(p, false, 0.3f);
+                else
+                {
+                    p.style.opacity = 0;
+                    p.style.display = DisplayStyle.None;
+                }
+            }
+            if (MapManager.Instance != null)
+            {
+                MapManager.Instance.SelectCountry(null);
+            }
+        }
+
         private void InitializeElements()
         {
-            _nameLabel       = _root.Q<Label>("CountryName");
-            _typeLabel       = _root.Q<Label>("GovernmentType");
-            _capitalLabel    = _root.Q<Label>("CapitalCity");
-            _relationBadge   = _root.Q<Label>("RelationBadge");
-            _populationValue = _root.Q<Label>("PopulationValue");
-            _intelText       = _root.Q<Label>("IntelLevelText");
-            _flagImage       = _root.Q<Image>("SelectedFlag");
-            _scrollView      = _root.Q<ScrollView>();
+            if (_root == null) return;
+            var panel = _root.Q<VisualElement>("CountryInfoPanel");
+            var container = panel ?? _root;
 
-            _gdpVal          = _root.Q<Label>("GdpValue");
-            _gdpGrowthVal    = _root.Q<Label>("GdpGrowthValue");
-            _inflationVal    = _root.Q<Label>("InflationValue");
-            _debtRatioVal    = _root.Q<Label>("DebtRatioValue");
+            _nameLabel       = container.Q<Label>("CountryName");
+            _presidentLabel  = container.Q<Label>("PresidentName");
+            _typeLabel       = container.Q<Label>("GovernmentType");
+            _capitalLabel    = container.Q<Label>("CapitalCity");
+            _relationBadge   = container.Q<Label>("RelationBadge");
+            _populationValue = container.Q<Label>("PopulationValue");
+            _intelText       = container.Q<Label>("IntelLevelText");
+            _flagImage       = container.Q<Image>("SelectedFlag");
+            _scrollView      = container.Q<ScrollView>();
 
-            _stabilityVal    = _root.Q<Label>("StabilityValue");
-            _securityVal     = _root.Q<Label>("SecurityValue");
-            _threatVal       = _root.Q<Label>("ThreatValue");
+            _gdpVal          = container.Q<Label>("GdpValue");
+            _gdpGrowthVal    = container.Q<Label>("GdpGrowthValue");
+            _inflationVal    = container.Q<Label>("InflationValue");
+            _debtRatioVal    = container.Q<Label>("DebtRatioValue");
 
-            _milPersonnel    = _root.Q<Label>("MilPersonnel");
-            _milStrength     = _root.Q<Label>("MilStrength");
-            _milTanks        = _root.Q<Label>("MilTanks");
-            _milJets         = _root.Q<Label>("MilJets");
+            _stabilityVal    = container.Q<Label>("StabilityValue");
+            _securityVal     = container.Q<Label>("SecurityValue");
+            _threatVal       = container.Q<Label>("ThreatValue");
 
-            _crisisContainer = _root.Q<VisualElement>("CrisisContainer");
-            _headlineBox  = _root.Q<VisualElement>("CountryHeadlineBox");
-            _headlineText = _root.Q<Label>("CountryHeadlineText");
+            _milPersonnel    = container.Q<Label>("MilPersonnel");
+            _milStrength     = container.Q<Label>("MilStrength");
+            _milTanks        = container.Q<Label>("MilTanks");
+            _milJets         = container.Q<Label>("MilJets");
+            _milEquipContainer = container.Q<VisualElement>("MilEquipmentContainer");
 
-            _btnClose = _root.Q<Button>("ClosePanel");
-            if (_btnClose != null) _btnClose.clicked += () => UIStateManager.Instance?.HideCountryPanel();
+            _crisisContainer = container.Q<VisualElement>("CrisisContainer");
+            _headlineBox  = container.Q<VisualElement>("CountryHeadlineBox");
+            _headlineText = container.Q<Label>("CountryHeadlineText");
 
-            _btnInvest = _root.Q<Button>("BtnTrade");
-            if (_btnInvest != null) _btnInvest.clicked += OnInvestClicked;
+            _btnClose = container.Q<Button>("ClosePanel");
+            if (_btnClose != null) _btnClose.clicked += () => 
+            {
+                Debug.Log("[CountryInfo] Close button clicked.");
+                HideDossier();
+            };
 
-            _btnAlly = _root.Q<Button>("BtnAlly");
-            if (_btnAlly != null) _btnAlly.clicked += OnProposeAllianceClicked;
+            _btnAlly = container.Q<Button>("BtnAlly");
+            if (_btnAlly != null) _btnAlly.clicked += () =>
+            {
+                Debug.Log($"[CountryInfo] Faction Action button clicked for target: {(_currentCountry != null ? _currentCountry.countryName : "NULL")}");
+                OnInviteToFactionClicked();
+            };
 
-            _btnSpy = _root.Q<Button>("BtnSpy");
-            if (_btnSpy != null) _btnSpy.clicked += OnSpyClicked;
-
-            _btnSabotage = _root.Q<Button>("BtnSabotage");
-            if (_btnSabotage != null) _btnSabotage.clicked += OnSabotageClicked;
-
-            _btnWar = _root.Q<Button>("BtnWar");
-            if (_btnWar != null) _btnWar.clicked += OnDeclareWarClicked;
-
-            _root.Q<Button>("BtnReinforce")?.RegisterCallback<ClickEvent>(_ => OnSendAidClicked());
+            _btnWar = container.Q<Button>("BtnWar");
+            if (_btnWar != null) _btnWar.clicked += () =>
+            {
+                Debug.Log($"[CountryInfo] 'DECLARE WAR' button clicked for target: {(_currentCountry != null ? _currentCountry.countryName : "NULL")}");
+                OnDeclareWarClicked();
+            };
         }
 
         public void RefreshDisplay(CountryDataSO country)
@@ -206,6 +243,7 @@ namespace StateCraft.UI
             var player = GameManager.Instance?.playerCountry;
 
             if (_nameLabel != null) _nameLabel.text = country.countryName.ToUpper();
+            if (_presidentLabel != null) _presidentLabel.text = $"PRESIDENT: {country.GetPresidentName().ToUpper()}";
             if (_flagImage != null)
             {
                 string flagName = country.countryName.Replace(" ", "_");
@@ -217,6 +255,50 @@ namespace StateCraft.UI
                 else if (country.countryFlag != null)
                 {
                     _flagImage.sprite = country.countryFlag; // Fallback to serialized flag
+                }
+            }
+
+            // Update Faction Button text & styling based on relationship & faction state
+            if (_btnAlly != null && player != null)
+            {
+                bool playerInFaction = !string.IsNullOrEmpty(player.globalFaction) && player.globalFaction != "Independent" && player.globalFaction != "Non-Aligned";
+                bool targetInFaction = !string.IsNullOrEmpty(country.globalFaction) && country.globalFaction != "Independent" && country.globalFaction != "Non-Aligned";
+
+                if (playerInFaction && targetInFaction && player.globalFaction == country.globalFaction)
+                {
+                    _btnAlly.text = $"FACTION MEMBER ({country.globalFaction.ToUpper()})";
+                    _btnAlly.style.backgroundColor = new StyleColor(new Color(0f, 230/255f, 118/255f, 0.25f));
+                    _btnAlly.style.borderLeftColor  = new StyleColor(new Color(0f, 230/255f, 118/255f, 0.7f));
+                    _btnAlly.style.borderRightColor = new StyleColor(new Color(0f, 230/255f, 118/255f, 0.7f));
+                    _btnAlly.style.borderTopColor   = new StyleColor(new Color(0f, 230/255f, 118/255f, 0.7f));
+                    _btnAlly.style.borderBottomColor= new StyleColor(new Color(0f, 230/255f, 118/255f, 0.7f));
+                }
+                else if (targetInFaction)
+                {
+                    _btnAlly.text = $"FACTION: {country.globalFaction.ToUpper()}";
+                    _btnAlly.style.backgroundColor = new StyleColor(new Color(255/255f, 193/255f, 7/255f, 0.25f));
+                    _btnAlly.style.borderLeftColor  = new StyleColor(new Color(255/255f, 193/255f, 7/255f, 0.7f));
+                    _btnAlly.style.borderRightColor = new StyleColor(new Color(255/255f, 193/255f, 7/255f, 0.7f));
+                    _btnAlly.style.borderTopColor   = new StyleColor(new Color(255/255f, 193/255f, 7/255f, 0.7f));
+                    _btnAlly.style.borderBottomColor= new StyleColor(new Color(255/255f, 193/255f, 7/255f, 0.7f));
+                }
+                else if (playerInFaction)
+                {
+                    _btnAlly.text = $"INVITE TO {player.globalFaction.ToUpper()}";
+                    _btnAlly.style.backgroundColor = new StyleColor(new Color(0f, 210/255f, 255/255f, 0.25f));
+                    _btnAlly.style.borderLeftColor  = new StyleColor(new Color(0f, 210/255f, 255/255f, 0.7f));
+                    _btnAlly.style.borderRightColor = new StyleColor(new Color(0f, 210/255f, 255/255f, 0.7f));
+                    _btnAlly.style.borderTopColor   = new StyleColor(new Color(0f, 210/255f, 255/255f, 0.7f));
+                    _btnAlly.style.borderBottomColor= new StyleColor(new Color(0f, 210/255f, 255/255f, 0.7f));
+                }
+                else
+                {
+                    _btnAlly.text = "PROPOSE ALLIANCE";
+                    _btnAlly.style.backgroundColor = new StyleColor(new Color(0f, 210/255f, 255/255f, 0.25f));
+                    _btnAlly.style.borderLeftColor  = new StyleColor(new Color(0f, 210/255f, 255/255f, 0.7f));
+                    _btnAlly.style.borderRightColor = new StyleColor(new Color(0f, 210/255f, 255/255f, 0.7f));
+                    _btnAlly.style.borderTopColor   = new StyleColor(new Color(0f, 210/255f, 255/255f, 0.7f));
+                    _btnAlly.style.borderBottomColor= new StyleColor(new Color(0f, 210/255f, 255/255f, 0.7f));
                 }
             }
 
@@ -319,8 +401,19 @@ namespace StateCraft.UI
         {
             if (_currentCountry == null) return;
             var c = _currentCountry;
+            var player = GameManager.Instance?.playerCountry;
 
             int tier = Mathf.Clamp(Mathf.FloorToInt(level / 25f) + 1, 1, 4);
+
+            // Cap the tier if the player has no real intel assets deployed/owned
+            if (player != null && c != player)
+            {
+                if (player.satelliteCount == 0 && player.droneCount == 0 && player.operativeCount < 5)
+                {
+                    tier = 1; // Force tier 1 if player has no intel assets
+                }
+            }
+
             if (_intelText != null) _intelText.text = $"INTEL LEVEL {tier}: {GetIntelTierName(tier)}";
 
             // ECONOMICS
@@ -358,11 +451,36 @@ namespace StateCraft.UI
                 _threatVal.style.color = tc;
             }
 
-            // MILITARY
+            // MILITARY & ORDER OF BATTLE BREAKDOWN
+            float milScore = c.GetMilitaryFirepowerScore();
             if (_milPersonnel != null) _milPersonnel.text = tier >= 3 ? $"{c.armyStats.personnel:N0}" : "CLASSIFIED";
-            if (_milStrength != null)  _milStrength.text  = tier >= 3 ? $"{c.militaryStrength:F0}" : "CLASSIFIED";
+            if (_milStrength != null)  _milStrength.text  = tier >= 3 ? $"{milScore:N0}" : "CLASSIFIED";
             if (_milTanks != null)     _milTanks.text     = tier >= 3 ? $"{c.unitTanks:N0}" : "—";
             if (_milJets != null)      _milJets.text      = tier >= 3 ? $"{c.unitFighters:N0}" : "—";
+
+            if (_milEquipContainer != null)
+            {
+                _milEquipContainer.Clear();
+                if (tier >= 3)
+                {
+                    AddEquipRow(_milEquipContainer, "🔫 Assault Rifles",       $"{c.unitRifles:N0} Units");
+                    AddEquipRow(_milEquipContainer, "💥 Heavy Artillery",      $"{c.unitArtillery:N0} Guns");
+                    AddEquipRow(_milEquipContainer, "🎖️ Main Battle Tanks",    $"{c.unitTanks:N0} Tanks");
+                    AddEquipRow(_milEquipContainer, "🛡️ Armored Carriers",     $"{c.unitAPCs:N0} APCs");
+                    AddEquipRow(_milEquipContainer, "✈️ Fighter Jets",         $"{c.unitFighters:N0} Jets");
+                    AddEquipRow(_milEquipContainer, "🚁 Attack Helicopters",   $"{c.unitAttackHelis:N0} Helis");
+                    AddEquipRow(_milEquipContainer, "⚓ Warships & Frigates",  $"{c.unitDestroyers:N0} Vessels");
+                    AddEquipRow(_milEquipContainer, "🌊 Submarines",           $"{c.unitSubmarines:N0} Subs");
+                }
+                else
+                {
+                    var lockLbl = new Label("🔒 CLASSIFIED WEAPONS ARSENAL — Requires Intel Level 3+ or satellite coverage to decrypt military equipment inventory.")
+                    {
+                        style = { color = new Color(255/255f, 193/255f, 7/255f), fontSize = 10, whiteSpace = WhiteSpace.Normal, unityFontStyleAndWeight = FontStyle.Bold }
+                    };
+                    _milEquipContainer.Add(lockLbl);
+                }
+            }
 
             // CRISES
             if (_crisisContainer != null)
@@ -395,62 +513,46 @@ namespace StateCraft.UI
 
         // ---- ACTIONS ----
 
-        private void OnInvestClicked()
+        private void OnInviteToFactionClicked()
         {
-            if (GameManager.Instance == null || _currentCountry == null) return;
-            float cost = 2.0f;
-            if (GameManager.Instance.playerBudget < cost) { NotificationManager.Instance?.AddNotification("Insufficient funds to invest.", Color.red); return; }
-            GameManager.Instance.playerBudget -= cost;
-            _currentCountry.stability = Mathf.Min(100f, _currentCountry.stability + 3f);
-            _currentCountry.gdp *= 1.01f;
-            string sym = GameManager.Instance.playerCountry?.currencySymbol ?? "N";
-            NotificationManager.Instance?.AddNotification($"INVESTED {sym}2B in {_currentCountry.countryName}: +3% stability, +1% GDP.", new Color(0, 230/255f, 118/255f));
-            NewsSystem.Instance?.PublishNews($"TRADE: {GameManager.Instance.playerCountry?.countryName} expands economic footprint in {_currentCountry.countryName}.", true);
-        }
-
-        private void OnProposeAllianceClicked()
-        {
-            if (GameManager.Instance == null || _currentCountry == null) return;
+            if (GameManager.Instance == null || _currentCountry == null) 
+            {
+                Debug.LogWarning("[CountryInfo] Faction Invite failed: GameManager or _currentCountry is null.");
+                return;
+            }
             var player = GameManager.Instance.playerCountry;
-            if (player == null) return;
+            if (player == null)
+            {
+                Debug.LogWarning("[CountryInfo] Faction Invite failed: playerCountry is null.");
+                return;
+            }
+            
             float rel = DashboardLiveContent.ComputeRelation(player, _currentCountry, GameManager.Instance);
-            if (rel < 55f) { NotificationManager.Instance?.AddNotification($"Relations too low for alliance ({rel:F0}/100). Send ambassadors first.", Color.red); return; }
-            player.allianceCount++;
+            Debug.Log($"[CountryInfo] Attempting Faction Invite: {player.countryName} -> {_currentCountry.countryName}. Relation Score: {rel:F1}");
+
+            if (rel < 55f) { NotificationManager.Instance?.AddNotification($"Relations too low for faction invite ({rel:F0}/100).", Color.red); return; }
+            
             player.globalPrestige = Mathf.Min(100f, player.globalPrestige + 2f);
-            NotificationManager.Instance?.AddNotification($"ALLIANCE PROPOSED with {_currentCountry.countryName}!", new Color(76/255f, 175/255f, 80/255f));
-            NewsSystem.Instance?.PublishNews($"ALLIANCE: Mutual defence pact proposed between {player.countryName} and {_currentCountry.countryName}.");
-        }
-
-        private void OnSpyClicked()
-        {
-            if (GameManager.Instance == null || _currentCountry == null) return;
-            float cost = 0.5f;
-            if (GameManager.Instance.playerBudget < cost) { NotificationManager.Instance?.AddNotification("Insufficient funds to deploy assets.", Color.red); return; }
-            GameManager.Instance.playerBudget -= cost;
-            _currentCountry.intelligenceLevel = Mathf.Min(100f, _currentCountry.intelligenceLevel + 20f);
-            NotificationManager.Instance?.AddNotification($"ASSETS DEPLOYED to {_currentCountry.countryName}. Intel level improved.", new Color(255/255f, 193/255f, 7/255f));
-            RefreshDisplay(_currentCountry);
-        }
-
-        private void OnSabotageClicked()
-        {
-            if (GameManager.Instance == null || _currentCountry == null) return;
-            float cost = 1.0f;
-            if (GameManager.Instance.playerBudget < cost) { NotificationManager.Instance?.AddNotification("Insufficient funds for covert op.", Color.red); return; }
-            GameManager.Instance.playerBudget -= cost;
-            _currentCountry.stability -= 8f;
-            _currentCountry.security  -= 5f;
-            _currentCountry.gdp      *= 0.98f;
-            NotificationManager.Instance?.AddNotification($"SABOTAGE: Infrastructure degraded in {_currentCountry.countryName}.", new Color(255/255f, 82/255f, 82/255f));
-            NewsSystem.Instance?.PublishNews($"INTEL: Mysterious infrastructure failures in {_currentCountry.countryName}. Sabotage suspected.", true);
+            NotificationManager.Instance?.AddNotification($"INVITED {_currentCountry.countryName} TO FACTION!", new Color(76/255f, 175/255f, 80/255f));
+            NewsSystem.Instance?.PublishNews($"FACTIONS: {player.countryName} formally invites {_currentCountry.countryName} into their geopolitical sphere.");
         }
 
         private void OnDeclareWarClicked()
         {
-            if (GameManager.Instance == null || _currentCountry == null) return;
+            if (GameManager.Instance == null || _currentCountry == null) 
+            {
+                Debug.LogWarning("[CountryInfo] Declare War failed: GameManager or _currentCountry is null.");
+                return;
+            }
             var player = GameManager.Instance.playerCountry;
             var warSys = GameManager.Instance.WarSystem;
-            if (warSys == null || player == null) return;
+            if (warSys == null || player == null) 
+            {
+                Debug.LogWarning($"[CountryInfo] Declare War failed: playerCountry={player?.countryName}, WarSystem={warSys}");
+                return;
+            }
+
+            Debug.Log($"[CountryInfo] Executing Declare War: {player.countryName} vs {_currentCountry.countryName}");
             warSys.DeclareWar(player, _currentCountry);
             NotificationManager.Instance?.AddNotification($"WAR DECLARED against {_currentCountry.countryName}! Forces mobilizing.", Color.red);
             NewsSystem.Instance?.PublishNews($"WAR: {player.countryName} declares war on {_currentCountry.countryName}!");
@@ -468,7 +570,24 @@ namespace StateCraft.UI
             NotificationManager.Instance?.AddNotification($"AID SENT to {_currentCountry.countryName}: +5 stability.", new Color(76/255f, 175/255f, 80/255f));
         }
 
-        // ---- HELPERS ----
+        private void AddEquipRow(VisualElement parent, string category, string value, Color? valueColor = null)
+        {
+            if (parent == null) return;
+            var row = new VisualElement();
+            row.style.flexDirection = FlexDirection.Row;
+            row.style.justifyContent = Justify.SpaceBetween;
+            row.style.marginBottom = 4;
+            row.style.borderBottomWidth = 1;
+            row.style.borderBottomColor = new Color(255/255f, 255/255f, 255/255f, 0.05f);
+            row.style.paddingBottom = 2;
+
+            var catLbl = new Label(category) { style = { color = new Color(180/255f, 200/255f, 220/255f), fontSize = 10 } };
+            var valLbl = new Label(value) { style = { color = valueColor ?? Color.white, fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } };
+
+            row.Add(catLbl);
+            row.Add(valLbl);
+            parent.Add(row);
+        }
 
         private static string FormatPopulation(long pop)
         {

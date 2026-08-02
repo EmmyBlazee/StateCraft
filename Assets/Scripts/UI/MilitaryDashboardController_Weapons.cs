@@ -136,7 +136,7 @@ namespace StateCraft.UI
         }
 
 
-        private void SwitchWeaponsTab(int index)
+        public void SwitchWeaponsTab(int index)
         {
             EnsureWeaponsWired();
             if (_wPanelArsenal    != null) _wPanelArsenal.style.display    = index == 0 ? DisplayStyle.Flex : DisplayStyle.None;

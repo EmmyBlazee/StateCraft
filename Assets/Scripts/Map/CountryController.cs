@@ -50,17 +50,13 @@ namespace StateCraft.Map
 
         private void OnMouseDown()
         {
-// Block click if mouse is over UI Toolkit elements
+            // Block click if mouse is over interactive UI elements
             if (UIStateManager.Instance != null && UIStateManager.Instance.IsPointerOverUI())
             {
-return;
+                return;
             }
 
-            // Removed legacy EventSystem check because UI Toolkit's Event System bridge 
-            // falsely flags transparent full-screen layout containers as interactive.
-            // We now solely rely on UIStateManager.Instance.IsPointerOverUI() above.
-
-if (MapManager.Instance != null)
+            if (MapManager.Instance != null)
                 MapManager.Instance.SelectCountry(countryData);
         }
 

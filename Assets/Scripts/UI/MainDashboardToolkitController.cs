@@ -27,6 +27,7 @@ namespace StateCraft.UI
         private Button _btnDiplomacy;
         private Button _btnEvents;
         private Button _btnSearch;
+        private Button _btnTutorial;
 
         // Player Vitals
         private Label _treasuryLabel;
@@ -82,6 +83,13 @@ namespace StateCraft.UI
             _uiDocument = GetComponent<UIDocument>();
             if (_uiDocument == null) return;
             _root = _uiDocument.rootVisualElement;
+
+            if (GetComponent<AIDiplomaticProposalController>() == null)
+                gameObject.AddComponent<AIDiplomaticProposalController>();
+
+            if (GetComponent<TutorialTourController>() == null)
+                gameObject.AddComponent<TutorialTourController>();
+
             InitializeElements();
         }
 
@@ -105,6 +113,9 @@ namespace StateCraft.UI
             _btnNotificationHistory = _root.Q<Button>("BtnNotificationHistory");
             _btnSystemMenu = _root.Q<Button>("BtnSystemMenu");
 
+            var systemMenuInstance = _root.Q<VisualElement>("SystemMenuInstance");
+            if (systemMenuInstance != null) systemMenuInstance.style.display = DisplayStyle.None;
+
             _systemMenuRoot = _root.Q<VisualElement>("SystemMenuRoot");
             if (_systemMenuRoot != null)
             {
@@ -117,37 +128,127 @@ namespace StateCraft.UI
                 if (btnQuit != null) btnQuit.clicked += () =>
                 {
                     GameContext.ReturningToMainMenu = true;
+                    GameManager.Instance?.ResetAllCountriesToBaseline();
                     UnityEngine.SceneManagement.SceneManager.LoadScene(0);
                 };
                 
-                var btnSave = _systemMenuRoot.Q<Button>("BtnSave");
-                if (btnSave != null) btnSave.clicked += () =>
+                var inGameModal = _systemMenuRoot.Q<VisualElement>("InGameOverwriteSaveModal");
+                var btnConfirmInGameSave = _systemMenuRoot.Q<Button>("BtnConfirmInGameSave");
+                var btnCancelInGameSave = _systemMenuRoot.Q<Button>("BtnCancelInGameSave");
+
+                if (inGameModal != null) inGameModal.style.display = DisplayStyle.None;
+
+                void PerformSave()
                 {
+                    if (inGameModal != null) inGameModal.style.display = DisplayStyle.None;
                     GameManager.Instance?.SaveGame();
                     ToggleSystemMenu(false);
-                };
+                }
 
-                var btnLoad = _systemMenuRoot.Q<Button>("BtnLoad");
-                if (btnLoad != null) btnLoad.clicked += () =>
+                if (btnConfirmInGameSave != null) btnConfirmInGameSave.clicked += PerformSave;
+                if (btnCancelInGameSave != null) btnCancelInGameSave.clicked += () => { if (inGameModal != null) inGameModal.style.display = DisplayStyle.None; };
+
+                var btnSave = _systemMenuRoot.Q<Button>("BtnSave");
+                if (btnSave != null) btnSave.clicked += () =>
                 {
                     string path = GameManager.SaveFilePath;
                     if (System.IO.File.Exists(path))
                     {
-                        GameManager.Instance?.LoadGame();
-                        ToggleSystemMenu(false);
+                        if (inGameModal != null)
+                        {
+                            inGameModal.style.display = DisplayStyle.Flex;
+                            return;
+                        }
                     }
-                    else
-                    {
-                        NotificationManager.Instance?.AddNotification("NO SAVE FILE FOUND — Start a game first.", Color.red);
-                        ToggleSystemMenu(false);
-                    }
+                    PerformSave();
+                };
+
+                // In-Game Settings Modal Wiring
+                var settingsModal = _systemMenuRoot.Q<VisualElement>("InGameSettingsModal");
+                var btnSettings = _systemMenuRoot.Q<Button>("BtnSettings");
+                var btnCloseSettings = _systemMenuRoot.Q<Button>("BtnCloseInGameSettings");
+                var btnSaveSettings = _systemMenuRoot.Q<Button>("BtnSaveInGameSettings");
+                var btnResetSettings = _systemMenuRoot.Q<Button>("BtnResetInGameSettings");
+
+                var sliderMusic = _systemMenuRoot.Q<Slider>("SliderInGameMusicVol");
+                var lblMusic = _systemMenuRoot.Q<Label>("LblInGameMusicVol");
+                var toggleFullscreen = _systemMenuRoot.Q<Toggle>("ToggleInGameFullscreen");
+                var dropResolution = _systemMenuRoot.Q<DropdownField>("DropInGameResolution");
+
+                if (settingsModal != null) settingsModal.style.display = DisplayStyle.None;
+
+                // Load initial values from PlayerPrefs
+                float savedMusic = PlayerPrefs.GetFloat("Settings_MusicVolume", 1.0f);
+                bool savedFullscreen = PlayerPrefs.GetInt("Settings_Fullscreen", Screen.fullScreen ? 1 : 0) == 1;
+                int savedResIndex = PlayerPrefs.GetInt("Settings_ResolutionIndex", 0);
+
+                if (sliderMusic != null && lblMusic != null)
+                {
+                    sliderMusic.SetValueWithoutNotify(savedMusic * 100f);
+                    lblMusic.text = $"{Mathf.RoundToInt(savedMusic * 100f)}%";
+                    sliderMusic.RegisterValueChangedCallback(evt => {
+                        lblMusic.text = $"{Mathf.RoundToInt(evt.newValue)}%";
+                        float vol = evt.newValue / 100f;
+                        if (AudioManager.Instance != null) AudioManager.Instance.SetMusicVolume(vol);
+                        PlayerPrefs.SetFloat("Settings_MusicVolume", vol);
+                        PlayerPrefs.Save();
+                    });
+                }
+
+                if (toggleFullscreen != null)
+                {
+                    toggleFullscreen.SetValueWithoutNotify(savedFullscreen);
+                    toggleFullscreen.RegisterValueChangedCallback(evt => {
+                        Screen.fullScreen = evt.newValue;
+                        PlayerPrefs.SetInt("Settings_Fullscreen", evt.newValue ? 1 : 0);
+                        PlayerPrefs.Save();
+                    });
+                }
+
+                if (dropResolution != null)
+                {
+                    dropResolution.index = savedResIndex;
+                    dropResolution.RegisterValueChangedCallback(evt => {
+                        string res = evt.newValue;
+                        if (res == "1920x1080") Screen.SetResolution(1920, 1080, Screen.fullScreen);
+                        else if (res == "2560x1440") Screen.SetResolution(2560, 1440, Screen.fullScreen);
+                        else if (res == "3840x2160") Screen.SetResolution(3840, 2160, Screen.fullScreen);
+                        else if (res == "1280x720") Screen.SetResolution(1280, 720, Screen.fullScreen);
+                        
+                        int idx = dropResolution.choices.IndexOf(res);
+                        if (idx >= 0)
+                        {
+                            PlayerPrefs.SetInt("Settings_ResolutionIndex", idx);
+                            PlayerPrefs.Save();
+                        }
+                    });
+                }
+
+                void HideInGameSettings()
+                {
+                    if (settingsModal != null) settingsModal.style.display = DisplayStyle.None;
+                }
+
+                if (btnSettings != null) btnSettings.clicked += () =>
+                {
+                    if (settingsModal != null) settingsModal.style.display = DisplayStyle.Flex;
+                };
+
+                if (btnCloseSettings != null) btnCloseSettings.clicked += HideInGameSettings;
+                if (btnSaveSettings != null) btnSaveSettings.clicked += HideInGameSettings;
+                if (btnResetSettings != null) btnResetSettings.clicked += () =>
+                {
+                    if (sliderMusic != null) sliderMusic.value = 100;
+                    if (toggleFullscreen != null) toggleFullscreen.value = true;
+                    if (dropResolution != null) dropResolution.index = 0;
                 };
 
                 var btnHowToPlay = _systemMenuRoot.Q<Button>("BtnHowToPlay");
                 if (btnHowToPlay != null) btnHowToPlay.clicked += () =>
                 {
+                    Debug.Log("[MainDashboard] BtnHowToPlay clicked! Triggering TutorialTourController.Instance.ShowPrompt()...");
                     ToggleSystemMenu(false);
-                    if (_howToPlayRoot != null) _howToPlayRoot.style.display = DisplayStyle.Flex;
+                    if (TutorialTourController.Instance != null) TutorialTourController.Instance.ShowPrompt();
                 };
             }
 
@@ -160,12 +261,12 @@ namespace StateCraft.UI
                 if (btnCloseHTP != null)
                 {
                     btnCloseHTP.pickingMode = PickingMode.Position;
-                    btnCloseHTP.clicked += () => _howToPlayRoot.style.display = DisplayStyle.None;
+                    btnCloseHTP.clicked += () => ToggleHowToPlayModal(false);
                 }
 
                 void SwitchInGameHTPTab(int activeIdx)
                 {
-                    for (int i = 0; i <= 5; i++)
+                    for (int i = 0; i <= 6; i++)
                     {
                         var page = _howToPlayRoot.Q<VisualElement>($"HTPPage{i}");
                         var tabBtn = _howToPlayRoot.Q<Button>($"HTPTab{i}");
@@ -179,7 +280,7 @@ namespace StateCraft.UI
                     }
                 }
 
-                for (int i = 0; i <= 5; i++)
+                for (int i = 0; i <= 6; i++)
                 {
                     int tabIdx = i;
                     var tabBtn = _howToPlayRoot.Q<Button>($"HTPTab{i}");
@@ -250,6 +351,7 @@ namespace StateCraft.UI
                     _btnQuitToMenuFromGameOver.clicked += () => 
                     {
                         GameContext.ReturningToMainMenu = true;
+                        GameManager.Instance?.ResetAllCountriesToBaseline();
                         UnityEngine.SceneManagement.SceneManager.LoadScene(0);
                     };
                 }
@@ -291,6 +393,11 @@ namespace StateCraft.UI
 
             _btnEvents = _root.Q<Button>("NavEvents");
             if (_btnEvents != null) _btnEvents.clicked += () => ShowPanel("Events");
+
+            _btnTutorial = _root.Q<Button>("NavTutorial");
+            if (_btnTutorial != null) _btnTutorial.clicked += () => {
+                if (TutorialTourController.Instance != null) TutorialTourController.Instance.ShowPrompt();
+            };
 
             InjectNavImages();
         }
@@ -397,8 +504,21 @@ namespace StateCraft.UI
 
             var globalCtrl = FindObjectOfType<GlobalDashboardController>(true);
             InjectPanel(GetDashboardPanel(globalCtrl, "GlobalDashboard"), "Global");
-
             HideAllPanels();
+
+            if (!GameContext.ShouldLoadSave)
+            {
+                StartCoroutine(DeferredNewGameTourCheck());
+            }
+        }
+
+        private System.Collections.IEnumerator DeferredNewGameTourCheck()
+        {
+            yield return new UnityEngine.WaitForSeconds(0.5f);
+            if (TutorialTourController.Instance != null)
+            {
+                TutorialTourController.Instance.ShowPrompt();
+            }
         }
 
         private void OnDisable()
@@ -410,10 +530,18 @@ namespace StateCraft.UI
         }
 
         
+        public VisualElement GetPanelVisualElement(string key)
+        {
+            if (_panels != null && _panels.ContainsKey(key)) return _panels[key];
+            return _panelContainer?.Q<VisualElement>($"{key}Dashboard");
+        }
+
         public void ShowPanel(string name)
         {
             HideAllPanels();
             if (_systemMenuRoot != null) _systemMenuRoot.style.display = DisplayStyle.None;
+
+            if (_panelContainer != null) _panelContainer.style.display = DisplayStyle.Flex;
 
             if (_panels.ContainsKey(name) && _panels[name] != null)
             {
@@ -444,6 +572,8 @@ namespace StateCraft.UI
 
         public void HideAllPanels()
         {
+            if (_panelContainer != null) _panelContainer.style.display = DisplayStyle.None;
+
             foreach (var panel in _panels.Values)
             {
                 if (panel != null) panel.style.display = DisplayStyle.None;
@@ -501,10 +631,23 @@ namespace StateCraft.UI
 
         private void ToggleSystemMenu(bool show)
         {
-            if (_systemMenuRoot == null) return;
-            
-            _systemMenuRoot.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
-            
+            var menuInstance = _root?.Q<VisualElement>("SystemMenuInstance");
+            if (menuInstance != null)
+            {
+                menuInstance.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
+                menuInstance.pickingMode = show ? PickingMode.Position : PickingMode.Ignore;
+                if (show) menuInstance.BringToFront();
+            }
+
+            if (_systemMenuRoot != null)
+            {
+                _systemMenuRoot.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
+                _systemMenuRoot.pickingMode = show ? PickingMode.Position : PickingMode.Ignore;
+                if (show) _systemMenuRoot.BringToFront();
+            }
+
+            AudioManager.Instance?.PlayUIClick();
+
             if (show)
             {
                 // Pause the game when opening the menu
@@ -512,47 +655,73 @@ namespace StateCraft.UI
             }
             else
             {
-                // Resume the game at 1x when closing the menu
+                // Resume the game at 1x speed when unpausing / closing menu
                 if (GameManager.Instance != null) SetTimeSpeed(1);
             }
         }
 
-        private void SetTimeSpeed(int level)
+        private void ToggleHowToPlayModal(bool show)
+        {
+            var htpInstance = _root?.Q<VisualElement>("HowToPlayInstance");
+            if (htpInstance != null)
+            {
+                htpInstance.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
+                htpInstance.pickingMode = show ? PickingMode.Position : PickingMode.Ignore;
+                if (show) htpInstance.BringToFront();
+            }
+
+            if (_howToPlayRoot != null)
+            {
+                _howToPlayRoot.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
+                _howToPlayRoot.pickingMode = show ? PickingMode.Position : PickingMode.Ignore;
+                if (show) _howToPlayRoot.BringToFront();
+            }
+
+            AudioManager.Instance?.PlayUIClick();
+        }
+
+        public void SetTimeSpeed(int level)
         {
             if (GameManager.Instance == null) return;
 
             // Update UI State
-            _btnPause.RemoveFromClassList("time-btn-active");
-            _btn1x.RemoveFromClassList("time-btn-active");
-            _btn2x.RemoveFromClassList("time-btn-active");
-            _btn3x.RemoveFromClassList("time-btn-active");
+            _btnPause?.RemoveFromClassList("time-btn-active");
+            _btn1x?.RemoveFromClassList("time-btn-active");
+            _btn2x?.RemoveFromClassList("time-btn-active");
+            _btn3x?.RemoveFromClassList("time-btn-active");
 
             switch (level)
             {
                 case 0:
                     GameManager.Instance.isRealTime = false;
-                    _btnPause.AddToClassList("time-btn-active");
+                    _btnPause?.AddToClassList("time-btn-active");
                     break;
                 case 1:
                     GameManager.Instance.isRealTime = true;
                     GameManager.Instance.turnDuration = 5f;
-                    _btn1x.AddToClassList("time-btn-active");
+                    _btn1x?.AddToClassList("time-btn-active");
                     break;
                 case 2:
                     GameManager.Instance.isRealTime = true;
                     GameManager.Instance.turnDuration = 2.5f;
-                    _btn2x.AddToClassList("time-btn-active");
+                    _btn2x?.AddToClassList("time-btn-active");
                     break;
                 case 3:
                     GameManager.Instance.isRealTime = true;
                     GameManager.Instance.turnDuration = 1f;
-                    _btn3x.AddToClassList("time-btn-active");
+                    _btn3x?.AddToClassList("time-btn-active");
                     break;
             }
         }
 
         private void Update()
         {
+            if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.Escape))
+            {
+                bool isCurrentlyOpen = _systemMenuRoot != null && _systemMenuRoot.style.display == DisplayStyle.Flex;
+                ToggleSystemMenu(!isCurrentlyOpen);
+            }
+
             if (GameManager.Instance == null) return;
             UpdatePlayerVitals();
             UpdateSimInfo();
@@ -747,6 +916,7 @@ namespace StateCraft.UI
             {
                 _warDeclaredMessage.text = $"{aggressor.countryName.ToUpper()} HAS FORMALLY DECLARED WAR UPON OUR NATION.";
                 _warDeclaredModal.style.display = DisplayStyle.Flex;
+                AudioManager.Instance?.PlayWarAlert();
                 
                 // Force pause when war is declared
                 if (GameManager.Instance != null)

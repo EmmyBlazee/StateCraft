@@ -1012,16 +1012,19 @@ namespace StateCraft.UI
 
         private void EnsureBasesData(CountryDataSO country)
         {
+            if (country == null) return;
             if (country.militaryBases == null)
                 country.militaryBases = new List<MilitaryBase>();
 
+            var validRegions = country.regions != null ? country.regions.Where(r => r != null).ToList() : new List<RegionDataSO>();
+
             // Check if existing bases belong to a different country (e.g. leftover serialized data)
-            if (country.militaryBases.Count > 0 && country.regions != null && country.regions.Count > 0)
+            if (country.militaryBases.Count > 0 && validRegions.Count > 0)
             {
                 bool baseMatchesRegion = false;
-                foreach (var region in country.regions)
+                foreach (var region in validRegions)
                 {
-                    if (country.militaryBases[0].regionName == region.regionName)
+                    if (country.militaryBases[0] != null && country.militaryBases[0].regionName == region.regionName)
                     {
                         baseMatchesRegion = true;
                         break;
@@ -1038,35 +1041,35 @@ namespace StateCraft.UI
             if (country.militaryBases.Count == 0)
             {
                 // Generate dynamic bases based on the country's actual regions
-                if (country.regions != null && country.regions.Count > 0)
+                if (validRegions.Count > 0)
                 {
                     int idCounter = 1;
                     
                     // Base 1: National HQ in the first region (often capital)
-                    country.militaryBases.Add(new MilitaryBase($"BASE_{idCounter++}", $"{country.regions[0].regionName} Defense HQ", country.regions[0].regionName, "JOINT", 3000, "National Defense HQ"));
+                    country.militaryBases.Add(new MilitaryBase($"BASE_{idCounter++}", $"{validRegions[0].regionName} Defense HQ", validRegions[0].regionName, "JOINT", 3000, "National Defense HQ"));
                     
                     // Create bases distributed among other regions
                     string[] branches = { "ARMY", "AIR", "NAVY", "ARMY" };
                     string[] roles = { "Training & Logistics", "Air Superiority", "Maritime Operations", "Armored Division" };
                     
-                    for (int i = 1; i < Mathf.Min(country.regions.Count, 6); i++)
+                    for (int i = 1; i < Mathf.Min(validRegions.Count, 6); i++)
                     {
                         int branchIdx = (i - 1) % branches.Length;
                         string branch = branches[branchIdx];
                         string role = roles[branchIdx];
                         
                         // Default to JOINT if landlocked and NAVY is selected, but for simplicity let's just use it
-                        string baseName = branch == "AIR" ? $"{country.regions[i].regionName} Air Base" :
-                                          branch == "NAVY" ? $"{country.regions[i].regionName} Naval Base" :
-                                          $"{country.regions[i].regionName} Army Garrison";
+                        string baseName = branch == "AIR" ? $"{validRegions[i].regionName} Air Base" :
+                                          branch == "NAVY" ? $"{validRegions[i].regionName} Naval Base" :
+                                          $"{validRegions[i].regionName} Army Garrison";
                                           
-                        country.militaryBases.Add(new MilitaryBase($"BASE_{idCounter++}", baseName, country.regions[i].regionName, branch, UnityEngine.Random.Range(1500, 2500), role));
+                        country.militaryBases.Add(new MilitaryBase($"BASE_{idCounter++}", baseName, validRegions[i].regionName, branch, UnityEngine.Random.Range(1500, 2500), role));
                     }
                     
                     // Add one under construction if they have enough regions
-                    if (country.regions.Count > 2)
+                    if (validRegions.Count > 2)
                     {
-                        var bUnderConst = new MilitaryBase($"BASE_{idCounter++}", $"{country.regions[country.regions.Count - 1].regionName} Forward Op Base", country.regions[country.regions.Count - 1].regionName, "ARMY", 800, "Border Security");
+                        var bUnderConst = new MilitaryBase($"BASE_{idCounter++}", $"{validRegions[validRegions.Count - 1].regionName} Forward Op Base", validRegions[validRegions.Count - 1].regionName, "ARMY", 800, "Border Security");
                         bUnderConst.status = "UNDER CONSTRUCTION";
                         country.militaryBases.Add(bUnderConst);
                     }

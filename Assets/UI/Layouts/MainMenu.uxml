@@ -11,7 +11,6 @@
         <ui:VisualElement name="ButtonStack" style="align-items: stretch; width: 320px; margin-top: 40px;">
             <ui:Button name="BtnNewGame"   text="NEW GAME"       class="button-premium action-btn-green" style="margin-bottom: 14px; font-size: 17px; height: 48px; letter-spacing: 2px;" />
             <ui:Button name="BtnLoadGame"  text="LOAD GAME"      class="button-premium action-btn-blue"  style="margin-bottom: 14px; font-size: 17px; height: 48px; letter-spacing: 2px;" />
-            <ui:Button name="BtnHowToPlay" text="HOW TO PLAY"    class="button-premium action-btn-orange" style="margin-bottom: 14px; font-size: 17px; height: 48px; letter-spacing: 2px;" />
             <ui:Button name="BtnSettings"  text="SETTINGS"       class="button-premium"                  style="margin-bottom: 14px; font-size: 17px; height: 48px; letter-spacing: 2px;" />
             <ui:Button name="BtnQuit"      text="QUIT TO DESKTOP" class="button-premium action-btn-red"   style="font-size: 17px; height: 48px; letter-spacing: 2px;" />
         </ui:VisualElement>
@@ -78,15 +77,10 @@
                 <ui:VisualElement style="height: 1px; background-color: rgba(255,255,255,0.07); margin-bottom: 18px;" />
                 <ui:Label text="AUDIO" style="font-size: 11px; color: rgba(0,210,255,0.7); -unity-font-style: bold; letter-spacing: 2px; margin-bottom: 14px;" />
 
-                <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                    <ui:Label text="Master Volume" style="font-size: 13px; color: rgba(200,215,230,1); width: 130px;" />
-                    <ui:Slider name="SliderMasterVol" low-value="0" high-value="100" value="80" style="flex-grow: 1; margin-left: 12px;" />
-                    <ui:Label name="LblMasterVol" text="80" style="font-size: 12px; color: rgba(200,215,230,1); width: 30px; -unity-text-align: middle-right;" />
-                </ui:VisualElement>
 
                 <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 24px;">
                     <ui:Label text="Music Volume" style="font-size: 13px; color: rgba(200,215,230,1); width: 130px;" />
-                    <ui:Slider name="SliderMusicVol" low-value="0" high-value="100" value="60" style="flex-grow: 1; margin-left: 12px;" />
+                    <ui:Slider name="SliderMusicVol" low-value="0" high-value="100" value="60" style="flex-grow: 1; margin-left: 12px; margin-right: 12px; max-width: 200px;" />
                     <ui:Label name="LblMusicVol" text="60" style="font-size: 12px; color: rgba(200,215,230,1); width: 30px; -unity-text-align: middle-right;" />
                 </ui:VisualElement>
 
@@ -103,5 +97,8 @@
     <!-- ── How To Play overlay (template embed, hidden by default) ────────────── -->
     <ui:Template name="HowToPlay" src="project://database/Assets/UI/Layouts/HowToPlay.uxml" />
     <ui:Instance template="HowToPlay" name="HowToPlayOverlay" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;" />
+
+    <ui:Template name="TutorialTour" src="project://database/Assets/UI/Layouts/TutorialTour.uxml" />
+    <ui:Instance template="TutorialTour" name="TutorialTourOverlay" picking-mode="Ignore" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 9999; display: none;" />
 
 </ui:UXML>

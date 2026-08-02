@@ -2,6 +2,7 @@
     <Style src="project://database/Assets/UI/Styles/Global.uss?fileID=7433441132597879392&amp;guid=f18ee3d1960f75747bcbb641ec70876e&amp;type=3#Global" />
     <ui:Template name="SystemMenu" src="project://database/Assets/UI/Layouts/SystemMenu.uxml" />
     <ui:Template name="HowToPlay" src="project://database/Assets/UI/Layouts/HowToPlay.uxml" />
+    <ui:Template name="TutorialTour" src="project://database/Assets/UI/Layouts/TutorialTour.uxml" />
     <ui:Template name="GameOverScreen" src="project://database/Assets/UI/Layouts/GameOverScreen.uxml" />
     <ui:VisualElement name="MainDashboard" picking-mode="Ignore" style="width: 100%; height: 100%; position: absolute; display: flex; pointer-events: none;">
         <ui:VisualElement name="TopBar" picking-mode="Ignore" class="econ-topbar" style="position: absolute; top: 0; width: 100%; pointer-events: auto; z-index: 10;">
@@ -29,11 +30,14 @@
                     <ui:Label name="DateSub" text="Global Time" class="econ-date-sub" />
                 </ui:VisualElement>
                 <ui:VisualElement name="TimeControls" style="flex-direction: row; align-items: center; justify-content: flex-end; width: auto;">
-                    <ui:Button name="TimePause" text="‖" class="time-btn" />
+                    <ui:Button name="TimePause" text="||" class="time-btn" />
                     <ui:Button name="Time1x" text="1x" class="time-btn time-btn-active" />
                     <ui:Button name="Time2x" text="2x" class="time-btn" />
                     <ui:Button name="Time3x" text="3x" class="time-btn" />
-                    <ui:Button name="BtnNotificationHistory" text="" class="time-btn" style="margin-left: 10px; width: 35px; background-image: url('project://database/Assets/Resources/NavIcons/icon_bell_final.png'); -unity-background-scale-mode: scale-to-fit; -unity-background-image-tint-color: #90a4ae;" />
+                    <ui:VisualElement name="NotificationBellWrapper" style="position: relative; width: 35px; height: 35px; margin-left: 10px;">
+                        <ui:Button name="BtnNotificationHistory" text="" class="time-btn" style="width: 35px; height: 35px; background-image: url('project://database/Assets/Resources/NavIcons/icon_bell_final.png'); -unity-background-scale-mode: scale-to-fit; -unity-background-image-tint-color: #90a4ae;" />
+                        <ui:Label name="NotificationBadge" text="0" style="position: absolute; top: -4px; right: -4px; width: 16px; height: 16px; border-radius: 8px; background-color: rgb(220, 38, 38); color: rgb(255,255,255); font-size: 9px; -unity-font-style: bold; -unity-text-align: middle-center; display: none;" />
+                    </ui:VisualElement>
                     <ui:Button name="BtnSystemMenu" text="" class="time-btn" style="margin-left: 5px; width: 35px; background-image: url('project://database/Assets/Resources/NavIcons/icon_gear_final.png'); -unity-background-scale-mode: scale-to-fit; -unity-background-image-tint-color: #90a4ae;" />
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -67,8 +71,9 @@
             </ui:Button>
         </ui:VisualElement>
         
-        <ui:Instance template="SystemMenu" name="SystemMenuInstance" picking-mode="Ignore" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 100;" />
-        <ui:Instance template="HowToPlay" name="HowToPlayInstance" picking-mode="Ignore" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 300;" />
+        <ui:Instance template="SystemMenu" name="SystemMenuInstance" picking-mode="Ignore" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 100; display: none;" />
+        <ui:Instance template="HowToPlay" name="HowToPlayInstance" picking-mode="Ignore" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 300; display: none;" />
+        <ui:Instance template="TutorialTour" name="TutorialTourInstance" picking-mode="Ignore" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 9999; display: none;" />
         <ui:Instance template="GameOverScreen" name="GameOverInstance" picking-mode="Ignore" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 400;" />
         
         <!-- War Declared Modal -->
@@ -92,6 +97,24 @@
             
             <ui:Button name="BtnClosePresidentProfile" text="CLOSE" class="button-premium" style="height: 35px; font-size: 14px; color: rgb(0, 210, 255); border-color: rgba(0, 210, 255, 0.5); background-color: rgba(0, 210, 255, 0.08); -unity-font-style: bold; letter-spacing: 1px;" />
         </ui:VisualElement>
-        
+
+        <!-- AI Diplomatic Proposal Modal -->
+        <ui:VisualElement name="AIProposalModal" style="display: none; position: absolute; left: 50%; top: 50%; width: 460px; margin-left: -230px; margin-top: -160px; padding: 22px; background-color: rgba(8, 12, 18, 0.98); border-radius: 10px; border-width: 1px; border-color: rgba(0, 220, 255, 0.4); z-index: 200; pointer-events: auto;" class="glass-panel hologram-border">
+            <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 12px; border-bottom-width: 1px; border-color: rgba(0, 220, 255, 0.2); padding-bottom: 8px;">
+                <ui:Image name="AIProposalFlag" style="width: 36px; height: 24px; margin-right: 10px; border-radius: 2px;" />
+                <ui:VisualElement style="flex-grow: 1;">
+                    <ui:Label name="AIProposalHeader" text="DIPLOMATIC PROPOSAL" style="font-size: 11px; color: rgba(0, 210, 255, 0.7); -unity-font-style: bold; letter-spacing: 1.5px;" />
+                    <ui:Label name="AIProposalTitle" text="PEACE TREATY OFFER" style="font-size: 16px; color: white; -unity-font-style: bold; letter-spacing: 1px;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            
+            <ui:Label name="AIProposalSender" text="FROM: EMBASSY OF EGYPT" style="font-size: 12px; color: rgb(255, 215, 0); -unity-font-style: bold; margin-bottom: 10px;" />
+            <ui:Label name="AIProposalMessage" text="President Abdel Fattah el-Sisi proposes an immediate ceasefire and end to hostile operations." style="font-size: 13px; color: rgb(220, 230, 240); white-space: normal; line-height: 18px; margin-bottom: 20px;" />
+            
+            <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                <ui:Button name="BtnAcceptProposal" text="ACCEPT PROPOSAL" class="button-premium" style="flex-grow: 1; margin-right: 8px; height: 38px; font-size: 12px; color: rgb(0, 255, 170); border-color: rgba(0, 255, 170, 0.6); background-color: rgba(0, 255, 170, 0.12); -unity-font-style: bold; letter-spacing: 1px;" />
+                <ui:Button name="BtnDeclineProposal" text="DECLINE" class="button-premium" style="flex-grow: 1; margin-left: 8px; height: 38px; font-size: 12px; color: rgb(255, 82, 82); border-color: rgba(255, 82, 82, 0.6); background-color: rgba(255, 82, 82, 0.12); -unity-font-style: bold; letter-spacing: 1px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

@@ -172,24 +172,38 @@ namespace StateCraft.UI
                 AddInd("Interest Payments", $"{UiFormat.Money(totalBudget * 0.015f, sym)} (7.0%)", Color.white);
                 AddInd("Capital Expenditure", $"{UiFormat.Money(totalBudget * 0.05f, sym)} (23.5%)", Color.white);
             }
-
             var health = _panelBudget.Q<VisualElement>("BudgetHealthContainer");
             if (health != null)
             {
                 health.Clear();
 
-                // Derive health score from budget utilization
-                float healthPct = Mathf.Clamp((1f - pctUtil) * 100f + 50f, 0f, 100f);
-                // Map to label
+                // Compute holistic Budget Health Score (0 - 100%)
+                // Starts at 100%, penalized if spending exceeds allocated budget, or if military takes an unsustainable % of GDP
+                float healthScore = 100f;
+
+                // Penalty for high budget utilization
+                if (pctUtil > 1.0f)
+                    healthScore -= Mathf.Min(60f, (pctUtil - 1.0f) * 100f);
+                else if (pctUtil > 0.85f)
+                    healthScore -= (pctUtil - 0.85f) * 100f;
+
+                // Penalty if Defence Budget is over 10% of GDP
+                float pctGdpCalculated = country.gdp > 0 ? ((country.income * (country.budgetMilitaryShare / 100f) * 12f) / country.gdp) * 100f : 0f;
+                if (pctGdpCalculated > 10f)
+                {
+                    healthScore -= Mathf.Min(35f, (pctGdpCalculated - 10f) * 1.5f);
+                }
+
+                healthScore = Mathf.Clamp(healthScore, 5f, 100f);
+
                 string healthLabel;
                 Color ringColor;
-                if      (pctUtil <= 0.70f) { healthLabel = "EXCELLENT"; ringColor = new Color(0.14f, 0.93f, 0.34f); }
-                else if (pctUtil <= 0.90f) { healthLabel = "GOOD";      ringColor = new Color(0.14f, 0.93f, 0.34f); }
-                else if (pctUtil <= 1.00f) { healthLabel = "FAIR";      ringColor = new Color(1f, 0.7f, 0f); }
-                else                       { healthLabel = "CRITICAL";   ringColor = new Color(1f, 0.3f, 0.3f); }
+                if      (healthScore >= 80f) { healthLabel = "EXCELLENT"; ringColor = new Color(0.14f, 0.93f, 0.34f); }
+                else if (healthScore >= 60f) { healthLabel = "GOOD";      ringColor = new Color(0.14f, 0.93f, 0.34f); }
+                else if (healthScore >= 40f) { healthLabel = "FAIR";      ringColor = new Color(1f, 0.7f, 0f); }
+                else                         { healthLabel = "CRITICAL";   ringColor = new Color(1f, 0.3f, 0.3f); }
 
-                // Donut ring (approximated with border)
-                float displayPct = Mathf.Clamp(pctUtil * 100f, 0f, 100f);
+                // Donut ring displaying actual Fiscal Health Score
                 var dContainer = new VisualElement() { style = {
                     width = 80, height = 80, justifyContent = Justify.Center, alignItems = Align.Center,
                     borderTopWidth = 6, borderBottomWidth = 6, borderLeftWidth = 6, borderRightWidth = 6,
@@ -198,7 +212,7 @@ namespace StateCraft.UI
                     borderLeftColor = ringColor, borderRightColor = new Color(1,1,1,0.1f),
                     marginBottom = 15
                 }};
-                dContainer.Add(new Label($"{displayPct:F0}%") { style = { color = Color.white, fontSize = 18, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = -2 } });
+                dContainer.Add(new Label($"{healthScore:F0}%") { style = { color = Color.white, fontSize = 18, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = -2 } });
                 dContainer.Add(new Label(healthLabel) { style = { color = ringColor, fontSize = 9 } });
                 health.Add(dContainer);
                 

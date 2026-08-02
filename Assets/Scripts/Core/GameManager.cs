@@ -61,6 +61,22 @@ namespace StateCraft.Core
             if (hasGameEnded) return;
             hasGameEnded = true;
             isRealTime = false;
+            
+            // Delete save file so player cannot bypass game over by re-opening the game
+            try
+            {
+                string savePath = SaveFilePath;
+                if (System.IO.File.Exists(savePath))
+                {
+                    System.IO.File.Delete(savePath);
+                    Debug.Log("[GameManager] Game Over — Save file deleted from disk to enforce defeat/victory.");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[GameManager] Error deleting save file on game over: {ex.Message}");
+            }
+
             OnGameOver?.Invoke(isVictory, title, summary, stats);
         }
 
@@ -72,76 +88,31 @@ namespace StateCraft.Core
 
         private void Awake()
         {
-if (Instance == null)
+            if (Instance == null)
             {
                 Instance = this;
+                Application.runInBackground = true;
                 if (transform.parent != null) transform.SetParent(null);
                 DontDestroyOnLoad(gameObject);
-InitializeSystems();
-}
+                
+                if (AudioManager.Instance == null)
+                {
+                    var audioGO = new GameObject("AudioManager");
+                    audioGO.AddComponent<AudioManager>();
+                }
+
+                InitializeSystems();
+            }
             else if (Instance != this)
             {
-Destroy(gameObject);
+                Destroy(gameObject);
                 return; // Stop execution immediately
             }
         }
 
         private void InitializeSystems()
         {
-            if (allCountries != null)
-            {
-                foreach (var country in allCountries)
-                {
-                    if (country != null)
-                    {
-                        SafeClearActiveOperations(country);
-                        country.trainingPipelines?.Clear();
-                        country.activeCovertOps?.Clear();
-                        country.detectedThreats?.Clear();
-
-                        // Reset exchange rate to baseline — prevents bloated rates from persisting across play sessions
-                        if (country.baseExchangeRate > 0f)
-                            country.exchangeRate = country.baseExchangeRate;
-                    }
-                }
-            }
-
-            if (playerCountry != null)
-            {
-                SafeClearActiveOperations(playerCountry);
-                playerCountry.trainingPipelines?.Clear();
-                playerCountry.activeCovertOps?.Clear();
-                playerCountry.detectedThreats?.Clear();
-
-                if (playerCountry.baseExchangeRate > 0f)
-                    playerCountry.exchangeRate = playerCountry.baseExchangeRate;
-            }
-
-            // --- Save Clamping: Fix old broken save states ---
-            // BUG 4 FIX: Clamp bounds updated to match GDP-in-billions scale.
-            // Old bound of 20000f for gdp made sense as raw USD only if gdp was ~$20 trillion max.
-            // Now gdp is in billions so 20000f = $20 trillion which is still a fine upper cap,
-            // but the reset value changes from 1000f (raw) to 477f (billions).
-            // Similarly debt/foreign/domestic reset to the new default billion-scale values.
-            foreach (var country in allCountries)
-            {
-                if (country != null)
-                {
-                    if (float.IsNaN(country.treasury) || float.IsInfinity(country.treasury) || Mathf.Abs(country.treasury) > 10000f) country.treasury = 12f;
-                    if (float.IsNaN(country.gdp) || float.IsInfinity(country.gdp) || country.gdp > 50000f || country.gdp < 0f) country.gdp = 477f;
-                    if (float.IsNaN(country.debt) || float.IsInfinity(country.debt) || Mathf.Abs(country.debt) > 20000f) country.debt = 95f;
-                    if (float.IsNaN(country.foreignDebt) || float.IsInfinity(country.foreignDebt) || Mathf.Abs(country.foreignDebt) > 20000f) country.foreignDebt = 35f;
-                    if (float.IsNaN(country.domesticDebt) || float.IsInfinity(country.domesticDebt) || Mathf.Abs(country.domesticDebt) > 20000f) country.domesticDebt = 60f;
-                    if (float.IsNaN(country.income) || float.IsInfinity(country.income) || Mathf.Abs(country.income) > 500f) country.income = 8f;
-                    if (float.IsNaN(country.spending) || float.IsInfinity(country.spending) || Mathf.Abs(country.spending) > 500f) country.spending = 6f;
-                    
-                    if (country == playerCountry)
-                    {
-                        if (float.IsNaN(playerBudget) || float.IsInfinity(playerBudget) || Mathf.Abs(playerBudget) > 10000f) playerBudget = country.treasury;
-                        else playerBudget = country.treasury;
-                    }
-                }
-            }
+            ResetAllCountriesToBaseline();
 
             SeedHistoricalFactions();
 
@@ -167,8 +138,303 @@ Destroy(gameObject);
             // ── Apply scenario briefing text to all countries ──
             ScenarioBriefings.Apply(allCountries);
 
-            // Cleanly acquire NewsSystem — rely wholly on the Instance since it is a static singleton initialized in Awake.
             NewsSystem = Systems.NewsSystem.Instance;
+        }
+
+        private static string[] GetRealWorldRegionNames(string countryName)
+        {
+            if (string.IsNullOrEmpty(countryName)) return new string[] { "Central District", "Northern Province", "Southern Maritime", "Frontier Buffer" };
+
+            string name = countryName.Trim();
+            switch (name)
+            {
+                case "Nigeria": return new string[] { "Abuja (FCT)", "Lagos Economic Hub", "Kano Northern Trade Region", "Rivers Niger Delta Oil Hub" };
+                case "Algeria": return new string[] { "Algiers (Capital)", "Oran Coastal Region", "Constantine Industrial", "Tamanrasset Sahara Border" };
+                case "Sudan": return new string[] { "Khartoum (Capital)", "Port Red Sea Region", "Darfur Western Province", "Kordofan Central Belt" };
+                case "Senegal": return new string[] { "Dakar (Capital)", "Thiès Industrial Zone", "Saint-Louis Maritime", "Ziguinchor Casamance" };
+                case "Cote d'Ivoire": case "Cote_dIvoire": case "Ivory Coast": return new string[] { "Abidjan Economic Hub", "Yamoussoukro (Capital)", "Bouaké Central Region", "San-Pédro Port Zone" };
+                case "Cameroon": return new string[] { "Yaoundé (Capital)", "Douala Port Region", "Garoua Northern Belt", "Bamenda Western Zone" };
+                case "Uganda": return new string[] { "Kampala (Capital)", "Jinja Industrial Zone", "Gulu Northern Belt", "Mbarara Western Zone" };
+                case "Tanzania": return new string[] { "Dar es Salaam (Port)", "Dodoma (Capital)", "Arusha Northern Region", "Zanzibar Island Zone" };
+                case "Zambia": return new string[] { "Lusaka (Capital)", "Ndola Copperbelt", "Kitwe Mining Hub", "Livingstone Southern Zone" };
+                case "Zimbabwe": return new string[] { "Harare (Capital)", "Bulawayo Industrial", "Mutare Eastern Border", "Gweru Central Province" };
+                case "Tunisia": return new string[] { "Tunis (Capital)", "Sfax Industrial Port", "Sousse Coastal Zone", "Bizerte Northern Port" };
+                case "Mali": return new string[] { "Bamako (Capital)", "Sikasso Southern Belt", "Mopti Central Delta", "Timbuktu Northern Region" };
+                case "Niger": return new string[] { "Niamey (Capital)", "Zinder South-Central", "Maradi Agricultural", "Agadez Northern Sahara" };
+                case "Chad": return new string[] { "N'Djamena (Capital)", "Moundou Southern Hub", "Abéché Eastern Border", "Sarh Agricultural Zone" };
+                case "Rwanda": return new string[] { "Kigali (Capital)", "Musanze Northern Zone", "Huye Southern Hub", "Rubavu Lake Border" };
+                case "Somalia": return new string[] { "Mogadishu (Capital)", "Hargeisa Northern Region", "Kismayo Southern Port", "Bosaso Puntland Zone" };
+                case "Libya": return new string[] { "Tripoli (Capital)", "Benghazi Eastern Hub", "Misrata Central Port", "Sabha Fezzan Region" };
+                case "Madagascar": return new string[] { "Antananarivo (Capital)", "Toamasina East Port", "Mahajanga North Coast", "Fianarantsoa Highlands" };
+                case "Mozambique": return new string[] { "Maputo (Capital)", "Beira Central Port", "Nampula Northern Zone", "Tete Zambezi Valley" };
+                case "Botswana": return new string[] { "Gaborone (Capital)", "Francistown Northern", "Maun Okavango Zone", "Lobatse Southern Belt" };
+                case "Burkina Faso": case "Burkina_Faso": return new string[] { "Ouagadougou (Capital)", "Bobo-Dioulasso Hub", "Koudougou Central Zone", "Sahel Northern Border" };
+                case "Gabon": return new string[] { "Libreville (Capital)", "Port-Gentil Oil Hub", "Franceville Mining Zone", "Oyem Northern Region" };
+                case "Namibia": return new string[] { "Windhoek (Capital)", "Walvis Bay Port Zone", "Swakopmund Coast", "Oshakati Northern Border" };
+                case "Republic of the Congo": case "Republic_of_the_Congo": case "Congo": return new string[] { "Brazzaville (Capital)", "Pointe-Noire Atlantic Port", "Dolisie Southern Region", "Ouesso Northern Basin" };
+                case "Central African Republic": case "Central_African_Republic": return new string[] { "Bangui (Capital)", "Bimbo Central District", "Berbérati Western Zone", "Ndélé Northern Border" };
+                case "South Sudan": case "South_Sudan": return new string[] { "Juba (Capital)", "Malakal Upper Nile", "Wau Bahr el Ghazal", "Yei Equatoria Zone" };
+                case "Eritrea": return new string[] { "Asmara (Capital)", "Massawa Red Sea Port", "Keren Central Zone", "Assab Southern Port" };
+                case "Mauritania": return new string[] { "Nouakchott (Capital)", "Nouadhibou Mining Port", "Rosso Senegal River Zone", "Zouérat North Mining" };
+                case "Benin": return new string[] { "Cotonou Port City", "Porto-Novo (Capital)", "Parakou Northern Region", "Abomey Central Zone" };
+                case "Togo": return new string[] { "Lomé (Capital Port)", "Sokodé Central Region", "Kara Northern Province", "Atakpamé Plateau" };
+                case "Sierra Leone": case "Sierra_Leone": return new string[] { "Freetown (Capital Port)", "Bo Southern District", "Kenema Eastern Zone", "Makeni Northern Hub" };
+                case "Liberia": return new string[] { "Monrovia (Capital Port)", "Gbarnga Central Hub", "Buchanan Coastal Zone", "Harper Southern Border" };
+                case "Guinea": return new string[] { "Conakry (Capital Port)", "Kankan Upper Guinea", "Kindia Maritime Region", "Nzérékoré Forest Zone" };
+                case "Malawi": return new string[] { "Lilongwe (Capital)", "Blantyre Commercial Hub", "Mzuzu Northern Region", "Zomba Southern Zone" };
+                case "Burundi": return new string[] { "Gitega (Capital)", "Bujumbura Lake Port", "Ngozi Northern Region", "Rumonge Southern Shore" };
+                case "Djibouti": return new string[] { "Djibouti City (Capital Port)", "Ali Sabieh Southern", "Tadjoura Northern Gulf", "Dikhil Western Desert" };
+                case "Eswatini": return new string[] { "Mbabane (Capital)", "Manzini Commercial Hub", "Lobamba Royal District", "Big Bend Lowveld Zone" };
+                case "Lesotho": return new string[] { "Maseru (Capital)", "Teyateyaneng Central", "Mafeteng Southern District", "Leribe Northern Zone" };
+                case "Equatorial Guinea": case "Equatorial_Guinea": return new string[] { "Malabo (Bioko Island)", "Bata Mainland Hub", "Ebebiyín Border Zone", "Oyala New Capital" };
+                case "Gambia": return new string[] { "Banjul (Capital)", "Serekunda Urban Hub", "Brikama Western Division", "Janjanbureh Island" };
+                case "Guinea-Bissau": case "Guinea_Bissau": return new string[] { "Bissau (Capital Port)", "Bafatá Central Region", "Gabú Eastern Border", "Cacheu Coastal Region" };
+                case "Cabo Verde": case "Cabo_Verde": return new string[] { "Praia (Santiago Island)", "Mindelo (São Vicente)", "Santa Maria (Sal)", "Espargos Airport Hub" };
+                case "Comoros": return new string[] { "Moroni (Grande Comore)", "Mutsamudu (Anjouan)", "Fomboni (Mohéli)", "Domoni Eastern Coast" };
+                case "Mauritius": return new string[] { "Port Louis (Capital)", "Beau Bassin-Rose Hill", "Vacoas-Phoenix", "Curepipe Central Hub" };
+                case "Seychelles": return new string[] { "Victoria (Mahé Island)", "Anse Royale District", "Praslin Island Region", "La Digue Island Zone" };
+                case "Sao Tome and Principe": case "Sao_Tome_and_Principe": return new string[] { "São Tomé (Capital)", "Trindade Mé-Zóchi", "Neves Industrial Port", "Santo António (Príncipe)" };
+                case "Western Sahara": case "Western_Sahara": return new string[] { "Laayoune (Capital)", "Dakhla Coastal Port", "Smara Interior District", "Boujdour Coastal Region" };
+                default:
+                    return new string[] { $"{name} Capital District", $"{name} North Industrial Zone", $"{name} South Agriculture Belt", $"{name} Frontier Buffer Zone" };
+            }
+        }
+
+        public void EnsureCountryRegions(CountryDataSO c)
+        {
+            if (c == null) return;
+            if (c.regions == null) c.regions = new List<RegionDataSO>();
+
+            // Prune null entries
+            c.regions.RemoveAll(r => r == null);
+
+            // Check if any existing region lacks a valid regionName
+            bool invalidNames = false;
+            foreach (var r in c.regions)
+            {
+                if (string.IsNullOrWhiteSpace(r.regionName))
+                {
+                    invalidNames = true;
+                    break;
+                }
+            }
+
+            if (c.regions.Count == 0 || invalidNames)
+            {
+                c.regions.Clear();
+                Debug.Log($"[GameManager] Auto-populating authentic real-world regions for '{c.countryName}'...");
+                string[] realRegionNames = GetRealWorldRegionNames(c.countryName);
+
+                var r1 = ScriptableObject.CreateInstance<RegionDataSO>();
+                r1.regionName = realRegionNames[0];
+                r1.specialization = RegionSpecialization.Urban;
+                r1.stability = 85f;
+                r1.security = 90f;
+                r1.economicContribution = 40f;
+                r1.isCoastal = true;
+                r1.intelCoverage = 75f;
+                r1.heartsAndMinds = 80f;
+
+                var r2 = ScriptableObject.CreateInstance<RegionDataSO>();
+                r2.regionName = realRegionNames[1];
+                r2.specialization = RegionSpecialization.ResourceRich;
+                r2.stability = 75f;
+                r2.security = 75f;
+                r2.economicContribution = 30f;
+                r2.isCoastal = false;
+                r2.intelCoverage = 50f;
+
+                var r3 = ScriptableObject.CreateInstance<RegionDataSO>();
+                r3.regionName = realRegionNames[2];
+                r3.specialization = RegionSpecialization.Rural;
+                r3.stability = 70f;
+                r3.security = 70f;
+                r3.economicContribution = 20f;
+                r3.isCoastal = true;
+
+                var r4 = ScriptableObject.CreateInstance<RegionDataSO>();
+                r4.regionName = realRegionNames[3];
+                r4.specialization = RegionSpecialization.BorderConflict;
+                r4.stability = 50f;
+                r4.security = 55f;
+                r4.baseInsurgencyRisk = 15f;
+                r4.economicContribution = 10f;
+                r4.isCoastal = false;
+
+                c.regions.Add(r1);
+                c.regions.Add(r2);
+                c.regions.Add(r3);
+                c.regions.Add(r4);
+            }
+
+            // Re-link existing military bases to valid active regions
+            if (c.militaryBases != null && c.regions != null && c.regions.Count > 0)
+            {
+                string capitalRegionName = c.regions[0].regionName;
+                foreach (var mb in c.militaryBases)
+                {
+                    if (mb == null) continue;
+                    bool match = c.regions.Exists(r => r != null && r.regionName == mb.regionName);
+                    if (!match)
+                    {
+                        mb.regionName = capitalRegionName;
+                    }
+                }
+            }
+        }
+
+        public void CalculateCountryEconomyAndAssets(CountryDataSO c)
+        {
+            if (c == null) return;
+
+            // 1. Calculate realistic GDP based on population & resources
+            float popMillions = c.population / 1_000_000f;
+            float basePerCapita = 2.5f; // $2,500 USD per capita (in thousands)
+
+            float resourceValueBillions = 0f;
+            if (c.resources != null)
+            {
+                foreach (var res in c.resources)
+                {
+                    resourceValueBillions += (res.abundance * 1.5f);
+                }
+            }
+
+            float calculatedGdp = Mathf.Max(50f, (popMillions * basePerCapita * 0.1f) + resourceValueBillions + (c.baseArmyCount * 15f));
+
+            c.gdp = Mathf.Clamp(calculatedGdp, 45f, 4800f);
+
+            // 2. Derive Monthly Revenue / Income (~15% tax capture + resource export revenue)
+            float monthlyTaxRevenue = (c.gdp * 0.15f) / 12f;
+            float monthlyResourceRevenue = resourceValueBillions * 0.08f;
+            float totalMonthlyIncome = monthlyTaxRevenue + monthlyResourceRevenue;
+
+            c.income = Mathf.Clamp(totalMonthlyIncome, 1.5f, 180f);
+
+            // 3. Derive Monthly Spending (88% of income, maintaining budget surplus)
+            c.spending = c.income * 0.88f;
+
+            // 4. Treasury Reserves (4 to 6 months of monthly income)
+            c.treasury = Mathf.Clamp(c.income * 5f, 5f, 350f);
+
+            // 5. Debt Scaling (30% to 50% of GDP)
+            c.debt = c.gdp * 0.35f;
+            c.foreignDebt = c.debt * 0.40f;
+            c.domesticDebt = c.debt * 0.60f;
+
+            // 6. Scaled Military Units & Weapons based on economic capacity & army scale
+            int armyScale = Mathf.Clamp(Mathf.RoundToInt(c.gdp * 45f), 15000, 250000);
+            c.unitInfantry = armyScale;
+            c.unitRifles = armyScale;
+            c.unitTanks = Mathf.RoundToInt(armyScale * 0.005f);
+            c.unitAPCs = Mathf.RoundToInt(armyScale * 0.010f);
+            c.unitFighters = Mathf.RoundToInt(armyScale * 0.0018f);
+            c.unitAttackHelis = Mathf.RoundToInt(armyScale * 0.0012f);
+            c.unitDestroyers = Mathf.RoundToInt(armyScale * 0.0003f);
+            c.unitSubmarines = Mathf.RoundToInt(armyScale * 0.0001f);
+            c.unitArtillery = Mathf.RoundToInt(armyScale * 0.003f);
+            c.unitBombers = Mathf.RoundToInt(armyScale * 0.0002f);
+        }
+
+        public void ResetAllCountriesToBaseline()
+        {
+            Debug.Log("[GameManager] Executing full baseline reset & economic scaling of all countries for New Game...");
+
+            if (allCountries != null)
+            {
+                foreach (var c in allCountries)
+                {
+                    if (c == null) continue;
+
+                    // 1. Ensure country has regions
+                    EnsureCountryRegions(c);
+
+                    // 2. Dynamically calculate realistic economy & assets from population and resources
+                    CalculateCountryEconomyAndAssets(c);
+
+                    // 2b. Synchronize BranchStats to the dynamically calculated unit sizes
+                    if (c.armyStats != null)
+                    {
+                        c.armyStats.personnel = c.unitInfantry;
+                        c.armyStats.equipment = c.unitTanks + c.unitAPCs + c.unitArtillery;
+                    }
+                    if (c.navyStats != null)
+                    {
+                        c.navyStats.personnel = c.unitInfantry / 10;
+                        c.navyStats.equipment = c.unitDestroyers + c.unitSubmarines;
+                    }
+                    if (c.airForceStats != null)
+                    {
+                        c.airForceStats.personnel = c.unitInfantry / 8;
+                        c.airForceStats.equipment = c.unitFighters + c.unitAttackHelis + c.unitBombers;
+                    }
+                    if (c.rdfStats != null)
+                    {
+                        c.rdfStats.personnel = c.unitInfantry / 20;
+                        c.rdfStats.equipment = 50;
+                    }
+
+                    // 2c. Reset all industry tiers to 0 for a new game
+                    c.indAgriRice = 0;
+                    c.indAgriCassava = 0;
+                    c.indAgriCocoa = 0;
+                    c.indMiningLocal = 0;
+                    c.indMiningOil = 0;
+                    c.indTechIT = 0;
+                    c.indTechFintech = 0;
+                    c.indManufacturing = 0;
+
+                    c.stability = 75f;
+
+                    c.security = 80f;
+                    c.corruptionIndex = 15f;
+                    c.exposureRisk = 0f;
+                    c.globalPrestige = 50f;
+
+                    if (c.baseExchangeRate > 0f)
+                        c.exchangeRate = c.baseExchangeRate;
+                    else
+                        c.exchangeRate = 1.0f;
+
+                    c.populationChangeLastTurn = 0;
+                    c.hasNuclearWeapon = false;
+
+                    // Intelligence
+                    c.intelligenceLevel = 10f;
+                    c.satelliteCount = 0;
+                    c.satellitesUnderConstruction = 0;
+                    c.droneCount = 0;
+                    c.dronesUnderConstruction = 0;
+                    c.operativeCount = 12;
+
+                    // Clear runtime lists & operations
+                    SafeClearActiveOperations(c);
+                    c.trainingPipelines?.Clear();
+                    c.productionOrders?.Clear();
+                    c.completedProductions?.Clear();
+                    c.activeContracts?.Clear();
+                    c.activeSupplyContracts?.Clear();
+                    c.researchProjects?.Clear();
+                    c.activeInsurgentCamps?.Clear();
+                    c.activeRecommendations?.Clear();
+                    c.facilityConstructionOrders?.Clear();
+                    c.facilityUpgradeOrders?.Clear();
+                    c.militaryBases?.Clear();
+                    c.activeCovertOps?.Clear();
+                    c.detectedThreats?.Clear();
+                    c.recentReconReports?.Clear();
+                    c.activeCrises?.Clear();
+                    c.activeTreaties?.Clear();
+                    c.activeTradeAgreements?.Clear();
+                }
+            }
+
+            if (playerCountry != null)
+            {
+                playerBudget = playerCountry.treasury;
+            }
+
+            hasGameEnded = false;
         }
 
         private void SeedHistoricalFactions()
@@ -815,6 +1081,8 @@ foreach (var country in allCountries)
 
         public void SaveGame(bool autoSave = false)
         {
+            if (hasGameEnded) return;
+
             var data = new StateCraft.Data.GameSaveData();
             if (TurnSystem is TurnSystem ts) {
                 data.currentTurn = ts.CurrentTurn;

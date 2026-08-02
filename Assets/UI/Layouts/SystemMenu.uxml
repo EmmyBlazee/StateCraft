@@ -10,7 +10,7 @@
             
             <ui:Button name="BtnSave" text="SAVE GAME" class="button-premium" style="margin-bottom: 12px; font-size: 16px; height: 45px; letter-spacing: 1px; color: rgb(0, 230, 118); border-color: rgba(0, 230, 118, 0.5); background-color: rgba(0, 230, 118, 0.08); -unity-font-style: bold;" />
             
-            <ui:Button name="BtnLoad" text="LOAD GAME" class="button-premium" style="margin-bottom: 12px; font-size: 16px; height: 45px; letter-spacing: 1px; color: rgb(255, 180, 0); border-color: rgba(255, 180, 0, 0.5); background-color: rgba(255, 180, 0, 0.08); -unity-font-style: bold;" />
+            <ui:Button name="BtnSettings" text="SETTINGS" class="button-premium" style="margin-bottom: 12px; font-size: 16px; height: 45px; letter-spacing: 1px; color: rgb(255, 180, 0); border-color: rgba(255, 180, 0, 0.5); background-color: rgba(255, 180, 0, 0.08); -unity-font-style: bold;" />
             
             <ui:Button name="BtnHowToPlay" text="HOW TO PLAY" class="button-premium" style="margin-bottom: 12px; font-size: 16px; height: 45px; letter-spacing: 1px; color: rgb(0, 210, 255); border-color: rgba(0, 210, 255, 0.5); background-color: rgba(0, 210, 255, 0.08); -unity-font-style: bold;" />
             
@@ -26,6 +26,53 @@
                 <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
                     <ui:Button name="BtnCancelInGameSave" text="CANCEL" class="button-premium" style="width: 170px; height: 40px; font-size: 13px;" />
                     <ui:Button name="BtnConfirmInGameSave" text="OVERWRITE SAVE" class="button-premium action-btn-green" style="width: 170px; height: 40px; font-size: 13px;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Settings Modal (Hidden by Default) -->
+        <ui:VisualElement name="InGameSettingsModal" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.88); align-items: center; justify-content: center; display: none; z-index: 1000;">
+            <ui:VisualElement style="width: 480px; background-color: rgba(8, 12, 18, 0.98); border-radius: 10px; border-width: 1px; border-color: rgba(0, 210, 255, 0.3); overflow: hidden;">
+
+                <!-- Header -->
+                <ui:VisualElement style="background-color: rgba(0,210,255,0.06); padding: 18px 24px; flex-direction: row; justify-content: space-between; align-items: center; border-bottom-width: 1px; border-bottom-color: rgba(0,210,255,0.15);">
+                    <ui:Label text="SETTINGS" style="font-size: 18px; color: #00c8ff; -unity-font-style: bold; letter-spacing: 4px;" />
+                    <ui:Button name="BtnCloseInGameSettings" text="✕" class="button-premium action-btn-red" style="width: 32px; height: 32px; font-size: 14px;" />
+                </ui:VisualElement>
+
+                <!-- Body -->
+                <ui:VisualElement style="padding: 24px 28px;">
+
+                    <!-- Display -->
+                    <ui:Label text="DISPLAY" style="font-size: 11px; color: rgba(0,210,255,0.7); -unity-font-style: bold; letter-spacing: 2px; margin-bottom: 14px;" />
+
+                    <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+                        <ui:Label text="Fullscreen" style="font-size: 13px; color: rgba(200,215,230,1);" />
+                        <ui:Toggle name="ToggleInGameFullscreen" value="true" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                        <ui:Label text="Resolution" style="font-size: 13px; color: rgba(200,215,230,1);" />
+                        <ui:DropdownField name="DropInGameResolution" choices="1920x1080,2560x1440,3840x2160,1280x720" index="0" style="width: 160px;" />
+                    </ui:VisualElement>
+
+                    <!-- Audio divider -->
+                    <ui:VisualElement style="height: 1px; background-color: rgba(255,255,255,0.07); margin-bottom: 18px;" />
+                    <ui:Label text="AUDIO" style="font-size: 11px; color: rgba(0,210,255,0.7); -unity-font-style: bold; letter-spacing: 2px; margin-bottom: 14px;" />
+
+
+                    <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                        <ui:Label text="Music Volume" style="font-size: 13px; color: rgba(200,215,230,1); width: 130px;" />
+                        <ui:Slider name="SliderInGameMusicVol" low-value="0" high-value="100" value="60" style="flex-grow: 1; margin-left: 12px; margin-right: 12px; max-width: 200px;" />
+                        <ui:Label name="LblInGameMusicVol" text="60%" style="font-size: 12px; color: rgba(200,215,230,1); width: 40px; -unity-text-align: middle-right;" />
+                    </ui:VisualElement>
+
+                    <!-- Footer buttons -->
+                    <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                        <ui:Button name="BtnResetInGameSettings" text="RESET DEFAULTS" class="button-premium" style="font-size: 12px; height: 36px; flex-grow: 1; margin-right: 10px;" />
+                        <ui:Button name="BtnSaveInGameSettings"  text="SAVE &amp; CLOSE"   class="button-premium action-btn-green" style="font-size: 12px; height: 36px; flex-grow: 1;" />
+                    </ui:VisualElement>
+
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

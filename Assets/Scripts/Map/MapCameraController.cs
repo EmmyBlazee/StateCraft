@@ -10,9 +10,9 @@ namespace StateCraft.Map
         public float panMargin = 20f;
 
         [Header("Zoom")]
-        public float zoomSpeed = 5f;
+        public float zoomSpeed = 15f;
         public float minZoom = 2f;
-        public float maxZoom = 40f;
+        public float maxZoom = 100f;
 
         private Vector3 dragOrigin;
         private Camera cam;
@@ -20,6 +20,9 @@ namespace StateCraft.Map
         private void Awake()
         {
             cam = GetComponent<Camera>();
+            // Force override if inspector value is too low from old saves
+            if (maxZoom < 100f) maxZoom = 100f;
+            if (zoomSpeed < 10f) zoomSpeed = 15f;
         }
 
         private void Start()
@@ -35,12 +38,8 @@ namespace StateCraft.Map
             bool overUI = UIStateManager.Instance != null && UIStateManager.Instance.IsPointerOverUI();
             if (overUI) return;
 
-            // Also block zoom if mouse is hovering over the CountryInfo dossier panel
-            // (right 420px of screen) so the ScrollView can receive scroll wheel events
-            bool mouseOverDossier = Input.mousePosition.x > Screen.width - 420f;
-            
             HandleMovement();
-            if (!mouseOverDossier) HandleZoom();
+            HandleZoom();
             HandleMouseDrag();
         }
 
@@ -71,6 +70,9 @@ namespace StateCraft.Map
 
         private void HandleZoom()
         {
+            if (StateCraft.UI.CountryInfoToolkitController.IsPointerOverDossierStatic())
+                return;
+
             float scroll = Input.GetAxis("Mouse ScrollWheel");
             if (scroll != 0)
             {

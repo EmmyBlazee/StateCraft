@@ -208,15 +208,25 @@ namespace StateCraft.UI
             else if (c.reserveFuel > 80f && c.reserveAmmo > 80f)
                 lines.Add(new FeedLine { Tag = "LOG", Message = "Strategic reserves fully replenished.", Color = green });
 
-            foreach (var op in c.activeOperations)
-                lines.Add(new FeedLine { Tag = "OPS", Message = $"{op.opName} [{op.type}] — {op.status} in {op.regionName}.", Color = cyan });
-
-            foreach (var region in c.regions)
+            if (c.activeOperations != null)
             {
-                if (region.security < 40f)
+                foreach (var op in c.activeOperations)
                 {
-                    lines.Add(new FeedLine { Tag = "COIN", Message = $"{region.regionName}: security {region.security:F0}% — reinforcements requested.", Color = red });
-                    break;
+                    if (op == null) continue;
+                    lines.Add(new FeedLine { Tag = "OPS", Message = $"{op.opName} [{op.type}] — {op.status} in {op.regionName}.", Color = cyan });
+                }
+            }
+
+            if (c.regions != null)
+            {
+                foreach (var region in c.regions)
+                {
+                    if (region == null) continue;
+                    if (region.security < 40f)
+                    {
+                        lines.Add(new FeedLine { Tag = "COIN", Message = $"{region.regionName}: security {region.security:F0}% — reinforcements requested.", Color = red });
+                        break;
+                    }
                 }
             }
 
@@ -302,11 +312,23 @@ namespace StateCraft.UI
             if (c.agencyIntegrity < 60f)
                 lines.Add(new FeedLine { Tag = "AUDIT", Message = "Agency integrity compromised — leak risk elevated.", Color = red });
 
-            foreach (var op in c.activeCovertOps)
-                lines.Add(new FeedLine { Tag = "BLACK", Message = $"{op.opName} targeting {op.target} — {op.status} ({op.riskLevel} risk).", Color = purple });
+            if (c.activeCovertOps != null)
+            {
+                foreach (var op in c.activeCovertOps)
+                {
+                    if (op == null) continue;
+                    lines.Add(new FeedLine { Tag = "BLACK", Message = $"{op.opName} targeting {op.target} — {op.status} ({op.riskLevel} risk).", Color = purple });
+                }
+            }
 
-            foreach (var threat in c.detectedThreats)
-                lines.Add(new FeedLine { Tag = "THREAT", Message = $"{threat.threatName}: {threat.severity} ({threat.category}).", Color = threat.severity == "Critical" ? red : amber });
+            if (c.detectedThreats != null)
+            {
+                foreach (var threat in c.detectedThreats)
+                {
+                    if (threat == null) continue;
+                    lines.Add(new FeedLine { Tag = "THREAT", Message = $"{threat.threatName}: {threat.severity} ({threat.category}).", Color = threat.severity == "Critical" ? red : amber });
+                }
+            }
 
             if (gm?.allCountries != null)
             {

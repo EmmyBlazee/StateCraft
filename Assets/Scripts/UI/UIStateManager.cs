@@ -114,6 +114,32 @@ namespace StateCraft.UI
                 _selector.pickingMode = PickingMode.Ignore;
             }
 
+            // Global UI Click Sound Wiring
+            foreach (var doc in allDocs)
+            {
+                if (doc != null && doc.rootVisualElement != null)
+                {
+                    // Use TrickleDown to catch the click before it gets consumed
+                    doc.rootVisualElement.RegisterCallback<ClickEvent>(evt =>
+                    {
+                        var target = evt.target as VisualElement;
+                        // Walk up the tree to see if we clicked a button or something that acts like one
+                        while (target != null)
+                        {
+                            if (target is Button || target.ClassListContains("unity-button"))
+                            {
+                                if (AudioManager.Instance != null)
+                                {
+                                    AudioManager.Instance.PlayUIClick();
+                                }
+                                break;
+                            }
+                            target = target.parent;
+                        }
+                    }, TrickleDown.TrickleDown);
+                }
+            }
+
             // Cleanup Legacy UI
             var allCanvases = Resources.FindObjectsOfTypeAll<Canvas>();
             foreach (var canvas in allCanvases)
@@ -158,8 +184,8 @@ doc.gameObject.SetActive(false);
                 if (!string.IsNullOrEmpty(GameContext.PlayerName))
                     GameManager.Instance.playerName = GameContext.PlayerName;
 
-                // Apply selected country
-                if (GameManager.Instance.playerCountry == null && !string.IsNullOrEmpty(GameContext.SelectedCountryName))
+                // Apply selected country (or override old defeated country on New Game)
+                if (!string.IsNullOrEmpty(GameContext.SelectedCountryName))
                 {
                     CountryDataSO found = null;
 
@@ -184,7 +210,7 @@ doc.gameObject.SetActive(false);
                     if (found != null)
                     {
                         GameManager.Instance.playerCountry = found;
-                        Debug.Log($"[UIStateManager] Player country set to: {found.countryName}");
+                        Debug.Log($"[UIStateManager] Player country updated to: {found.countryName}");
                     }
                     else
                     {
@@ -192,12 +218,17 @@ doc.gameObject.SetActive(false);
                     }
                 }
 
-                // Handle Load Game
+                // Handle Load Game vs New Game
                 if (GameContext.ShouldLoadSave)
                 {
                     GameContext.ShouldLoadSave = false;
                     GameManager.Instance.LoadGame();
                     yield return null; // allow LoadGame to set playerCountry
+                }
+                else
+                {
+                    // New Game launched — perform full baseline reset to clear prior defeat/session state
+                    GameManager.Instance?.ResetAllCountriesToBaseline();
                 }
 
                 // ── Editor fallback: if no country set, show selector ─────────
@@ -228,7 +259,8 @@ doc.gameObject.SetActive(false);
 
             // ── Phase 2: Scenario Briefing ────────────────────────────────────
             var player = GameManager.Instance?.playerCountry;
-            if (player != null && !player.hasShownBriefing)
+            bool tutorialWillRun = PlayerPrefs.GetInt("HasCompletedTutorialTour", 0) == 0;
+            if (player != null && !player.hasShownBriefing && !tutorialWillRun)
             {
                 yield return StartCoroutine(ShowScenarioBriefing(root, player));
                 player.hasShownBriefing = true;
@@ -242,6 +274,17 @@ doc.gameObject.SetActive(false);
         // Full-screen overlay shown once at game start. Pulls text from
         // CountryDataSO.scenarioTitle / scenarioContext / scenarioPriorities.
         // Falls back to generic text if the fields are empty.
+
+        /// <summary>Called by TutorialTourController.EndTour() so the briefing shows after the tour.</summary>
+        public void ShowScenarioBriefingPublic(StateCraft.Data.CountryDataSO country)
+        {
+            if (country == null || country.hasShownBriefing) return;
+            var root = _uiDoc?.rootVisualElement;
+            if (root == null) return;
+            country.hasShownBriefing = true;
+            StartCoroutine(ShowScenarioBriefing(root, country));
+        }
+
         private IEnumerator ShowScenarioBriefing(VisualElement root, StateCraft.Data.CountryDataSO country)
         {
             bool dismissed = false;
@@ -488,7 +531,7 @@ doc.gameObject.SetActive(false);
 
         public void HideCountryPanel()
         {
-            if (_countryPanel != null) StartCoroutine(FadeOut(_countryPanel, 0.3f));
+            if (_countryPanel != null) ApplySafeTransition(_countryPanel, false, 0.3f);
         }
 
         public void ApplySafeTransition(VisualElement element, bool show, float duration)
@@ -805,42 +848,27 @@ doc.gameObject.SetActive(false);
         public bool IsPointerOverUI()
         {
             Vector2 mousePos = Input.mousePosition;
-            Vector2 pointerPos = new Vector2(mousePos.x, Screen.height - mousePos.y);
+            Vector2 screenPos = new Vector2(mousePos.x, Screen.height - mousePos.y);
 
-            // Check all documents from top sorting order down
-            var docs = new List<UIDocument> { countrySelectorDoc, countryPanelDoc, newsTickerDoc, dashboardDoc };
-            
+            var docs = FindObjectsOfType<UIDocument>();
             foreach (var doc in docs)
             {
                 if (doc == null || doc.rootVisualElement == null) continue;
-                
-                // CRITICAL: If the root is hidden or transparent, skip the whole document
                 if (doc.rootVisualElement.resolvedStyle.display == DisplayStyle.None || 
                     doc.rootVisualElement.resolvedStyle.opacity < 0.01f) continue;
 
-                var panel = doc.rootVisualElement.panel;
-                if (panel == null) continue;
-
-                // Use the built-in screen-to-panel conversion correctly
-                Vector2 screenPos = new Vector2(mousePos.x, Screen.height - mousePos.y);
-                VisualElement picked = doc.rootVisualElement.panel.Pick(screenPos);
-
+                VisualElement picked = doc.rootVisualElement.panel?.Pick(screenPos);
                 if (picked != null && picked != doc.rootVisualElement)
                 {
+                    string name = picked.name ?? "";
+                    if (name == "MainDashboard" || name == "PanelContainer" || name == "NotificationStack" || name == "UI_Toolkit_Root")
+                        continue;
+
                     if (picked.pickingMode == PickingMode.Position)
                     {
-                        // Ignore invisible flex containers
-                        bool isTransparentContainer = picked.resolvedStyle.backgroundColor.a == 0 && 
-                                                      picked.resolvedStyle.backgroundImage.texture == null &&
-                                                      !(picked is TextElement) &&
-                                                      !(picked is ScrollView);
-
-                        if (!isTransparentContainer)
+                        if (picked.resolvedStyle.display != DisplayStyle.None && picked.resolvedStyle.opacity >= 0.01f)
                         {
-                            // Final safety check: skip if the element itself is effectively hidden
-                            if (picked.resolvedStyle.display == DisplayStyle.None || picked.resolvedStyle.opacity < 0.1f) continue;
-                            
-return true;
+                            return true;
                         }
                     }
                 }

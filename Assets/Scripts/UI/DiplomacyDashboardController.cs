@@ -84,9 +84,9 @@ namespace StateCraft.UI
                 root.Q<Button>("TabOverview"),
                 root.Q<Button>("TabBilateral"),
                 root.Q<Button>("TabTreaties"),
-                root.Q<Button>("TabTrade"),
                 root.Q<Button>("TabOrganizations"),
-                root.Q<Button>("TabEmbassies")
+                root.Q<Button>("TabEmbassies"),
+                root.Q<Button>("TabTrade")
             };
 
             _panels = new VisualElement[]
@@ -94,9 +94,9 @@ namespace StateCraft.UI
                 root.Q<VisualElement>("PanelOverview"),
                 root.Q<VisualElement>("PanelBilateral"),
                 root.Q<VisualElement>("PanelTreaties"),
-                root.Q<VisualElement>("PanelTrade"),
                 root.Q<VisualElement>("PanelOrganizations"),
-                root.Q<VisualElement>("PanelEmbassies")
+                root.Q<VisualElement>("PanelEmbassies"),
+                root.Q<VisualElement>("PanelTrade")
             };
 
             for (int i = 0; i < _tabs.Length; i++)
@@ -162,7 +162,7 @@ namespace StateCraft.UI
             // Open Trade Desk standalone button (if present in UXML)
             root.Q<Button>("BtnOpenTrade")?.RegisterCallback<ClickEvent>(_ =>
             {
-                SwitchTab(3); // Switch to Trade tab
+                SwitchTab(5); // Switch to Trade tab (Index 5)
                 if (_tradeController == null) _tradeController = UnityEngine.Object.FindObjectOfType<TradeAgreementController>();
                 _tradeController?.Show();
             });
@@ -170,7 +170,7 @@ namespace StateCraft.UI
             // Propose New Trade button in the Trade panel
             root.Q<Button>("BtnAddTrade")?.RegisterCallback<ClickEvent>(_ =>
             {
-                SwitchTab(3);
+                SwitchTab(5);
                 if (_tradeController == null) _tradeController = UnityEngine.Object.FindObjectOfType<TradeAgreementController>();
                 _tradeController?.Show();
             });
@@ -178,7 +178,7 @@ namespace StateCraft.UI
             // Offer Trade Deal button in the bilateral overview panel
             root.Q<Button>("BtnOfferTrade")?.RegisterCallback<ClickEvent>(_ =>
             {
-                SwitchTab(3);
+                SwitchTab(5);
                 if (_tradeController == null) _tradeController = UnityEngine.Object.FindObjectOfType<TradeAgreementController>();
                 // Show with specific partner
                 if (_detailCountryTitle != null && !string.IsNullOrEmpty(_detailCountryTitle.text))
@@ -195,7 +195,16 @@ namespace StateCraft.UI
             });
         }
 
-        // ─── Tab switching ────────────────────────────────────────────────────
+        public void SwitchTabByName(string name)
+        {
+            if (name == "TabOverview") SwitchTab(0);
+            else if (name == "TabBilateral") SwitchTab(1);
+            else if (name == "TabTreaties") SwitchTab(2);
+            else if (name == "TabOrganizations") SwitchTab(3);
+            else if (name == "TabEmbassies") SwitchTab(4);
+            else if (name == "TabTrade") SwitchTab(5);
+        }
+
         private void SwitchTab(int index)
         {
             if (_panelBilateralDetail != null)
@@ -214,8 +223,8 @@ namespace StateCraft.UI
                 _tabs[i].EnableInClassList("active-tab", i == index);
             }
 
-            // If the user switches to the Trade tab (index 3), ensure the Trade Desk is initialized
-            if (index == 3)
+            // If the user switches to the Trade tab (index 5), ensure the Trade Desk is initialized
+            if (index == 5)
             {
                 if (_tradeController == null) _tradeController = UnityEngine.Object.FindObjectOfType<TradeAgreementController>();
                 _tradeController?.Show();
@@ -238,6 +247,13 @@ namespace StateCraft.UI
         // ─── Show / Hide ──────────────────────────────────────────────────────
         public void Show()
         {
+            if (_dashboardRoot == null || _dashboardRoot.panel == null)
+            {
+                _dashboardRoot = MainDashboardToolkitController.Instance?.GetPanelVisualElement("Diplomacy")
+                              ?? _root?.Q<VisualElement>("DiplomacyDashboard");
+                if (_dashboardRoot != null) _root = _dashboardRoot;
+            }
+
             if (_dashboardRoot == null) return;
             _dashboardRoot.style.display = DisplayStyle.Flex;
             UIStateManager.Instance?.ApplySafeTransition(_dashboardRoot, true, 0.4f);
@@ -253,6 +269,14 @@ namespace StateCraft.UI
         // ─── Refresh ──────────────────────────────────────────────────────────
         public void RefreshDiplomacyData()
         {
+            if (_dashboardRoot == null || _dashboardRoot.panel == null)
+            {
+                _dashboardRoot = MainDashboardToolkitController.Instance?.GetPanelVisualElement("Diplomacy")
+                              ?? _root?.Q<VisualElement>("DiplomacyDashboard")
+                              ?? _dashboardRoot;
+                if (_dashboardRoot != null) _root = _dashboardRoot;
+            }
+
             var gm = GameManager.Instance;
             if (gm?.playerCountry == null) return;
             var player = gm.playerCountry;

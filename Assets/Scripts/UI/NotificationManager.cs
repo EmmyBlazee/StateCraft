@@ -30,6 +30,8 @@ namespace StateCraft.UI
         private ScrollView _historyScrollView;
         private Button _btnCloseHistory;
         private Button _btnClearHistory;
+        private Label _unreadBadge;
+        private int _unreadCount = 0;
 
         private void Awake()
         {
@@ -47,10 +49,11 @@ namespace StateCraft.UI
                 _btnCloseHistory = doc.rootVisualElement.Q<Button>("BtnCloseHistory");
                 _btnClearHistory = doc.rootVisualElement.Q<Button>("BtnClearHistory");
                 doc.rootVisualElement.pickingMode = PickingMode.Ignore;
+                if (_unreadBadge == null) _unreadBadge = doc.rootVisualElement.Q<Label>("NotificationBadge");
             }
 
             // FALLBACK: Global search if not found locally
-            if (_stack == null || _historyModal == null)
+            if (_stack == null || _historyModal == null || _unreadBadge == null)
             {
                 var allDocs = FindObjectsOfType<UIDocument>();
 
@@ -59,6 +62,7 @@ namespace StateCraft.UI
                     if (d == null || d.rootVisualElement == null) continue;
                     
                     if (_stack == null) _stack = d.rootVisualElement.Q<VisualElement>("NotificationStack");
+                    if (_unreadBadge == null) _unreadBadge = d.rootVisualElement.Q<Label>("NotificationBadge");
                     if (_historyModal == null)
                     {
                         var modal = d.rootVisualElement.Q<VisualElement>("NotificationHistoryModal");
@@ -71,7 +75,7 @@ namespace StateCraft.UI
                         }
                     }
 
-                    if (_stack != null && _historyModal != null) break;
+                    if (_stack != null && _historyModal != null && _unreadBadge != null) break;
                 }
             }
 
@@ -175,11 +179,31 @@ namespace StateCraft.UI
             {
                 RefreshHistoryModal();
             }
+            else
+            {
+                // Increment unread badge
+                _unreadCount++;
+                UpdateBadge();
+            }
 
             ShowAlert(title, message, isCritical, displaySeconds);
 
             // Notify listeners (like NewsTickerUI)
             OnNotificationAdded?.Invoke(message, color);
+        }
+
+        private void UpdateBadge()
+        {
+            if (_unreadBadge == null) return;
+            if (_unreadCount <= 0)
+            {
+                _unreadBadge.style.display = DisplayStyle.None;
+            }
+            else
+            {
+                _unreadBadge.text = _unreadCount > 99 ? "99+" : _unreadCount.ToString();
+                _unreadBadge.style.display = DisplayStyle.Flex;
+            }
         }
 
         public void ShowAlert(
@@ -340,6 +364,9 @@ namespace StateCraft.UI
             {
                 _historyModal.style.display = DisplayStyle.Flex;
                 RefreshHistoryModal();
+                // Clear unread badge when player opens the history panel
+                _unreadCount = 0;
+                UpdateBadge();
             }
             else
             {
@@ -360,8 +387,9 @@ namespace StateCraft.UI
 
             if (_history.Count == 0)
             {
-                var lbl = new Label("No recent notifications.");
-                lbl.style.color = new Color(0.5f, 0.5f, 0.5f);
+                var lbl = new Label("NO RECENT NOTIFICATIONS");
+                lbl.style.color = new Color(0f, 0.85f, 1f, 0.7f);
+                lbl.style.fontSize = 11;
                 lbl.style.marginTop = 20;
                 lbl.style.unityTextAlign = TextAnchor.MiddleCenter;
                 _historyScrollView.Add(lbl);
@@ -371,6 +399,8 @@ namespace StateCraft.UI
             foreach (var notif in _history)
             {
                 var card = new VisualElement();
+                card.style.width = Length.Percent(100);
+                card.style.flexShrink = 0;
                 
                 card.style.backgroundColor = notif.isCritical
                     ? new Color(0.15f, 0.05f, 0.05f, 0.95f)

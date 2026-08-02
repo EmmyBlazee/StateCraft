@@ -1,0 +1,52 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/Global.uss" />
+
+    <!-- Full-screen overlay with top-left origin for exact spotlight coordinate math -->
+    <ui:VisualElement name="TutorialTourRoot" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: rgba(4, 8, 16, 0.45); display: none; z-index: 9999; pointer-events: auto;">
+
+        <!-- Glowing Neon Cyan Spotlight Focus Box -->
+        <ui:VisualElement name="TourSpotlightFrame" style="position: absolute; border-width: 3px; border-color: rgb(0, 240, 255); border-radius: 8px; background-color: rgba(0, 240, 255, 0.16); pointer-events: none; transition-property: all; transition-duration: 0.25s; box-shadow: 0 0 35px rgba(0, 240, 255, 1.0);" />
+
+        <!-- Floating Glassmorphic Tour Card -->
+        <ui:VisualElement name="TourCard" style="position: absolute; width: 500px; background-color: rgba(10, 15, 24, 0.98); border-radius: 12px; border-width: 1px; border-color: rgba(0, 200, 255, 0.6); flex-direction: column; overflow: hidden; padding: 22px; box-shadow: 0 12px 45px rgba(0,0,0,0.9); transition-property: all; transition-duration: 0.25s; pointer-events: auto;">
+
+            <!-- Top Header & Module Badge -->
+            <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <ui:VisualElement style="flex-direction: row; align-items: center;">
+                    <ui:Label name="TourModuleTag" text="COMMAND ESSENTIALS" style="font-size: 12px; color: rgb(0, 230, 255); -unity-font-style: bold; letter-spacing: 2px; background-color: rgba(0, 200, 255, 0.18); padding: 5px 10px; border-radius: 4px; margin-right: 12px;" />
+                    <ui:Label name="TourStepCounter" text="STEP 1 OF 32" style="font-size: 13px; color: rgba(200, 210, 220, 0.95); letter-spacing: 1px; -unity-font-style: bold;" />
+                </ui:VisualElement>
+                <ui:Button name="BtnTourSkip" text="✕ SKIP TOUR" style="height: 28px; font-size: 11px; color: rgba(255, 100, 100, 0.95); background-color: rgba(255, 50, 50, 0.15); border-radius: 4px; border-width: 1px; border-color: rgba(255, 80, 80, 0.5); padding: 0 12px; letter-spacing: 1px; -unity-font-style: bold;" />
+            </ui:VisualElement>
+
+            <!-- Title & Icon -->
+            <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 10px;">
+                <ui:Label name="TourStepIcon" text="" style="font-size: 24px; margin-right: 10px; color: rgb(0, 230, 255);" />
+                <ui:Label name="TourStepTitle" text="Welcome Commander" style="font-size: 20px; color: rgb(255, 255, 255); -unity-font-style: bold; letter-spacing: 1px;" />
+            </ui:VisualElement>
+
+            <!-- Description Body -->
+            <ui:Label name="TourStepDesc" text="You are the Head of State. Guide your nation through economic growth, military power, intelligence black ops, and international diplomacy." style="font-size: 15px; color: rgb(240, 245, 255); white-space: normal; line-height: 22px; margin-bottom: 20px;" />
+
+            <!-- Navigation Footer Bar -->
+            <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; border-top-width: 1px; border-top-color: rgba(255, 255, 255, 0.12); padding-top: 14px;">
+                <ui:Button name="BtnTourPrev" text="◀ PREVIOUS" style="height: 38px; font-size: 12px; color: rgb(220, 230, 240); background-color: rgba(255, 255, 255, 0.1); border-radius: 6px; border-width: 1px; border-color: rgba(255, 255, 255, 0.25); padding: 0 16px; -unity-font-style: bold;" />
+                <ui:Button name="BtnTourNext" text="NEXT STEP ▶" style="height: 38px; font-size: 13px; color: rgb(10, 15, 24); background-color: rgb(0, 230, 255); border-radius: 6px; border-width: 0; padding: 0 22px; -unity-font-style: bold;" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <!-- Centered Prompt Modal for First Time Start -->
+        <ui:VisualElement name="TourPromptModal" style="position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: 520px; background-color: rgba(10, 15, 24, 0.98); border-radius: 14px; border-width: 1px; border-color: rgba(0, 230, 255, 0.6); padding: 28px; align-items: center; flex-direction: column; box-shadow: 0 15px 50px rgba(0,0,0,0.95); display: none;">
+            <ui:Label text="STATECRAFT ACADEMY" style="font-size: 12px; color: rgb(0, 230, 255); -unity-font-style: bold; letter-spacing: 3px; margin-bottom: 8px;" />
+            <ui:Label text="Start Executive Guided Tour?" style="font-size: 22px; color: rgb(255, 255, 255); -unity-font-style: bold; margin-bottom: 12px; text-align: center;" />
+            <ui:Label text="Welcome to your presidency! Would you like a step-by-step interactive tour of your administration's dashboards, economic policy, military procurement, and covert ops?" style="font-size: 15px; color: rgb(230, 240, 250); white-space: normal; text-align: center; margin-bottom: 24px; line-height: 22px;" />
+            
+            <ui:VisualElement style="flex-direction: row; justify-content: center; width: 100%;">
+                <ui:Button name="BtnPromptSkip" text="NO, I KNOW THE ROPES" style="height: 42px; font-size: 12px; color: rgba(220, 230, 240, 0.9); background-color: rgba(255, 255, 255, 0.1); border-radius: 6px; border-width: 1px; border-color: rgba(255, 255, 255, 0.2); padding: 0 16px; margin-right: 12px; -unity-font-style: bold;" />
+                <ui:Button name="BtnPromptStart" text="▶ START GUIDED TOUR" style="height: 42px; font-size: 13px; color: rgb(10, 15, 24); background-color: rgb(0, 230, 255); border-radius: 6px; border-width: 0; padding: 0 22px; -unity-font-style: bold;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

@@ -38,6 +38,7 @@ namespace StateCraft.Systems
         private int   _collapseMonths          = 0;
         private bool  _victoryAnnounced        = false;
         private bool  _defeatAnnounced         = false;
+        private int   _bankruptcyWarningMonths = 0; // consecutive months near default
 
         // ── Score record shown in UI ──────────────────────────
         public float  CurrentPrestige   { get; private set; }
@@ -72,12 +73,29 @@ namespace StateCraft.Systems
             }
 
             // ─── DEFEAT: Bankruptcy ───────────────────────────
-            if (player.treasury < -50f && player.creditRating == "D")
+            // Grace: treasury must be below -100B AND rating D for 3 consecutive months.
+            // This prevents a 2-month game-over from unavoidable startup deficits.
+            if (player.treasury < -100f && player.creditRating == "D")
             {
-                AnnounceDefeat(player, gm, currentMonth,
-                    "Sovereign default and credit collapse have paralysed the state. " +
-                    "International creditors have seized assets. Your government has fallen.");
-                return;
+                _bankruptcyWarningMonths++;
+                if (_bankruptcyWarningMonths == 1)
+                {
+                    UI.NotificationManager.Instance?.AddNotification(
+                        "WARNING: Sovereign default imminent. Treasury critical and credit rating collapsed to D. " +
+                        "Raise revenue or cut spending immediately to avoid government collapse.",
+                        Color.red);
+                }
+                if (_bankruptcyWarningMonths >= 3)
+                {
+                    AnnounceDefeat(player, gm, currentMonth,
+                        "Sovereign default and credit collapse have paralysed the state. " +
+                        "International creditors have seized assets. Your government has fallen.");
+                    return;
+                }
+            }
+            else
+            {
+                _bankruptcyWarningMonths = 0;
             }
 
             // ─── VICTORY CONDITIONS ───────────────────────────

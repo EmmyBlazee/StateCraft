@@ -334,10 +334,72 @@ namespace StateCraft.Systems
             return target;
         }
 
-        // ── Trade Proposals (unchanged from original) ─────────
+        // ── Trade & Diplomatic Proposals ─────────────────────────
         private void HandleTradeProposals(CountryDataSO country, GameManager gm)
         {
-            if (Random.value >= 0.2f || gm.playerCountry?.resources == null) return;
+            if (gm.playerCountry == null) return;
+
+            // 1. Peace Treaty Proposal from enemy AI country
+            var warStage = gm.WarSystem != null ? gm.WarSystem.GetWarStage(country) : WarStage.Peace;
+            if (warStage >= WarStage.Tension && Random.value < 0.15f)
+            {
+                var aiCountry = country;
+                var player = gm.playerCountry;
+
+                UI.AIDiplomaticProposalController.Instance?.ShowProposal(new UI.AIDiplomaticProposalData
+                {
+                    senderCountry = aiCountry,
+                    proposalType = "Peace Treaty",
+                    title = "PEACE TREATY OFFER",
+                    message = $"President {aiCountry.GetPresidentName()} of {aiCountry.countryName} proposes an immediate ceasefire and signing of a formal peace treaty to halt hostilities.",
+                    onAccept = () => {
+                        gm.WarSystem.SetWarStage(aiCountry, WarStage.Peace);
+                        gm.Relations.Adjust(aiCountry.countryName, player.countryName, +25f, "Peace treaty accepted", gm.TurnSystem?.CurrentTurn ?? 0);
+                        NewsSystem.Instance?.PublishNews($"PEACE AGREEMENT: {aiCountry.countryName} and {player.countryName} have signed a formal ceasefire treaty.");
+                        UI.NotificationManager.Instance?.AddNotification($"✅ PEACE SIGNED: Ceasefire established with {aiCountry.countryName}.", new Color(0f, 0.85f, 0.4f));
+                    },
+                    onDecline = () => {
+                        gm.Relations.Adjust(aiCountry.countryName, player.countryName, -10f, "Peace treaty rejected", gm.TurnSystem?.CurrentTurn ?? 0);
+                        UI.NotificationManager.Instance?.AddNotification($"❌ PEACE REJECTED: War continues with {aiCountry.countryName}.", new Color(255/255f, 82/255f, 82/255f));
+                    }
+                });
+                return;
+            }
+
+            // 2. Faction Alliance Invitation from friendly AI country
+            if (!string.IsNullOrEmpty(country.globalFaction) && country.globalFaction != "Independent" && country.globalFaction != "Non-Aligned")
+            {
+                if (gm.playerCountry.globalFaction == "Independent" || gm.playerCountry.globalFaction == "Non-Aligned")
+                {
+                    float relScore = gm.Relations != null ? gm.Relations.GetScore(country.countryName, gm.playerCountry.countryName) : 0f;
+                    if (relScore > +25f && Random.value < 0.10f)
+                    {
+                        var aiCountry = country;
+                        var player = gm.playerCountry;
+                        string factionName = aiCountry.globalFaction;
+
+                        UI.AIDiplomaticProposalController.Instance?.ShowProposal(new UI.AIDiplomaticProposalData
+                        {
+                            senderCountry = aiCountry,
+                            proposalType = "Alliance Invitation",
+                            title = "FACTION ALLIANCE INVITATION",
+                            message = $"The government of {aiCountry.countryName} formally invites {player.countryName} to join the {factionName}. Membership provides free trade and mutual defense.",
+                            onAccept = () => {
+                                gm.DiplomacySystem.JoinFaction(player, factionName);
+                                gm.Relations.Adjust(aiCountry.countryName, player.countryName, +20f, "Joined faction", gm.TurnSystem?.CurrentTurn ?? 0);
+                            },
+                            onDecline = () => {
+                                gm.Relations.Adjust(aiCountry.countryName, player.countryName, -5f, "Faction invitation declined", gm.TurnSystem?.CurrentTurn ?? 0);
+                                UI.NotificationManager.Instance?.AddNotification($"Declined invitation to join {factionName}.", Color.yellow);
+                            }
+                        });
+                        return;
+                    }
+                }
+            }
+
+            // 3. Trade Agreement Offer
+            if (Random.value >= 0.2f || gm.playerCountry.resources == null) return;
 
             foreach (var res in country.resources)
             {
@@ -352,19 +414,29 @@ namespace StateCraft.Systems
                 float qty     = 2000f;
                 float payment = GlobalTradeMarket.GetPricePerUnit(tradeResType) * qty;
 
-                if (gm.DiplomacySystem is DiplomacySystem diplo)
-                {
-                    var proposal = diplo.CreateProposal(gm.playerCountry, country,
-                        tradeResType, payment, 12, true);
-                    proposal.resourceQuantity = qty;
+                var aiPartner = country;
+                var playerCountry = gm.playerCountry;
 
-                    InboxSystem.Instance?.SendMessage(gm.playerCountry,
-                        $"Embassy of {country.countryName}", "Trade Agreement Proposed",
-                        $"The government of {country.countryName} urgently requests a multi-month Trade Agreement. " +
-                        $"We need to import {res.type} to support our economy. " +
-                        $"We offer ${payment / 1e6f:N1}M per month. Please check the Trade Desk.",
-                        "Important");
-                }
+                UI.AIDiplomaticProposalController.Instance?.ShowProposal(new UI.AIDiplomaticProposalData
+                {
+                    senderCountry = aiPartner,
+                    proposalType = "Trade Agreement",
+                    title = "TRADE AGREEMENT OFFER",
+                    message = $"The government of {aiPartner.countryName} proposes a 12-month Trade Deal to import {res.type} for ${payment / 1e6f:N1}M per month.",
+                    onAccept = () => {
+                        gm.DiplomacySystem.SignTradeDeal(playerCountry, aiPartner, tradeResType, payment);
+                        UI.NotificationManager.Instance?.AddNotification($"✅ TRADE AGREEMENT SIGNED: Supplying {res.type} to {aiPartner.countryName}.", new Color(0f, 0.85f, 0.4f));
+                    },
+                    onDecline = () => {
+                        gm.Relations.Adjust(aiPartner.countryName, playerCountry.countryName, -5f, "Trade offer declined", gm.TurnSystem?.CurrentTurn ?? 0);
+                        UI.NotificationManager.Instance?.AddNotification($"Declined trade agreement offer from {aiPartner.countryName}.", Color.yellow);
+                    }
+                });
+
+                InboxSystem.Instance?.SendMessage(gm.playerCountry,
+                    $"Embassy of {country.countryName}", "Trade Agreement Proposed",
+                    $"The government of {country.countryName} urgently requests a multi-month Trade Agreement for {res.type}.",
+                    "Important");
                 break;
             }
         }

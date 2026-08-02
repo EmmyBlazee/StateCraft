@@ -47,34 +47,27 @@ namespace StateCraft.UI
 
         private void Start()
         {
-            if (_uiDoc == null) _uiDoc = GetComponent<UIDocument>();
-            if (_uiDoc != null)
-            {
-                _root = _uiDoc.rootVisualElement;
-            }
+            BindActiveDashboardRoot();
+        }
 
-            var dashboard = _root?.Q<VisualElement>("IntelligenceDashboard");
-
-            // Fallback: UIDocument can defer tree construction past Start().
-            // Clone directly from the asset — the element will be injected into
-            // MainDashboard's panel container so this reference is what we need.
-            if (dashboard == null && _uiDoc?.visualTreeAsset != null)
+        private void BindActiveDashboardRoot()
+        {
+            var activePanel = MainDashboardToolkitController.Instance?.GetPanelVisualElement("Intel");
+            if (activePanel != null)
             {
-                var container = new VisualElement();
-                _uiDoc.visualTreeAsset.CloneTree(container);
-                _root = container;
-                dashboard = container.Q<VisualElement>("IntelligenceDashboard");
-            }
-
-            if (dashboard != null)
-            {
-                _dashboardRoot = dashboard;
-                InitializeElements(dashboard);
-                dashboard.style.display = DisplayStyle.None;
+                _dashboardRoot = activePanel;
+                _root = activePanel;
             }
             else
             {
-                UnityEngine.Debug.LogError("[IntelDashboard] 'IntelligenceDashboard' NOT FOUND even after CloneTree fallback! Check UXML file.");
+                if (_uiDoc == null) _uiDoc = GetComponent<UIDocument>();
+                if (_uiDoc != null) _root = _uiDoc.rootVisualElement;
+                _dashboardRoot = _root?.Q<VisualElement>("IntelligenceDashboard");
+            }
+
+            if (_dashboardRoot != null)
+            {
+                InitializeElements(_dashboardRoot);
             }
         }
 
@@ -83,6 +76,7 @@ namespace StateCraft.UI
         {
             if (GameManager.Instance != null && GameManager.Instance.TurnSystem != null)
                 GameManager.Instance.TurnSystem.OnTurnEnded += RefreshIntelligenceData;
+            BindActiveDashboardRoot();
             if (_dashboardRoot != null) RefreshIntelligenceData();
         }
 
@@ -127,10 +121,10 @@ namespace StateCraft.UI
             _overviewFooterContainer = root.Q<VisualElement>("OverviewFooterContainer");
             _overviewThreatsList = root.Q<ScrollView>("OverviewThreatsList");
 
-            _headerBudget     = root.Q<Label>("HeaderIntelBudget");
-            _headerOperatives = root.Q<Label>("HeaderOperativeCount");
-            _headerCoverage   = root.Q<Label>("GlobalCoverageScore");
-            _exposureRiskLabel = root.Q<Label>("ExposureRiskLabel");
+            _headerBudget     = root.Q<Label>("HdrIntelBudgetTop") ?? root.Q<Label>("HeaderIntelBudget");
+            _headerOperatives = root.Q<Label>("HdrOperatives")     ?? root.Q<Label>("HeaderOperativeCount");
+            _headerCoverage   = root.Q<Label>("HdrIntelCoverage")   ?? root.Q<Label>("GlobalCoverageScore");
+            _exposureRiskLabel = root.Q<Label>("HdrExposureRisk")   ?? root.Q<Label>("ExposureRiskLabel");
 
             _regionalCoverageList = root.Q<ScrollView>("RegionalCoverageList");
             _intelGridList        = root.Q<VisualElement>("IntelGridList");
@@ -194,7 +188,17 @@ namespace StateCraft.UI
             root.Q<Button>("CloseIntelligence").clicked += Hide;
         }
 
-        private void SwitchTab(int index)
+        public void SwitchTabByName(string name)
+        {
+            if (name == "TabOverview") SwitchTab(0);
+            else if (name == "TabIntelNetwork") SwitchTab(1);
+            else if (name == "TabRecon") SwitchTab(2);
+            else if (name == "TabCovertOps") SwitchTab(3);
+            else if (name == "TabDataAnalysis") SwitchTab(4);
+            else if (name == "TabThreats") SwitchTab(5);
+        }
+
+        public void SwitchTab(int index)
         {
             for (int i = 0; i < _allPanels.Count; i++)
             {
@@ -216,6 +220,12 @@ namespace StateCraft.UI
 
         public void Show()
         {
+            if (_dashboardRoot == null || _dashboardRoot.panel == null)
+            {
+                _dashboardRoot = MainDashboardToolkitController.Instance?.GetPanelVisualElement("Intel") 
+                              ?? _root?.Q<VisualElement>("IntelligenceDashboard");
+            }
+
             var panel = _dashboardRoot;
             if (panel != null)
             {
@@ -223,9 +233,6 @@ namespace StateCraft.UI
                 UIStateManager.Instance?.ApplySafeTransition(panel, true, 0.4f);
                 RefreshIntelligenceData();
                 UIStateManager.FixScrollViews(panel); // Fix scrollbars in builds after UI refresh
-            }
-            else
-            {
             }
         }
 
@@ -237,6 +244,13 @@ namespace StateCraft.UI
 
         public void RefreshIntelligenceData()
         {
+            if (_dashboardRoot == null || _dashboardRoot.panel == null)
+            {
+                _dashboardRoot = MainDashboardToolkitController.Instance?.GetPanelVisualElement("Intel") 
+                              ?? _root?.Q<VisualElement>("IntelligenceDashboard") 
+                              ?? _dashboardRoot;
+            }
+
             var gm = GameManager.Instance;
             var country = gm?.playerCountry;
             if (country == null) return;
@@ -309,7 +323,7 @@ namespace StateCraft.UI
             PopulateOverviewTab(country);
 
             // ── Intelligence Top Bar KPIs ──────────────────────────────────────
-            var hdrCoverage = _dashboardRoot?.Q<Label>("HdrIntelCoverage");
+            var hdrCoverage = _headerCoverage ?? _dashboardRoot?.Q<Label>("HdrIntelCoverage");
             var hdrCoverageRating = _dashboardRoot?.Q<Label>("HdrIntelCoverageRating");
             if (hdrCoverage != null)
             {
@@ -319,7 +333,7 @@ namespace StateCraft.UI
                     hdrCoverageRating.text = country.globalIntelCoverage >= 70 ? "High Coverage" : country.globalIntelCoverage >= 40 ? "Moderate" : "Low Coverage";
             }
 
-            var hdrOps = _dashboardRoot?.Q<Label>("HdrOperatives");
+            var hdrOps = _headerOperatives ?? _dashboardRoot?.Q<Label>("HdrOperatives");
             if (hdrOps != null) hdrOps.text = country.operativeCount.ToString();
 
             var hdrCovert = _dashboardRoot?.Q<Label>("HdrCovertOps");
@@ -339,7 +353,7 @@ namespace StateCraft.UI
                 hdrSat.style.color = country.satelliteCount >= 4 ? new Color(0.14f, 0.93f, 0.34f) : Color.white;
             }
 
-            var hdrExp = _dashboardRoot?.Q<Label>("HdrExposureRisk");
+            var hdrExp = _exposureRiskLabel ?? _dashboardRoot?.Q<Label>("HdrExposureRisk");
             var hdrExpSub = _dashboardRoot?.Q<Label>("HdrExposureRiskSub");
             if (hdrExp != null)
             {
@@ -349,7 +363,7 @@ namespace StateCraft.UI
                     hdrExpSub.text = country.exposureRisk > 75f ? "⚠ CRITICAL" : country.exposureRisk > 40f ? "Elevated Risk" : "Network Safe";
             }
 
-            var hdrBudgetTop = _dashboardRoot?.Q<Label>("HdrIntelBudgetTop");
+            var hdrBudgetTop = _headerBudget ?? _dashboardRoot?.Q<Label>("HdrIntelBudgetTop");
             if (hdrBudgetTop != null)
                 hdrBudgetTop.text = UiFormat.Money(country.intelligenceBudget * country.exchangeRate, sym);
         }
@@ -454,10 +468,11 @@ namespace StateCraft.UI
                         for (int i = 0; i < country.regions.Count && i < 5; i++)
                         {
                             var reg = country.regions[i];
+                            if (reg == null) continue;
                             var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 6 } };
                             
                             var rL = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, width = 110 } };
-                            rL.Add(new Label(reg.regionName) { style = { color = Color.gray, fontSize = 10, whiteSpace = WhiteSpace.Normal } });
+                            rL.Add(new Label(reg.regionName ?? "Region") { style = { color = Color.gray, fontSize = 10, whiteSpace = WhiteSpace.Normal } });
                             row.Add(rL);
                             
                             var barBg = new VisualElement { style = { flexGrow = 1, height = 4, backgroundColor = new Color(1, 1, 1, 0.1f), borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, marginRight = 8, marginLeft = 8 } };
@@ -2442,10 +2457,11 @@ namespace StateCraft.UI
                 for(int i=0; i<country.regions.Count && i<6; i++)
                 {
                     var reg = country.regions[i];
+                    if (reg == null) continue;
                     var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 6 } };
                     
                     var rL = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, width = 110 } };
-                    rL.Add(new Label(reg.regionName) { style = { color = Color.grey, fontSize = 10, whiteSpace = WhiteSpace.Normal } });
+                    rL.Add(new Label(reg.regionName ?? "Region") { style = { color = Color.grey, fontSize = 10, whiteSpace = WhiteSpace.Normal } });
                     row.Add(rL);
                     
                     var barBg = new VisualElement { style = { flexGrow = 1, height = 4, backgroundColor = cWhiteAlpha, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, marginRight = 8, marginLeft = 8 } };

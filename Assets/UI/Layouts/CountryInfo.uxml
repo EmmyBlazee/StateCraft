@@ -1,15 +1,16 @@
-﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/Styles/Global.uss" />
-    <ui:VisualElement name="CountryInfoPanel" class="glass-panel hologram-border" style="width: 420px; padding: 20px; position: absolute; right: 0; top: 65px; bottom: 35px; border-right-width: 0; opacity: 0; display: none; pointer-events: none;">
+    <ui:VisualElement name="CountryInfoPanel" class="glass-panel hologram-border" style="width: 420px; padding: 20px; position: absolute; right: 0; top: 65px; bottom: 115px; border-right-width: 0; opacity: 0; display: none; pointer-events: none;">
 
         <!-- SCROLLABLE DOSSIER — everything except the close button scrolls -->
-        <ui:ScrollView mode="Vertical" vertical-scroller-visibility="Hidden" style="flex-grow: 1;">
+        <ui:ScrollView mode="Vertical" vertical-scroller-visibility="Hidden" style="flex-grow: 1; flex-shrink: 1; overflow: hidden;">
 
             <!-- DOSSIER HEADER -->
             <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 15px; border-bottom-width: 1px; border-bottom-color: rgba(0,210,255,0.25); padding-bottom: 15px;">
                 <ui:Image name="SelectedFlag" style="width: 55px; height: 37px; border-radius: 3px; margin-right: 15px; background-color: rgba(0,0,0,0.4);" />
                 <ui:VisualElement style="flex-grow: 1;">
                     <ui:Label name="CountryName" text="—" style="font-size: 21px; color: white; -unity-font-style: bold; letter-spacing: 2px;" />
+                    <ui:Label name="PresidentName" text="PRESIDENT: —" style="font-size: 12px; color: rgb(0,210,255); -unity-font-style: bold; letter-spacing: 1px; margin-top: 2px;" />
                     <ui:Label name="GovernmentType" text="—" style="font-size: 12px; color: #90a4ae; letter-spacing: 1px; margin-top: 2px;" />
                     <ui:Label name="CapitalCity" text="—" style="font-size: 12px; color: #546e7a; letter-spacing: 1px;" />
                 </ui:VisualElement>
@@ -69,14 +70,14 @@
             </ui:VisualElement>
 
             <!-- MILITARY SNAPSHOT -->
-            <ui:Label text="◈ MILITARY READINESS" style="font-size: 12px; color: rgb(0,210,255); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 8px;" />
+            <ui:Label text="◈ MILITARY READINESS &amp; INTEL" style="font-size: 12px; color: rgb(0,210,255); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 8px;" />
             <ui:VisualElement style="flex-direction: row; flex-wrap: wrap; justify-content: space-between; margin-bottom: 14px; background-color: rgba(0,0,0,0.25); padding: 10px; border-radius: 4px;">
                 <ui:VisualElement style="width: 48%; margin-bottom: 8px;">
                     <ui:Label text="ARMY PERSONNEL" style="font-size: 11px; color: #546e7a;" />
                     <ui:Label name="MilPersonnel" text="—" style="font-size: 14px; color: white;" />
                 </ui:VisualElement>
                 <ui:VisualElement style="width: 48%; margin-bottom: 8px;">
-                    <ui:Label text="MILITARY STRENGTH" style="font-size: 11px; color: #546e7a;" />
+                    <ui:Label text="FIREPOWER RATING" style="font-size: 11px; color: #546e7a;" />
                     <ui:Label name="MilStrength" text="—" style="font-size: 14px; color: white;" />
                 </ui:VisualElement>
                 <ui:VisualElement style="width: 48%; margin-bottom: 8px;">
@@ -89,26 +90,18 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
+            <!-- FULL EQUIPMENT BREAKDOWN (UNLOCKED AT INTEL TIER 3+) -->
+            <ui:Label name="MilEquipHeader" text="◈ ARMED FORCES WEAPONS ARSENAL" style="font-size: 12px; color: rgb(0,210,255); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 8px;" />
+            <ui:VisualElement name="MilEquipmentContainer" style="margin-bottom: 14px; background-color: rgba(10, 20, 30, 0.4); padding: 10px; border-radius: 4px; border-width: 1px; border-color: rgba(0, 210, 255, 0.15);" />
+
             <!-- ACTIVE CRISES -->
             <ui:Label name="CrisisHeader" text="◈ ACTIVE REGIONAL CRISES" style="font-size: 12px; color: rgb(255,82,82); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 8px;" />
             <ui:VisualElement name="CrisisContainer" style="margin-bottom: 14px;" />
 
             <!-- ACTION BUTTONS -->
             <ui:Label text="◈ DIPLOMATIC OPERATIONS" style="font-size: 12px; color: rgb(0,210,255); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 8px;" />
-            <ui:VisualElement style="flex-direction: row; flex-wrap: wrap; margin-bottom: 8px;">
-                <ui:Button name="BtnTrade" text="TRADE DEAL" class="button-premium" style="flex-grow: 1; margin: 2px; height: 30px; font-size: 12px;" />
-                <ui:Button name="BtnAlly" text="PROPOSE ALLIANCE" class="button-premium" style="flex-grow: 1; margin: 2px; height: 30px; font-size: 12px; background-color: rgba(76,175,80,0.2);" />
-            </ui:VisualElement>
-
-            <ui:Label text="◈ INTELLIGENCE OPERATIONS" style="font-size: 12px; color: rgb(0,210,255); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 8px;" />
-            <ui:VisualElement style="flex-direction: row; flex-wrap: wrap; margin-bottom: 8px;">
-                <ui:Button name="BtnSpy" text="INFILTRATE" class="button-premium" style="flex-grow: 1; margin: 2px; height: 30px; font-size: 12px; border-color: #ffc107;" />
-                <ui:Button name="BtnSabotage" text="SABOTAGE INFRA" class="button-premium" style="flex-grow: 1; margin: 2px; height: 30px; font-size: 12px; border-color: #ff1744;" />
-            </ui:VisualElement>
-
-            <ui:Label text="◈ MILITARY DIRECTIVE" style="font-size: 12px; color: rgb(0,210,255); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 8px;" />
             <ui:VisualElement style="flex-direction: row; flex-wrap: wrap; margin-bottom: 20px;">
-                <ui:Button name="BtnReinforce" text="SEND AID" class="button-premium" style="flex-grow: 1; margin: 2px; height: 30px; font-size: 12px;" />
+                <ui:Button name="BtnAlly" text="INVITE TO FACTION" class="button-premium" style="flex-grow: 1; margin: 2px; height: 30px; font-size: 12px; background-color: rgba(76,175,80,0.2);" />
                 <ui:Button name="BtnWar" text="DECLARE WAR" class="button-premium" style="flex-grow: 1; margin: 2px; height: 30px; font-size: 12px; background-color: rgba(255,23,68,0.2); border-color: #ff1744;" />
             </ui:VisualElement>
 

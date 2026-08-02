@@ -434,24 +434,28 @@ namespace StateCraft.UI
 
         private static string BuildMilBriefing(CountryDataSO c, GameManager gm, WarStage stage)
         {
+            if (c == null) return "No military briefing available.";
+            int regionCount = c.regions != null ? c.regions.Count : 0;
             if (c.unitRifles < c.armyStats.personnel)
                 return $"CRITICAL WEAPONS SHORTAGE: Insufficient service rifles ({c.unitRifles:N0}) to fully equip active army ({c.armyStats.personnel:N0}). Tactical operations running at 50% efficiency! Procure rifles under the WEAPONS tab.";
             if (stage == WarStage.Conflict)
                 return $"Nation at war. Readiness {c.militaryReadiness:F0}% — prioritize logistics and COIN taskings.";
             if (c.reserveAmmo < 50f || c.reserveFuel < 50f)
                 return "Supply lines strained. Convoy escorts and reserve replenishment recommended.";
-            if (c.regions.Exists(r => r.security < 40f))
+            if (c.regions != null && c.regions.Exists(r => r != null && r.security < 40f))
                 return "Internal security deteriorating in at least one theatre. Consider COIN posture.";
-            return $"Peacetime posture holding. Joint readiness {c.militaryReadiness:F0}% across {c.regions.Count} regions.";
+            return $"Peacetime posture holding. Joint readiness {c.militaryReadiness:F0}% across {regionCount} regions.";
         }
 
         private void PopulatePolice(CountryDataSO country)
         {
-            if (_regionPoliceList == null) return;
+            if (_regionPoliceList == null || country == null || country.regions == null) return;
             _regionPoliceList.Clear();
 
+            int validCount = country.regions.Count(r => r != null);
             foreach (var region in country.regions)
             {
+                if (region == null) continue;
                 var item = new VisualElement();
                 item.AddToClassList("sub-panel");
                 item.style.paddingTop = 10;
@@ -462,7 +466,7 @@ namespace StateCraft.UI
                 item.style.marginRight = 5;
                 item.style.marginBottom = 10;
 
-                int localPolice = country.regions.Count > 0 ? Mathf.RoundToInt(country.nationalPoliceSize / (float)country.regions.Count) : 0;
+                int localPolice = validCount > 0 ? Mathf.RoundToInt(country.nationalPoliceSize / (float)validCount) : 0;
                 
                 item.Add(new Label(region.regionName.ToUpper()) { style = { color = new Color(255/255f, 235/255f, 59/255f), fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
                 item.Add(new Label($"Local Police: {localPolice:N0} Officers") { style = { color = Color.white, fontSize = 9, marginTop = 4 } });
@@ -475,9 +479,11 @@ namespace StateCraft.UI
 
         private void UpdateIntelAssessment(CountryDataSO country)
         {
-            if (country.regions.Count == 0) return;
-            var r = country.regions[0]; // Example: grab the first region for the assessment or the lowest security one
-            foreach (var reg in country.regions)
+            if (country == null || country.regions == null || country.regions.Count == 0) return;
+            var validRegions = country.regions.Where(r => r != null).ToList();
+            if (validRegions.Count == 0) return;
+            var r = validRegions[0];
+            foreach (var reg in validRegions)
             {
                 if (reg.security < r.security) r = reg;
             }

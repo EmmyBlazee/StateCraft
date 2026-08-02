@@ -64,6 +64,7 @@ MonoBehaviour:
       seaTradeProtection: 0
     pipelines: []
   countryName: Nigeria
+  presidentName: 
   capitalCity: Abuja
   currencyName: Naira
   currencySymbol: "\u20A6"
@@ -80,30 +81,32 @@ MonoBehaviour:
   hasShownBriefing: 1
   countryFlag: {fileID: 0}
   mapColor: {r: 0.37807375, g: 0.8165946, b: 0.7795663, a: 1}
-  population: 231747811
+  population: 233685083
   populationGrowthRate: 0.025
-  populationChangeLastTurn: 481804
-  invRiceTonnes: 395425.8
+  populationChangeLastTurn: 0
+  invRiceTonnes: 422694.03
   invCassavaTonnes: 0
-  invCocoaTonnes: 1700000
-  invMineralsTonnes: 2100000
-  invOilBarrels: 1.739e+9
+  invCocoaTonnes: 1780000
+  invMineralsTonnes: 2500000
+  invOilBarrels: 1.819e+9
+  invGasUnits: 20000000
+  invUraniumUnits: 0
   invTechGoods: 0
-  intelligenceLevel: 72.57225
-  cyberDefenseLevel: 99.97224
+  intelligenceLevel: 10
+  cyberDefenseLevel: 99.74675
   signalInterceptCapability: 100
   intelligenceBudget: 0.3513129
-  intelligenceFunds: 1735.9724
-  satelliteCount: 2
+  intelligenceFunds: 1142.3777
+  satelliteCount: 0
   satellitesUnderConstruction: 0
   satelliteBuildMonthsRemaining: 0
-  droneCount: 1
+  droneCount: 0
   dronesUnderConstruction: 0
   droneBuildMonthsRemaining: 0
-  operativeCount: 5
+  operativeCount: 12
   globalIntelCoverage: 100
   foreignAgentsDetected: 0
-  agencyIntegrity: 32.5
+  agencyIntegrity: 26.5
   activeCovertOps: []
   recentReconReports: []
   detectedThreats: []
@@ -124,18 +127,18 @@ MonoBehaviour:
   - resourceName: Cyber Tools
     allocatedAmount: 70
     maxAmount: 100
-  gdp: 188.1555
-  income: 4.493784
-  spending: 5.5206313
-  treasury: 3997.1929
+  gdp: 185.53175
+  income: 34.719143
+  spending: 30.552845
+  treasury: 173.59572
   inflationRate: 0
   gdpGrowthRate: 0.040000003
   playerBudget: 0
-  exchangeRate: 1360.7295
+  exchangeRate: 1550
   baseExchangeRate: 1550
-  debt: 177.9682
-  domesticDebt: 90.84286
-  foreignDebt: 87.12535
+  debt: 64.93611
+  domesticDebt: 38.96167
+  foreignDebt: 25.974445
   taxRate: 19.35
   subsidyLevel: 0
   importTariffRate: 19.6
@@ -200,7 +203,7 @@ MonoBehaviour:
   - _refresh_
   adviserDismissTurn: 10
   adviserNextRecommendationTurn: 13
-  corruptionIndex: 30
+  corruptionIndex: 15
   povertyRate: 45
   unemploymentRate: 12
   foreignInvestment: 725999940
@@ -217,14 +220,14 @@ MonoBehaviour:
   prevPublicApproval: 0
   prevMonthlyTaxRevenue: 5.2591376
   prevMonthBalance: 0
-  taxArrears: 36.179226
+  taxArrears: 39.634373
   budgetHistory:
-  - -1730.7404
   - -1885.7811
   - -1705.8695
   - -2097.6008
   - -2241.0847
   - -2062.758
+  - -2279.0007
   resources:
   - type: 0
     abundance: 85
@@ -272,25 +275,25 @@ MonoBehaviour:
   workforceMining: 30000
   workforceAgri: 150000
   workforceManufacturing: 5000
-  stability: 60
-  security: 39.564137
+  stability: 75
+  security: 80
   nationalPoliceSize: 55000
   militaryStrength: 3.0044074
   armyStrength: 6
   navyStrength: 0.014441828
   airForceStrength: 0.0050632954
-  unitInfantry: 12000
-  unitTanks: 138
-  unitAPCs: 515
-  unitArtillery: 0
-  unitRifles: 24000
-  unitFighters: 0
-  unitBombers: 9
-  unitAttackHelis: 0
+  unitInfantry: 14000
+  unitTanks: 75
+  unitAPCs: 150
+  unitArtillery: 45
+  unitRifles: 15000
+  unitFighters: 27
+  unitBombers: 3
+  unitAttackHelis: 18
   unitUAVs: 0
   unitFrigates: 1
-  unitDestroyers: 0
-  unitSubmarines: 0
+  unitDestroyers: 4
+  unitSubmarines: 2
   unitPatrolBoats: 8
   oosRifles: 0
   oosTanks: 0
@@ -316,24 +319,24 @@ MonoBehaviour:
   securitySpending: 0.39633968
   militaryProjects: []
   militaryBudgetUSD: 1.5056268
-  militaryUpkeepUSD: 2.2773275
-  militaryReadiness: 74
+  militaryUpkeepUSD: 0.116713546
+  militaryReadiness: 66
   armyStats:
     branchName: Army
-    personnel: 12000
-    equipment: 653
+    personnel: 14000
+    equipment: 270
     readiness: 95
     morale: 80
   navyStats:
     branchName: Navy
     personnel: 4250
-    equipment: 9
+    equipment: 15
     readiness: 92
     morale: 75
   airForceStats:
     branchName: Air Force
     personnel: 1551
-    equipment: 9
+    equipment: 48
     readiness: 65
     morale: 85
   rdfStats:
@@ -347,27 +350,27 @@ MonoBehaviour:
   reserveMedical: 100
   reserveFood: 84
   activeOperations:
-  - operationId: eb3be470-c5aa-4a1d-a9ff-42bf8131f1e7
+  - operationId: ff89ce27-2f86-4307-8eb0-ddc15455f38e
     missionId: ground_assault
     contributions:
     - branch: 0
       unitCounts:
       - unitName: Tanks
-        count: 55
+        count: 0
       - unitName: APCs
-        count: 50
-      personnelAssigned: 8000
+        count: 0
+      personnelAssigned: 1000
       casualtiesSuffered: 0
       equipmentLost: 0
-    opName: OPERATION ENUGU SHIELD
-    regionName: Enugu
+    opName: OPERATION RIVERSNIGERDELTAOILHUB SHIELD
+    regionName: Rivers Niger Delta Oil Hub
     type: ground_assault
     status: Active
-    costPerMonth: 464.99997
-    deployedTroops: 8000
+    costPerMonth: 20
+    deployedTroops: 1000
     deployedHelis: 0
-    deployedTanks: 55
-    deployedAPCs: 50
+    deployedTanks: 0
+    deployedAPCs: 0
     deployedFighters: 0
     deployedFrigates: 0
     deployedSubmarines: 0
@@ -381,7 +384,7 @@ MonoBehaviour:
     deployedDestroyers: 0
     casualtyRisk: 
     civilianRisk: 
-    securityBoostRate: 96
+    securityBoostRate: 50.5
     isDecommissioning: 0
     turnsToDeploy: 1
     phase: Preparing
@@ -422,424 +425,213 @@ MonoBehaviour:
     durationMonths: 0
     rewards: None
   operationalLogs: []
-  activeRecommendations:
-  - regionName: Lagos
-    threatType: Civil Unrest
-    urgency: Medium
-    justification: Security deterioration detected (50%). Riot warning active.
-    turnsActive: 1
-    isAddressed: 0
-  - regionName: Kano
-    threatType: Civil Unrest
-    urgency: Medium
-    justification: Security deterioration detected (50%). Riot warning active.
-    turnsActive: 1
-    isAddressed: 0
-  - regionName: Rivers
-    threatType: Civil Unrest
-    urgency: Medium
-    justification: Security deterioration detected (50%). Riot warning active.
-    turnsActive: 1
-    isAddressed: 0
-  - regionName: Borno
-    threatType: Civil Unrest
-    urgency: Medium
-    justification: Security deterioration detected (50%). Riot warning active.
-    turnsActive: 1
-    isAddressed: 0
-  - regionName: Abuja (FCT)
-    threatType: Civil Unrest
-    urgency: Medium
-    justification: Security deterioration detected (50%). Riot warning active.
-    turnsActive: 1
-    isAddressed: 0
-  - regionName: Enugu
-    threatType: Civil Unrest
-    urgency: Medium
-    justification: Security deterioration detected (50%). Riot warning active.
-    turnsActive: 1
-    isAddressed: 0
+  activeRecommendations: []
   activeInsurgentCamps: []
   trainingPipelines: []
   productionOrders: []
   completedProductions: []
   availableOffers:
-  - id: OFF_APC_1_548
-    title: 100 APCs (Rooikat Mk1D)
+  - id: OFF_TNK_1_745
+    title: 50 Main Battle Tanks (Titan-90)
+    subtitle: Main Battle Tank
+    tags:
+    - 125mm Gun
+    - ERA Armor
+    supplier: Ural Steel Works
+    country: Russia
+    unitCost: "\u20A61.7B"
+    totalCost: "\u20A684.9B"
+    quantity: 50 Units
+    deliveryTime: 7 Months
+    flagEmoji: "\U0001F1F7\U0001F1FA"
+    produceType: TNK
+    unitQuantity: 50
+    deliveryMonths: 7
+    totalCostB: 84.92821
+  - id: OFF_APC_1_102
+    title: 100 Heavy APCs (Apex Mk1D)
     subtitle: Armored Personnel Carrier
     tags:
     - 8x8
     - Mine Resistant
-    supplier: Denel Land Systems
+    supplier: Vanguard Defense Dynamics
     country: South Africa
-    unitCost: "\u20A6404.2M"
-    totalCost: "\u20A640.4B"
+    unitCost: "\u20A6438.5M"
+    totalCost: "\u20A643.9B"
     quantity: 100 Units
     deliveryTime: 5 Months
     flagEmoji: "\U0001F1FF\U0001F1E6"
     produceType: APC
     unitQuantity: 100
     deliveryMonths: 5
-    totalCostB: 40.420734
-  - id: OFF_RIFLE_1_772
-    title: 10,000 Assault Rifles
-    subtitle: Infantry Weapons
-    tags:
-    - 5.56mm
-    - Standard Issue
-    supplier: FN Herstal
-    country: Belgium
-    unitCost: "\u20A64.6M"
-    totalCost: "\u20A646.0B"
-    quantity: 10k Units
-    deliveryTime: 2 Months
-    flagEmoji: "\U0001F1E7\U0001F1EA"
-    produceType: RIFLE
-    unitQuantity: 10000
-    deliveryMonths: 2
-    totalCostB: 45.993973
-  - id: OFF_ART_1_622
-    title: 24 Mobile Artillery (M109)
-    subtitle: Self-Propelled Howitzer
-    tags:
-    - 155mm
-    - Tracked
-    supplier: BAE Systems
-    country: USA
-    unitCost: "\u20A62.0B"
-    totalCost: "\u20A648.0B"
-    quantity: 24 Units
-    deliveryTime: 4 Months
-    flagEmoji: "\U0001F1FA\U0001F1F8"
-    produceType: ARTILLERY
-    unitQuantity: 24
-    deliveryMonths: 4
-    totalCostB: 47.994385
-  - id: OFF_PATROL_1_585
-    title: 8 Offshore Patrol Boats
-    subtitle: Offshore Patrol Vessel
-    tags:
-    - Coastal Ops
-    - Fast
-    supplier: ASFAT
-    country: Turkey
-    unitCost: "\u20A610.7B"
-    totalCost: "\u20A685.9B"
-    quantity: 8 Units
-    deliveryTime: 5 Months
-    flagEmoji: "\U0001F1F9\U0001F1F7"
-    produceType: PATROL_BOAT
-    unitQuantity: 8
-    deliveryMonths: 5
-    totalCostB: 85.86533
-  - id: OFF_DES_1_401
-    title: 1 Guided Missile Destroyer
-    subtitle: Destroyer
-    tags:
-    - Aegis
-    - Heavy Strike
-    supplier: BAE Systems
-    country: UK
-    unitCost: "\u20A6661.2B"
-    totalCost: "\u20A6661.2B"
-    quantity: 1 Unit
-    deliveryTime: 47 Months
-    flagEmoji: "\U0001F1EC\U0001F1E7"
-    produceType: DESTROYER
-    unitQuantity: 1
-    deliveryMonths: 47
-    totalCostB: 661.2466
-  - id: OFF_APC_2_584
-    title: 150 Stryker IFVs
-    subtitle: Infantry Fighting Vehicle
-    tags:
-    - Mobile
-    - Networked
-    supplier: General Dynamics
-    country: USA
-    unitCost: "\u20A6446.8M"
-    totalCost: "\u20A667.0B"
-    quantity: 150 Units
-    deliveryTime: 4 Months
-    flagEmoji: "\U0001F1FA\U0001F1F8"
-    produceType: APC
-    unitQuantity: 150
-    deliveryMonths: 4
-    totalCostB: 67.02113
-  - id: OFF_FTR_1_518
-    title: 12 Fighter Jets (JF-17)
+    totalCostB: 43.853462
+  - id: OFF_FTR_1_509
+    title: 12 Multi-Role Fighters (Falcon-17)
     subtitle: Multi-Role Combat Aircraft
     tags:
     - 4.5 Gen
     - Avionics
-    supplier: PAC
+    supplier: Apex Aero Aerospace
     country: Pakistan
-    unitCost: "\u20A613.5B"
-    totalCost: "\u20A6161.9B"
+    unitCost: "\u20A615.0B"
+    totalCost: "\u20A6179.8B"
     quantity: 12 Units
-    deliveryTime: 8 Months
+    deliveryTime: 9 Months
     flagEmoji: "\U0001F1F5\U0001F1F0"
     produceType: FTR
     unitQuantity: 12
-    deliveryMonths: 8
-    totalCostB: 161.88522
-  - id: OFF_UAV_1_487
-    title: 20 Combat Drones (TB2)
+    deliveryMonths: 9
+    totalCostB: 179.79497
+  - id: OFF_ART_1_471
+    title: 24 Mobile Artillery (Ares-109)
+    subtitle: Self-Propelled Howitzer
+    tags:
+    - 155mm
+    - Tracked
+    supplier: Aegis Heavy Industries
+    country: USA
+    unitCost: "\u20A62.0B"
+    totalCost: "\u20A647.2B"
+    quantity: 24 Units
+    deliveryTime: 5 Months
+    flagEmoji: "\U0001F1FA\U0001F1F8"
+    produceType: ARTILLERY
+    unitQuantity: 24
+    deliveryMonths: 5
+    totalCostB: 47.206844
+  - id: OFF_RIFLE_1_206
+    title: 10,000 AR-55 Bullpup Rifles
+    subtitle: Infantry Weapons
+    tags:
+    - 5.56mm
+    - Standard Issue
+    supplier: Valiant Ordnance
+    country: Belgium
+    unitCost: "\u20A65.2M"
+    totalCost: "\u20A652.1B"
+    quantity: 10k Units
+    deliveryTime: 1 Months
+    flagEmoji: "\U0001F1E7\U0001F1EA"
+    produceType: RIFLE
+    unitQuantity: 10000
+    deliveryMonths: 1
+    totalCostB: 52.14967
+  - id: OFF_HEL_1_321
+    title: 15 Gunship Helicopters (Viper-64)
+    subtitle: Attack Helicopter
+    tags:
+    - Anti-Armor
+    - Agile
+    supplier: AeroCorp Flight Systems
+    country: USA
+    unitCost: "\u20A610.3B"
+    totalCost: "\u20A6153.9B"
+    quantity: 15 Units
+    deliveryTime: 7 Months
+    flagEmoji: "\U0001F1FA\U0001F1F8"
+    produceType: HEL
+    unitQuantity: 15
+    deliveryMonths: 7
+    totalCostB: 153.92801
+  - id: OFF_ART_2_987
+    title: 30 Centurion Howitzers
+    subtitle: Self-Propelled Howitzer
+    tags:
+    - 155mm
+    - Wheeled
+    supplier: Gallic Defense Systems
+    country: France
+    unitCost: "\u20A61.7B"
+    totalCost: "\u20A651.9B"
+    quantity: 30 Units
+    deliveryTime: 7 Months
+    flagEmoji: "\U0001F1EB\U0001F1F7"
+    produceType: ARTILLERY
+    unitQuantity: 30
+    deliveryMonths: 7
+    totalCostB: 51.893074
+  - id: OFF_UAV_1_203
+    title: 20 Combat Drones (Predator-2)
     subtitle: Unmanned Combat Aerial Vehicle
     tags:
     - Recon
     - Precision
-    supplier: Baykar
+    supplier: Bayraktar Systems
     country: Turkey
-    unitCost: "\u20A62.4B"
-    totalCost: "\u20A648.9B"
+    unitCost: "\u20A62.6B"
+    totalCost: "\u20A652.1B"
     quantity: 20 Units
     deliveryTime: 3 Months
     flagEmoji: "\U0001F1F9\U0001F1F7"
     produceType: UAV
     unitQuantity: 20
     deliveryMonths: 3
-    totalCostB: 48.871223
-  - id: OFF_FTR_2_229
-    title: 10 F-16 Block 70/72
-    subtitle: Multi-Role Combat Aircraft
-    tags:
-    - 4.5 Gen
-    - AESA Radar
-    supplier: Lockheed Martin
-    country: USA
-    unitCost: "\u20A625.7B"
-    totalCost: "\u20A6256.9B"
-    quantity: 10 Units
-    deliveryTime: 12 Months
-    flagEmoji: "\U0001F1FA\U0001F1F8"
-    produceType: FTR
-    unitQuantity: 10
-    deliveryMonths: 12
-    totalCostB: 256.9347
-  - id: OFF_BOMBER_1_770
-    title: 4 Strategic Bombers (H-6K)
+    totalCostB: 52.06136
+  - id: OFF_BOMBER_1_717
+    title: 4 Strategic Bombers (Thunder-6K)
     subtitle: Strategic Bomber
     tags:
     - Long Range
     - Payload
-    supplier: Xian Aircraft
+    supplier: Skyward Aviation
     country: China
-    unitCost: "\u20A629.9B"
-    totalCost: "\u20A6119.6B"
+    unitCost: "\u20A632.5B"
+    totalCost: "\u20A6129.9B"
     quantity: 4 Units
-    deliveryTime: 13 Months
+    deliveryTime: 12 Months
     flagEmoji: "\U0001F1E8\U0001F1F3"
     produceType: BOMBER
     unitQuantity: 4
-    deliveryMonths: 13
-    totalCostB: 119.64123
+    deliveryMonths: 12
+    totalCostB: 129.88986
+  - id: OFF_RIFLE_2_175
+    title: 20,000 Vanguard Assault Rifles
+    subtitle: Infantry Weapons
+    tags:
+    - 5.45mm
+    - Modernized
+    supplier: Krasnov Arms Consortium
+    country: Russia
+    unitCost: "\u20A64.2M"
+    totalCost: "\u20A684.6B"
+    quantity: 20k Units
+    deliveryTime: 4 Months
+    flagEmoji: "\U0001F1F7\U0001F1FA"
+    produceType: RIFLE
+    unitQuantity: 20000
+    deliveryMonths: 4
+    totalCostB: 84.57724
   activeContracts: []
-  activeSupplyContracts:
-  - id: 48a23dcd-063f-4785-8a5b-931b9ac044ea
-    resourceType: FUEL
-    label: Fuel Resupply (6 Mo)
-    amountPerTurn: 20
-    costPerTurn: 0.05
-    turnsTotal: 6
-    turnsRemaining: 6
-  - id: c3e19c98-aa31-4146-adf6-bde514b3ff87
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: 19a58d2d-7298-4f1b-8a33-b6e5c5a9dbe7
-    resourceType: FOOD
-    label: Rations Pipeline (6 Mo)
-    amountPerTurn: 25
-    costPerTurn: 0.03
-    turnsTotal: 6
-    turnsRemaining: 6
-  - id: 9aea67dd-c9ad-4382-b6d7-981054d46c4d
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: bde8014a-a4e7-4700-a167-8731bf7b9a9e
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: b1f7ea28-2a13-4cbc-9ef8-b3d24c60355a
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: cb0d911e-a5d0-4f79-b2ae-2bffe721b862
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: 0c90f1e1-979e-4218-87df-990f95b590ba
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: 1aa9bd36-4104-4e85-a465-b39450b83b63
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: 4d27464b-3f2d-471d-bb8a-1d3c68196072
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: 54c7cb82-ba2f-42d3-a8e1-316575715e65
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: a5fc643a-6b2a-4f1d-be80-96e44717a37f
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: 9c586344-6716-4d6e-8759-3820645d3617
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: 68e2c7a1-b222-4e7d-802a-8e87e131b5cc
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: d7bfdff2-d176-4bf0-a8e8-971f43ca7f27
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: ad21bc8e-6631-48f3-9f79-90442fca9453
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: 2ad75801-1ddf-4d30-9737-35f028ca687d
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: 4d0ef95f-79b2-4e65-afb9-f8153165f2f7
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: 29257ac9-8152-4550-8f44-a6f1b15e35a8
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: 77f33a7d-b904-4d3e-b246-cfb75ac7f5d6
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: 2f906993-3d9f-4f9a-a0d4-f4ccf3533dfe
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: 4edb2744-ee69-476e-8251-8bddeae97a3e
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: b2f5ddc7-e41e-4d71-8cc0-c1bfe3398523
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: 13a28353-5d2e-4eaa-8606-82ef4388834d
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
-  - id: c7b71b7f-4031-46af-930e-6a27c76e05c9
-    resourceType: FUEL
-    label: Fuel Strategic Reserve (12 Mo)
-    amountPerTurn: 40
-    costPerTurn: 0.09
-    turnsTotal: 12
-    turnsRemaining: 12
+  activeSupplyContracts: []
   researchProjects: []
   defenseFactories: []
   militaryBases:
   - id: BASE_1
-    baseName: Lagos Defense HQ
-    regionName: Lagos
+    baseName: Abuja (FCT) Defense HQ
+    regionName: Abuja (FCT)
     branch: JOINT
     status: OPERATIONAL
     capacity: 3000
     currentPersonnel: 2400
     upkeepCost: 15
     role: National Defense HQ
-    establishedYear: 2018
+    establishedYear: 2015
     sizeHa: 500
     capabilities:
     - name: Command & Control
-      level: 93
+      level: 74
       icon: "\uF519"
     - name: Logistics Support
-      level: 43
+      level: 53
       icon: "\uF018"
     - name: Maintenance
-      level: 44
+      level: 85
       icon: "\uF0AD"
     - name: Power Supply
-      level: 62
+      level: 88
       icon: "\uF0E7"
     - name: Defenses
-      level: 64
+      level: 50
       icon: "\uF132"
     assignedUnits:
     - unitName: JOINT Command Group
@@ -852,216 +644,142 @@ MonoBehaviour:
       personnel: 720
       icon: "\uF018"
   - id: BASE_2
-    baseName: Kano Army Garrison
-    regionName: Kano
+    baseName: Lagos Economic Hub Army Garrison
+    regionName: Lagos Economic Hub
     branch: ARMY
     status: OPERATIONAL
-    capacity: 2018
-    currentPersonnel: 1614
-    upkeepCost: 10.09
+    capacity: 2474
+    currentPersonnel: 1979
+    upkeepCost: 12.37
     role: Training & Logistics
-    establishedYear: 2013
-    sizeHa: 336
+    establishedYear: 2018
+    sizeHa: 412
     capabilities:
     - name: Command & Control
-      level: 98
+      level: 89
       icon: "\uF519"
     - name: Logistics Support
-      level: 61
+      level: 99
       icon: "\uF018"
     - name: Maintenance
-      level: 97
+      level: 61
       icon: "\uF0AD"
     - name: Power Supply
-      level: 99
+      level: 63
       icon: "\uF0E7"
     - name: Defenses
-      level: 52
+      level: 76
       icon: "\uF132"
     assignedUnits:
     - unitName: ARMY Command Group
-      personnel: 645
+      personnel: 791
       icon: "\uF132"
     - unitName: Support Battalion
-      personnel: 484
+      personnel: 593
       icon: "\uF0AD"
     - unitName: Logistics Unit
-      personnel: 484
+      personnel: 593
       icon: "\uF018"
   - id: BASE_3
-    baseName: Rivers Air Base
-    regionName: Rivers
+    baseName: Kano Northern Trade Region Air Base
+    regionName: Kano Northern Trade Region
     branch: AIR
     status: OPERATIONAL
-    capacity: 1608
-    currentPersonnel: 1286
-    upkeepCost: 8.04
+    capacity: 2486
+    currentPersonnel: 1988
+    upkeepCost: 12.429999
     role: Air Superiority
-    establishedYear: 2017
-    sizeHa: 268
+    establishedYear: 2010
+    sizeHa: 414
     capabilities:
     - name: Command & Control
-      level: 94
+      level: 64
       icon: "\uF519"
     - name: Logistics Support
-      level: 58
+      level: 93
       icon: "\uF018"
     - name: Maintenance
-      level: 84
+      level: 80
       icon: "\uF0AD"
     - name: Power Supply
-      level: 83
+      level: 65
       icon: "\uF0E7"
     - name: Defenses
-      level: 56
+      level: 39
       icon: "\uF132"
     assignedUnits:
     - unitName: AIR Command Group
-      personnel: 514
+      personnel: 795
       icon: "\uF132"
     - unitName: Support Battalion
-      personnel: 385
+      personnel: 596
       icon: "\uF0AD"
     - unitName: Logistics Unit
-      personnel: 385
+      personnel: 596
       icon: "\uF018"
   - id: BASE_4
-    baseName: Borno Naval Base
-    regionName: Borno
+    baseName: Rivers Niger Delta Oil Hub Naval Base
+    regionName: Rivers Niger Delta Oil Hub
     branch: NAVY
     status: OPERATIONAL
-    capacity: 2369
-    currentPersonnel: 1895
-    upkeepCost: 11.844999
+    capacity: 2464
+    currentPersonnel: 1971
+    upkeepCost: 12.32
     role: Maritime Operations
-    establishedYear: 2014
-    sizeHa: 394
+    establishedYear: 2012
+    sizeHa: 410
     capabilities:
     - name: Command & Control
-      level: 52
+      level: 92
       icon: "\uF519"
     - name: Logistics Support
-      level: 73
+      level: 89
       icon: "\uF018"
     - name: Maintenance
-      level: 42
+      level: 57
       icon: "\uF0AD"
     - name: Power Supply
-      level: 90
+      level: 95
       icon: "\uF0E7"
     - name: Defenses
-      level: 31
+      level: 47
       icon: "\uF132"
     assignedUnits:
     - unitName: NAVY Command Group
-      personnel: 758
+      personnel: 788
       icon: "\uF132"
     - unitName: Support Battalion
-      personnel: 568
+      personnel: 591
       icon: "\uF0AD"
     - unitName: Logistics Unit
-      personnel: 568
+      personnel: 591
       icon: "\uF018"
   - id: BASE_5
-    baseName: Abuja (FCT) Army Garrison
-    regionName: Abuja (FCT)
-    branch: ARMY
-    status: OPERATIONAL
-    capacity: 2090
-    currentPersonnel: 1672
-    upkeepCost: 10.45
-    role: Armored Division
-    establishedYear: 2012
-    sizeHa: 348
-    capabilities:
-    - name: Command & Control
-      level: 61
-      icon: "\uF519"
-    - name: Logistics Support
-      level: 64
-      icon: "\uF018"
-    - name: Maintenance
-      level: 56
-      icon: "\uF0AD"
-    - name: Power Supply
-      level: 64
-      icon: "\uF0E7"
-    - name: Defenses
-      level: 55
-      icon: "\uF132"
-    assignedUnits:
-    - unitName: ARMY Command Group
-      personnel: 668
-      icon: "\uF132"
-    - unitName: Support Battalion
-      personnel: 501
-      icon: "\uF0AD"
-    - unitName: Logistics Unit
-      personnel: 501
-      icon: "\uF018"
-  - id: BASE_6
-    baseName: Enugu Army Garrison
-    regionName: Enugu
-    branch: ARMY
-    status: OPERATIONAL
-    capacity: 1516
-    currentPersonnel: 1212
-    upkeepCost: 7.58
-    role: Training & Logistics
-    establishedYear: 2013
-    sizeHa: 252
-    capabilities:
-    - name: Command & Control
-      level: 95
-      icon: "\uF519"
-    - name: Logistics Support
-      level: 66
-      icon: "\uF018"
-    - name: Maintenance
-      level: 94
-      icon: "\uF0AD"
-    - name: Power Supply
-      level: 68
-      icon: "\uF0E7"
-    - name: Defenses
-      level: 45
-      icon: "\uF132"
-    assignedUnits:
-    - unitName: ARMY Command Group
-      personnel: 484
-      icon: "\uF132"
-    - unitName: Support Battalion
-      personnel: 363
-      icon: "\uF0AD"
-    - unitName: Logistics Unit
-      personnel: 363
-      icon: "\uF018"
-  - id: BASE_7
-    baseName: Enugu Forward Op Base
-    regionName: Enugu
+    baseName: Rivers Niger Delta Oil Hub Forward Op Base
+    regionName: Rivers Niger Delta Oil Hub
     branch: ARMY
     status: UNDER CONSTRUCTION
-    capacity: 1300
+    capacity: 800
     currentPersonnel: 640
-    upkeepCost: 6.5
+    upkeepCost: 4
     role: Border Security
-    establishedYear: 2012
+    establishedYear: 2010
     sizeHa: 133
     capabilities:
     - name: Command & Control
-      level: 70
+      level: 92
       icon: "\uF519"
     - name: Logistics Support
-      level: 41
+      level: 54
       icon: "\uF018"
     - name: Maintenance
-      level: 49
+      level: 74
       icon: "\uF0AD"
     - name: Power Supply
-      level: 69
+      level: 96
       icon: "\uF0E7"
     - name: Defenses
-      level: 48
+      level: 61
       icon: "\uF132"
     assignedUnits:
     - unitName: ARMY Command Group
@@ -1073,117 +791,6 @@ MonoBehaviour:
     - unitName: Logistics Unit
       personnel: 192
       icon: "\uF018"
-  - id: CON_e92f7
-    baseName: New Training Academy
-    regionName: Lagos
-    branch: ARMY
-    status: OPERATIONAL
-    capacity: 500
-    currentPersonnel: 400
-    upkeepCost: 2.5
-    role: Training
-    establishedYear: 2014
-    sizeHa: 83
-    capabilities:
-    - name: Command & Control
-      level: 99
-      icon: "\uF519"
-    - name: Logistics Support
-      level: 72
-      icon: "\uF018"
-    - name: Maintenance
-      level: 92
-      icon: "\uF0AD"
-    - name: Power Supply
-      level: 81
-      icon: "\uF0E7"
-    - name: Defenses
-      level: 51
-      icon: "\uF132"
-    assignedUnits:
-    - unitName: ARMY Command Group
-      personnel: 160
-      icon: "\uF132"
-    - unitName: Support Battalion
-      personnel: 120
-      icon: "\uF0AD"
-    - unitName: Logistics Unit
-      personnel: 120
-      icon: "\uF018"
-  - id: CON_3ff0d
-    baseName: New Training Academy
-    regionName: Lagos
-    branch: RDF
-    status: OPERATIONAL
-    capacity: 150
-    currentPersonnel: 120
-    upkeepCost: 0.75
-    role: Training
-    establishedYear: 2013
-    sizeHa: 25
-    capabilities:
-    - name: Command & Control
-      level: 88
-      icon: "\uF519"
-    - name: Logistics Support
-      level: 73
-      icon: "\uF018"
-    - name: Maintenance
-      level: 46
-      icon: "\uF0AD"
-    - name: Power Supply
-      level: 91
-      icon: "\uF0E7"
-    - name: Defenses
-      level: 85
-      icon: "\uF132"
-    assignedUnits:
-    - unitName: RDF Command Group
-      personnel: 48
-      icon: "\uF132"
-    - unitName: Support Battalion
-      personnel: 36
-      icon: "\uF0AD"
-    - unitName: Logistics Unit
-      personnel: 36
-      icon: "\uF018"
-  - id: CON_f0850
-    baseName: New Forward Base
-    regionName: Lagos
-    branch: RDF
-    status: OPERATIONAL
-    capacity: 300
-    currentPersonnel: 240
-    upkeepCost: 1.5
-    role: Combat
-    establishedYear: 2013
-    sizeHa: 50
-    capabilities:
-    - name: Command & Control
-      level: 76
-      icon: "\uF519"
-    - name: Logistics Support
-      level: 94
-      icon: "\uF018"
-    - name: Maintenance
-      level: 44
-      icon: "\uF0AD"
-    - name: Power Supply
-      level: 65
-      icon: "\uF0E7"
-    - name: Defenses
-      level: 44
-      icon: "\uF132"
-    assignedUnits:
-    - unitName: RDF Command Group
-      personnel: 96
-      icon: "\uF132"
-    - unitName: Support Battalion
-      personnel: 72
-      icon: "\uF0AD"
-    - unitName: Logistics Unit
-      personnel: 72
-      icon: "\uF018"
   facilityConstructionOrders: []
   facilityUpgradeOrders: []
   warEnemyName: 
@@ -1191,6 +798,7 @@ MonoBehaviour:
   warExhaustion: 0
   warWillToFight: 100
   totalKIA: 0
+  totalCivilianCasualties: 0
   totalWounded: 0
   warFatigueStabilityDrain: 0
   assignedGenerals: []
@@ -1203,11 +811,23 @@ MonoBehaviour:
   rdfCooldownMonths: 0
   lastRDFTurn: -100
   lastRDFRegionIndex: -1
-  globalPrestige: 6
+  globalPrestige: 50
   allianceCount: 0
   sanctionIssuedCount: 1
   sanctionReceivedCount: 0
   inboxMessages:
+  - id: 6768a94c-a2df-4e9b-8f0a-c20a5302009d
+    sender: NATIONAL SECURITY COUNCIL
+    subject: "TERRORIST ATTACK REPORT \u2014 KANO"
+    body: "CRITICAL SECURITY DISPATCH FOR NIGERIA\n\nA violent terrorist attack has
+      occurred in Kano.\n\u2022 Casualties: 17 people killed (KIA), 25 wounded.\n\u2022
+      Target Region: Kano\n\u2022 Current Region Security: 50%\n\u2022 Insurgency
+      Level: 0%\n\nImmediate military or security deployment is recommended to restore
+      order."
+    dateReceived: 01 FEB 2026
+    isRead: 0
+    turnReceived: 2
+    urgency: Critical
   - id: b5af0ec5-459a-4216-8585-547a75d3b3b8
     sender: NATIONAL SECURITY COUNCIL
     subject: "TERRORIST ATTACK REPORT \u2014 LAGOS"
@@ -1335,156 +955,8 @@ MonoBehaviour:
     isRead: 0
     turnReceived: 1
     urgency: Important
-  activeCrises:
-  - crisisName: 'Diplomatic Ultimatum: Broken Contract'
-    affectedRegion: Algeria
-    severity: Critical
-    internationalPressure: 95
-  - crisisName: 'Diplomatic Ultimatum: Broken Contract'
-    affectedRegion: Angola
-    severity: Critical
-    internationalPressure: 95
-  - crisisName: 'Diplomatic Ultimatum: Broken Contract'
-    affectedRegion: Algeria
-    severity: Critical
-    internationalPressure: 95
-  - crisisName: 'Diplomatic Ultimatum: Broken Contract'
-    affectedRegion: Benin
-    severity: Critical
-    internationalPressure: 95
-  - crisisName: 'Diplomatic Ultimatum: Broken Contract'
-    affectedRegion: Botswana
-    severity: Critical
-    internationalPressure: 95
-  - crisisName: 'Diplomatic Ultimatum: Broken Contract'
-    affectedRegion: Algeria
-    severity: Critical
-    internationalPressure: 95
-  - crisisName: 'Diplomatic Ultimatum: Broken Contract'
-    affectedRegion: Algeria
-    severity: Critical
-    internationalPressure: 95
-  activeTradeAgreements:
-  - id: f6a64f6c-d07f-4900-8c0d-9f8e7896dc0d
-    partnerCountry: Algeria
-    resource: 0
-    monthlyPaymentUSD: 6.40366e+11
-    durationMonths: 9
-    status: 4
-    resourceQuantity: 8.365948e+9
-    isBulkTransfer: 0
-    isSeller: 1
-    originalPaymentUSD: 6.40366e+11
-    originalDurationMonths: 11
-    counterReason: 
-  - id: 63b631d0-0432-4a1c-8250-174eb51a57f3
-    partnerCountry: Angola
-    resource: 0
-    monthlyPaymentUSD: 1.0844874e+11
-    durationMonths: 9
-    status: 4
-    resourceQuantity: 1.399998e+9
-    isBulkTransfer: 0
-    isSeller: 1
-    originalPaymentUSD: 1.0844874e+11
-    originalDurationMonths: 11
-    counterReason: 
-  - id: 4d2e5442-4b7e-40b0-a2d8-16d91e3344a3
-    partnerCountry: Angola
-    resource: 1
-    monthlyPaymentUSD: 302359140
-    durationMonths: 0
-    status: 4
-    resourceQuantity: 7000000
-    isBulkTransfer: 0
-    isSeller: 1
-    originalPaymentUSD: 302359140
-    originalDurationMonths: 10
-    counterReason: 
-  - id: fbf31599-415b-470b-ad21-30f341692d07
-    partnerCountry: Algeria
-    resource: 3
-    monthlyPaymentUSD: 3.8737183e+9
-    durationMonths: 10
-    status: 4
-    resourceQuantity: 9320000
-    isBulkTransfer: 0
-    isSeller: 1
-    originalPaymentUSD: 3.8737183e+9
-    originalDurationMonths: 12
-    counterReason: 
-  - id: 4a2bc946-de58-4a2a-9027-40921963c5ed
-    partnerCountry: Benin
-    resource: 0
-    monthlyPaymentUSD: 1.1788489e+11
-    durationMonths: 10
-    status: 4
-    resourceQuantity: 1.58e+9
-    isBulkTransfer: 0
-    isSeller: 1
-    originalPaymentUSD: 1.1788489e+11
-    originalDurationMonths: 12
-    counterReason: 
-  - id: f3ee804e-2637-43b6-9910-55bedd1397b7
-    partnerCountry: Botswana
-    resource: 0
-    monthlyPaymentUSD: 2.7633402e+11
-    durationMonths: 11
-    status: 4
-    resourceQuantity: 3.82e+9
-    isBulkTransfer: 0
-    isSeller: 1
-    originalPaymentUSD: 2.7633402e+11
-    originalDurationMonths: 13
-    counterReason: 
-  - id: f041dedd-d08d-4fe6-80a8-f4ae3b85d5ee
-    partnerCountry: Algeria
-    resource: 0
-    monthlyPaymentUSD: 1.4597257e+10
-    durationMonths: 11
-    status: 4
-    resourceQuantity: 180000000
-    isBulkTransfer: 0
-    isSeller: 1
-    originalPaymentUSD: 1.4597257e+10
-    originalDurationMonths: 13
-    counterReason: 
-  - id: ab195ad0-1491-4a1e-9996-cb5f820ea6b6
-    partnerCountry: Angola
-    resource: 1
-    monthlyPaymentUSD: 299879600
-    durationMonths: 0
-    status: 4
-    resourceQuantity: 7000000
-    isBulkTransfer: 0
-    isSeller: 1
-    originalPaymentUSD: 299879600
-    originalDurationMonths: 11
-    counterReason: 
-  - id: 84c8f850-73e8-4adf-ae2c-e887427e2904
-    partnerCountry: Algeria
-    resource: 3
-    monthlyPaymentUSD: 2.0374906e+9
-    durationMonths: 12
-    status: 4
-    resourceQuantity: 5420000
-    isBulkTransfer: 0
-    isSeller: 1
-    originalPaymentUSD: 2.0374906e+9
-    originalDurationMonths: 14
-    counterReason: 
-  - id: 31d0da94-b8fd-4223-bb6c-73794b1b1016
-    partnerCountry: Central African Republic
-    resource: 2
-    monthlyPaymentUSD: 46620230
-    durationMonths: 0
-    status: 4
-    resourceQuantity: 1000
-    isBulkTransfer: 0
-    isSeller: 0
-    originalPaymentUSD: 46620230
-    originalDurationMonths: 11
-    counterReason: 
+  activeCrises: []
+  activeTradeAgreements: []
   activeTreaties: []
   diplomacyEvents:
   - eventName: Trade Agreement Signed
@@ -1849,8 +1321,8 @@ MonoBehaviour:
   embassyBudget: 1.2
   battleResults: []
   covertBudget: 0
-  counterIntelligence: 37.85394
-  exposureRisk: 20.900002
+  counterIntelligence: 36.65394
+  exposureRisk: 0
   recruitedAssets: []
   intelHardware:
   - id: 9b33c488-3f09-4cf9-ae6e-1751d0e5bd9b
@@ -1866,12 +1338,11 @@ MonoBehaviour:
     monthsTotal: 6
     monthsRemaining: 0
   regions:
-  - {fileID: 11400000, guid: da348be1548a3f9499a296c0ed2d508b, type: 2}
-  - {fileID: 11400000, guid: 961a7012e8bc8db45a9e406774928d18, type: 2}
-  - {fileID: 11400000, guid: dd6d138aaec0d0f46b39940cf91fb6fa, type: 2}
-  - {fileID: 11400000, guid: d1d7ea7cd7da43045913db54163700eb, type: 2}
-  - {fileID: 11400000, guid: 2d7a6a2b3b1743648a2dd5c66c62331f, type: 2}
-  - {fileID: 11400000, guid: f13a3de8fa878ca40a66ab2600a8e9f6, type: 2}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  globalFaction: ECOWAS
   activeFactions: []
   activePolicies: []
   activeProjects:
@@ -1880,7 +1351,7 @@ MonoBehaviour:
     regionName: Abuja
     targetID: PowerHydro
     totalCost: 55
-    monthsRemaining: 74
+    monthsRemaining: 70
     totalMonths: 30
     stage: 3
     description: 
@@ -1889,7 +1360,7 @@ MonoBehaviour:
     regionName: Abuja
     targetID: PowerHydro
     totalCost: 55
-    monthsRemaining: 74
+    monthsRemaining: 70
     totalMonths: 30
     stage: 3
     description: 
@@ -1898,7 +1369,7 @@ MonoBehaviour:
     regionName: Abuja
     targetID: PowerHydro
     totalCost: 55
-    monthsRemaining: 118
+    monthsRemaining: 114
     totalMonths: 30
     stage: 3
     description: 
@@ -1907,7 +1378,7 @@ MonoBehaviour:
     regionName: Abuja
     targetID: Roads
     totalCost: 45
-    monthsRemaining: 105
+    monthsRemaining: 101
     totalMonths: 18
     stage: 3
     description: 
@@ -1916,7 +1387,7 @@ MonoBehaviour:
     regionName: Abuja
     targetID: PowerSolar
     totalCost: 22
-    monthsRemaining: 118
+    monthsRemaining: 114
     totalMonths: 10
     stage: 3
     description: 

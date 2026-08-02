@@ -81,7 +81,10 @@ namespace StateCraft.Core
 
         private void Awake()
         {
+            Application.runInBackground = true;
             _videoPlayer = GetComponent<VideoPlayer>();
+            if (GetComponent<StateCraft.UI.TutorialTourController>() == null)
+                gameObject.AddComponent<StateCraft.UI.TutorialTourController>();
         }
 
         private IEnumerator Start()
@@ -105,10 +108,13 @@ namespace StateCraft.Core
             {
                 Debug.Log("[Splash] Phase 1: Playing intro video. clip=" + (_videoPlayer.clip != null ? _videoPlayer.clip.name : "NULL"));
 
+                _videoFinished = false;
                 _videoPlayer.loopPointReached += _ => { Debug.Log("[Splash] loopPointReached fired."); _videoFinished = true; };
                 _videoPlayer.prepareCompleted  += _ => { Debug.Log("[Splash] prepareCompleted — calling Play()."); _videoPlayer.Play(); };
+                
                 _videoPlayer.Prepare();
-                Debug.Log("[Splash] Prepare() called. Waiting for video to start...");
+                _videoPlayer.Play(); // Direct Play invocation for immediate start
+                Debug.Log("[Splash] Prepare() and Play() called. Waiting for video to start...");
 
                 // Wait for video to start (max 5s)
                 float prepWait = 0f;
@@ -126,9 +132,10 @@ namespace StateCraft.Core
                 while (!_videoFinished && vidElapsed < maxTime)
                 {
                     vidElapsed += Time.deltaTime;
-                    if (!_videoPlayer.isPlaying && vidElapsed > 1f)
+                    // Only trigger fallback if video had already started and subsequently stopped before loopPointReached
+                    if (prepWait < 5f && !_videoPlayer.isPlaying && vidElapsed > 2f)
                     {
-                        Debug.Log("[Splash] Fallback: isPlaying=false at " + vidElapsed.ToString("F1") + "s — forcing finish.");
+                        Debug.Log("[Splash] Fallback: Video stopped playing at " + vidElapsed.ToString("F1") + "s — finishing phase.");
                         _videoFinished = true;
                     }
                     yield return null;
@@ -151,8 +158,8 @@ namespace StateCraft.Core
             yield return StartCoroutine(RunLoader());
             Debug.Log("[Splash] Phase 2: Loader complete.");
 
-            // ── Phase 3: Show Main Menu ────────────────────────────────────────
-            Debug.Log("[Splash] Phase 3: Hiding loader, showing menu.");
+            // ── Phase 3: Show Main Menu Direct ─────────────────────────────────
+            Debug.Log("[Splash] Phase 3: Showing main menu.");
             HideLoader();
             BindAndShowMenu();
         }
@@ -349,6 +356,14 @@ namespace StateCraft.Core
                 }
             }
 
+            _overwriteSaveModal   = root.Q<VisualElement>("OverwriteSaveModal");
+            _btnConfirmOverwrite = root.Q<Button>("BtnConfirmOverwrite");
+            _btnCancelOverwrite  = root.Q<Button>("BtnCancelOverwrite");
+
+            if (_overwriteSaveModal != null) _overwriteSaveModal.style.display = DisplayStyle.None;
+            if (_btnConfirmOverwrite != null) _btnConfirmOverwrite.clicked += ProceedToNameModal;
+            if (_btnCancelOverwrite != null) _btnCancelOverwrite.clicked += () => _overwriteSaveModal.style.display = DisplayStyle.None;
+
             // Ensure modals start hidden
             if (_nameModal != null) _nameModal.style.display = DisplayStyle.None;
             if (_settingsModal != null) _settingsModal.style.display = DisplayStyle.None;
@@ -364,6 +379,67 @@ namespace StateCraft.Core
 
             if (_btnCloseSettings != null) _btnCloseSettings.clicked += HideSettings;
             if (_btnSaveSettings != null) _btnSaveSettings.clicked += HideSettings;
+
+            // Wire up Music Volume Slider
+            var sliderMusic = root.Q<Slider>("SliderMusicVol");
+            var lblMusic = root.Q<Label>("LblMusicVol");
+            if (sliderMusic != null && lblMusic != null)
+            {
+                float savedMusic = PlayerPrefs.GetFloat("Settings_MusicVolume", 1.0f);
+                sliderMusic.SetValueWithoutNotify(savedMusic * 100f);
+                lblMusic.text = $"{Mathf.RoundToInt(savedMusic * 100f)}%";
+                
+                sliderMusic.RegisterValueChangedCallback(evt => {
+                    lblMusic.text = $"{Mathf.RoundToInt(evt.newValue)}%";
+                    float vol = evt.newValue / 100f;
+                    if (AudioManager.Instance != null) AudioManager.Instance.SetMusicVolume(vol);
+                    PlayerPrefs.SetFloat("Settings_MusicVolume", vol);
+                    PlayerPrefs.Save();
+                });
+            }
+
+            // Wire up Display Settings (Fullscreen & Resolution)
+            var toggleFullscreen = root.Q<Toggle>("ToggleFullscreen");
+            var dropResolution = root.Q<DropdownField>("DropResolution");
+            
+            bool savedFullscreen = PlayerPrefs.GetInt("Settings_Fullscreen", Screen.fullScreen ? 1 : 0) == 1;
+            int savedResIndex = PlayerPrefs.GetInt("Settings_ResolutionIndex", 0);
+
+            if (toggleFullscreen != null)
+            {
+                toggleFullscreen.SetValueWithoutNotify(savedFullscreen);
+                toggleFullscreen.RegisterValueChangedCallback(evt => {
+                    Screen.fullScreen = evt.newValue;
+                    PlayerPrefs.SetInt("Settings_Fullscreen", evt.newValue ? 1 : 0);
+                    PlayerPrefs.Save();
+                });
+            }
+
+            if (dropResolution != null)
+            {
+                dropResolution.index = savedResIndex;
+                dropResolution.RegisterValueChangedCallback(evt => {
+                    string res = evt.newValue;
+                    if (res == "1920x1080") Screen.SetResolution(1920, 1080, Screen.fullScreen);
+                    else if (res == "2560x1440") Screen.SetResolution(2560, 1440, Screen.fullScreen);
+                    else if (res == "3840x2160") Screen.SetResolution(3840, 2160, Screen.fullScreen);
+                    else if (res == "1280x720") Screen.SetResolution(1280, 720, Screen.fullScreen);
+                    
+                    int idx = dropResolution.choices.IndexOf(res);
+                    if (idx >= 0)
+                    {
+                        PlayerPrefs.SetInt("Settings_ResolutionIndex", idx);
+                        PlayerPrefs.Save();
+                    }
+                });
+            }
+
+            if (_btnResetSettings != null) _btnResetSettings.clicked += () =>
+            {
+                if (sliderMusic != null) sliderMusic.value = 100;
+                if (toggleFullscreen != null) toggleFullscreen.value = true;
+                if (dropResolution != null) dropResolution.index = 0;
+            };
 
             // Show menu
             root.style.display = DisplayStyle.Flex;
@@ -404,7 +480,14 @@ namespace StateCraft.Core
             Debug.Log($"[Splash] OnConfirmName clicked. PlayerName set to '{name}'. Hiding modal and showing country selector.");
 
             GameContext.PlayerName    = name;
+            GameContext.SelectedCountryName = "";
             GameContext.ShouldLoadSave = false;
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.playerCountry = null;
+                GameManager.Instance.playerName = name;
+            }
 
             if (_nameModal != null) _nameModal.style.display = DisplayStyle.None;
             if (_menuRoot  != null) _menuRoot.style.display  = DisplayStyle.None;
@@ -436,12 +519,19 @@ namespace StateCraft.Core
             Debug.Log("[Splash] Save file found. Loading scene: " + mainSceneName);
             GameContext.ShouldLoadSave = true;
             GameContext.ReturningToMainMenu = false;
-            SceneManager.LoadScene(mainSceneName);
+            // Load Game = ongoing conflict state, play war track during loading
+            StartCoroutine(LoadSceneWithLoader(mainSceneName, "war"));
         }
 
         private void OnHowToPlay()
         {
             Debug.Log("[Splash] How To Play clicked.");
+            if (StateCraft.UI.TutorialTourController.Instance != null)
+            {
+                StateCraft.UI.TutorialTourController.Instance.StartTour();
+                return;
+            }
+
             if (_howToPlayOverlay != null)
             {
                 _howToPlayOverlay.style.display = DisplayStyle.Flex;
@@ -644,10 +734,69 @@ namespace StateCraft.Core
                 GameContext.SelectedCountryName = country.countryName;
                 GameContext.ReturningToMainMenu  = false;
                 HideCountrySelector();
-                SceneManager.LoadScene(mainSceneName);
+                // New Game = fresh start, play peace track during loading
+                StartCoroutine(LoadSceneWithLoader(mainSceneName, "peace"));
             };
 
             return row;
+        }
+
+        // ── Scene Loading with Loader UI ─────────────────────────────────────────
+
+        private IEnumerator LoadSceneWithLoader(string sceneName, string musicMood = "peace")
+        {
+            // Hide the menu UI so the loader sits on top cleanly
+            if (menuUIDocument != null)
+                menuUIDocument.rootVisualElement.style.display = DisplayStyle.None;
+            if (selectorUIDocument != null)
+                selectorUIDocument.rootVisualElement.style.display = DisplayStyle.None;
+
+            // Ensure the splash background is visible as a backdrop
+            if (splashCanvasGroup != null)
+            {
+                splashCanvasGroup.alpha = 1f;
+                splashCanvasGroup.gameObject.SetActive(true);
+            }
+
+            // Trigger mood-appropriate music during loading
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlayMoodTrack(musicMood);
+
+            // Show the loader overlay
+            ShowLoader();
+            if (_loadingLabel != null) _loadingLabel.text = "LOADING  0%";
+            if (_loadingBar   != null) _loadingBar.value  = 0f;
+            yield return null; // Let UI re-render before blocking
+
+            // Begin async scene load (allowSceneActivation = false so we control timing)
+            var op = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneName);
+            op.allowSceneActivation = false;
+
+            float displayProgress = 0f;
+            while (op.progress < 0.9f || displayProgress < 100f)
+            {
+                // Async load goes to 0.9 (90%) then waits for allowSceneActivation
+                float target = (op.progress < 0.9f)
+                    ? op.progress / 0.9f * 95f   // map 0–0.9 to 0–95%
+                    : 100f;
+
+                // Smooth the displayed progress so it doesn't jump
+                displayProgress = Mathf.MoveTowards(displayProgress, target, Time.deltaTime * 80f);
+
+                if (_loadingBar   != null) _loadingBar.value  = displayProgress;
+                if (_loadingLabel != null) _loadingLabel.text = $"LOADING  {Mathf.RoundToInt(displayProgress)}%";
+
+                if (displayProgress >= 100f) break;
+                yield return null;
+            }
+
+            // Hold at 100% briefly so the player can see "READY"
+            if (_loadingLabel != null) _loadingLabel.text = "READY";
+            if (_loadingBar   != null) _loadingBar.value  = 100f;
+            yield return new WaitForSeconds(0.4f);
+
+            // Activate the loaded scene
+            op.allowSceneActivation = true;
         }
 
         // ── Crossfade ──────────────────────────────────────────────────────────
