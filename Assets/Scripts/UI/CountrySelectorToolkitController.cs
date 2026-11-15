@@ -1,0 +1,165 @@
+using UnityEngine;
+using UnityEngine.UIElements;
+using System.Collections.Generic;
+using StateCraft.Core;
+using StateCraft.Data;
+using StateCraft.Map;
+
+namespace StateCraft.UI
+{
+    public class CountrySelectorToolkitController : MonoBehaviour
+    {
+        private UIDocument _uiDocument;
+        private VisualElement _root;
+        private VisualElement _selectorRoot;
+        private ScrollView _countryList;
+        private TextField _searchInput;
+        private Button _btnClose;
+
+        private void Awake()
+        {
+            _uiDocument = GetComponent<UIDocument>();
+            if (_uiDocument == null) return;
+            _uiDocument.sortingOrder = 100;
+            _root = _uiDocument.rootVisualElement;
+            InitializeElements();
+        }
+
+        private void Start()
+        {
+            RefreshList("");
+            _selectorRoot.style.opacity = 0;
+            _selectorRoot.pickingMode = PickingMode.Ignore;
+        }
+
+        private void InitializeElements()
+        {
+            if (_root == null) return;
+            
+            _selectorRoot = _root.Q<VisualElement>("SelectorRoot");
+            
+            if (_selectorRoot == null)
+            {
+                var allDocs = FindObjectsOfType<UIDocument>();
+                foreach (var doc in allDocs)
+                {
+                    var found = doc.rootVisualElement?.Q<VisualElement>("SelectorRoot");
+                    if (found != null)
+                    {
+                        _selectorRoot = found;
+                        _root = doc.rootVisualElement;
+                        break;
+                    }
+                }
+            }
+
+            if (_selectorRoot != null)
+            {
+                _countryList = _selectorRoot.Q<ScrollView>("CountryList");
+                _searchInput = _selectorRoot.Q<TextField>("SearchInput");
+                _btnClose = _selectorRoot.Q<Button>("CloseSelector");
+
+                if (_btnClose != null) _btnClose.clicked += Hide;
+                
+                if (_searchInput != null)
+                {
+                    _searchInput.RegisterValueChangedCallback(evt => RefreshList(evt.newValue));
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[UI] CountrySelector: Could not find 'SelectorRoot' in any UIDocument.");
+            }
+        }
+
+        public void Show()
+        {
+            if (_selectorRoot == null) return;
+            
+            _selectorRoot.style.display = DisplayStyle.Flex;
+            _selectorRoot.style.opacity = 1;
+            _selectorRoot.pickingMode = PickingMode.Position;
+            _selectorRoot.style.visibility = Visibility.Visible;
+            
+            if (_searchInput != null) _searchInput.Focus();
+            RefreshList("");
+            
+        }
+
+        public void Hide()
+        {
+            if (_selectorRoot == null) return;
+            
+            _selectorRoot.style.display = DisplayStyle.None;
+            _selectorRoot.style.opacity = 0;
+            _selectorRoot.pickingMode = PickingMode.Ignore;
+            _selectorRoot.style.visibility = Visibility.Hidden;
+            
+        }
+
+        private void RefreshList(string filter)
+        {
+            if (_countryList == null) return;
+            _countryList.Clear();
+
+            if (GameManager.Instance == null || GameManager.Instance.allCountries == null) return;
+
+            foreach (var country in GameManager.Instance.allCountries)
+            {
+                if (string.IsNullOrEmpty(filter) || country.countryName.ToLower().Contains(filter.ToLower()))
+                {
+                    _countryList.Add(CreateCountryRow(country));
+                }
+            }
+        }
+
+        private VisualElement CreateCountryRow(CountryDataSO country)
+        {
+            var row = new Button();
+            row.name = $"Row_{country.countryName}";
+            row.AddToClassList("selector-row");
+            
+            row.style.flexDirection = FlexDirection.Row;
+            row.style.alignItems = Align.Center;
+            row.style.paddingLeft = 15;
+            row.style.paddingRight = 15;
+            row.style.height = 50;
+            row.style.backgroundColor = new Color(1f, 1f, 1f, 0.03f);
+            
+            row.style.borderBottomWidth = 1;
+            row.style.borderBottomColor = new Color(1f, 1f, 1f, 0.05f);
+            row.style.borderTopWidth = 0;
+            row.style.borderLeftWidth = 0;
+            row.style.borderRightWidth = 0;
+            
+            row.pickingMode = PickingMode.Position;
+
+            var flag = new Image();
+            flag.style.width = 30;
+            flag.style.height = 20;
+            flag.style.marginRight = 15;
+            flag.pickingMode = PickingMode.Ignore;
+            if (country.countryFlag != null) flag.sprite = country.countryFlag;
+            row.Add(flag);
+
+            var name = new Label(country.countryName.ToUpper());
+            name.style.color = Color.white;
+            name.style.fontSize = 14;
+            name.pickingMode = PickingMode.Ignore;
+            row.Add(name);
+
+            row.clicked += () => {
+if (MapManager.Instance != null) MapManager.Instance.SelectCountry(country);
+                
+                if (GameManager.Instance != null && GameManager.Instance.playerCountry == null)
+                {
+                    GameManager.Instance.playerCountry = country;
+                }
+                
+                Hide();
+            };
+
+            return row;
+        }
+    }
+}

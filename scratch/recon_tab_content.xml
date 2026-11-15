@@ -1,0 +1,175 @@
+<ui:VisualElement name="PanelSurveillance" style="display: none; height: 100%; flex-direction: column;">
+                
+                <!-- TOP HEADER STRIP -->
+                <ui:VisualElement style="flex-direction: row; justify-content: space-between; background-color: rgba(10, 14, 20, 0.95); padding: 12px; margin-bottom: 12px; border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                    <ui:VisualElement style="flex-direction: row; align-items: center; width: 25%;">
+                        <ui:Label text="&#xf05b;" class="fa-icon" style="font-size: 25px; color: rgb(214, 223, 230); margin-right: 12px;" />
+                        <ui:VisualElement>
+                            <ui:Label text="RECON &amp; SURVEILLANCE" style="font-size: 16px; color: white; -unity-font-style: bold;" />
+                            <ui:Label text="Monitor, detect and collect intelligence through all available assets." style="font-size: 12px; color: grey; margin-top: 2px;" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; width: 70%;">
+                        <ui:VisualElement class="econ-kpi" style="border-right-width: 1px; border-color: rgba(255,255,255,0.1); padding-right: 15px; margin-right: 15px;">
+                            <ui:Label text="SURVEILLANCE ASSETS" class="econ-kpi-label" />
+                            <ui:VisualElement style="flex-direction: row; align-items: baseline;">
+                                <ui:Label text="&#xf2b9;" class="fa-icon" style="font-size: 14px; color: rgb(35, 237, 86); margin-right: 4px;" />
+                                <ui:Label name="RS_TotalAssets" text="24" class="econ-kpi-value" style="font-size: 18px;" />
+                            </ui:VisualElement>
+                            <ui:Label name="RS_OnlineAssets" text="Online: 18" class="econ-kpi-delta positive" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="econ-kpi" style="border-right-width: 1px; border-color: rgba(255,255,255,0.1); padding-right: 15px; margin-right: 15px;">
+                            <ui:Label text="MISSIONS IN PROGRESS" class="econ-kpi-label" />
+                            <ui:VisualElement style="flex-direction: row; align-items: baseline;">
+                                <ui:Label text="&#xf0b1;" class="fa-icon" style="font-size: 14px; color: rgb(214, 223, 230); margin-right: 4px;" />
+                                <ui:Label name="RS_TotalMissions" text="7" class="econ-kpi-value" style="font-size: 18px;" />
+                            </ui:VisualElement>
+                            <ui:Label name="RS_HighPriority" text="High Priority: 2" class="econ-kpi-delta warning" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="econ-kpi" style="border-right-width: 1px; border-color: rgba(255,255,255,0.1); padding-right: 15px; margin-right: 15px;">
+                            <ui:Label text="INTEL COLLECTION RATE" class="econ-kpi-label" />
+                            <ui:Label name="RS_CollectionRate" text="71%" class="econ-kpi-value" style="font-size: 18px;" />
+                            <ui:Label name="RS_CollectionStatus" text="Good" class="econ-kpi-delta positive" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="econ-kpi" style="border-right-width: 1px; border-color: rgba(255,255,255,0.1); padding-right: 15px; margin-right: 15px;">
+                            <ui:Label text="DETECTION RATE" class="econ-kpi-label" />
+                            <ui:Label name="RS_DetectionRate" text="63%" class="econ-kpi-value" style="font-size: 18px;" />
+                            <ui:Label name="RS_DetectionStatus" text="Moderate" class="econ-kpi-delta warning" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="econ-kpi">
+                            <ui:Label text="FUSION ACCURACY" class="econ-kpi-label" />
+                            <ui:Label name="RS_FusionAccuracy" text="86%" class="econ-kpi-value" style="font-size: 18px;" />
+                            <ui:Label name="RS_FusionStatus" text="High" class="econ-kpi-delta positive" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- MIDDLE GRID (3 COLUMNS) -->
+                <ui:VisualElement style="flex-direction: row; flex-grow: 1; min-height: 0; margin-bottom: 12px;">
+                    
+                    <!-- COL 1: SURVEILLANCE ASSETS -->
+                    <ui:VisualElement style="width: 28%; margin-right: 12px; flex-direction: column;">
+                        <ui:VisualElement class="sub-panel" style="flex-grow: 1; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05); min-height: 0;">
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <ui:Label text="SURVEILLANCE ASSETS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px;" />
+                                <ui:Label name="RS_AssetHeaderCounts" text="18 Online / 24 Total" style="font-size: 12px; color: rgb(35, 237, 86);" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between; border-bottom-width: 1px; border-color: rgba(255,255,255,0.05); padding-bottom: 4px; margin-bottom: 4px;">
+                                <ui:Label text="ASSET" style="font-size: 11px; color: grey; width: 60px;" />
+                                <ui:Label text="TYPE" style="font-size: 11px; color: grey; width: 60px;" />
+                                <ui:Label text="STATUS" style="font-size: 11px; color: grey; width: 50px;" />
+                                <ui:Label text="COVERAGE" style="font-size: 11px; color: grey; width: 60px;" />
+                                <ui:Label text="USE" style="font-size: 11px; color: grey; flex-grow: 1; unity-text-align: middle-right;" />
+                            </ui:VisualElement>
+                            <ui:ScrollView name="RS_AssetsList" style="flex-grow: 1; margin-bottom: 8px;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" />
+                            <ui:Button text="VIEW ALL ASSETS" style="background-color: rgba(255,255,255,0.05); border-width: 0; padding: 6px; color: grey; font-size: 12px;" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- COL 2: ACTIVE RECON MISSIONS -->
+                    <ui:VisualElement style="width: 46%; margin-right: 12px; flex-direction: column;">
+                        <ui:VisualElement class="sub-panel" style="flex-grow: 1; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05); min-height: 0;">
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <ui:Label name="RS_MissionsHeaderTitle" text="ACTIVE RECON MISSIONS (7)" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px;" />
+                                <ui:Label text="VIEW ALL" style="font-size: 12px; color: rgba(255, 255, 255, 0.5); letter-spacing: 1px; padding: 4px 8px; background-color: rgba(255,255,255,0.05); border-radius: 2px; cursor: link;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between; border-bottom-width: 1px; border-color: rgba(255,255,255,0.05); padding-bottom: 4px; margin-bottom: 4px;">
+                                <ui:Label text="MISSION" style="font-size: 11px; color: grey; width: 120px;" />
+                                <ui:Label text="ASSET" style="font-size: 11px; color: grey; width: 70px;" />
+                                <ui:Label text="OBJECTIVE" style="font-size: 11px; color: grey; flex-grow: 1;" />
+                                <ui:Label text="AREA" style="font-size: 11px; color: grey; width: 80px;" />
+                                <ui:Label text="STATUS" style="font-size: 11px; color: grey; width: 70px;" />
+                                <ui:Label text="ETA" style="font-size: 11px; color: grey; width: 50px; unity-text-align: middle-right;" />
+                            </ui:VisualElement>
+                            <ui:ScrollView name="RS_MissionsList" style="flex-grow: 1;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- COL 3: LIVE INTELLIGENCE FEED -->
+                    <ui:VisualElement style="flex-grow: 1; flex-direction: column;">
+                        <ui:VisualElement class="sub-panel" style="flex-grow: 1; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05); min-height: 0;">
+                            <ui:Label text="LIVE INTELLIGENCE FEED" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 12px;" />
+                            <ui:ScrollView name="RS_LiveFeedList" style="flex-grow: 1; margin-bottom: 8px;" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" />
+                            <ui:Button text="VIEW FULL FEED" style="background-color: rgba(255,255,255,0.05); border-width: 0; padding: 6px; color: grey; font-size: 12px;" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- BOTTOM GRID -->
+                <ui:VisualElement style="flex-direction: row; min-height: 220px; margin-bottom: 12px;">
+                    <!-- SENSOR COVERAGE -->
+                    <ui:VisualElement class="sub-panel" style="width: 22%; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                        <ui:Label text="SENSOR COVERAGE" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 12px;" />
+                        <ui:VisualElement name="RS_SensorCoverageList" style="flex-grow: 1; justify-content: space-around; margin-bottom: 8px;" />
+                        <ui:Button text="VIEW COVERAGE MAP" style="background-color: rgba(255,255,255,0.05); border-width: 0; padding: 6px; color: grey; font-size: 12px;" />
+                    </ui:VisualElement>
+
+                    <!-- INTEL COLLECTION BREAKDOWN -->
+                    <ui:VisualElement class="sub-panel" style="width: 32%; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                        <ui:Label text="INTELLIGENCE COLLECTION BREAKDOWN (This Month)" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 12px;" />
+                        <ui:VisualElement style="flex-direction: row; flex-grow: 1; align-items: center;">
+                            <ui:VisualElement style="width: 100px; height: 100px; margin-right: 16px; justify-content: center; align-items: center;">
+                                <!-- Donut chart dynamically drawn -->
+                                <ui:VisualElement name="RS_DonutChartCenter" style="position: absolute; width: 64px; height: 64px; border-radius: 32px; background-color: rgba(10, 14, 20, 1); align-items: center; justify-content: center;">
+                                    <ui:Label name="RS_DonutTotalValue" text="₦588M" style="font-size: 16px; color: white; -unity-font-style: bold;" />
+                                    <ui:Label text="TOTAL SPENT" style="font-size: 10px; color: grey;" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                            <ui:VisualElement name="RS_DonutBreakdownList" style="flex-grow: 1; justify-content: center;" />
+                        </ui:VisualElement>
+                        <ui:Button text="ADJUST BUDGET" style="background-color: rgba(255,255,255,0.05); border-width: 0; padding: 6px; color: grey; font-size: 12px; margin-top: 8px;" />
+                    </ui:VisualElement>
+
+                    <!-- TASK NEW RECON MISSION -->
+                    <ui:VisualElement class="sub-panel" style="width: 22%; margin-right: 12px; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                        <ui:Label text="TASK NEW RECON MISSION" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 8px;" />
+                        
+                        <ui:Label text="Mission Type" style="font-size: 11px; color: grey; margin-bottom: 4px;" />
+                        <ui:VisualElement style="min-height: 24px; align-items: center; background-color: rgba(1,1,1,0.2); border-width: 1px; border-color: rgba(255,255,255,0.1); padding: 4px 8px; margin-bottom: 12px; border-radius: 2px; flex-direction: row; justify-content: space-between;">
+                            <ui:Label text="Select Mission Type" style="font-size: 12px; color: grey;" />
+                            <ui:Label text="▼" style="font-size: 11px; color: grey;" />
+                        </ui:VisualElement>
+
+                        <ui:Label text="Objective" style="font-size: 11px; color: grey; margin-bottom: 4px;" />
+                        <ui:TextField value="Enter objective..." style="font-size: 12px; margin-bottom: 12px; min-height: 24px;" class="custom-textfield" />
+
+                        <ui:Label text="Area of Interest" style="font-size: 11px; color: grey; margin-bottom: 4px;" />
+                        <ui:VisualElement style="min-height: 24px; align-items: center; background-color: rgba(1,1,1,0.2); border-width: 1px; border-color: rgba(255,255,255,0.1); padding: 4px 8px; margin-bottom: 12px; border-radius: 2px; flex-direction: row; justify-content: space-between;">
+                            <ui:Label text="Select Area" style="font-size: 12px; color: grey;" />
+                            <ui:Label text="▼" style="font-size: 11px; color: grey;" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement style="flex-direction: row; justify-content: space-between; margin-bottom: 8px;">
+                            <ui:VisualElement style="width: 48%;">
+                                <ui:Label text="Priority" style="font-size: 11px; color: grey; margin-bottom: 2px;" />
+                                <ui:Label text="Medium ▼" style="font-size: 12px; color: rgb(237, 180, 35);" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="width: 48%;">
+                                <ui:Label text="Assigned Asset" style="font-size: 11px; color: grey; margin-bottom: 2px;" />
+                                <ui:Label text="Auto Assign ▼" style="font-size: 12px; color: grey;" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        
+                        <ui:Button text="LAUNCH MISSION" style="background-color: rgba(35, 237, 86, 0.1); border-color: rgba(35, 237, 86, 0.3); border-width: 1px; border-radius: 4px; color: rgb(35, 237, 86); font-size: 13px; padding: 4px; -unity-font-style: bold;" />
+                    </ui:VisualElement>
+
+                    <!-- RECON ANALYTICS -->
+                    <ui:VisualElement class="sub-panel" style="flex-grow: 1; padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                        <ui:Label text="RECON ANALYTICS" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 12px;" />
+                        <ui:VisualElement name="RS_AnalyticsList" style="flex-grow: 1; justify-content: space-around; margin-bottom: 8px;" />
+                        <ui:Button text="VIEW ANALYTICS DASHBOARD" style="background-color: rgba(255,255,255,0.05); border-width: 0; padding: 6px; color: grey; font-size: 12px;" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- BOTTOM STRIP: RECENT RECON ACTIVITY -->
+                <ui:VisualElement class="sub-panel" style="padding: 12px; background-color: rgba(10, 14, 20, 0.95); border-radius: 4px; border-width: 1px; border-color: rgba(255,255,255,0.05);">
+                    <ui:Label text="RECENT RECON ACTIVITY" style="font-size: 13px; color: rgba(214, 223, 230, 0.6); -unity-font-style: bold; letter-spacing: 1px; margin-bottom: 12px;" />
+                    <ui:VisualElement name="RS_RecentActivityContainer" style="flex-direction: row; flex-wrap: wrap; justify-content: space-between;" />
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+
+            <!-- 3. COVERT OPS TAB (renamed to INTELLIGENCE NETWORK in UI, kept PanelCovertOps ID to avoid breaking code) -->
+            
