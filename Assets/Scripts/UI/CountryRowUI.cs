@@ -26,7 +26,6 @@ namespace StateCraft.UI
 
         private void OnViewClicked()
         {
-            // This tells the Map to select and jump to this country!
             if (MapManager.Instance != null)
             {
                 MapManager.Instance.SelectCountry(countryData);

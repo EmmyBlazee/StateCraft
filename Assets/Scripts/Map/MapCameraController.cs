@@ -20,21 +20,18 @@ namespace StateCraft.Map
         private void Awake()
         {
             cam = GetComponent<Camera>();
-            // Force override if inspector value is too low from old saves
             if (maxZoom < 100f) maxZoom = 100f;
             if (zoomSpeed < 10f) zoomSpeed = 15f;
         }
 
         private void Start()
         {
-            // Zoom out to see the whole map on load
             if (cam != null)
                 cam.orthographicSize = 25f;
         }
 
         private void Update()
         {
-            // Block all map interaction if over UI
             bool overUI = UIStateManager.Instance != null && UIStateManager.Instance.IsPointerOverUI();
             if (overUI) return;
 
@@ -45,7 +42,7 @@ namespace StateCraft.Map
 
         private void HandleMouseDrag()
         {
-            if (Input.GetMouseButtonDown(1)) // Right click to drag
+            if (Input.GetMouseButtonDown(1))
             {
                 dragOrigin = cam.ScreenToWorldPoint(Input.mousePosition);
             }
@@ -54,7 +51,7 @@ namespace StateCraft.Map
             {
                 Vector3 difference = dragOrigin - cam.ScreenToWorldPoint(Input.mousePosition);
                 Vector3 newPos = transform.position + difference;
-                newPos.z = transform.position.z; // Keep camera Z depth
+                newPos.z = transform.position.z;
                 transform.position = newPos;
             }
         }

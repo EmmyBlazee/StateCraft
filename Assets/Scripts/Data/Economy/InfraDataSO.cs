@@ -15,7 +15,7 @@ namespace StateCraft.Data.Economy
 
         [Header("Description")]
         [TextArea(2, 4)] public string effectDescription;
-        [TextArea(2, 4)] public string bottleneckThreshold; // e.g. "< 3"
+        [TextArea(2, 4)] public string bottleneckThreshold;
 
         [Header("Cost")]
         public float baseCost   = 8f;

@@ -22,7 +22,6 @@ namespace StateCraft.Map
 
         public void UpdateIconsForCountry(CountryDataSO country, Vector3 position)
         {
-            // Clear old icons
             if (activeIcons.ContainsKey(country))
             {
                 foreach (var icon in activeIcons[country]) Destroy(icon);
@@ -33,7 +32,6 @@ namespace StateCraft.Map
                 activeIcons[country] = new List<GameObject>();
             }
 
-            // Spawn insurgency icon if high
             if (country.stability < 40f && insurgencyIconPrefab != null)
             {
                 GameObject icon = Instantiate(insurgencyIconPrefab, position + Vector3.up * 0.5f, Quaternion.identity, transform);

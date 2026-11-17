@@ -7,9 +7,6 @@ using StateCraft.Data;
 
 namespace StateCraft.UI
 {
-    /// <summary>
-    /// Coordinates the overall UI state, transitions, and global input blocking.
-    /// </summary>
     public class UIStateManager : MonoBehaviour
     {
         public static UIStateManager Instance { get; private set; }
@@ -28,7 +25,6 @@ namespace StateCraft.UI
 
         private void Awake()
         {
-            // Ensure CriticalDispatchController exists on this GameObject for Critical inbox popups
             if (CriticalDispatchController.Instance == null)
             {
                 if (GetComponent<CriticalDispatchController>() == null)
@@ -69,7 +65,6 @@ namespace StateCraft.UI
             _newsTicker = root.Q<VisualElement>("NewsTickerContainer");
             _selector = root.Q<VisualElement>("SelectorRoot");
 
-            // GLOBAL FALLBACK: If separate documents are used
             var allDocs = FindObjectsOfType<UIDocument>();
             if (_countryPanel == null) {
                 foreach(var doc in allDocs) {
@@ -90,13 +85,11 @@ namespace StateCraft.UI
                 }
             }
 
-            // Initial states: Hide everything except the main dashboard sequence
             if (_dashboard != null) {
                 _dashboard.style.display = DisplayStyle.Flex;
                 _dashboard.style.opacity = 1;
             }
             
-            // Explicitly hide these to prevent them from blocking clicks
             if (_countryPanel != null) {
                 _countryPanel.style.display = DisplayStyle.None;
                 _countryPanel.style.opacity = 0;
@@ -106,24 +99,19 @@ namespace StateCraft.UI
                 _newsTicker.style.opacity = 0;
             }
             
-            // Selector always starts hidden — selection now happens in SplashScene.
-            // It will only be shown manually if needed (e.g., in-editor fallback).
             if (_selector != null) {
                 _selector.style.display = DisplayStyle.None;
                 _selector.style.opacity = 0;
                 _selector.pickingMode = PickingMode.Ignore;
             }
 
-            // Global UI Click Sound Wiring
             foreach (var doc in allDocs)
             {
                 if (doc != null && doc.rootVisualElement != null)
                 {
-                    // Use TrickleDown to catch the click before it gets consumed
                     doc.rootVisualElement.RegisterCallback<ClickEvent>(evt =>
                     {
                         var target = evt.target as VisualElement;
-                        // Walk up the tree to see if we clicked a button or something that acts like one
                         while (target != null)
                         {
                             if (target is Button || target.ClassListContains("unity-button"))
@@ -140,7 +128,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // Cleanup Legacy UI
             var allCanvases = Resources.FindObjectsOfTypeAll<Canvas>();
             foreach (var canvas in allCanvases)
             {
@@ -159,8 +146,7 @@ namespace StateCraft.UI
                 }
             }
 
-            // Cleanup Redundant UIDocuments (Legacy check)
-            string[] legacyUxmls = { "CountryInfo_Legacy", "NewsTicker_Old" }; // Only nuke truly old stuff
+            string[] legacyUxmls = { "CountryInfo_Legacy", "NewsTicker_Old" };
             
             foreach (var doc in allDocs)
             {
@@ -177,20 +163,16 @@ doc.gameObject.SetActive(false);
 
         private IEnumerator GameStartSequence()
         {
-            // ── Bootstrap from GameContext (set by SplashScene) ───────────────
             if (GameManager.Instance != null)
             {
-                // Apply player name
                 if (!string.IsNullOrEmpty(GameContext.PlayerName))
                     GameManager.Instance.playerName = GameContext.PlayerName;
 
-                // Apply selected country (or override old defeated country on New Game)
                 if (!string.IsNullOrEmpty(GameContext.SelectedCountryName))
                 {
                     CountryDataSO found = null;
 
 #if UNITY_EDITOR
-                    // Editor: scan Assets/Data/Countries directly
                     var guids = UnityEditor.AssetDatabase.FindAssets("t:CountryDataSO", new[] { "Assets/Data/Countries" });
                     foreach (var guid in guids)
                     {
@@ -200,7 +182,6 @@ doc.gameObject.SetActive(false);
                         { found = asset; break; }
                     }
 #else
-                    // Build: load via CountryRegistry (created by SplashSceneBuilder)
                     var registry = Resources.Load<StateCraft.Data.CountryRegistry>("CountryRegistry");
                     if (registry != null)
                         found = registry.FindByName(GameContext.SelectedCountryName);
@@ -218,20 +199,17 @@ doc.gameObject.SetActive(false);
                     }
                 }
 
-                // Handle Load Game vs New Game
                 if (GameContext.ShouldLoadSave)
                 {
                     GameContext.ShouldLoadSave = false;
                     GameManager.Instance.LoadGame();
-                    yield return null; // allow LoadGame to set playerCountry
+                    yield return null;
                 }
                 else
                 {
-                    // New Game launched — perform full baseline reset to clear prior defeat/session state
                     GameManager.Instance?.ResetAllCountriesToBaseline();
                 }
 
-                // ── Editor fallback: if no country set, show selector ─────────
                 if (GameManager.Instance.playerCountry == null)
                 {
                     Debug.LogWarning("[UIStateManager] No country in GameContext. Showing selector as fallback.");
@@ -247,7 +225,6 @@ doc.gameObject.SetActive(false);
                 }
             }
 
-            // ── Phase 1: Fade in HUD ──────────────────────────────────────────
             var root    = _uiDoc.rootVisualElement;
             var topBar  = root.Q<VisualElement>("TopBar");
             var sidebar = root.Q<VisualElement>("Sidebar");
@@ -257,7 +234,6 @@ doc.gameObject.SetActive(false);
 
             yield return new WaitForSeconds(0.5f);
 
-            // ── Phase 2: Scenario Briefing ────────────────────────────────────
             var player = GameManager.Instance?.playerCountry;
             bool tutorialWillRun = PlayerPrefs.GetInt("HasCompletedTutorialTour", 0) == 0;
             if (player != null && !player.hasShownBriefing && !tutorialWillRun)
@@ -266,17 +242,10 @@ doc.gameObject.SetActive(false);
                 player.hasShownBriefing = true;
             }
 
-            // ── Phase 3: Fade in News Ticker ──────────────────────────────────
             if (_newsTicker != null) ApplySafeTransition(_newsTicker, true, 0.8f);
         }
 
-        // ─── Scenario Briefing Screen ─────────────────────────────────────────
-        // Full-screen overlay shown once at game start. Pulls text from
-        // CountryDataSO.scenarioTitle / scenarioContext / scenarioPriorities.
-        // Falls back to generic text if the fields are empty.
-
-        /// <summary>Called by TutorialTourController.EndTour() so the briefing shows after the tour.</summary>
-        public void ShowScenarioBriefingPublic(StateCraft.Data.CountryDataSO country)
+public void ShowScenarioBriefingPublic(StateCraft.Data.CountryDataSO country)
         {
             if (country == null || country.hasShownBriefing) return;
             var root = _uiDoc?.rootVisualElement;
@@ -289,7 +258,6 @@ doc.gameObject.SetActive(false);
         {
             bool dismissed = false;
 
-            // ── Resolve display text ──────────────────────────────────────────
             string sym      = string.IsNullOrEmpty(country.currencySymbol) ? "$" : country.currencySymbol;
             string title    = string.IsNullOrEmpty(country.scenarioTitle)
                 ? $"{country.countryName.ToUpper()} — ASSUME THE PRESIDENCY"
@@ -307,14 +275,12 @@ doc.gameObject.SetActive(false);
                   "• Watch the election timer — approval rating determines your survival"
                 : country.scenarioPriorities;
 
-            // ── Spawn Dedicated Host Document ─────────────────────────────────
             var hostGO = new GameObject("ScenarioBriefingHost");
             var hostDoc = hostGO.AddComponent<UIDocument>();
             hostDoc.panelSettings = _uiDoc.panelSettings;
             hostDoc.sortingOrder = 100;
             var hostRoot = hostDoc.rootVisualElement;
 
-            // ── Build full-screen overlay ─────────────────────────────────────
             var overlay = new VisualElement();
             overlay.name = "ScenarioBriefingOverlay";
             overlay.style.position        = Position.Absolute;
@@ -326,7 +292,6 @@ doc.gameObject.SetActive(false);
             overlay.pickingMode           = PickingMode.Position;
             hostRoot.Add(overlay);
 
-            // ── Card ──────────────────────────────────────────────────────────
             var card = new VisualElement();
             card.style.width           = new StyleLength(new Length(58f, LengthUnit.Percent));
             card.style.maxWidth        = 680;
@@ -342,13 +307,11 @@ doc.gameObject.SetActive(false);
             card.pickingMode = PickingMode.Position;
             overlay.Add(card);
 
-            // Gold top stripe
             var stripe = new VisualElement();
             stripe.style.height          = 5;
             stripe.style.backgroundColor = gold;
             card.Add(stripe);
 
-            // Header area
             var header = new VisualElement();
             header.style.paddingTop    = 24;
             header.style.paddingLeft   = header.style.paddingRight  = 28;
@@ -357,7 +320,6 @@ doc.gameObject.SetActive(false);
             header.style.borderBottomColor = new Color(1f, 1f, 1f, 0.08f);
             card.Add(header);
 
-            // CLASSIFIED stamp label
             var stamp = new Label("CLASSIFIED SITUATION BRIEFING");
             stamp.style.color                  = gold;
             stamp.style.fontSize               = 9;
@@ -366,7 +328,6 @@ doc.gameObject.SetActive(false);
             stamp.style.marginBottom           = 10;
             header.Add(stamp);
 
-            // Country title
             var titleLabel = new Label(title);
             titleLabel.style.color                  = Color.white;
             titleLabel.style.fontSize               = 22;
@@ -375,21 +336,18 @@ doc.gameObject.SetActive(false);
             titleLabel.style.marginBottom           = 6;
             header.Add(titleLabel);
 
-            // Date subtitle
             string gameDate = GameManager.Instance?.TurnSystem?.CurrentDate ?? "YEAR ONE";
             var dateLabel = new Label(gameDate.ToUpper());
             dateLabel.style.color    = new Color(0.6f, 0.6f, 0.6f);
             dateLabel.style.fontSize = 10;
             header.Add(dateLabel);
 
-            // Body area
             var body = new VisualElement();
             body.style.paddingTop    = 20;
             body.style.paddingLeft   = body.style.paddingRight  = 28;
             body.style.paddingBottom = 0;
             card.Add(body);
 
-            // Situation context paragraph
             var contextLabel = new Label(context);
             contextLabel.style.color      = new Color(0.82f, 0.82f, 0.82f);
             contextLabel.style.fontSize   = 12;
@@ -397,14 +355,12 @@ doc.gameObject.SetActive(false);
             contextLabel.style.marginBottom = 20;
             body.Add(contextLabel);
 
-            // Divider
             var divider = new VisualElement();
             divider.style.height          = 1;
             divider.style.backgroundColor = new Color(1f, 1f, 1f, 0.1f);
             divider.style.marginBottom    = 16;
             body.Add(divider);
 
-            // Priorities header
             var priHeader = new Label("YOUR IMMEDIATE PRIORITIES");
             priHeader.style.color                  = gold;
             priHeader.style.fontSize               = 10;
@@ -413,7 +369,6 @@ doc.gameObject.SetActive(false);
             priHeader.style.marginBottom           = 10;
             body.Add(priHeader);
 
-            // Priority bullets
             var priLabel = new Label(priorities);
             priLabel.style.color      = new Color(0.88f, 0.88f, 0.88f);
             priLabel.style.fontSize   = 12;
@@ -421,7 +376,6 @@ doc.gameObject.SetActive(false);
             priLabel.style.marginBottom = 24;
             body.Add(priLabel);
 
-            // Stats row — quick snapshot
             var statsRow = new VisualElement();
             statsRow.style.flexDirection    = FlexDirection.Row;
             statsRow.style.justifyContent   = Justify.SpaceAround;
@@ -460,7 +414,6 @@ doc.gameObject.SetActive(false);
             AddStat("APPROVAL",  approvalStr,  approvalCol);
             AddStat("POPULATION", $"{(country.population / 1_000_000f):F0}M", Color.white);
 
-            // Begin button
             var footer = new VisualElement();
             footer.style.paddingLeft = footer.style.paddingRight = 28;
             card.Add(footer);
@@ -480,10 +433,8 @@ doc.gameObject.SetActive(false);
             beginBtn.style.borderBottomLeftRadius = beginBtn.style.borderBottomRightRadius = 4;
             footer.Add(beginBtn);
 
-            // ── Wait for dismissal ────────────────────────────────────────────
             while (!dismissed) yield return null;
 
-            // Fade out overlay
             float t = 0f;
             while (t < 0.4f)
             {
@@ -500,7 +451,6 @@ doc.gameObject.SetActive(false);
             
             element.style.display = DisplayStyle.Flex;
             float time = 0;
-            // Force start at 0 if it's currently invisible
             float start = element.style.opacity.value;
             if (float.IsNaN(start)) start = 0;
 
@@ -539,13 +489,10 @@ doc.gameObject.SetActive(false);
             if (element == null) return;
             element.pickingMode = show ? PickingMode.Position : PickingMode.Ignore;
 
-            // Toggle children picking mode — but SKIP ScrollView internal elements
-            // (unity-scroller, unity-slider, unity-dragger) which manage their own picking
             element.Query<VisualElement>().ForEach(ve =>
             {
                 string n = ve.name ?? "";
                 string cls = ve.GetType().Name;
-                // Never override ScrollView internals or they break in builds
                 bool isScrollInternal = n.StartsWith("unity-") || 
                                         cls == "ScrollView" || 
                                         cls == "Scroller" ||
@@ -556,24 +503,15 @@ doc.gameObject.SetActive(false);
             StartCoroutine(show ? FadeIn(element, duration) : FadeOut(element, duration));
         }
 
-        /// <summary>
-        /// Fix all ScrollViews in a panel — call after Show() to ensure scrollbars work in builds.
-        /// </summary>
-        // ─────────────────────────────────────────────────────────
-        // GAME OVER SCREEN
-        // ─────────────────────────────────────────────────────────
-
-        public void ShowGameOver(StateCraft.Data.CountryDataSO country, float approval,
+public void ShowGameOver(StateCraft.Data.CountryDataSO country, float approval,
                                   int monthsInOffice, bool isCoup = false)
         {
             if (_uiDoc == null || _uiDoc.rootVisualElement == null) return;
             var root = _uiDoc.rootVisualElement;
 
-            // Pause everything
             if (GameManager.Instance != null)
                 GameManager.Instance.isRealTime = false;
 
-            // Build full-screen game over overlay
             var overlay = new VisualElement();
             overlay.name = "GameOverOverlay";
             overlay.style.position        = Position.Absolute;
@@ -586,14 +524,12 @@ doc.gameObject.SetActive(false);
             overlay.pickingMode           = PickingMode.Position;
             overlay.BringToFront();
 
-            // Title
             string title     = isCoup ? "COUP D'ÉTAT" : "ELECTORAL DEFEAT";
             string subtitle  = isCoup ? "Your government has been overthrown"
                                       : "You have been voted out of office";
             Color accentColor= isCoup ? new Color(1f, 0.25f, 0.25f)
                                       : new Color(0.95f, 0.72f, 0.1f);
 
-            // Accent line
             var topLine = new VisualElement();
             topLine.style.width           = new StyleLength(new Length(40f, LengthUnit.Percent));
             topLine.style.height          = 3;
@@ -614,7 +550,6 @@ doc.gameObject.SetActive(false);
             subLabel.style.marginBottom = 40;
             overlay.Add(subLabel);
 
-            // Stats card
             var card = new VisualElement();
             card.style.width            = new StyleLength(new Length(40f, LengthUnit.Percent));
             card.style.backgroundColor  = new Color(0.06f, 0.06f, 0.10f, 0.98f);
@@ -629,7 +564,6 @@ doc.gameObject.SetActive(false);
             card.style.borderBottomLeftRadius = 6; card.style.borderBottomRightRadius = 6;
             card.style.marginBottom     = 32;
 
-            // Legacy header
             var legacyHeader = new Label("YOUR LEGACY");
             legacyHeader.style.color    = new Color(0.5f, 0.5f, 0.65f);
             legacyHeader.style.fontSize = 9;
@@ -664,7 +598,6 @@ doc.gameObject.SetActive(false);
 
             overlay.Add(card);
 
-            // Verdict
             string verdict = approval >= 70f ? "A RESPECTED LEADER — history will remember you fondly." :
                              approval >= 55f ? "A CAPABLE ADMINISTRATOR — mixed results, mixed legacy." :
                              approval >= 40f ? "A FLAWED LEADER — good intentions, poor execution." :
@@ -680,13 +613,11 @@ doc.gameObject.SetActive(false);
             verdictLabel.style.width = new StyleLength(new Length(42f, LengthUnit.Percent));
             overlay.Add(verdictLabel);
 
-            // Buttons row
             var btnRow = new VisualElement();
             btnRow.style.flexDirection = FlexDirection.Row;
 
             var restartBtn = new Button(() =>
             {
-                // Return to Main Menu
                 UnityEngine.SceneManagement.SceneManager.LoadScene("SplashScene");
             }) { text = "🏠  MAIN MENU" };
 
@@ -744,7 +675,6 @@ doc.gameObject.SetActive(false);
                 sv.touchScrollBehavior = ScrollView.TouchScrollBehavior.Clamped;
                 sv.scrollDecelerationRate = 0.135f;
                 sv.elasticity = 0.1f;
-                // Ensure all scrollbar children are pickable
                 sv.Query<VisualElement>().ForEach(ve =>
                 {
                     string n = ve.name ?? "";
@@ -754,16 +684,10 @@ doc.gameObject.SetActive(false);
             });
         }
 
-        /// <summary>
-        /// Logs any VisualElement whose resolved layout width or height exceeds its parent's.
-        /// Call after a panel becomes visible so layout has been resolved.
-        /// Uses GeometryChangedEvent to wait for the first layout pass.
-        /// </summary>
         public static void LogOverflowingElements(VisualElement root, string panelLabel = "")
         {
             if (root == null) return;
 
-            // Wait for the first geometry pass so resolvedStyle dimensions are valid
             root.RegisterCallback<GeometryChangedEvent>(OnLayout);
 
             void OnLayout(GeometryChangedEvent _)
@@ -776,7 +700,6 @@ doc.gameObject.SetActive(false);
                     var parent = ve.parent;
                     if (parent == null) return;
 
-                    // Skip internal Unity elements (scrollbars, sliders, etc.)
                     string n = ve.name ?? "";
                     if (n.StartsWith("unity-")) return;
 
@@ -785,10 +708,8 @@ doc.gameObject.SetActive(false);
                     float pW  = parent.resolvedStyle.width;
                     float pH  = parent.resolvedStyle.height;
 
-                    // Skip unresolved (NaN / 0) layouts
                     if (float.IsNaN(veW) || float.IsNaN(veH) || pW <= 0 || pH <= 0) return;
 
-                    // Check if the element resides inside a ScrollView
                     bool insideScrollView = false;
                     for (VisualElement current = parent; current != null; current = current.parent)
                     {
@@ -799,10 +720,9 @@ doc.gameObject.SetActive(false);
                         }
                     }
 
-                    bool overflowsX = veW > pW + 2f;  // 2px tolerance for rounding
+                    bool overflowsX = veW > pW + 2f;
                     bool overflowsY = veH > pH + 2f;
 
-                    // Ignore vertical overflows inside ScrollViews since they are meant to scroll
                     if (insideScrollView) overflowsY = false;
 
                     if (overflowsX || overflowsY)
@@ -831,9 +751,7 @@ doc.gameObject.SetActive(false);
             }
         }
 
-
-        // Static version for global UI utility calls
-        public static void ApplySafeTransition(VisualElement element, string[] properties, float duration)
+public static void ApplySafeTransition(VisualElement element, string[] properties, float duration)
         {
             if (element == null) return;
             List<StylePropertyName> props = new List<StylePropertyName>();
@@ -842,9 +760,6 @@ doc.gameObject.SetActive(false);
             element.style.transitionDuration = new List<TimeValue> { new TimeValue(duration) };
         }
 
-        /// <summary>
-        /// Global check for map interaction. Returns true if pointer is over interactive UI.
-        /// </summary>
         public bool IsPointerOverUI()
         {
             Vector2 mousePos = Input.mousePosition;
@@ -878,4 +793,3 @@ doc.gameObject.SetActive(false);
         }
     }
 }
-// Force re-import: 2026-05-14 10:14

@@ -18,5 +18,3 @@ This document tracks all the polish, quality-of-life (QoL), and advanced feature
 - **Enhanced Visual Hierarchy**: Continue refining button weights, colors, and iconography (like the bright green `🔨 COMMENCE CONSTRUCTION` button) across all dashboards to guide the player's eye to primary actions.
 - **Dynamic Tooltips**: Add hover tooltips across complex stats (like Threat Levels, Readiness, or Upkeep) to explain the underlying math to the player without cluttering the screen.
 
----
-*Note: Feel free to add new ideas to this list as we continue building V1!*

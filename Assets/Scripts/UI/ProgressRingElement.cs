@@ -3,18 +3,13 @@ using UnityEngine.UIElements;
 
 namespace StateCraft.UI
 {
-    /// <summary>
-    /// Custom UITK element that draws a progress ring chart using Painter2D.
-    /// </summary>
     public class ProgressRingElement : VisualElement
     {
-        // ── Constants ────────────────────────────────────────────────────────
-        private const float RING_WIDTH = 9f;   // ring thickness in px
+        private const float RING_WIDTH = 9f;
 
-        private static readonly Color ColBackground = (Color)new Color32(69, 91, 111, 255); // #455B6F border color from Global.uss
-        private static readonly Color ColFill = (Color)new Color32(25, 226, 255, 255);      // #19E2FF market color
+        private static readonly Color ColBackground = (Color)new Color32(69, 91, 111, 255);
+        private static readonly Color ColFill = (Color)new Color32(25, 226, 255, 255);
 
-        // ── State ────────────────────────────────────────────────────────────
         private float _valuePct;
 
         public ProgressRingElement()
@@ -28,9 +23,7 @@ namespace StateCraft.UI
             MarkDirtyRepaint();
         }
 
-        // ── Drawing ──────────────────────────────────────────────────────────
-
-        private void OnGenerateVisualContent(MeshGenerationContext ctx)
+private void OnGenerateVisualContent(MeshGenerationContext ctx)
         {
             float w = contentRect.width;
             float h = contentRect.height;
@@ -47,14 +40,12 @@ namespace StateCraft.UI
             p.lineCap   = LineCap.Butt;
             p.lineWidth = strokeW;
 
-            // ── Grey background track (full 360°) ────────────────────────────
             StrokeArc(p, cx, cy, midR, 0f, 360f, ColBackground);
 
             if (_valuePct <= 0f) return;
 
             float fillDeg = (_valuePct / 100f) * 360f;
 
-            // Clockwise from 12 o'clock (-90° = top in Painter2D convention)
             float startCursor = -90f;
 
             StrokeArc(p, cx, cy, midR,

@@ -15,18 +15,14 @@ namespace StateCraft.UI
         private VisualElement _root;
         private VisualElement _dashboardRoot;
         
-        // Tabs
         private Button _tabForces, _tabRecruit, _tabWeapons, _tabBases, _tabOps, _tabProjects, _tabLogistics, _tabBudget;
         private VisualElement _panelForces, _panelRecruit, _panelWeapons, _panelBases, _panelOps, _panelProjects, _panelLogistics, _panelBudget;
         private List<VisualElement> _allPanels = new List<VisualElement>();
 
-
-        // Header
-        private Label _headerCountryName;
+private Label _headerCountryName;
         private Label _headerBudget, _headerReadiness, _threatLevelBadge, _headerKIA;
         private Label _headerFirepower, _headerTotalPersonnel, _headerBasesCount, _headerOperationsCount;
 
-        // Forces
         private ScrollView _generalsContainer, _blockadesContainer;
         private Button _btnRecruitGeneral, _btnDeclareBlockade;
 
@@ -34,7 +30,6 @@ namespace StateCraft.UI
         private VisualElement _personnelGrid, _weaponsGrid, _basesGrid;
         private Label _milBriefing;
         private VisualElement _milLiveFeed;
-                // NEW OPERATIONS DASHBOARD FIELDS
         private ScrollView _threatList;
         private ScrollView _opsList;
         private ScrollView _feedList;
@@ -47,18 +42,14 @@ namespace StateCraft.UI
         private ScrollView _activeProjectsList, _availableProjectsList;
         private ScrollView _budgetLedgerList;
 
-        // Strategic Deterrence (WMD)
         private ProgressBar _wmdProgressBar;
         private Label _wmdStatusLabel, _wmdOperationalBadge;
 
-        // Logistics
         private ProgressBar _fuelBar, _ammoBar, _medicalBar, _foodBar, _elecBar;
         private VisualElement _supplyRouteList;
         private Label _natFuelStock, _natFoodStock, _natElecStock;
 
-
-        // Doctrine
-        private Label _doctrineDesc;
+private Label _doctrineDesc;
         private Label _postureLabel;
         private VisualElement _postureIcon;
         private string _currentPosture = "DETERRENCE";
@@ -119,7 +110,6 @@ namespace StateCraft.UI
             _tabWeapons = root.Q<Button>("TabWeapons");
             _tabBases = root.Q<Button>("TabBases");
             _tabOps = root.Q<Button>("TabOperations");
-            // TabProjects has no button in the nav bar UXML — _tabProjects stays null (safe; SwitchTab null-checks)
             _tabLogistics = root.Q<Button>("TabLogistics");
             _tabBudget = root.Q<Button>("TabBudget");
 
@@ -133,8 +123,6 @@ namespace StateCraft.UI
             _panelBudget = root.Q<VisualElement>("PanelBudget");
 
             _allPanels.Clear();
-            // Order matches nav button order: Forces(0) Recruit(1) Weapons(2) Bases(3) Ops(4) Logistics(5) Budget(6)
-            // _panelProjects is still queryable but excluded here — no TabProjects nav button exists
             _allPanels.AddRange(new[] { _panelForces, _panelRecruit, _panelWeapons, _panelBases, _panelOps, _panelLogistics, _panelBudget });
 
             InitializeWeapons(root);
@@ -149,9 +137,7 @@ namespace StateCraft.UI
             _tabLogistics.clicked += () => SwitchTab(5);
             _tabBudget.clicked += () => SwitchTab(6);
 
-
-            // Header
-            _headerCountryName = root.Q<Label>("CountryName");
+_headerCountryName = root.Q<Label>("CountryName");
             _headerFirepower = root.Q<Label>("HdrMilRank");
             _headerTotalPersonnel = root.Q<Label>("HdrPersonnel");
             _headerBudget = root.Q<Label>("HdrDefBudget") ?? root.Q<Label>("HeaderMilBudget");
@@ -161,7 +147,6 @@ namespace StateCraft.UI
             _threatLevelBadge = root.Q<Label>("ThreatLevelBadge");
             _headerKIA = root.Q<Label>("HeaderKIA");
 
-            // Containers
             _generalsContainer = root.Q<ScrollView>("GeneralsContainer");
             _blockadesContainer = root.Q<ScrollView>("BlockadesContainer");
 
@@ -197,7 +182,6 @@ namespace StateCraft.UI
             _wmdStatusLabel = root.Q<Label>("WMDStatusLabel");
             _wmdOperationalBadge = root.Q<Label>("WMDOperationalBadge");
 
-            // Logistics
             _fuelBar = root.Q<ProgressBar>("FuelBar");
             _ammoBar = root.Q<ProgressBar>("AmmoBar");
             _medicalBar = root.Q<ProgressBar>("MedicalBar");
@@ -222,16 +206,13 @@ namespace StateCraft.UI
             var btnBuyFood = root.Q<Button>("BtnBuyFood");
             if (btnBuyFood != null) btnBuyFood.clicked += () => BuyLogistics("FOOD", 0.02f);
 
-
-            // Doctrine
-            _doctrineDesc = root.Q<Label>("PostureDesc");
+_doctrineDesc = root.Q<Label>("PostureDesc");
             _postureLabel = root.Q<Label>("PostureLabel");
             _postureIcon = root.Q<VisualElement>("PostureIconBg");
             
             var btnChangePosture = root.Q<Button>("BtnChangePosture");
             if (btnChangePosture != null) btnChangePosture.clicked += CyclePosture;
             
-            // Legacy bindings kept for backward compatibility if ever needed
             var oldDef = root.Q<Button>("BtnPostureDefensive");
             if (oldDef != null) oldDef.clicked += () => SetPosture("DEFENSIVE");
             var oldDet = root.Q<Button>("BtnPostureDeterrence");
@@ -242,19 +223,17 @@ namespace StateCraft.UI
             if (oldCoin != null) oldCoin.clicked += () => SetPosture("COIN FOCUS");
 
             var btnLaunchOp = root.Q<Button>("btn-launch-new");
-            if (btnLaunchOp == null) btnLaunchOp = root.Q<Button>("BtnLaunchOp"); // fallback
+            if (btnLaunchOp == null) btnLaunchOp = root.Q<Button>("BtnLaunchOp");
             if (btnLaunchOp != null)
             {
                 btnLaunchOp.clicked += ShowLaunchOpModalNoArgs;
             }
 
-            // Wire inbox button immediately so it always opens, even with no operations
             var btnOpsInbox = root.Q<Button>("btn-inbox");
             if (btnOpsInbox != null) btnOpsInbox.clicked += ShowInboxModal;
 
-            // Map layout link buttons to actual game views
             var btnViewForces = root.Q<Button>("btn-view-forces");
-            if (btnViewForces != null) btnViewForces.clicked += () => SwitchTab(0); // Switch to Forces tab (index 0)
+            if (btnViewForces != null) btnViewForces.clicked += () => SwitchTab(0);
 
             var btnViewOpTypes = root.Q<Button>("btn-view-op-types");
             if (btnViewOpTypes != null) btnViewOpTypes.clicked += ShowLaunchOpModalNoArgs;
@@ -318,23 +297,16 @@ namespace StateCraft.UI
                 else tabs[i].RemoveFromClassList("active-tab");
             }
 
-            // Weapons tab (index 2): wire inner elements now that the panel is
-            // visible. Unity instantiates nested TemplateContainer content during
-            // the first layout pass *after* display changes from None → Flex.
-            // We register a one-shot GeometryChangedEvent so EnsureWeaponsWired
-            // and PopulateWeapons run AFTER that layout pass completes.
             if (index == 2 && _panelWeapons != null)
             {
-                // Try immediately first — may already be wired from a prior visit
                 EnsureWeaponsWired();
                 if (_weaponsWired && GameManager.Instance?.playerCountry != null)
                 {
                     PopulateWeapons(GameManager.Instance.playerCountry);
-                    SwitchWeaponsTab(0); // reset to Arsenal sub-tab
+                    SwitchWeaponsTab(0);
                 }
                 else
                 {
-                    // Not wired yet — wait for the geometry pass to finish
                     EventCallback<GeometryChangedEvent> onLayout = null;
                     onLayout = evt =>
                     {
@@ -350,7 +322,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // Bases tab (index 3): deferred wiring
             if (index == 3 && _panelBases != null)
             {
                 EnsureBasesWired();
@@ -404,7 +375,7 @@ namespace StateCraft.UI
             if (panel != null)
             {
                 panel.style.display = DisplayStyle.Flex;
-                UIStateManager.FixScrollViews(panel); // Fix scrollbars in builds
+                UIStateManager.FixScrollViews(panel);
                 UIStateManager.Instance?.ApplySafeTransition(panel, true, 0.4f);
                 RefreshMilitaryData();
             }
@@ -432,7 +403,6 @@ namespace StateCraft.UI
             
             if (_headerCountryName != null) _headerCountryName.text = country.countryName.ToUpper();
             
-            // Fix dynamic branch names in tabs
             var rctArmy = _root?.Q<Label>("RecruitLblArmyName");
             if (rctArmy != null) rctArmy.text = $"The {country.countryName} Army";
             var rctAF = _root?.Q<Label>("RecruitLblAirForceName");
@@ -450,9 +420,6 @@ namespace StateCraft.UI
             var basesSub = _root?.Q<Label>("BasesLblSubtitle");
             if (basesSub != null) basesSub.text = $"Build, manage and upgrade military bases across {country.countryName} and abroad.";
 
-            // --- Auto-Sync Healer ---
-            // Corrects legacy save-state discrepancies where older bugged code
-            // drained specific units but not the branch stats, or vice versa.
             int armyDeployed = 0;
             int rdfDeployed = 0;
             int afDeployed = 0;
@@ -487,11 +454,9 @@ namespace StateCraft.UI
                 }
             }
 
-            // Unify the stats! The actual units + the deployed units = total branch size.
             country.armyStats.personnel = country.unitInfantry + armyDeployed;
             country.rdfStats.personnel = Mathf.Max(country.rdfStats.personnel, rdfDeployed);
 
-            // Sync Air Force and Navy personnel from militaryState (set by MilitaryManager on tick)
             var ms = country.militaryState;
             if (ms != null)
             {
@@ -510,7 +475,6 @@ namespace StateCraft.UI
                 $"AF={country.airForceStats.personnel}, Navy={country.navyStats.personnel}, " +
                 $"ActiveOps={country.activeOperations?.Count ?? 0}");
 
-            // Toggle shortage alert badge globally!
             var shortageBadge = _root?.Q<Label>("ShortageAlertBadge");
             bool isWeaponsShortage = country.unitRifles < country.armyStats.personnel;
             if (shortageBadge != null)
@@ -545,7 +509,6 @@ namespace StateCraft.UI
                 _threatLevelBadge.style.borderRightColor = stageColor;
             }
 
-            // ── Top Bar KPIs ──────────────────────────────────────────
             var hdrRank = _headerFirepower ?? _dashboardRoot?.Q<Label>("HdrMilRank") ?? _root?.Q<Label>("HdrMilRank");
             if (hdrRank != null)
             {
@@ -676,13 +639,7 @@ namespace StateCraft.UI
             PopulateSupplyRoutes(country);
         }
 
-
-
-
-
-
-
-        private float CalculateFrontPower(CountryDataSO country, string enemyName)
+private float CalculateFrontPower(CountryDataSO country, string enemyName)
         {
             float power = 0f;
             if (country.activeOperations == null) return power;
@@ -699,11 +656,7 @@ namespace StateCraft.UI
             return power;
         }
 
-
-
-
-
-        private static List<MilitaryOperation> GenerateAmbientOperations(CountryDataSO c, GameManager gm)
+private static List<MilitaryOperation> GenerateAmbientOperations(CountryDataSO c, GameManager gm)
         {
             var list = new List<MilitaryOperation>();
             foreach (var region in c.regions)
@@ -732,43 +685,7 @@ namespace StateCraft.UI
             return list;
         }
 
-
-
-        // ─────────────────────────────────────────────────────────────────────
-        // STRATEGIC PROJECTS TAB
-        // ─────────────────────────────────────────────────────────────────────
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // ══════════════════════════════════════════════════════════════
-        // NEW OPERATIONS TAB DATA POPULATION
-        // ══════════════════════════════════════════════════════════════
-
-
-
-
-
-
-
-        // ── Operations Tab Helpers & Enums ──
-        public enum ThreatLevel  { High, Medium, Low }
+public enum ThreatLevel  { High, Medium, Low }
         public enum OpType       { CounterTerror, Peacekeeping, BorderPatrol, AirRecon, AirStrike, Maritime, NavalBombardment, HvtCapture }
         public enum FeedColour   { Green, Yellow, Red }
 
@@ -864,8 +781,7 @@ namespace StateCraft.UI
             return "feed-item__dot--red";
         }
 
-
-        private Label AddImpactStat(VisualElement parent, string titleText, string initialVal)
+private Label AddImpactStat(VisualElement parent, string titleText, string initialVal)
         {
             var box = new VisualElement();
             box.style.flexDirection = FlexDirection.Column;

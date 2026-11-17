@@ -12,18 +12,13 @@ namespace StateCraft.UI
 {
     public partial class EconomyDashboardController
     {
-        // ── State ─────────────────────────────────────────────────────────────
 
-        /// <summary>Active blueprint category filter. "ALL" means no filter.</summary>
         private string _blueprintFilter = "ALL";
 
-        /// <summary>Cached reference to the live blueprint grid — resolved once from _panelConstruction.</summary>
         private VisualElement _liveBlueprintGrid;
 
-        /// <summary>Cached reference to the blueprint filter tab bar.</summary>
         private VisualElement _blueprintTabBar;
 
-        /// <summary>True once filter tab click events have been wired.</summary>
         private bool _constructionTabWired = false;
 
         private void SyncProjectsSidePanel()
@@ -41,11 +36,8 @@ namespace StateCraft.UI
             wrapper.style.display = (showProj || showAdv) ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
-        // ── Initialisation ────────────────────────────────────────────────────
-
-        internal void InitConstructionTab()
+internal void InitConstructionTab()
         {
-            // Use _panelConstruction, NOT _root
             if (_panelConstruction == null) return;
 
             _liveBlueprintGrid = _panelConstruction.Q<VisualElement>("LiveBlueprintGrid");
@@ -63,7 +55,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // Close button in the side panel
             var closeBtn = _panelConstruction.Q<Button>(className: "projects-close-btn");
             if (closeBtn != null)
             {
@@ -76,17 +67,10 @@ namespace StateCraft.UI
             }
         }
 
-        // ── Tab Refresh ───────────────────────────────────────────────────────
-
-        /// <summary>
-        /// Full refresh of PanelConstruction — KPIs, active project cards, blueprint library.
-        /// Called by RefreshDisplay() every turn, and by SwitchTab(4) when the tab is opened.
-        /// </summary>
-        private void RefreshProjectsTab(CountryDataSO country, string sym)
+private void RefreshProjectsTab(CountryDataSO country, string sym)
         {
             if (country == null || _panelConstruction == null) return;
 
-            // ── KPI Strip ────────────────────────────────────────────────────
             float monthlySpend   = 0f;
             int   pipelineCount  = 0;
             float gdpBoost       = 0f;
@@ -106,7 +90,6 @@ namespace StateCraft.UI
 
             float avgCompletion = pipelineCount > 0 ? totalMonthsSum / pipelineCount : 0f;
 
-            // Query labels directly from _panelConstruction — avoids display:none blindness
             PanelSetLabel("ProjectsKPI_Count",         pipelineCount.ToString());
             PanelSetLabel("ProjectsKPI_MonthlyCost",   UiFormat.Money(monthlySpend, sym));
             PanelSetLabel("ProjectsKPI_GDPBoost",      $"+{gdpBoost:F1}%");
@@ -114,7 +97,6 @@ namespace StateCraft.UI
             PanelSetLabel("ProjectsKPI_AvgCompletion", $"{avgCompletion:F1} Months");
             PanelSetLabel("ProjectsActiveHeading",     $"ACTIVE PROJECTS ({pipelineCount})");
 
-            // Adviser
             var advCard = _panelConstruction?.Q<VisualElement>("ProjectsAdviserCard");
             if (_currentAdviserRec.HasValue)
             {
@@ -127,7 +109,6 @@ namespace StateCraft.UI
             }
             SyncProjectsSidePanel();
 
-            // Legacy hidden summary element
             if (_constructionSummary != null)
             {
                 _constructionSummary.Clear();
@@ -136,7 +117,6 @@ namespace StateCraft.UI
                     { style = { color = Color.white, fontSize = 10 } });
             }
 
-            // ── Active Project Cards ─────────────────────────────────────────
             var grid = _panelConstruction.Q<ScrollView>("ProjectsActiveGrid");
             Debug.Log($"[Construction] ProjectsActiveGrid found: {grid != null} | activeProjects: {country.activeProjects?.Count ?? -1}");
 
@@ -163,14 +143,10 @@ namespace StateCraft.UI
                 }
             }
 
-            // ── Blueprint Library ────────────────────────────────────────────
             RebuildBlueprintGrid(country, sym);
         }
 
-        // ── Active Project Cards ──────────────────────────────────────────────
-
-        /// <summary>Overload for legacy call sites that don't pass country.</summary>
-        private void AddConstructionProjectCard(VisualElement container, ActiveProject p, string sym)
+private void AddConstructionProjectCard(VisualElement container, ActiveProject p, string sym)
             => AddConstructionProjectCard(container, GameManager.Instance?.playerCountry, p, sym);
 
         private void AddConstructionProjectCard(VisualElement container, CountryDataSO country, ActiveProject p, string sym)
@@ -221,7 +197,6 @@ namespace StateCraft.UI
             card.Add(new Label(stageBadge)
                 { style = { color = new Color(255f/255f, 171f/255f, 64f/255f), fontSize = 7, marginTop = 4 } });
 
-            // ── Click → populate side panel ───────────────────────────────────
             var capturedP    = p;
             var capturedSym  = sym;
             var capturedDesc = desc;
@@ -264,9 +239,7 @@ namespace StateCraft.UI
             container.Add(card);
         }
 
-        // ── Blueprint Library ─────────────────────────────────────────────────
-
-        private void SetBlueprintFilter(string filter)
+private void SetBlueprintFilter(string filter)
         {
             _blueprintFilter = filter.ToUpperInvariant();
 
@@ -289,7 +262,6 @@ namespace StateCraft.UI
 
         private void RebuildBlueprintGrid(CountryDataSO country, string sym)
         {
-            // Always resolve from _panelConstruction — never from _root
             _liveBlueprintGrid = _panelConstruction?.Q<VisualElement>("LiveBlueprintGrid");
             Debug.Log($"[Construction] RebuildBlueprintGrid | _liveBlueprintGrid: {_liveBlueprintGrid != null} | _panelConstruction: {_panelConstruction != null}");
 
@@ -385,9 +357,7 @@ namespace StateCraft.UI
                 PopulateBlueprintCatalog(country);
         }
 
-        // ── Commission Action ─────────────────────────────────────────────────
-
-        private void CommissionBlueprintFromCard(BlueprintDataSO bp)
+private void CommissionBlueprintFromCard(BlueprintDataSO bp)
         {
             var country = GameManager.Instance?.playerCountry;
             if (country == null || bp == null) return;
@@ -419,7 +389,6 @@ namespace StateCraft.UI
                 });
         }
 
-        /// <summary>Legacy name-based entry point (used by HandleEconomyAction).</summary>
         private void CommissionBlueprint(string blueprintName)
         {
             var country = GameManager.Instance?.playerCountry;
@@ -437,9 +406,7 @@ namespace StateCraft.UI
                 "No matching blueprint exists in the database.", "OK", null);
         }
 
-        // ── Legacy helpers (kept for compatibility) ───────────────────────────
-
-        private void ToggleBlueprints()
+private void ToggleBlueprints()
         {
             _blueprintsVisible = !_blueprintsVisible;
             ApplyBlueprintVisibility();
@@ -567,9 +534,7 @@ namespace StateCraft.UI
             _constructionCardsContainer.Add(row);
         }
 
-        // ── Private Utilities ─────────────────────────────────────────────────
-
-        private static bool IsActivePipelineStage(ProjectStage stage)
+private static bool IsActivePipelineStage(ProjectStage stage)
             => stage == ProjectStage.Planned ||
                stage == ProjectStage.Funded  ||
                stage == ProjectStage.UnderConstruction;
@@ -632,7 +597,6 @@ namespace StateCraft.UI
             return new Color(0f, 210f/255f, 1f);
         }
 
-        /// <summary>Set a label's text by querying from _panelConstruction (not _root).</summary>
         private void PanelSetLabel(string name, string text)
         {
             if (_panelConstruction?.Q<Label>(name) is Label lbl) lbl.text = text;

@@ -1,20 +1,3 @@
-// ============================================================
-// FILE: Scripts/Systems/VictorySystem.cs  (NEW FILE)
-// PURPOSE: One clear win condition.
-//   Win by reaching PRESTIGE TARGET (100 pts) or
-//   REGIONAL DOMINANCE (highest prestige + allied majority).
-//   Lose by nation collapse (stability 0 for 3 months).
-//
-// INTEGRATION:
-//   1. Add field in GameManager:
-//      public VictorySystem VictorySystem { get; private set; }
-//
-//   2. In InitializeSystems():
-//      VictorySystem = new VictorySystem();
-//
-//   3. In ProcessMonth(), at the very end of the player country block:
-//      VictorySystem.CheckVictory(playerCountry, allCountries, TurnSystem.CurrentTurn);
-// ============================================================
 
 using StateCraft.Data;
 using StateCraft.Core;
@@ -27,26 +10,22 @@ namespace StateCraft.Systems
 {
     public class VictorySystem
     {
-        // ── Tuning constants ─────────────────────────────────
-        private const float PRESTIGE_WIN_TARGET    = 100f;   // reach this prestige to trigger victory check
-        private const int   PRESTIGE_LEAD_MONTHS   = 6;      // must hold lead for 6 consecutive months
-        private const int   DOMINATED_ALLY_COUNT   = 4;      // need ≥4 allied nations for dominance win
-        private const int   COLLAPSE_MONTHS        = 3;      // stability=0 for 3 months → game over
+        private const float PRESTIGE_WIN_TARGET    = 100f;
+        private const int   PRESTIGE_LEAD_MONTHS   = 6;
+        private const int   DOMINATED_ALLY_COUNT   = 4;
+        private const int   COLLAPSE_MONTHS        = 3;
 
-        // ── Tracking state ────────────────────────────────────
         private int   _prestigeLeadMonths      = 0;
         private int   _collapseMonths          = 0;
         private bool  _victoryAnnounced        = false;
         private bool  _defeatAnnounced         = false;
-        private int   _bankruptcyWarningMonths = 0; // consecutive months near default
+        private int   _bankruptcyWarningMonths = 0;
 
-        // ── Score record shown in UI ──────────────────────────
         public float  CurrentPrestige   { get; private set; }
         public int    AllyCount         { get; private set; }
         public string VictoryStatus     { get; private set; } = "In Progress";
-        public float  ProgressToWin     { get; private set; }  // 0-1
+        public float  ProgressToWin     { get; private set; }
 
-        // ── Main check (call monthly for player country) ──────
         public void CheckVictory(CountryDataSO player,
                                  List<CountryDataSO> allCountries,
                                  int currentMonth)
@@ -55,7 +34,6 @@ namespace StateCraft.Systems
 
             var gm = GameManager.Instance;
 
-            // ─── DEFEAT: Nation collapse ──────────────────────
             if (player.stability <= 3f)
             {
                 _collapseMonths++;
@@ -72,9 +50,6 @@ namespace StateCraft.Systems
                 _collapseMonths = 0;
             }
 
-            // ─── DEFEAT: Bankruptcy ───────────────────────────
-            // Grace: treasury must be below -100B AND rating D for 3 consecutive months.
-            // This prevents a 2-month game-over from unavoidable startup deficits.
             if (player.treasury < -100f && player.creditRating == "D")
             {
                 _bankruptcyWarningMonths++;
@@ -98,12 +73,9 @@ namespace StateCraft.Systems
                 _bankruptcyWarningMonths = 0;
             }
 
-            // ─── VICTORY CONDITIONS ───────────────────────────
             CurrentPrestige = player.globalPrestige;
             AllyCount       = CountAllies(player, allCountries, gm);
 
-            // Condition A: Prestige Target
-            // Must be highest-prestige nation AND above 100 for 6 months
             bool isLeading = IsPrestigeLeader(player, allCountries);
             bool aboveTarget = player.globalPrestige >= PRESTIGE_WIN_TARGET;
 
@@ -141,8 +113,6 @@ namespace StateCraft.Systems
                               + Mathf.Clamp01(AllyCount / (float)DOMINATED_ALLY_COUNT)    * 0.5f;
             }
 
-            // Condition B: Regional Dominance
-            // Reach 4+ allied nations while holding the prestige lead
             if (isLeading && AllyCount >= DOMINATED_ALLY_COUNT)
             {
                 AnnounceVictory(player, gm, currentMonth,
@@ -152,7 +122,6 @@ namespace StateCraft.Systems
                 return;
             }
 
-            // ── Intermediate notifications ────────────────────
             if (player.globalPrestige >= 80f && player.globalPrestige < 100f && currentMonth % 6 == 0)
             {
                 UI.NotificationManager.Instance?.AddNotification(
@@ -162,7 +131,6 @@ namespace StateCraft.Systems
             }
         }
 
-        // ── Helpers ───────────────────────────────────────────
         private bool IsPrestigeLeader(CountryDataSO player, List<CountryDataSO> all)
         {
             foreach (var c in all)
@@ -263,13 +231,7 @@ namespace StateCraft.Systems
             if (gm != null) gm.TriggerGameOver(false, "GOVERNMENT COLLAPSED", reason, stats);
         }
 
-
-        // ── Public: Prestige adjustments (called from other systems) ──
-        /// <summary>
-        /// Central method to adjust prestige with a reason logged to news.
-        /// Call this from WarSystem.EndWar, DiplomacySystem.SignTradeDeal, etc.
-        /// </summary>
-        public static void AwardPrestige(CountryDataSO country, float amount, string reason)
+public static void AwardPrestige(CountryDataSO country, float amount, string reason)
         {
             country.globalPrestige = Mathf.Clamp(country.globalPrestige + amount, 0f, 150f);
 
@@ -284,24 +246,3 @@ namespace StateCraft.Systems
     }
 }
 
-// ============================================================
-// PRESTIGE AWARD HOOKS — paste these into existing systems:
-//
-// WarSystem.EndWar() — after winner is determined:
-//   if (outcome.Contains("Victory"))
-//   {
-//       var winner = outcome.Contains(a.countryName) ? a : b;
-//       VictorySystem.AwardPrestige(winner, +15f, $"Won war against {(winner==a?b:a).countryName}");
-//       VictorySystem.AwardPrestige(winner==a?b:a, -10f, $"Defeated in war");
-//   }
-//
-// DiplomacySystem.SignTradeDeal():
-//   VictorySystem.AwardPrestige(seller, +2f, "Signed trade deal");
-//   VictorySystem.AwardPrestige(buyer,  +1f, "Secured resource supply");
-//
-// DiplomacySystem.FundProxyInsurgency() — if exposed:
-//   VictorySystem.AwardPrestige(sponsor, -15f, "Caught funding insurgency");
-//
-// EventSystem.ApplyEventOutcome() — if stability gained:
-//   if (stability > 0) VictorySystem.AwardPrestige(country, +1f, "Crisis resolved well");
-// ============================================================

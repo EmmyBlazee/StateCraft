@@ -8,7 +8,6 @@ namespace StateCraft.Systems
 {
     public class EconomySystem : IEconomySystem
     {
-        // Credit rating only degrades after sustained stress, not every single bad month.
         private int _debtStressMonths = 0;
 
         public void UpdateEconomy(CountryDataSO country)
@@ -18,17 +17,13 @@ namespace StateCraft.Systems
             if (float.IsNaN(country.treasury) || float.IsInfinity(country.treasury)) country.treasury = 0f;
             if (float.IsNaN(country.stability) || float.IsInfinity(country.stability)) country.stability = 50f;
 
-            // Calculate dynamic military upkeep based on active forces
             country.militaryUpkeepUSD = country.CalculateMilitaryUpkeep();
 
-            // Reset income based on base values + policies
             country.income = CalculateProjectedIncome(country);
 
-            // Subsidies are a direct cost based on GDP (applied monthly)
             float subsidyCost = (country.gdp / 12f) * (country.subsidyLevel / 100f);
             float uraniumImportFee = country.isImportingUranium ? 0.05f : 0f;
 
-            // Check for underfunded military
             if (country.militaryUpkeepUSD > country.militaryBudgetUSD)
             {
                 country.militaryReadiness = Mathf.Max(0f, country.militaryReadiness - 2f);
@@ -41,10 +36,8 @@ namespace StateCraft.Systems
                 country.militaryReadiness = Mathf.Min(100f, country.militaryReadiness + 0.5f);
             }
 
-            // Deduct mandatory background operations from income
             country.income -= (subsidyCost + uraniumImportFee);
 
-            // ── Tax Gap → Arrears Accumulation ───────────────────────────────────
             {
                 float fullRevenue     = EconomyLogicEvaluator.GetTotalTaxRevenue(country);
                 float compliancePct   = Mathf.Clamp(100f - country.corruptionIndex, 10f, 100f);
@@ -53,7 +46,6 @@ namespace StateCraft.Systems
                 float monthlyGap      = Mathf.Max(0f, fullRevenue - actualCollected);
                 country.taxArrears   += monthlyGap;
 
-                // High unpaid arrears erode credit rating — but only after 3 consecutive stressed months
                 float gdpMonthly = country.gdp / 12f;
                 if (gdpMonthly > 0f && (country.taxArrears / gdpMonthly) > 0.20f)
                 {
@@ -70,38 +62,30 @@ namespace StateCraft.Systems
                 }
             }
 
-            // Apply Policy Effects
             foreach (var policy in country.activePolicies)
             {
                 country.income -= policy.recurringCost;
                 if (policy.type == PolicyType.Economy)
                 {
-                    // Economy policies affect GDP growth
                 }
             }
 
-            // Add policy impacts on growth
             float growthRate = country.gdpGrowthRate * (country.stability / 100f);
 
-            // Monetary Policy (Interest Rate) Impact on GDP Growth
             if (country.centralBankInterestRate > 6f)
                 growthRate -= (country.centralBankInterestRate - 6f) * 0.001f;
             else if (country.centralBankInterestRate < 4f)
                 growthRate += (4f - country.centralBankInterestRate) * 0.001f;
 
-            // Trade Policy (Import Tariff) Impact on GDP Growth
             if (country.importTariffRate > 15f)
                 growthRate -= (country.importTariffRate - 15f) * 0.0005f;
 
-            // Infrastructure Growth Boost
             growthRate += (country.airportLevel * 0.002f) + (country.roadLevel * 0.001f) + (country.educationLevel * 0.0015f);
             growthRate += (country.healthcareLevel * 0.0005f);
 
-            // ELECTRICITY IMPACT
             if (country.electricityLevel < 40f) growthRate -= 0.02f;
             else if (country.electricityLevel > 80f) growthRate += 0.01f;
 
-            // 1. Taxation Ripple
             if (country.taxRate > 25f)
             {
                 float penalty = (country.taxRate - 25f) * 0.01f;
@@ -114,7 +98,6 @@ namespace StateCraft.Systems
                 growthRate += (15f - country.taxRate) * 0.002f;
             }
 
-            // 2. Welfare Ripple
             if (country.subsidyLevel > 5f)
             {
                 country.stability = Mathf.Min(100f, country.stability + (country.subsidyLevel - 5f) * 0.2f);
@@ -128,7 +111,6 @@ namespace StateCraft.Systems
             if (float.IsNaN(growthRate) || float.IsInfinity(growthRate)) growthRate = 0.001f;
             country.gdp *= (1f + growthRate);
 
-            // Inflation calculation
             if (country.gdp > 0 && !float.IsNaN(country.gdp))
             {
                 float debtRatio = country.debt / country.gdp;
@@ -148,7 +130,6 @@ namespace StateCraft.Systems
 
             country.inflationRate = Mathf.Clamp(country.inflationRate, 0f, 2.0f);
 
-            // --- DEMOGRAPHICS & PRODUCTION ---
             long oldPopulation = country.population;
             float popGrowthModifier = country.populationGrowthRate / 12f;
             if (country.taxRate > 25f) popGrowthModifier -= (country.taxRate - 25f) * 0.0001f;
@@ -162,7 +143,6 @@ namespace StateCraft.Systems
             ProcessTradeAgreements(country);
             ProcessDebtService(country);
 
-            // --- SCARCITY PENALTY (EMBARGO/ISOLATION) ---
             if (country.resources != null)
             {
                 bool hasOilScarcity = true;
@@ -195,13 +175,10 @@ namespace StateCraft.Systems
                 }
             }
 
-            // --- EXCHANGE RATE DYNAMICS ---
             UpdateExchangeRate(country);
 
-            // --- CONSTRUCTION PROJECTS ---
             ProcessConstructionProjects(country);
 
-            // ── Build the ledger entry for this month ─────────────────────────────
             var gm = GameManager.Instance;
             if (gm?.Ledger != null && country == gm.playerCountry)
             {
@@ -468,7 +445,6 @@ namespace StateCraft.Systems
 
             if (principalRatio <= 0f)
             {
-                // Skipping payments — mild penalty; credit degrades only after 2 consecutive skips
                 country.stability = Mathf.Max(0f, country.stability - 0.5f);
                 _debtStressMonths++;
                 if (_debtStressMonths >= 2) { country.creditRating = DegradeRating(country.creditRating); _debtStressMonths = 0; }
@@ -486,11 +462,10 @@ namespace StateCraft.Systems
                 country.foreignDebt  = Mathf.Max(0f, country.foreignDebt  - principalRepaymentUSD * (country.foreignDebt  / totalDebt));
                 country.debt = country.domesticDebt + country.foreignDebt;
                 if (principalRatio >= 1.2f) country.creditRating = ImproveRating(country.creditRating);
-                _debtStressMonths = Mathf.Max(0, _debtStressMonths - 1); // stress recedes on clean payment
+                _debtStressMonths = Mathf.Max(0, _debtStressMonths - 1);
             }
             else
             {
-                // Only degrade credit after 2 consecutive failures — not every single missed payment
                 _debtStressMonths++;
                 if (_debtStressMonths >= 2)
                 {
@@ -543,7 +518,6 @@ namespace StateCraft.Systems
                         country.treasury -= monthlyCost;
                         project.monthsRemaining--;
 
-                        // Corruption risk
                         if (country.corruptionIndex > 40f && UnityEngine.Random.value > 0.8f)
                         {
                             project.monthsRemaining++;

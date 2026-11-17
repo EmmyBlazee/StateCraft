@@ -24,14 +24,12 @@ namespace StateCraft.Map
 
         private void Update()
         {
-            // Simple pulse effect for unstable countries
-            float pulse = (Mathf.Sin(Time.time * 2f) + 1f) / 2f; // 0 to 1 pulse
+            float pulse = (Mathf.Sin(Time.time * 2f) + 1f) / 2f;
 
             foreach (var country in countryControllers)
             {
                 if (country.countryData == null) continue;
 
-                // If stability is dangerously low, pulse the color
                 if (country.countryData.stability < 30f)
                 {
                     var renderer = country.GetComponent<SpriteRenderer>();

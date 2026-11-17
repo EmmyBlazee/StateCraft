@@ -5,14 +5,8 @@ using StateCraft.UI;
 
 namespace StateCraft.Systems
 {
-    /// <summary>
-    /// GameCommunicator — fires contextual briefings to the player
-    /// at key moments so the game never goes silent.
-    /// Called from GameManager.ProcessTurn() each turn.
-    /// </summary>
     public static class GameCommunicator
     {
-        // Track what we've already told the player to avoid spam
         private static float _lastGdpWarning     = -1f;
         private static float _lastStabilityWarn  = -1f;
 
@@ -28,13 +22,11 @@ namespace StateCraft.Systems
             CheckPopulation(country, currentTurn);
         }
 
-        // ── Economy ──────────────────────────────────────────────
         static void CheckEconomy(CountryDataSO c, int turn)
         {
             var gm = GameManager.Instance;
             if (gm == null) return;
 
-            // Treasury going negative
             if (gm.playerBudget < 0.1f && (int)_lastGdpWarning != turn)
             {
                 _lastGdpWarning = turn;
@@ -51,7 +43,6 @@ namespace StateCraft.Systems
                     $"If the treasury hits zero, we cannot pay our troops, fund operations, or service our debt.", "Critical");
             }
 
-            // Inflation out of control
             if (c.inflationRate > 25f && turn % 5 == 0)
             {
                 NotificationManager.Instance?.AddNotification(
@@ -60,7 +51,6 @@ namespace StateCraft.Systems
                     new Color(1f, 0.6f, 0.1f));
             }
 
-            // Exchange rate crash
             if (c.exchangeRate > 2000f && turn % 4 == 0)
             {
                 NotificationManager.Instance?.AddNotification(
@@ -69,7 +59,6 @@ namespace StateCraft.Systems
                     new Color(1f, 0.5f, 0f));
             }
 
-            // GDP is zero (uninitialized data)
             if (c.gdp <= 0.01f && turn == 1)
             {
                 NotificationManager.Instance?.AddNotification(
@@ -77,7 +66,6 @@ namespace StateCraft.Systems
                     Color.yellow);
             }
 
-            // Trade surplus/deficit
             if (c.income > 0f && turn % 6 == 0)
             {
                 string trend = c.income > c.spending ? "SURPLUS" : "DEFICIT";
@@ -88,7 +76,6 @@ namespace StateCraft.Systems
             }
         }
 
-        // ── Stability ─────────────────────────────────────────────
         static void CheckStability(CountryDataSO c, int turn)
         {
             if (c.stability < 20f && (int)_lastStabilityWarn != turn)
@@ -119,7 +106,6 @@ namespace StateCraft.Systems
                     new Color(1f, 0.7f, 0.2f));
             }
 
-            // Regional instability spikes
             if (c.regions != null)
             {
                 foreach (var region in c.regions)
@@ -135,10 +121,8 @@ namespace StateCraft.Systems
             }
         }
 
-        // ── Military ──────────────────────────────────────────────
         static void CheckMilitary(CountryDataSO c, int turn)
         {
-            // No troops at all
             if (c.unitInfantry < 1000 && c.unitTanks < 10 && turn % 6 == 0)
             {
                 NotificationManager.Instance?.AddNotification(
@@ -147,7 +131,6 @@ namespace StateCraft.Systems
                     new Color(1f, 0.6f, 0.1f));
             }
 
-            // No air force
             if (c.unitFighters < 5 && c.unitBombers < 2 && turn % 8 == 0)
             {
                 NotificationManager.Instance?.AddNotification(
@@ -156,7 +139,6 @@ namespace StateCraft.Systems
                     Color.yellow);
             }
 
-            // Supply reserves low outside of war (remind to restock)
             if (c.reserveAmmo < 50f && !IsAtWar(c) && turn % 5 == 0)
             {
                 NotificationManager.Instance?.AddNotification(
@@ -165,7 +147,6 @@ namespace StateCraft.Systems
                     Color.yellow);
             }
 
-            // Troops with no operations running
             if (c.unitInfantry > 10000 && (c.activeCovertOps == null || c.activeCovertOps.Count == 0) &&
                 !IsAtWar(c) && turn % 10 == 0)
             {
@@ -176,10 +157,8 @@ namespace StateCraft.Systems
             }
         }
 
-        // ── Diplomacy ─────────────────────────────────────────────
         static void CheckDiplomacy(CountryDataSO c, int turn)
         {
-            // No alliances at all after many turns
             if (c.allianceCount == 0 && turn == 15)
             {
                 NotificationManager.Instance?.AddNotification(
@@ -188,7 +167,6 @@ namespace StateCraft.Systems
                     new Color(0.4f, 0.8f, 1f));
             }
 
-            // No active trade deals
             if ((c.activeTradeAgreements == null || c.activeTradeAgreements.Count == 0) && turn == 6)
             {
                 NotificationManager.Instance?.AddNotification(
@@ -197,7 +175,6 @@ namespace StateCraft.Systems
                     Color.yellow);
             }
 
-            // Sanctions on you (sanctionsReceived)
             if (c.sanctionReceivedCount > 0 && turn % 5 == 0)
             {
                 NotificationManager.Instance?.AddNotification(
@@ -206,7 +183,6 @@ namespace StateCraft.Systems
                     new Color(1f, 0.5f, 0.5f));
             }
 
-            // Prestige very low
             if (c.globalPrestige < 10f && turn % 4 == 0)
             {
                 NotificationManager.Instance?.AddNotification(
@@ -216,10 +192,9 @@ namespace StateCraft.Systems
             }
         }
 
-        // ── Prestige milestones ───────────────────────────────────
         static void CheckPrestige(CountryDataSO c, int turn)
         {
-            if (turn % 12 != 0) return; // Annual check
+            if (turn % 12 != 0) return;
 
             string rank = c.globalPrestige >= 80f ? "REGIONAL POWER" :
                           c.globalPrestige >= 60f ? "RESPECTED NATION" :
@@ -247,12 +222,10 @@ namespace StateCraft.Systems
                 "Standard");
         }
 
-        // ── Population ────────────────────────────────────────────
         static void CheckPopulation(CountryDataSO c, int turn)
         {
             if (turn % 6 != 0) return;
 
-            // Population growth notification
             if (c.population > 0)
             {
                 long pop = (long)c.population;

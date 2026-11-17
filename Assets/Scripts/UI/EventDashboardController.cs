@@ -98,7 +98,6 @@ namespace StateCraft.UI
 
             var pendingEvents = evSys.GetPendingEvents(player);
 
-            // Populate KPIs
             int critical = 0, high = 0, medium = 0;
             foreach(var pEv in pendingEvents)
             {
@@ -119,7 +118,6 @@ namespace StateCraft.UI
             if (_kpiHigh != null) _kpiHigh.text = high.ToString();
             if (_kpiMedium != null) _kpiMedium.text = medium.ToString();
 
-            // Populate Event Cards
             if (_activeEventsList != null)
             {
                 _activeEventsList.Clear();
@@ -146,7 +144,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // Populate Upcoming
             PopulateUpcomingEvents();
         }
 
@@ -158,7 +155,7 @@ namespace StateCraft.UI
             card.style.paddingLeft = 20; card.style.paddingRight = 20; card.style.paddingTop = 20; card.style.paddingBottom = 20;
             card.style.backgroundColor = new Color(0.06f, 0.08f, 0.12f, 0.95f);
             
-            Color sevCol = new Color(255/255f, 82/255f, 82/255f); // Critical Red
+            Color sevCol = new Color(255/255f, 82/255f, 82/255f);
 
             card.style.borderLeftWidth = 3;
             card.style.borderLeftColor = sevCol;
@@ -207,9 +204,9 @@ namespace StateCraft.UI
             card.AddToClassList("premium-card");
             card.style.marginBottom = 16;
             card.style.paddingLeft = 20; card.style.paddingRight = 20; card.style.paddingTop = 20; card.style.paddingBottom = 20;
-            card.style.backgroundColor = new Color(0.12f, 0.08f, 0.16f, 0.95f); // Purple tint
+            card.style.backgroundColor = new Color(0.12f, 0.08f, 0.16f, 0.95f);
             
-            Color sevCol = new Color(0.7f, 0.3f, 1f); // Purple
+            Color sevCol = new Color(0.7f, 0.3f, 1f);
 
             card.style.borderLeftWidth = 3;
             card.style.borderLeftColor = sevCol;
@@ -234,10 +231,10 @@ namespace StateCraft.UI
             btn.style.height = 38;
             btn.style.fontSize = 12;
             btn.RegisterCallback<ClickEvent>(_ => {
-                player.latestElectionResult = ""; // Clear the result
+                player.latestElectionResult = "";
                 
                 if (isDefeat)
-                    Hide(); // Hide dashboard to cleanly transition to Game Over
+                    Hide();
                 else
                     RefreshDashboard();
             });
@@ -258,7 +255,7 @@ namespace StateCraft.UI
             card.style.paddingLeft = 20; card.style.paddingRight = 20; card.style.paddingTop = 20; card.style.paddingBottom = 20;
             card.style.backgroundColor = new Color(0.06f, 0.08f, 0.12f, 0.95f);
             
-            Color sevCol = new Color(241/255f, 196/255f, 15/255f); // Medium
+            Color sevCol = new Color(241/255f, 196/255f, 15/255f);
             if (ev.severity == "Critical") sevCol = new Color(255/255f, 82/255f, 82/255f);
             else if (ev.severity == "High") sevCol = new Color(255/255f, 152/255f, 0/255f);
 
@@ -302,7 +299,6 @@ namespace StateCraft.UI
 
                     btnWrap.Add(btn);
 
-                    // Impacts Box
                     var impactBox = new VisualElement() { style = { flexDirection = FlexDirection.Row, flexWrap = Wrap.Wrap, justifyContent = Justify.Center, marginTop = 4 } };
                     
                     string sym = string.IsNullOrEmpty(player.currencySymbol) ? "₦" : player.currencySymbol;
@@ -332,7 +328,7 @@ namespace StateCraft.UI
             _upcomingEventsList.Clear();
 
             var gm = GameManager.Instance;
-            int monthsUntilElection = 48; // Default fallback
+            int monthsUntilElection = 48;
 
             if (gm != null && gm.TurnSystem != null)
             {
@@ -346,10 +342,8 @@ namespace StateCraft.UI
                                        monthsUntilElection < 12 ? $"{monthsUntilElection} Months" : 
                                        $"{monthsUntilElection / 12}y {monthsUntilElection % 12}m";
 
-            // Add real election event
             AddUpcoming("National Election", electionTimeframe, "Domestic");
 
-            // Budget Review Logic
             int monthsSinceBudget = 0;
             if (gm != null && gm.TurnSystem != null && gm.playerCountry != null)
             {
@@ -366,7 +360,6 @@ namespace StateCraft.UI
                 AddUpcoming("National Budget Review", $"{monthsLeft} Months", "Economy");
             }
 
-            // Mock upcoming events for flavour until their respective systems are built
             AddUpcoming("UN General Assembly", "3 Months", "Global");
             AddUpcoming("Joint Military Exercise", "8 Months", "Military");
         }

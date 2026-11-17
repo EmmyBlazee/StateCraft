@@ -7,8 +7,8 @@ namespace StateCraft.UI
     public class TimeControllerUI : MonoBehaviour
     {
         public TMP_Text dateText;
-        public float fastSpeed = 1f; // Seconds per month in fast mode
-        public float normalSpeed = 5f; // Seconds per month in normal mode
+        public float fastSpeed = 1f;
+        public float normalSpeed = 5f;
 
         [Header("Button Visuals")]
         public UnityEngine.UI.Image pauseIcon;
@@ -19,7 +19,6 @@ namespace StateCraft.UI
 
         private void Start()
         {
-            // Set initial highlight
             HighlightButton(playIcon);
         }
 
@@ -27,7 +26,6 @@ namespace StateCraft.UI
         {
             if (GameManager.Instance == null || dateText == null) return;
 
-            // Update the date display from the GameManager's turn system
             dateText.text = GameManager.Instance.TurnSystem.CurrentDate;
         }
 

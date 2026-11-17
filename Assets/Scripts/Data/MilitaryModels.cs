@@ -5,9 +5,6 @@ using StateCraft.Data;
 
 namespace StateCraft.Systems
 {
-    // ============================================================
-    //  ENUMS
-    // ============================================================
     public enum MilitaryDoctrine
     {
         Defensive = 0,
@@ -28,9 +25,6 @@ namespace StateCraft.Systems
         MajorVictory, MinorVictory, Stalemate, MinorDefeat, MajorDefeat, Routing,
     }
 
-    // ============================================================
-    //  CORE DATA STRUCTURES
-    // ============================================================
     [Serializable]
     public class ArmyPersonnel
     {
@@ -95,7 +89,7 @@ namespace StateCraft.Systems
 
         public void RecalculateEffects(float fleetReadiness, int marines)
         {
-            float eff = fleetReadiness / 100f; // Scale 0-1
+            float eff = fleetReadiness / 100f;
             piraryIncidentReduction = coastalPatrolActive ? eff * 0.7f : 0f;
             tradeRouteProtection = seaTradeProtection ? eff * 0.5f : 0f;
             navalIntelBonus = maritimeMonitoringActive ? eff * 0.4f : 0f;
@@ -186,7 +180,7 @@ namespace StateCraft.Systems
     }
 
     [Serializable]
-    public class RecruitmentPipelineNew // Renamed to avoid collision with legacy
+    public class RecruitmentPipelineNew
     {
         public string personnelType;
         public int count;
@@ -215,9 +209,6 @@ namespace StateCraft.Systems
         public List<RecruitmentPipelineNew> pipelines = new List<RecruitmentPipelineNew>();
     }
 
-    // ============================================================
-    //  CALCULATORS
-    // ============================================================
     public static class AirForceCalculator
     {
         public static int AircraftAvailable(int totalAircraft, int pilots, int groundCrew, int requiredCrewPerAircraft)

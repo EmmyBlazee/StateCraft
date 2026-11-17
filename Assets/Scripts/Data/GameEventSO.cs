@@ -7,7 +7,7 @@ namespace StateCraft.Data
     public class GameEventChoice
     {
         public string choiceText;
-        public float costUSD; // Money removed from treasury
+        public float costUSD;
         public float stabilityEffect;
         public float gdpEffect;
         public float intelEffect;
@@ -28,7 +28,7 @@ namespace StateCraft.Data
     public class GameEventSO : ScriptableObject
     {
         public string eventTitle;
-        public string severity = "Medium"; // Critical, High, Medium, Low
+        public string severity = "Medium";
         public int timeRemainingDays = 7;
         
         [TextArea(3, 10)]

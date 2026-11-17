@@ -19,7 +19,6 @@ namespace StateCraft.UI
             string sym = string.IsNullOrEmpty(country.currencySymbol) ? "₦" : country.currencySymbol;
             float exc = country.exchangeRate;
 
-            // 1. Calculate Base Values based directly on CountryDataSO.CalculateMilitaryUpkeep() logic
             float armyUpkeepLocal = ((country.unitInfantry * 0.0000020f) + (country.unitRifles * 0.0000002f) + (country.unitTanks * 0.000030f) + (country.unitAPCs * 0.000010f) + (country.unitArtillery * 0.000015f)) * exc;
             float airUpkeepLocal = ((country.airForceStats.personnel * 0.000006f) + (country.unitFighters * 0.000150f) + (country.unitBombers * 0.000280f) + (country.unitAttackHelis * 0.000080f) + (country.unitUAVs * 0.000020f)) * exc;
             float navyUpkeepLocal = ((country.navyStats.personnel * 0.000005f) + (country.unitFrigates * 0.000400f) + (country.unitDestroyers * 0.000800f) + (country.unitSubmarines * 0.001000f) + (country.unitPatrolBoats * 0.000040f)) * exc;
@@ -45,12 +44,10 @@ namespace StateCraft.UI
 
             float totalActual = totalStandingActual + operationsCostLocal + procurementCostLocal + supplyContractsCostLocal;
             
-            // Use the exact allocation formula from the Economy Tab
             float totalBudget = Mathf.Max(1f, country.income * (country.budgetMilitaryShare / 100f) * exc);
             float available = totalBudget - totalActual;
             float pctUtil = totalActual / totalBudget;
 
-            // -- TOP KPI ROW --
             var kpiTotal = _panelBudget.Q<VisualElement>("KpiTotal");
             if (kpiTotal != null)
             {
@@ -104,7 +101,6 @@ namespace StateCraft.UI
                 kpiGDP.Add(new Label("Target: 2.0%") { style = { color = Color.grey, fontSize = 9 } });
             }
 
-            // -- MIDDLE ROW: BRANCH ALLOCATION --
             void SetupBranchCard(string eleName, string title, float amt, Color col, string p1, float v1, string p2, float v2, string p3, float v3, string p4, float v4)
             {
                 var card = _panelBudget.Q<VisualElement>(eleName);
@@ -112,7 +108,7 @@ namespace StateCraft.UI
                 card.Clear();
                 
                 var top = new VisualElement() { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 10 } };
-                top.Add(new VisualElement() { style = { width = 16, height = 16, backgroundColor = col, marginRight = 8, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } }); // mock icon
+                top.Add(new VisualElement() { style = { width = 16, height = 16, backgroundColor = col, marginRight = 8, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } });
                 top.Add(new Label(title) { style = { color = Color.white, fontSize = 11, unityFontStyleAndWeight = FontStyle.Bold } });
                 card.Add(top);
 
@@ -153,7 +149,6 @@ namespace StateCraft.UI
             SetupBranchCard("BranchNavy", "NAVY", navyUpkeepLocal, new Color(0.4f, 0.2f, 0.8f), "Fleet Maintenance", 35, "Fuel", 27, "Personnel", 22, "Operations", 16);
             SetupBranchCard("BranchRDF", "RDF", rdfUpkeepLocal, new Color(0.9f, 0.6f, 0f), "Rapid Response", 35, "Training", 25, "Deployment", 20, "Equipment", 20);
 
-            // -- MIDDLE ROW: INDICATORS & HEALTH --
             var indicators = _panelBudget.Q<VisualElement>("IndicatorsContainer");
             if (indicators != null)
             {
@@ -177,17 +172,13 @@ namespace StateCraft.UI
             {
                 health.Clear();
 
-                // Compute holistic Budget Health Score (0 - 100%)
-                // Starts at 100%, penalized if spending exceeds allocated budget, or if military takes an unsustainable % of GDP
                 float healthScore = 100f;
 
-                // Penalty for high budget utilization
                 if (pctUtil > 1.0f)
                     healthScore -= Mathf.Min(60f, (pctUtil - 1.0f) * 100f);
                 else if (pctUtil > 0.85f)
                     healthScore -= (pctUtil - 0.85f) * 100f;
 
-                // Penalty if Defence Budget is over 10% of GDP
                 float pctGdpCalculated = country.gdp > 0 ? ((country.income * (country.budgetMilitaryShare / 100f) * 12f) / country.gdp) * 100f : 0f;
                 if (pctGdpCalculated > 10f)
                 {
@@ -203,7 +194,6 @@ namespace StateCraft.UI
                 else if (healthScore >= 40f) { healthLabel = "FAIR";      ringColor = new Color(1f, 0.7f, 0f); }
                 else                         { healthLabel = "CRITICAL";   ringColor = new Color(1f, 0.3f, 0.3f); }
 
-                // Donut ring displaying actual Fiscal Health Score
                 var dContainer = new VisualElement() { style = {
                     width = 80, height = 80, justifyContent = Justify.Center, alignItems = Align.Center,
                     borderTopWidth = 6, borderBottomWidth = 6, borderLeftWidth = 6, borderRightWidth = 6,
@@ -228,9 +218,7 @@ namespace StateCraft.UI
                 health.Add(r);
             }
 
-
-            // -- BOTTOM ROW: EXPENSES LIST --
-            var expensesList = _panelBudget.Q<VisualElement>("ExpensesScroll");
+var expensesList = _panelBudget.Q<VisualElement>("ExpensesScroll");
             if (expensesList != null)
             {
                 expensesList.Clear();
@@ -238,7 +226,7 @@ namespace StateCraft.UI
                 {
                     var r = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, marginBottom = 14 } };
                     var left = new VisualElement() { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
-                    left.Add(new VisualElement() { style = { width = 12, height = 12, backgroundColor = new Color(1,1,1,0.2f), marginRight = 10, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } }); // mock icon
+                    left.Add(new VisualElement() { style = { width = 12, height = 12, backgroundColor = new Color(1,1,1,0.2f), marginRight = 10, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } });
                     left.Add(new Label(n) { style = { color = Color.white, fontSize = 10, width = 140, paddingTop = 0, paddingBottom = 0, marginTop = 0, marginBottom = 0 } });
                     r.Add(left);
                     
@@ -277,7 +265,6 @@ namespace StateCraft.UI
                 tExpFooter.Add(r);
             }
 
-            // -- BOTTOM ROW: CENTER (OPS & FORECAST) --
             var opsScroll = _panelBudget.Q<VisualElement>("ActiveOpsScroll");
             if (opsScroll != null)
             {
@@ -335,7 +322,6 @@ namespace StateCraft.UI
                 AddFcst("Forecast Confidence", "High", new Color(0.14f, 0.93f, 0.34f));
             }
 
-            // -- BOTTOM ROW: COMMITMENTS --
             var cmtScroll = _panelBudget.Q<VisualElement>("CommitmentsScroll");
             if (cmtScroll != null)
             {

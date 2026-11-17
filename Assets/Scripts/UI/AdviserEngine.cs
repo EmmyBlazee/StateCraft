@@ -4,10 +4,6 @@ using StateCraft.Data;
 
 namespace StateCraft.UI
 {
-    /// <summary>
-    /// Generates context-aware adviser recommendations from live CountryDataSO state.
-    /// Each recommendation carries a real Apply() lambda that mutates country data.
-    /// </summary>
     public static class AdviserEngine
     {
         private const int RecommendationCooldownTurns = 3;
@@ -19,14 +15,13 @@ namespace StateCraft.UI
             public string Rationale;
             public string Benefits;
             public string Risks;
-            public float Cost;           // Treasury cost in Billions (local currency)
-            public int UrgencyScore;     // Higher = shown first
+            public float Cost;
+            public int UrgencyScore;
             public System.Action<CountryDataSO> Apply;
         }
 
         public static string GetEconomicAdviserName(CountryDataSO c)
         {
-            // Future placeholder for actual Cabinet/Minister lookup
             return "Chief Economic Adviser";
         }
 
@@ -34,7 +29,6 @@ namespace StateCraft.UI
         {
             if (c == null) return new Dictionary<string, float>();
 
-            // Base weights adjusted dynamically by crises or national state
             var weights = new Dictionary<string, float>
             {
                 { "MILITARY", c.warTurnsActive > 0 ? 30f : 20f },
@@ -47,7 +41,6 @@ namespace StateCraft.UI
                 { "WELFARE", c.povertyRate > 50f ? 8f : 4f }
             };
 
-            // Normalize weights to 100%
             float total = 0f;
             foreach (var w in weights.Values) total += w;
             var normalized = new Dictionary<string, float>();
@@ -59,29 +52,19 @@ namespace StateCraft.UI
         public static float GetDynamicBorrowAmount(CountryDataSO c)
         {
             if (c == null) return 50f;
-            // Borrow tranche scales with GDP (e.g. 1% of GDP converted to local currency)
             float amt = (c.gdp * 0.01f) * c.exchangeRate;
-            return Mathf.Max(10f, Mathf.Round(amt / 10f) * 10f); // Round to nearest 10
+            return Mathf.Max(10f, Mathf.Round(amt / 10f) * 10f);
         }
 
         public static float GetDynamicRepayAmount(CountryDataSO c)
         {
             if (c == null) return 50f;
-            // Repay tranche scales with total debt
             float debtLocal = c.debt * c.exchangeRate;
             float amt = debtLocal * 0.05f;
-            return Mathf.Max(10f, Mathf.Round(amt / 10f) * 10f); // Round to nearest 10
+            return Mathf.Max(10f, Mathf.Round(amt / 10f) * 10f);
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        // Public API
-        // ─────────────────────────────────────────────────────────────────────
-
-        /// <summary>
-        /// Returns up to <paramref name="maxCount"/> recommendations ranked by urgency,
-        /// excluding any that the player dismissed this session.
-        /// </summary>
-        public static List<AdviserRecommendation> GenerateRecommendations(
+public static List<AdviserRecommendation> GenerateRecommendations(
             CountryDataSO c, int maxCount = 5)
         {
             var results = new List<AdviserRecommendation>();
@@ -92,7 +75,6 @@ namespace StateCraft.UI
 
             foreach (var rec in BuildAll(c))
             {
-                // Skip dismissed titles (10-turn cooldown)
                 if (c.dismissedAdviserTitles != null &&
                     c.dismissedAdviserTitles.Contains(rec.Title) &&
                     currentTurn < c.adviserDismissTurn + 10)
@@ -104,9 +86,6 @@ namespace StateCraft.UI
             return results;
         }
 
-        /// <summary>
-        /// Dismiss the given title for 10 turns.
-        /// </summary>
         public static void Dismiss(CountryDataSO c, string title)
         {
             if (c == null) return;
@@ -118,17 +97,12 @@ namespace StateCraft.UI
             c.lastAdviserDecision = $"Declined: {title}";
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        // Rule engine — order determines display priority
-        // ─────────────────────────────────────────────────────────────────────
-
-        private static List<AdviserRecommendation> BuildAll(CountryDataSO c)
+private static List<AdviserRecommendation> BuildAll(CountryDataSO c)
         {
             var list = new List<AdviserRecommendation>();
             string sym = string.IsNullOrEmpty(c.currencySymbol) ? "₦" : c.currencySymbol;
             float debtGDP = c.gdp > 0 ? c.debt / c.gdp : 0f;
 
-            // ── 1. Debt Crisis ────────────────────────────────────────────────
             if (debtGDP > 0.5f)
                 list.Add(new AdviserRecommendation
                 {
@@ -148,7 +122,6 @@ namespace StateCraft.UI
                     }
                 });
 
-            // ── 2. High Inflation ─────────────────────────────────────────────
             if (c.inflationRate > 0.08f)
                 list.Add(new AdviserRecommendation
                 {
@@ -168,7 +141,6 @@ namespace StateCraft.UI
                     }
                 });
 
-            // ── 3. Power / Electricity Crisis ─────────────────────────────────
             if (c.electricityLevel < 40f)
                 list.Add(new AdviserRecommendation
                 {
@@ -191,7 +163,6 @@ namespace StateCraft.UI
                     }
                 });
 
-            // ── 4. Food Security Crisis ───────────────────────────────────────
             if (c.foodSecurity < 50f)
                 list.Add(new AdviserRecommendation
                 {
@@ -215,7 +186,6 @@ namespace StateCraft.UI
                     }
                 });
 
-            // ── 5. Treasury Critically Low ────────────────────────────────────
             float treasury = Core.GameManager.Instance?.playerBudget ?? c.treasury;
             if (treasury < 5f)
                 list.Add(new AdviserRecommendation
@@ -235,7 +205,6 @@ namespace StateCraft.UI
                     }
                 });
 
-            // ── 6. High Unemployment ──────────────────────────────────────────
             if (c.unemploymentRate > 20f)
                 list.Add(new AdviserRecommendation
                 {
@@ -259,7 +228,6 @@ namespace StateCraft.UI
                     }
                 });
 
-            // ── 7. Underdeveloped Manufacturing ───────────────────────────────
             if (c.indManufacturing < 2)
                 list.Add(new AdviserRecommendation
                 {
@@ -282,7 +250,6 @@ namespace StateCraft.UI
                     }
                 });
 
-            // ── 8. Strong Fiscal Position → FDI Incentive ────────────────────
             if (c.stability > 70f && debtGDP < 0.3f && c.taxRate > 20f)
                 list.Add(new AdviserRecommendation
                 {
@@ -302,7 +269,6 @@ namespace StateCraft.UI
                     }
                 });
 
-            // ── 9. High Corruption ────────────────────────────────────────────
             if (c.corruptionIndex > 50f)
                 list.Add(new AdviserRecommendation
                 {
@@ -324,7 +290,6 @@ namespace StateCraft.UI
                     }
                 });
 
-            // 10. High Deficit / Blocked Budget Finance Lock
             float deficit = c.spending - c.income;
             if (deficit > 0f && c.treasury < deficit)
                 list.Add(new AdviserRecommendation
@@ -338,7 +303,7 @@ namespace StateCraft.UI
                     UrgencyScore = 98,
                     Apply = country =>
                     {
-                        float borrowAmountBUSD = 2500f / country.exchangeRate; // Approx 2.5T local
+                        float borrowAmountBUSD = 2500f / country.exchangeRate;
                         country.debt += borrowAmountBUSD;
                         if (Core.GameManager.Instance != null) {
                             Core.GameManager.Instance.playerBudget += borrowAmountBUSD;
@@ -351,17 +316,12 @@ namespace StateCraft.UI
                     }
                 });
 
-            // Sort by urgency descending
             list.Sort((a, b) => b.UrgencyScore.CompareTo(a.UrgencyScore));
             return list;
 
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        // Helpers
-        // ─────────────────────────────────────────────────────────────────────
-
-        private static bool SpendTreasury(CountryDataSO c, float billions)
+private static bool SpendTreasury(CountryDataSO c, float billions)
         {
             var gm = Core.GameManager.Instance;
             float available = gm != null ? gm.playerBudget : c.treasury;

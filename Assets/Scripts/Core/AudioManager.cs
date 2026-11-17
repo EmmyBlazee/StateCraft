@@ -37,14 +37,12 @@ namespace StateCraft.Core
 
             _musicSource = gameObject.AddComponent<AudioSource>();
             _musicSource.playOnAwake = false;
-            _musicSource.loop = false; // We handle looping manually for playlists
+            _musicSource.loop = false;
 
-            // Load royalty-free sound effects & ambient music from Resources/Audio/
             _uiClickClip = Resources.Load<AudioClip>("Audio/UIClick");
             _warAlertClip = Resources.Load<AudioClip>("Audio/WarAlert");
             _notificationClip = Resources.Load<AudioClip>("Audio/Notification");
 
-            // Dynamically load all available music tracks from Resources/Audio/
             var allClips = Resources.LoadAll<AudioClip>("Audio");
             var tracksList = new System.Collections.Generic.List<AudioClip>();
 
@@ -53,7 +51,6 @@ namespace StateCraft.Core
                 if (clip == null) continue;
                 string clipName = clip.name.ToLower();
 
-                // Exclude SFX clips from background music playlist
                 if (clipName == "uiclick" || clipName == "waralert" || clipName == "notification")
                     continue;
 
@@ -61,7 +58,6 @@ namespace StateCraft.Core
                 Debug.Log($"[AudioManager] Added background music track to playlist: {clip.name}");
             }
 
-            // Shuffle the playlist so it feels fresh each session
             for (int i = tracksList.Count - 1; i > 0; i--)
             {
                 int j = Random.Range(0, i + 1);
@@ -73,10 +69,8 @@ namespace StateCraft.Core
             _musicTracks = tracksList.ToArray();
             Debug.Log($"[AudioManager] Loaded {_musicTracks.Length} background music tracks.");
 
-            // Master volume is fixed at 30% — controlled only via music volume slider
             AudioListener.volume = 0.3f;
 
-            // Load saved music volume setting
             float musicVol = PlayerPrefs.GetFloat("Settings_MusicVolume", 1.0f);
             _musicSource.volume = musicVol;
 
@@ -88,7 +82,6 @@ namespace StateCraft.Core
 
         private void Update()
         {
-            // Check if current track has finished playing
             if (_musicTracks != null && _musicTracks.Length > 0 && _musicSource != null)
             {
                 if (!_musicSource.isPlaying && _musicSource.clip != null)
@@ -105,14 +98,9 @@ namespace StateCraft.Core
             _musicSource.clip = _musicTracks[_currentTrackIndex];
             _musicSource.Play();
 
-            // Move to next track
             _currentTrackIndex = (_currentTrackIndex + 1) % _musicTracks.Length;
         }
 
-        /// <summary>
-        /// Immediately plays a specific mood track (peace / war / crisis).
-        /// Falls back to next playlist track if the named clip isn't found.
-        /// </summary>
         public void PlayMoodTrack(string mood)
         {
             string targetName = $"statecraft_bgm_{mood}".ToLower();
@@ -127,7 +115,6 @@ namespace StateCraft.Core
                     return;
                 }
             }
-            // Fallback if named clip not in playlist
             Debug.LogWarning($"[AudioManager] Mood track '{targetName}' not found. Falling back to playlist.");
             PlayNextTrack();
         }

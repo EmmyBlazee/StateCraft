@@ -18,13 +18,12 @@ namespace StateCraft.UI
         private Button[] _tabs;
         private VisualElement[] _panels;
 
-        // KPI Headers
         private Label _headerAllies, _headerRivals, _headerNeutral, _headerInfluence, _headerPrestige;
 
         private ScrollView _dipEventsList;
         private VisualElement _overviewTreatiesList, _overviewOrgsList;
         private Label _globalRepValue, _globalRepDesc;
-        private Label _pendingVotesBadge; // Overview KPI for pending org votes
+        private Label _pendingVotesBadge;
 
         private VisualElement _bilateralCardsGrid;
         private VisualElement _treatiesCardsList;
@@ -33,22 +32,18 @@ namespace StateCraft.UI
         private Label _embTotal, _embOperational, _embClosed, _embBudget;
         private VisualElement _embassiesCardsGrid;
 
-        // Bilateral filter — ACTIVE (Allies+Rivals) is the default so the player leads with actionable data
         private enum BilateralFilter { Actionable, Allies, Rivals, Neutral, All }
         private BilateralFilter _currentBilateralFilter = BilateralFilter.All;
         private Button _btnFilterActive, _btnFilterAllies, _btnFilterRivals, _btnFilterNeutral, _btnFilterAll;
 
-        // Bilateral Detail panel
         private VisualElement _panelBilateral;
         private VisualElement _panelBilateralDetail;
         private Label _detailCountryTitle, _detailRelationsScore, _detailRelationsLabel, _detailWarStage;
         private ProgressBar _detailRelationsBar;
         private VisualElement _detailStatsList, _detailTreatiesList, _detailActionsList;
 
-        // Trade panel reference
         private TradeAgreementController _tradeController;
 
-        // ─── Lifecycle ────────────────────────────────────────────────────────
         private void Awake()
         {
             _uiDoc = GetComponent<UIDocument>();
@@ -76,7 +71,6 @@ namespace StateCraft.UI
                 GameManager.Instance.TurnSystem.OnTurnEnded -= RefreshDiplomacyData;
         }
 
-        // ─── Init ─────────────────────────────────────────────────────────────
         private void InitializeElements(VisualElement root)
         {
             _tabs = new Button[]
@@ -129,7 +123,6 @@ namespace StateCraft.UI
             _embClosed      = root.Q<Label>("EmbClosed");
             _embBudget      = root.Q<Label>("EmbBudget");
 
-            // Bilateral filters
             _btnFilterActive  = root.Q<Button>("BtnFilterActive");
             _btnFilterAll     = root.Q<Button>("BtnFilterAll");
             _btnFilterAllies  = root.Q<Button>("BtnFilterAllies");
@@ -142,7 +135,6 @@ namespace StateCraft.UI
             if (_btnFilterNeutral != null) _btnFilterNeutral.clicked += () => SetBilateralFilter(BilateralFilter.Neutral);
             if (_btnFilterAll     != null) _btnFilterAll.clicked     += () => SetBilateralFilter(BilateralFilter.All);
 
-            // Detail panel
             _panelBilateral       = root.Q<VisualElement>("PanelBilateral");
             _panelBilateralDetail = root.Q<VisualElement>("PanelBilateralDetail");
             _detailCountryTitle   = root.Q<Label>("DetailCountryTitle");
@@ -156,18 +148,13 @@ namespace StateCraft.UI
 
             root.Q<Button>("BtnBackToCountries")?.RegisterCallback<ClickEvent>(_ => ShowBilateralGrid());
 
-            // Propose Treaty (Treaties tab bottom button)
-            // Propose Treaty removed, replaced by Faction system
-
-            // Open Trade Desk standalone button (if present in UXML)
-            root.Q<Button>("BtnOpenTrade")?.RegisterCallback<ClickEvent>(_ =>
+root.Q<Button>("BtnOpenTrade")?.RegisterCallback<ClickEvent>(_ =>
             {
-                SwitchTab(5); // Switch to Trade tab (Index 5)
+                SwitchTab(5);
                 if (_tradeController == null) _tradeController = UnityEngine.Object.FindObjectOfType<TradeAgreementController>();
                 _tradeController?.Show();
             });
 
-            // Propose New Trade button in the Trade panel
             root.Q<Button>("BtnAddTrade")?.RegisterCallback<ClickEvent>(_ =>
             {
                 SwitchTab(5);
@@ -175,17 +162,12 @@ namespace StateCraft.UI
                 _tradeController?.Show();
             });
 
-            // Offer Trade Deal button in the bilateral overview panel
             root.Q<Button>("BtnOfferTrade")?.RegisterCallback<ClickEvent>(_ =>
             {
                 SwitchTab(5);
                 if (_tradeController == null) _tradeController = UnityEngine.Object.FindObjectOfType<TradeAgreementController>();
-                // Show with specific partner
                 if (_detailCountryTitle != null && !string.IsNullOrEmpty(_detailCountryTitle.text))
                 {
-                    // detail title is UPPERCASE usually, but ShowWithPartner expects countryName.
-                    // Wait, ShowWithPartner handles the dropdown which expects exact name. 
-                    // Let's just call Show() to open the desk and let them pick.
                     _tradeController?.Show();
                 }
                 else
@@ -223,7 +205,6 @@ namespace StateCraft.UI
                 _tabs[i].EnableInClassList("active-tab", i == index);
             }
 
-            // If the user switches to the Trade tab (index 5), ensure the Trade Desk is initialized
             if (index == 5)
             {
                 if (_tradeController == null) _tradeController = UnityEngine.Object.FindObjectOfType<TradeAgreementController>();
@@ -244,7 +225,6 @@ namespace StateCraft.UI
             if (gm?.playerCountry != null) PopulateBilateralTab(gm.playerCountry, gm);
         }
 
-        // ─── Show / Hide ──────────────────────────────────────────────────────
         public void Show()
         {
             if (_dashboardRoot == null || _dashboardRoot.panel == null)
@@ -266,7 +246,6 @@ namespace StateCraft.UI
             MainDashboardToolkitController.Instance?.HideAllPanels();
         }
 
-        // ─── Refresh ──────────────────────────────────────────────────────────
         public void RefreshDiplomacyData()
         {
             if (_dashboardRoot == null || _dashboardRoot.panel == null)
@@ -301,9 +280,7 @@ namespace StateCraft.UI
             PopulateEmbassiesTab(player);
         }
 
-        // ─── Seed mock data ───────────────────────────────────────────────────
-
-        private void PopulateTradeTab(CountryDataSO player, GameManager gm)
+private void PopulateTradeTab(CountryDataSO player, GameManager gm)
         {
             var list = _dashboardRoot?.Q<ScrollView>("DashboardActiveAgreementsList");
             if (list == null) return;
@@ -321,7 +298,7 @@ namespace StateCraft.UI
                 card.Add(new Label($"{t.partnerCountry} — {t.resource}") { style = { color = Color.white, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 4 } });
                 string directionStr = t.isSeller ? "EXPORT" : "IMPORT";
                 card.Add(new Label($"Direction: {directionStr} | Quantity: {t.resourceQuantity:F0} ({t.durationMonths} turns left)") { style = { color = Color.grey, fontSize = 10, marginBottom = 4 } });
-                float totalValue = (t.monthlyPaymentUSD * t.durationMonths) / 1000f; // assuming monthlyPayment is in millions, value in billions
+                float totalValue = (t.monthlyPaymentUSD * t.durationMonths) / 1000f;
                 card.Add(new Label($"Strategic Value: ${totalValue:F2}B") { style = { color = new Color(0.14f, 0.93f, 0.34f), fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold } });
                 list.Add(card);
             }
@@ -363,7 +340,6 @@ namespace StateCraft.UI
             }
         }
 
-        // ─── Overview tab ─────────────────────────────────────────────────────
         private void PopulateOverviewTab(CountryDataSO player)
         {
             if (_dipEventsList != null)
@@ -382,13 +358,11 @@ namespace StateCraft.UI
                     _overviewTreatiesList.Add(new Label("No active treaties.") { style = { color = Color.grey, fontSize = 10, unityFontStyleAndWeight = FontStyle.Italic } });
             }
 
-            // Pending votes KPI — surface to player without them opening the Orgs tab
             int pendingVotes = player.internationalOrgs.Count(o => o.voteStatus == "Pending");
             if (_overviewOrgsList != null)
             {
                 _overviewOrgsList.Clear();
 
-                // Pending vote alert pill — appears first if there are any
                 if (pendingVotes > 0)
                 {
                     var alertPillFix = new Label($"⚠ {pendingVotes} VOTE{(pendingVotes > 1 ? "S" : "")} PENDING");
@@ -420,7 +394,7 @@ namespace StateCraft.UI
                     pill.style.fontSize = 10;
                     if (isPending)
                     {
-                        pill.text = $"{org.orgName} ●";  // dot signals pending vote
+                        pill.text = $"{org.orgName} ●";
                         pill.style.color = new Color(1f, 0.85f, 0.5f);
                     }
                     _overviewOrgsList.Add(pill);
@@ -428,7 +402,6 @@ namespace StateCraft.UI
             }
         }
 
-        // ─── Bilateral grid ───────────────────────────────────────────────────
         private void ShowBilateralGrid()
         {
             if (_panelBilateralDetail != null) _panelBilateralDetail.style.display = DisplayStyle.None;
@@ -445,11 +418,10 @@ namespace StateCraft.UI
                 .Select(o => new { Country = o, Score = DashboardLiveContent.ComputeRelation(player, o, gm) })
                 .ToList();
 
-            // Apply filter
             var filtered = scored.AsEnumerable();
             switch (_currentBilateralFilter)
             {
-                case BilateralFilter.Actionable: // Allies (≥70) + Rivals (≤30) — lead with what matters
+                case BilateralFilter.Actionable:
                     filtered = scored.Where(r => r.Score >= 70 || r.Score <= 30);
                     break;
                 case BilateralFilter.Allies:
@@ -466,7 +438,6 @@ namespace StateCraft.UI
                     break;
             }
 
-            // Sort: Actionable/All: most extreme first. Others: highest/lowest first.
             var sorted = (_currentBilateralFilter == BilateralFilter.Actionable || _currentBilateralFilter == BilateralFilter.All)
                 ? filtered.OrderByDescending(r => Mathf.Abs(r.Score - 50f)).ThenByDescending(r => r.Score).ToList()
                 : filtered.OrderByDescending(r => r.Score).ToList();
@@ -484,17 +455,14 @@ namespace StateCraft.UI
                 bool isAtWar        = gm.WarSystem?.GetWarStage(other) == Interfaces.WarStage.Conflict;
 
                 var card = MakeCard(100, 12);
-                // War indicator strip on the left edge
                 if (isAtWar)
                 {
                     card.style.borderLeftWidth = 3;
                     card.style.borderLeftColor = new Color(1f, 0.32f, 0.32f);
                 }
 
-                // Title
                 card.Add(new Label($"{other.countryName}") { style = { color = Color.white, unityFontStyleAndWeight = FontStyle.Bold, fontSize = 12, marginBottom = 6 } });
 
-                // Relations bar + score (compact — no badge row at card level)
                 var relRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 8 } };
                 var pb = new ProgressBar { value = relation, highValue = 100 };
                 pb.style.flexGrow = 1;
@@ -505,7 +473,6 @@ namespace StateCraft.UI
                 relRow.Add(new Label(isAtWar ? "⚔ WAR" : DashboardLiveContent.RelationLabel(relation)) { style = { color = isAtWar ? new Color(1f, 0.32f, 0.32f) : DashboardLiveContent.RelationColor(relation), fontSize = 9 } });
                 card.Add(relRow);
 
-                // Capture for closure
                 CountryDataSO captureOther = other;
                 float captureRelation = relation;
 
@@ -520,7 +487,6 @@ namespace StateCraft.UI
             }
         }
 
-        // ─── Bilateral Detail panel ───────────────────────────────────────────
         private void OpenBilateralDetail(CountryDataSO player, CountryDataSO target, float relation, GameManager gm)
         {
             if (_panelBilateral       != null) _panelBilateral.style.display       = DisplayStyle.None;
@@ -555,7 +521,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // Stats
             if (_detailStatsList != null)
             {
                 _detailStatsList.Clear();
@@ -567,7 +532,6 @@ namespace StateCraft.UI
                     AddDetailStat("NUCLEAR ARMED", "⚛ Confirmed", new Color(1f, 0.67f, 0.25f));
             }
 
-            // Shared treaties
             if (_detailTreatiesList != null)
             {
                 _detailTreatiesList.Clear();
@@ -583,7 +547,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // Actions
             if (_detailActionsList != null)
             {
                 _detailActionsList.Clear();
@@ -621,8 +584,7 @@ namespace StateCraft.UI
                     });
                 }
 
-
-                AddAction("TRADE RESOURCES", new Color(0.95f, 0.72f, 0.05f), () =>
+AddAction("TRADE RESOURCES", new Color(0.95f, 0.72f, 0.05f), () =>
                 {
                     if (_tradeController == null) _tradeController = UnityEngine.Object.FindObjectOfType<TradeAgreementController>();
                     if (_tradeController != null) _tradeController.ShowWithPartner(target.countryName);
@@ -649,7 +611,6 @@ namespace StateCraft.UI
                     OpenBilateralDetail(player, target, DashboardLiveContent.ComputeRelation(player, target, g), g);
                 });
 
-                // Divider
                 var sep = new VisualElement { style = { height = 1, backgroundColor = new Color(1, 1, 1, 0.08f), marginTop = 14, marginBottom = 14 } };
                 _detailActionsList.Add(sep);
 
@@ -671,7 +632,6 @@ namespace StateCraft.UI
                 }
                 else
                 {
-                    // Declare War button — always visible, nuclear blocks the CONFIRM not the button itself
                     var warBtn = new Button(() => ShowDeclareWarModal(player, target, relation, gm)) { text = "DECLARE WAR" };
                     warBtn.AddToClassList("econ-small-button");
                     warBtn.style.height = 36; warBtn.style.fontSize = 11; warBtn.style.marginTop = 4;
@@ -692,7 +652,6 @@ namespace StateCraft.UI
             }
         }
 
-        // ─── DECLARE WAR modal ────────────────────────────────────────────────
         private void ShowDeclareWarModal(CountryDataSO player, CountryDataSO target, float relation, GameManager gm)
         {
             bool isBetrayal = relation > 30;
@@ -718,7 +677,6 @@ namespace StateCraft.UI
             modal.Add(new Label("⚔  DECLARE WAR") { style = { color = cRed, fontSize = 20, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 4, unityTextAlign = TextAnchor.MiddleCenter } });
             modal.Add(new Label($"vs.  {target.countryName.ToUpper()}") { style = { color = Color.white, fontSize = 14, marginBottom = 20, unityTextAlign = TextAnchor.MiddleCenter } });
 
-            // Nuclear blocked banner — shown prominently when applicable
             if (isNuclearBlocked)
             {
                 var nukeBox = new VisualElement { style = { backgroundColor = new Color(0.4f, 0f, 0.4f, 0.5f), paddingTop = 14, paddingBottom = 14, paddingLeft = 14, paddingRight = 14, borderTopLeftRadius = 6, borderTopRightRadius = 6, borderBottomLeftRadius = 6, borderBottomRightRadius = 6, marginBottom = 16 } };
@@ -728,7 +686,6 @@ namespace StateCraft.UI
             }
             else
             {
-                // Betrayal warning (only shown when not nuclear-blocked — nuclear is more severe)
                 if (isBetrayal)
                 {
                     var bannerBox = new VisualElement { style = { backgroundColor = new Color(0.5f, 0.2f, 0f, 0.6f), paddingTop = 10, paddingBottom = 10, paddingLeft = 12, paddingRight = 12, borderTopLeftRadius = 6, borderTopRightRadius = 6, borderBottomLeftRadius = 6, borderBottomRightRadius = 6, marginBottom = 16 } };
@@ -737,7 +694,6 @@ namespace StateCraft.UI
                     modal.Add(bannerBox);
                 }
 
-                // Cost breakdown
                 var costsBox = new VisualElement { style = { backgroundColor = new Color(0.1f, 0.06f, 0.06f, 0.8f), paddingTop = 12, paddingBottom = 12, paddingLeft = 14, paddingRight = 14, borderTopLeftRadius = 6, borderTopRightRadius = 6, borderBottomLeftRadius = 6, borderBottomRightRadius = 6, marginBottom = 18 } };
                 costsBox.Add(new Label("EXPECTED CONSEQUENCES") { style = { color = new Color(0.6f, 0.6f, 0.7f), fontSize = 9, letterSpacing = 1, marginBottom = 8 } });
                 AddCostRow(costsBox, "Mobilisation Cost",   "$0.5B deducted from treasury",         cRed);
@@ -751,7 +707,6 @@ namespace StateCraft.UI
                 modal.Add(costsBox);
             }
 
-            // Action buttons
             var btnRow = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween } };
 
             var cancelBtn = new Button(() => overlay.parent?.Remove(overlay)) { text = "CANCEL" };
@@ -765,7 +720,6 @@ namespace StateCraft.UI
 
             if (isNuclearBlocked)
             {
-                // Nuclear: button is present but disabled and clearly greyed — not clickable
                 confirmBtn.SetEnabled(false);
                 confirmBtn.text = "⚛ BLOCKED — NUCLEAR DETERRENT";
                 confirmBtn.style.opacity = 0.35f;
@@ -793,7 +747,6 @@ namespace StateCraft.UI
             _dashboardRoot?.Add(overlay);
         }
 
-        // ─── RECALL confirmation modal ─────────────────────────────────────────
         private void ShowRecallConfirmModal(CountryDataSO player, Embassy emb)
         {
             var cRed  = new Color(1f, 0.32f, 0.32f);
@@ -853,7 +806,6 @@ namespace StateCraft.UI
             _dashboardRoot?.Add(overlay);
         }
 
-        // ─── Treaties tab ─────────────────────────────────────────────────────
         private void PopulateTreatiesTab(CountryDataSO player, GameManager gm)
         {
             if (_treatiesCardsList == null) return;
@@ -955,7 +907,7 @@ namespace StateCraft.UI
                 {
                     dipSys.JoinFaction(player, factionName);
                     NotificationManager.Instance?.AddNotification($"You have founded the {factionName}.", new Color(0.18f, 0.6f, 0.95f));
-                    player.globalPrestige = UnityEngine.Mathf.Min(100f, player.globalPrestige + 10f); // Leader bonus
+                    player.globalPrestige = UnityEngine.Mathf.Min(100f, player.globalPrestige + 10f);
                 }
                 
                 overlay.parent?.Remove(overlay);
@@ -1078,7 +1030,6 @@ namespace StateCraft.UI
                 card.Add(new Label("Current Resolution") { style = { color = Color.grey, fontSize = 9, marginBottom = 2 } });
                 card.Add(new Label(org.currentResolution) { style = { color = Color.white, fontSize = 11, marginBottom = 10, whiteSpace = WhiteSpace.Normal } });
 
-                // Vote buttons
                 var voteRow = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.FlexStart } };
                 foreach (var option in new[] { "Approve", "Abstain", "Reject" })
                 {
@@ -1108,7 +1059,6 @@ namespace StateCraft.UI
             }
         }
 
-        // ─── Embassies tab ────────────────────────────────────────────────────
         private void PopulateEmbassiesTab(CountryDataSO player)
         {
             if (_embTotal       != null) _embTotal.text       = player.embassies.Count.ToString();
@@ -1144,7 +1094,6 @@ namespace StateCraft.UI
                 var btnUp = new Button { text = "UPGRADE" };
                 btnUp.AddToClassList("econ-small-button"); btnUp.style.width = Length.Percent(48); btnUp.style.height = 24;
 
-                // RECALL now opens a confirmation modal — same decision weight as Declare War
                 var btnRecall = new Button(() => ShowRecallConfirmModal(player, captureEmb)) { text = "RECALL" };
                 btnRecall.AddToClassList("econ-small-button");
                 btnRecall.style.width  = Length.Percent(48); btnRecall.style.height = 24;
@@ -1160,7 +1109,6 @@ namespace StateCraft.UI
             }
         }
 
-        // ─── Shared helper methods ────────────────────────────────────────────
         private VisualElement MakeOverlay() => new VisualElement
         {
             style =

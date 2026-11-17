@@ -13,7 +13,7 @@ namespace StateCraft.Data
         [Header("RDF")]
         public float rdfCostPerUnitPerYear = 8000f;
         public int rdfTrainingMonths = 12;
-        public int rdfDeploymentTurns = 0; // INSTANT
+        public int rdfDeploymentTurns = 0;
         public float rdfMaxAsFractionOfInfantry = 0.05f;
         public int rdfCooldownMonths = 3;
 

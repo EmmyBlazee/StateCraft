@@ -19,13 +19,11 @@ namespace StateCraft.UI
 
         private void Start()
         {
-            // Register all panels
             if (globalPanel) allPanels.Add(globalPanel);
             if (militaryPanel) allPanels.Add(militaryPanel);
             if (intelPanel) allPanels.Add(intelPanel);
             if (economyPanel) allPanels.Add(economyPanel);
 
-            // Hide everything at start
             CloseDrawer();
         }
 
@@ -38,23 +36,19 @@ namespace StateCraft.UI
         {
             if (targetPanel == null) return;
 
-            // If the panel is already open, close the drawer (Toggle behavior)
             if (targetPanel.activeSelf)
             {
                 CloseDrawer();
                 return;
             }
 
-            // Open the drawer
             drawerRoot.SetActive(true);
 
-            // Hide all other panels first
             foreach (var panel in allPanels)
             {
                 panel.SetActive(false);
             }
 
-            // Show the target panel
             targetPanel.SetActive(true);
             
 }

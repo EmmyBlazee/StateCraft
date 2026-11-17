@@ -12,18 +12,15 @@ namespace StateCraft.UI
         private UIDocument _uiDocument;
         private VisualElement _root;
 
-        // UI Element References
         private VisualElement _hubExpandedPanel;
         private VisualElement _hubMinimizedStrip;
         private ScrollView _hubScrollContainer;
         private Button _btnCloseHub;
 
-        // Minimized strip icon containers
         private VisualElement _iconIntelContainer;
         private VisualElement _iconEconomyContainer;
         private VisualElement _iconSecurityContainer;
 
-        // Badges
         private Label _badgeIntel;
         private Label _badgeEconomy;
         private Label _badgeSecurity;
@@ -69,17 +66,14 @@ namespace StateCraft.UI
             _hubScrollContainer = _root.Q<ScrollView>("HubScrollContainer");
             _btnCloseHub = _root.Q<Button>("BtnCloseHub");
 
-            // Minimized containers
             _iconIntelContainer = _root.Q<VisualElement>("IconIntelContainer");
             _iconEconomyContainer = _root.Q<VisualElement>("IconEconomyContainer");
             _iconSecurityContainer = _root.Q<VisualElement>("IconSecurityContainer");
 
-            // Badges
             _badgeIntel = _root.Q<Label>("BadgeIntel");
             _badgeEconomy = _root.Q<Label>("BadgeEconomy");
             _badgeSecurity = _root.Q<Label>("BadgeSecurity");
 
-            // Register toggle triggers (Hover/Click min strip opens; BtnClose closes)
             if (_iconIntelContainer != null)
             {
                 _iconIntelContainer.RegisterCallback<ClickEvent>(evt => ExpandHub());
@@ -128,12 +122,10 @@ namespace StateCraft.UI
             var country = GameManager.Instance.playerCountry;
             var gm = GameManager.Instance;
 
-            // 1. Gather all alerts and counts
             int activeIntelOps = country.activeCovertOps != null ? country.activeCovertOps.Count : 0;
 
-            // Calculate macroeconomic warnings
             int macroAlertsCount = 0;
-            bool isHighInflation = country.inflationRate >= 0.08f; // Inflation >= 8%
+            bool isHighInflation = country.inflationRate >= 0.08f;
             if (isHighInflation) macroAlertsCount++;
 
             float welfareCost = (country.gdp / 12f) * (country.subsidyLevel / 100f);
@@ -142,7 +134,6 @@ namespace StateCraft.UI
             bool isSubsidiesExceedTaxes = welfareCost > taxRevenue;
             if (isSubsidiesExceedTaxes) macroAlertsCount++;
 
-            // Calculate unrest regions
             int unrestCount = 0;
             List<RegionDataSO> unrestRegions = new List<RegionDataSO>();
             if (country.regions != null)
@@ -157,16 +148,13 @@ namespace StateCraft.UI
                 }
             }
 
-            // 2. Update badges in the minimized strip
             UpdateBadge(_badgeIntel, activeIntelOps);
             UpdateBadge(_badgeEconomy, macroAlertsCount);
             UpdateBadge(_badgeSecurity, unrestCount);
 
-            // 3. Re-draw cards inside the scroll container
             if (_hubScrollContainer == null) return;
             _hubScrollContainer.Clear();
 
-            // RENDER COVERT OPERATIONS
             if (country.activeCovertOps != null && country.activeCovertOps.Count > 0)
             {
                 foreach (var op in country.activeCovertOps)
@@ -196,7 +184,6 @@ namespace StateCraft.UI
                     var time = new Label($"{op.monthsRemaining} Months Left") { style = { color = new Color(0, 210/255f, 1f), fontSize = 9, marginTop = 2, unityFontStyleAndWeight = FontStyle.Bold } };
                     card.Add(time);
 
-                    // Detection Risk Block
                     var riskContainer = new VisualElement() { style = { marginTop = 8 } };
                     var riskRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween } };
                     
@@ -206,7 +193,7 @@ namespace StateCraft.UI
                     if (op.detectionRisk >= 60f)
                     {
                         riskVal.text = $"[⚠️ HIGH RISK] {op.detectionRisk:F0}%";
-                        riskVal.style.color = new Color(255/255f, 193/255f, 7/255f); // Blinking yellow highlight color
+                        riskVal.style.color = new Color(255/255f, 193/255f, 7/255f);
                         riskVal.style.unityFontStyleAndWeight = FontStyle.Bold;
                     }
                     else
@@ -218,7 +205,6 @@ namespace StateCraft.UI
                     riskRow.Add(riskVal);
                     riskContainer.Add(riskRow);
 
-                    // Custom progress bar
                     var barBg = new VisualElement() { style = { height = 5, backgroundColor = new Color(0, 0, 0, 0.4f), borderTopLeftRadius = 3, borderTopRightRadius = 3, borderBottomLeftRadius = 3, borderBottomRightRadius = 3, overflow = Overflow.Hidden, marginTop = 4 } };
                     var barFill = new VisualElement() { style = { height = 5, width = Length.Percent(op.detectionRisk), borderTopLeftRadius = 3, borderTopRightRadius = 3, borderBottomLeftRadius = 3, borderBottomRightRadius = 3 } };
                     
@@ -234,12 +220,10 @@ namespace StateCraft.UI
                     riskContainer.Add(barBg);
                     card.Add(riskContainer);
 
-                    // Action buttons
                     var actionRow = new VisualElement();
                     actionRow.AddToClassList("hub-card-action-bar");
 
                     var abortBtn = new Button(() => {
-                        // Extract agent safely
                         country.operativeCount++;
                         country.activeCovertOps.Remove(op);
                         NotificationManager.Instance?.AddNotification(
@@ -263,7 +247,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // RENDER MACROECONOMIC VOLATILITY ALERTS
             if (isHighInflation)
             {
                 var card = new VisualElement();
@@ -336,7 +319,6 @@ namespace StateCraft.UI
                 _hubScrollContainer.Add(card);
             }
 
-            // RENDER CIVIL UNREST RISK ALERTS
             if (unrestRegions.Count > 0)
             {
                 foreach (var region in unrestRegions)
@@ -370,7 +352,7 @@ namespace StateCraft.UI
                     actionRow.AddToClassList("hub-card-action-bar");
 
                     var deployBtn = new Button(() => {
-                        float cost = 0.01f; // 10 million dollars (₦0.01B)
+                        float cost = 0.01f;
                         if (gm.playerBudget < cost)
                         {
                             NotificationManager.Instance?.AddNotification(
@@ -379,7 +361,6 @@ namespace StateCraft.UI
                             return;
                         }
 
-                        // Deduct funds and suppress
                         gm.playerBudget -= cost;
                         country.treasury = gm.playerBudget;
                         region.security = Mathf.Min(100f, region.security + 15f);
@@ -400,7 +381,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // Fallback display if absolutely quiet
             if (activeIntelOps == 0 && macroAlertsCount == 0 && unrestCount == 0)
             {
                 var emptyLabel = new Label("MONITORS ALL CLEAR\nNo operational alerts active.") 

@@ -1,18 +1,3 @@
-// ============================================================
-// FILE: Scripts/UI/MilitaryInboxController.cs
-// PURPOSE: Renders the battle result inbox inside the Military
-//          Dashboard. Drop this MonoBehaviour onto the same
-//          GameObject that has your MilitaryDashboard UIDocument.
-//
-// SETUP:
-//   1. Add this script to the MilitaryDashboard GameObject.
-//   2. In MilitaryDashboard.uxml add a container:
-//        <ui:VisualElement name="BattleInboxContainer" />
-//      inside whichever tab/section you want the battle log.
-//   3. Assign BattleResultCard.uxml to the battleCardTemplate
-//      field in the Inspector.
-//   4. Call Refresh() whenever the player opens the military tab.
-// ============================================================
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -38,7 +23,6 @@ namespace StateCraft.UI
 
         private void OnEnable()
         {
-            // Defer until after UIDocument has built its tree
             _doc?.rootVisualElement?.schedule
                 .Execute(Init)
                 .StartingIn(50);
@@ -56,7 +40,6 @@ namespace StateCraft.UI
             Refresh();
         }
 
-        /// <summary>Call this whenever the player opens the military tab.</summary>
         public void Refresh()
         {
             if (_container == null || battleCardTemplate == null) return;
@@ -83,7 +66,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // Show the 10 most recent results
             int limit = Mathf.Min(results.Count, 10);
             for (int i = 0; i < limit; i++)
             {
@@ -92,13 +74,11 @@ namespace StateCraft.UI
             }
         }
 
-        // ── Card builder ─────────────────────────────────────────────────────
         private VisualElement BuildBattleCard(BattleResultMessage r)
         {
             var root = battleCardTemplate.Instantiate();
             var card = root.Q<VisualElement>("BattleResultCard");
 
-            // ── Outcome badge ─────────────────────────────────────────────
             var badge = card.Q<VisualElement>("OutcomeBadge");
             var outcomeLabel = card.Q<Label>("OutcomeLabel");
             if (badge != null && outcomeLabel != null)
@@ -115,11 +95,9 @@ namespace StateCraft.UI
                 });
             }
 
-            // ── Header meta ───────────────────────────────────────────────
             SetLabel(card, "EnemyName", $"vs {r.enemyCountryName}");
             SetLabel(card, "DateLabel", r.dateReceived);
 
-            // ── Front badge ───────────────────────────────────────────────
             var frontBadge = card.Q<VisualElement>("FrontBadge");
             var frontLabel = card.Q<Label>("FrontLabel");
             if (frontBadge != null && frontLabel != null)
@@ -137,10 +115,8 @@ namespace StateCraft.UI
                 });
             }
 
-            // ── Narrative ─────────────────────────────────────────────────
             SetLabel(card, "NarrativeLabel", BuildNarrative(r));
 
-            // ── Losses table ──────────────────────────────────────────────
             SetLabel(card, "OurInfantry",   FormatLoss(r.ourInfantryLost));
             SetLabel(card, "EnemyInfantry", FormatLoss(r.enemyInfantryLost));
             SetLabel(card, "OurTanks",      FormatLoss(r.ourTanksLost));
@@ -152,23 +128,19 @@ namespace StateCraft.UI
             SetLabel(card, "OurShips",      FormatLoss(r.ourShipsLost));
             SetLabel(card, "EnemyShips",    FormatLoss(r.enemyShipsLost));
 
-            // Hide ships row if no naval action this war
             var navyRow = card.Q<VisualElement>("RowNavy");
             if (navyRow != null && r.ourShipsLost == 0 && r.enemyShipsLost == 0)
                 navyRow.style.display = DisplayStyle.None;
 
-            // ── KIA / Wounded summary ─────────────────────────────────────
             SetLabel(card, "KIACount",      r.ourKIA.ToString("N0"));
             SetLabel(card, "WoundedCount",  r.ourWounded.ToString("N0"));
             SetLabel(card, "EnemyKIACount", r.enemyKIA.ToString("N0"));
 
-            // ── Supply footer ─────────────────────────────────────────────
             SetLabel(card, "AmmoLabel",    $"Ammo: {r.ammoRemaining:F0}");
             SetLabel(card, "FuelLabel",    $"Fuel: {r.fuelRemaining:F0}");
             SetLabel(card, "ExhaustLabel", $"Exhaustion: {r.warExhaustion:F0}%");
             SetLabel(card, "WillLabel",    $"Will to fight: {r.willToFight:F0}%");
 
-            // Colour exhaustion warning
             var exhaustEl = card.Q<Label>("ExhaustLabel");
             if (exhaustEl != null)
             {
@@ -178,19 +150,16 @@ namespace StateCraft.UI
                     exhaustEl.RemoveFromClassList("supply-warn");
             }
 
-            // Mark unread with a left accent
             if (!r.isRead)
             {
                 card.style.borderLeftWidth = 3;
                 card.style.borderLeftColor = new StyleColor(new Color(0.9f, 0.75f, 0.25f));
-                // Mark as read when player sees it
                 r.isRead = true;
             }
 
             return root;
         }
 
-        // ── Helpers ──────────────────────────────────────────────────────────
         private static void SetLabel(VisualElement root, string name, string text)
         {
             var el = root.Q<Label>(name);

@@ -6,28 +6,17 @@ using System.IO;
 
 namespace StateCraft.Editor
 {
-    /// <summary>
-    /// One-click Windows EXE builder: StateCraft → Build Windows EXE
-    /// 
-    /// Steps performed automatically:
-    ///   1. Rebuilds the SplashScene (wires all country data, creates CountryRegistry)
-    ///   2. Runs BuildPipeline for Windows x86_64 Standalone
-    ///   3. Opens the output folder in Explorer when done
-    /// </summary>
     public static class BuildTool
     {
-        // Output folder relative to the project root (i.e., c:\Users\Tobi\StateCraft\Build\)
         private const string BUILD_FOLDER = "Build";
         private const string EXE_NAME     = "StateCraft.exe";
 
         [MenuItem("StateCraft/Build Windows EXE", priority = 20)]
         public static void BuildWindowsExe()
         {
-            // ── Step 1: Rebuild SplashScene & CountryRegistry ──────────────
             Debug.Log("[BuildTool] Step 1: Rebuilding SplashScene and CountryRegistry...");
             SplashSceneBuilder.Build();
 
-            // ── Step 2: Resolve scene list from Build Settings ─────────────
             var scenes = EditorBuildSettings.scenes;
             if (scenes.Length == 0)
             {
@@ -43,12 +32,10 @@ namespace StateCraft.Editor
 
             Debug.Log($"[BuildTool] Building {scenePaths.Length} scene(s): {string.Join(", ", scenePaths)}");
 
-            // ── Step 3: Prepare output path ────────────────────────────────
             string projectRoot = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
             string buildDir    = Path.Combine(projectRoot, BUILD_FOLDER);
             string exePath     = Path.Combine(buildDir,   EXE_NAME);
 
-            // Clean previous build for a fresh output
             if (Directory.Exists(buildDir))
             {
                 bool clean = EditorUtility.DisplayDialog(
@@ -65,7 +52,6 @@ namespace StateCraft.Editor
 
             Directory.CreateDirectory(buildDir);
 
-            // ── Step 4: Build ──────────────────────────────────────────────
             var options = new BuildPlayerOptions
             {
                 scenes           = scenePaths,
@@ -78,7 +64,6 @@ namespace StateCraft.Editor
             BuildReport  report  = BuildPipeline.BuildPlayer(options);
             BuildSummary summary = report.summary;
 
-            // ── Step 5: Report result ──────────────────────────────────────
             if (summary.result == BuildResult.Succeeded)
             {
                 double sizeMB = summary.totalSize / (1024.0 * 1024.0);
@@ -87,7 +72,6 @@ namespace StateCraft.Editor
 
                 EditorUtility.DisplayDialog("Build Succeeded!", msg, "Open Folder");
 
-                // Open the build folder in Windows Explorer
                 EditorUtility.RevealInFinder(exePath);
             }
             else
@@ -98,9 +82,6 @@ namespace StateCraft.Editor
             }
         }
 
-        /// <summary>
-        /// Menu item to just open the Build folder in Explorer without building.
-        /// </summary>
         [MenuItem("StateCraft/Open Build Folder", priority = 21)]
         public static void OpenBuildFolder()
         {

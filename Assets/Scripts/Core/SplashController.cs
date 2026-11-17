@@ -9,19 +9,9 @@ using StateCraft.Data;
 
 namespace StateCraft.Core
 {
-    /// <summary>
-    /// Manages the full splash → menu → name → country → launch sequence.
-    ///
-    ///   Phase 1 – Plays intro video (skipped when returning from a session).
-    ///   Phase 2 – Crossfades to splash image + animated loader.
-    ///   Phase 3 – Hides loader, reveals the Main Menu (New Game / Load / How To Play / Settings / Quit).
-    ///   Phase 4a – New Game: shows Player Name modal, then Country Selector.
-    ///   Phase 4b – Load Game: sets flag and transitions to game scene.
-    /// </summary>
     [RequireComponent(typeof(VideoPlayer))]
     public class SplashController : MonoBehaviour
     {
-        // ── Inspector References ───────────────────────────────────────────────
         [Header("References")]
         [Tooltip("RawImage GameObject for the video texture.")]
         public UnityEngine.UI.RawImage videoDisplay;
@@ -50,7 +40,6 @@ namespace StateCraft.Core
         [Tooltip("Drag all CountryDataSO assets here, OR leave empty to auto-load via AssetDatabase in-editor.")]
         public CountryDataSO[] countryDataList;
 
-        // ── Splash / Loader UI ─────────────────────────────────────────────────
         private VisualElement _dot1, _dot2, _dot3;
         private Label         _loadingLabel;
         private ProgressBar   _loadingBar;
@@ -58,28 +47,23 @@ namespace StateCraft.Core
         private int           _dotFrame;
         private const float   DOT_INTERVAL = 0.4f;
 
-        // ── Main Menu UI ───────────────────────────────────────────────────────
         private VisualElement _menuRoot;
         private VisualElement _nameModal;
         private TextField     _nameInput;
         private Button        _btnNewGame, _btnLoadGame, _btnHowToPlay, _btnSettings, _btnQuit;
         private Button        _btnConfirmName, _btnCancelName;
 
-        // ── Country Selector UI ────────────────────────────────────────────────
         private VisualElement _selectorRoot;
         private ScrollView    _countryList;
         private TextField     _selectorSearch;
 
-        // ── State ──────────────────────────────────────────────────────────────
         private VideoPlayer  _videoPlayer;
         private bool         _videoFinished;
         private bool         _countryChosen;
         private bool         _launchLoad;
         private string       _chosenCountryName;
 
-        // ──────────────────────────────────────────────────────────────────────
-
-        private void Awake()
+private void Awake()
         {
             Application.runInBackground = true;
             _videoPlayer = GetComponent<VideoPlayer>();
@@ -91,7 +75,6 @@ namespace StateCraft.Core
         {
             Debug.Log("[Splash] START — ReturningToMainMenu=" + GameContext.ReturningToMainMenu);
 
-            // ── Initial canvas states ─────────────────────────────────────────
             if (videoCanvasGroup)  { videoCanvasGroup.alpha = 1f;  videoCanvasGroup.gameObject.SetActive(true); }
             if (splashCanvasGroup) { splashCanvasGroup.alpha = 0f; }
 
@@ -103,7 +86,6 @@ namespace StateCraft.Core
 
             HideAllOverlays();
 
-            // ── Phase 1: Video ─────────────────────────────────────────────────
             if (!GameContext.ReturningToMainMenu)
             {
                 Debug.Log("[Splash] Phase 1: Playing intro video. clip=" + (_videoPlayer.clip != null ? _videoPlayer.clip.name : "NULL"));
@@ -113,10 +95,9 @@ namespace StateCraft.Core
                 _videoPlayer.prepareCompleted  += _ => { Debug.Log("[Splash] prepareCompleted — calling Play()."); _videoPlayer.Play(); };
                 
                 _videoPlayer.Prepare();
-                _videoPlayer.Play(); // Direct Play invocation for immediate start
+                _videoPlayer.Play();
                 Debug.Log("[Splash] Prepare() and Play() called. Waiting for video to start...");
 
-                // Wait for video to start (max 5s)
                 float prepWait = 0f;
                 while (!_videoPlayer.isPlaying && prepWait < 5f)
                 {
@@ -125,14 +106,12 @@ namespace StateCraft.Core
                 }
                 Debug.Log("[Splash] Video isPlaying=" + _videoPlayer.isPlaying + " after " + prepWait.ToString("F1") + "s prep wait.");
 
-                // Wait for finish — poll as fallback + hard timeout
                 float maxTime = _videoPlayer.clip != null ? (float)_videoPlayer.clip.length + 2f : 20f;
                 Debug.Log("[Splash] Video maxTime=" + maxTime.ToString("F1") + "s");
                 float vidElapsed = 0f;
                 while (!_videoFinished && vidElapsed < maxTime)
                 {
                     vidElapsed += Time.deltaTime;
-                    // Only trigger fallback if video had already started and subsequently stopped before loopPointReached
                     if (prepWait < 5f && !_videoPlayer.isPlaying && vidElapsed > 2f)
                     {
                         Debug.Log("[Splash] Fallback: Video stopped playing at " + vidElapsed.ToString("F1") + "s — finishing phase.");
@@ -149,7 +128,6 @@ namespace StateCraft.Core
                 Debug.Log("[Splash] Phase 1: SKIPPED (returning from game).");
             }
 
-            // ── Phase 2: Crossfade to Splash + Loader ─────────────────────────
             Debug.Log("[Splash] Phase 2: CrossFade to splash image starting.");
             yield return StartCoroutine(CrossFadeToSplash());
             Debug.Log("[Splash] Phase 2: CrossFade done. Showing loader.");
@@ -158,13 +136,11 @@ namespace StateCraft.Core
             yield return StartCoroutine(RunLoader());
             Debug.Log("[Splash] Phase 2: Loader complete.");
 
-            // ── Phase 3: Show Main Menu Direct ─────────────────────────────────
             Debug.Log("[Splash] Phase 3: Showing main menu.");
             HideLoader();
             BindAndShowMenu();
         }
 
-        // ── Update: dot animation & debug skip ────────────────────────────────
         private void Update()
         {
             if (UnityEngine.Input.GetMouseButtonDown(0))
@@ -172,7 +148,6 @@ namespace StateCraft.Core
                 Debug.Log($"[Splash-UI-Diag] Mouse 0 Pressed at screen pos: {UnityEngine.Input.mousePosition}");
             }
 
-            // Close Name Modal only on Escape key (allow Spacebar inside TextField for multi-word names like "John Doe")
             if (_nameModal != null && _nameModal.style.display == DisplayStyle.Flex)
             {
                 if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.Escape))
@@ -180,7 +155,6 @@ namespace StateCraft.Core
                     OnCancelName();
                     return;
                 }
-                // Don't execute global spacebar skip while typing player name
                 return;
             }
 
@@ -206,9 +180,7 @@ namespace StateCraft.Core
             }
         }
 
-        // ── Phase Helpers ──────────────────────────────────────────────────────
-
-        private void HideAllOverlays()
+private void HideAllOverlays()
         {
             if (splashUIDocument   != null) splashUIDocument.rootVisualElement.style.opacity   = 0;
             else Debug.LogWarning("[Splash] splashUIDocument is NULL — loader won't show!");
@@ -278,7 +250,6 @@ namespace StateCraft.Core
             if (menuUIDocument == null) { Debug.LogError("[Splash] menuUIDocument is not assigned! Menu cannot show."); return; }
             if (menuUIDocument.panelSettings == null) { Debug.LogError("<color=red>[Splash] CRITICAL: menuUIDocument is missing Panel Settings! The menu will NOT render.</color>"); }
             
-            // Force rendering on top of the SplashCanvas map
             menuUIDocument.sortingOrder = 100;
             if (selectorUIDocument != null) selectorUIDocument.sortingOrder = 101;
 
@@ -326,7 +297,6 @@ namespace StateCraft.Core
                     _btnCloseHTP.clicked += HideHowToPlay;
                 }
                 
-                // Wire HTP Tabs
                 for (int i = 0; i <= 5; i++)
                 {
                     int tabIdx = i;
@@ -340,7 +310,6 @@ namespace StateCraft.Core
                 }
             }
 
-            // Check save existence and grey out Load Game if no save file
             bool saveExists = HasSaveFile();
             if (_btnLoadGame != null)
             {
@@ -364,11 +333,9 @@ namespace StateCraft.Core
             if (_btnConfirmOverwrite != null) _btnConfirmOverwrite.clicked += ProceedToNameModal;
             if (_btnCancelOverwrite != null) _btnCancelOverwrite.clicked += () => _overwriteSaveModal.style.display = DisplayStyle.None;
 
-            // Ensure modals start hidden
             if (_nameModal != null) _nameModal.style.display = DisplayStyle.None;
             if (_settingsModal != null) _settingsModal.style.display = DisplayStyle.None;
 
-            // Wire buttons
             if (_btnNewGame      != null) _btnNewGame.clicked      += OnNewGame;
             if (_btnLoadGame     != null) _btnLoadGame.clicked     += OnLoadGame;
             if (_btnHowToPlay    != null) _btnHowToPlay.clicked    += OnHowToPlay;
@@ -380,7 +347,6 @@ namespace StateCraft.Core
             if (_btnCloseSettings != null) _btnCloseSettings.clicked += HideSettings;
             if (_btnSaveSettings != null) _btnSaveSettings.clicked += HideSettings;
 
-            // Wire up Music Volume Slider
             var sliderMusic = root.Q<Slider>("SliderMusicVol");
             var lblMusic = root.Q<Label>("LblMusicVol");
             if (sliderMusic != null && lblMusic != null)
@@ -398,7 +364,6 @@ namespace StateCraft.Core
                 });
             }
 
-            // Wire up Display Settings (Fullscreen & Resolution)
             var toggleFullscreen = root.Q<Toggle>("ToggleFullscreen");
             var dropResolution = root.Q<DropdownField>("DropResolution");
             
@@ -441,7 +406,6 @@ namespace StateCraft.Core
                 if (dropResolution != null) dropResolution.index = 0;
             };
 
-            // Show menu
             root.style.display = DisplayStyle.Flex;
             Debug.Log("[Splash] Menu display set to Flex — menu should now be visible.");
         }
@@ -519,7 +483,6 @@ namespace StateCraft.Core
             Debug.Log("[Splash] Save file found. Loading scene: " + mainSceneName);
             GameContext.ShouldLoadSave = true;
             GameContext.ReturningToMainMenu = false;
-            // Load Game = ongoing conflict state, play war track during loading
             StartCoroutine(LoadSceneWithLoader(mainSceneName, "war"));
         }
 
@@ -591,9 +554,7 @@ namespace StateCraft.Core
 #endif
         }
 
-        // ── Country Selector ───────────────────────────────────────────────────
-
-        private void ShowCountrySelector()
+private void ShowCountrySelector()
         {
             Debug.Log("[Splash] ShowCountrySelector called.");
             if (selectorUIDocument == null) { Debug.LogError("[Splash] selectorUIDocument not assigned!"); return; }
@@ -605,7 +566,6 @@ namespace StateCraft.Core
 
             Debug.Log("[Splash] Country Selector elements: SelectorRoot=" + (_selectorRoot != null) + " CountryList=" + (_countryList != null) + " SearchInput=" + (_selectorSearch != null));
 
-            // Wire close button — goes back to main menu
             var closeBtn = root.Q<Button>("CloseSelector");
             if (closeBtn != null) 
             {
@@ -637,7 +597,6 @@ namespace StateCraft.Core
             root.style.display = DisplayStyle.None;
             root.pickingMode   = PickingMode.Ignore;
 
-            // Restore the menu document's picking so buttons work again
             if (menuUIDocument != null)
             {
                 var menuRoot = menuUIDocument.rootVisualElement;
@@ -650,14 +609,12 @@ namespace StateCraft.Core
 
         private CountryDataSO[] LoadAllCountries()
         {
-            // 1. Use inspector-assigned list if populated
             if (countryDataList != null && countryDataList.Length > 0)
             {
                 Debug.Log($"[Splash] Loading {countryDataList.Length} countries from inspector list.");
                 return countryDataList;
             }
 
-            // 2. Editor fallback: load from Assets/Data/Countries via AssetDatabase
 #if UNITY_EDITOR
             var guids = UnityEditor.AssetDatabase.FindAssets("t:CountryDataSO", new[] { "Assets/Data/Countries" });
             var list  = new List<CountryDataSO>();
@@ -670,7 +627,6 @@ namespace StateCraft.Core
             Debug.Log($"[Splash] Editor: loaded {list.Count} countries from Assets/Data/Countries.");
             return list.OrderBy(c => c.countryName).ToArray();
 #else
-            // 3. Build fallback: try Resources subfolder "Countries"
             var built = Resources.LoadAll<CountryDataSO>("Countries");
             Debug.Log($"[Splash] Build: loaded {built.Length} countries from Resources/Countries.");
             return built.OrderBy(c => c.countryName).ToArray();
@@ -734,53 +690,43 @@ namespace StateCraft.Core
                 GameContext.SelectedCountryName = country.countryName;
                 GameContext.ReturningToMainMenu  = false;
                 HideCountrySelector();
-                // New Game = fresh start, play peace track during loading
                 StartCoroutine(LoadSceneWithLoader(mainSceneName, "peace"));
             };
 
             return row;
         }
 
-        // ── Scene Loading with Loader UI ─────────────────────────────────────────
-
-        private IEnumerator LoadSceneWithLoader(string sceneName, string musicMood = "peace")
+private IEnumerator LoadSceneWithLoader(string sceneName, string musicMood = "peace")
         {
-            // Hide the menu UI so the loader sits on top cleanly
             if (menuUIDocument != null)
                 menuUIDocument.rootVisualElement.style.display = DisplayStyle.None;
             if (selectorUIDocument != null)
                 selectorUIDocument.rootVisualElement.style.display = DisplayStyle.None;
 
-            // Ensure the splash background is visible as a backdrop
             if (splashCanvasGroup != null)
             {
                 splashCanvasGroup.alpha = 1f;
                 splashCanvasGroup.gameObject.SetActive(true);
             }
 
-            // Trigger mood-appropriate music during loading
             if (AudioManager.Instance != null)
                 AudioManager.Instance.PlayMoodTrack(musicMood);
 
-            // Show the loader overlay
             ShowLoader();
             if (_loadingLabel != null) _loadingLabel.text = "LOADING  0%";
             if (_loadingBar   != null) _loadingBar.value  = 0f;
-            yield return null; // Let UI re-render before blocking
+            yield return null;
 
-            // Begin async scene load (allowSceneActivation = false so we control timing)
             var op = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneName);
             op.allowSceneActivation = false;
 
             float displayProgress = 0f;
             while (op.progress < 0.9f || displayProgress < 100f)
             {
-                // Async load goes to 0.9 (90%) then waits for allowSceneActivation
                 float target = (op.progress < 0.9f)
-                    ? op.progress / 0.9f * 95f   // map 0–0.9 to 0–95%
+                    ? op.progress / 0.9f * 95f
                     : 100f;
 
-                // Smooth the displayed progress so it doesn't jump
                 displayProgress = Mathf.MoveTowards(displayProgress, target, Time.deltaTime * 80f);
 
                 if (_loadingBar   != null) _loadingBar.value  = displayProgress;
@@ -790,18 +736,14 @@ namespace StateCraft.Core
                 yield return null;
             }
 
-            // Hold at 100% briefly so the player can see "READY"
             if (_loadingLabel != null) _loadingLabel.text = "READY";
             if (_loadingBar   != null) _loadingBar.value  = 100f;
             yield return new WaitForSeconds(0.4f);
 
-            // Activate the loaded scene
             op.allowSceneActivation = true;
         }
 
-        // ── Crossfade ──────────────────────────────────────────────────────────
-
-        private IEnumerator CrossFadeToSplash()
+private IEnumerator CrossFadeToSplash()
         {
             float elapsed = 0f;
             while (elapsed < fadeDuration)

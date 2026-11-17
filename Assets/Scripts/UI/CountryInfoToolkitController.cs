@@ -13,32 +13,24 @@ namespace StateCraft.UI
         private VisualElement _root;
         private CountryDataSO _currentCountry;
 
-        // Header
         private Label _nameLabel, _presidentLabel, _typeLabel, _capitalLabel, _relationBadge, _populationValue;
         private Image _flagImage;
         private Label _intelText;
 
-        // Economic stats
         private Label _gdpVal, _gdpGrowthVal, _inflationVal, _debtRatioVal;
 
-        // Political stats
         private Label _stabilityVal, _securityVal, _threatVal;
 
-        // Military stats
         private Label _milPersonnel, _milStrength, _milTanks, _milJets;
         private VisualElement _milEquipContainer;
 
-        // Crisis container
         private VisualElement _crisisContainer;
 
-        // News headline
         private VisualElement _headlineBox;
         private Label _headlineText;
 
-        // Scroll
         private ScrollView _scrollView;
 
-        // Buttons
         private Button _btnClose, _btnInvest, _btnSpy, _btnSabotage, _btnWar, _btnAlly;
 
         private void Awake()
@@ -46,8 +38,6 @@ namespace StateCraft.UI
             _uiDocument = GetComponent<UIDocument>();
             if (_uiDocument != null)
             {
-                // CRITICAL: keep this document BELOW the main dashboard so it
-                // never intercepts raycast clicks when the panel is hidden.
                 _uiDocument.sortingOrder = -1;
                 _root = _uiDocument.rootVisualElement;
             }
@@ -64,9 +54,6 @@ namespace StateCraft.UI
 
             if (_root != null)
             {
-                // The document root must ALWAYS be Ignore — clicks go through it
-                // to the main dashboard. Only the panel element itself becomes
-                // Position when the dossier is shown.
                 _root.pickingMode = PickingMode.Ignore;
 
                 var p = _root.Q<VisualElement>("CountryInfoPanel");
@@ -98,7 +85,6 @@ namespace StateCraft.UI
             }
         }
         
-        // This is a static method we can call from MapCameraController to see if it should ignore zoom
         public static bool IsPointerOverDossierStatic()
         {
             var inst = FindObjectOfType<CountryInfoToolkitController>();
@@ -129,7 +115,6 @@ namespace StateCraft.UI
 
             RefreshDisplay(country);
 
-            // Hide action buttons when inspecting own country
             bool isOwnCountry = GameManager.Instance != null && GameManager.Instance.playerCountry == country;
             if (_btnAlly != null) _btnAlly.style.display = isOwnCountry ? DisplayStyle.None : DisplayStyle.Flex;
             if (_btnWar != null)  _btnWar.style.display  = isOwnCountry ? DisplayStyle.None : DisplayStyle.Flex;
@@ -141,7 +126,6 @@ namespace StateCraft.UI
                 if (_uiDocument != null) _uiDocument.sortingOrder = 10;
                 panel.style.display = DisplayStyle.Flex;
                 panel.style.opacity = 1;
-                // Re-enable picking on the panel and its children
                 panel.pickingMode = PickingMode.Position;
                 panel.Query<VisualElement>().ForEach(ve =>
                 {
@@ -254,11 +238,10 @@ namespace StateCraft.UI
                 }
                 else if (country.countryFlag != null)
                 {
-                    _flagImage.sprite = country.countryFlag; // Fallback to serialized flag
+                    _flagImage.sprite = country.countryFlag;
                 }
             }
 
-            // Update Faction Button text & styling based on relationship & faction state
             if (_btnAlly != null && player != null)
             {
                 bool playerInFaction = !string.IsNullOrEmpty(player.globalFaction) && player.globalFaction != "Independent" && player.globalFaction != "Non-Aligned";
@@ -302,7 +285,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // Derive a government descriptor from available data (no governmentType field on SO)
             string govType = country.stability > 70f ? "STABLE DEMOCRACY" :
                              country.stability > 45f ? "TRANSITIONAL GOVERNMENT" :
                              country.militaryStrength > 300f ? "MILITARY-LED REGIME" : "FRAGILE STATE";
@@ -331,7 +313,6 @@ namespace StateCraft.UI
 
             string headline = null;
 
-            // Search the global news history for a recent mention of this country
             if (NewsSystem.Instance != null)
             {
                 headline = System.Linq.Enumerable.FirstOrDefault(
@@ -344,8 +325,7 @@ namespace StateCraft.UI
                         n => n.IndexOf(country.countryName, System.StringComparison.OrdinalIgnoreCase) >= 0);
             }
 
-            // Determine border color from headline keywords, or fall back to stat-based brief
-            Color accent = new Color(255/255f, 152/255f, 0/255f); // amber default
+            Color accent = new Color(255/255f, 152/255f, 0/255f);
             if (!string.IsNullOrEmpty(headline))
             {
                 if (headline.Contains("WAR") || headline.Contains("MILITARY") || headline.Contains("CONFLICT") || headline.Contains("SKIRMISH"))
@@ -359,7 +339,6 @@ namespace StateCraft.UI
             }
             else
             {
-                // Fallback: derive a brief from live stats
                 var gm = GameManager.Instance;
                 var warStage = gm?.WarSystem != null ? gm.WarSystem.GetWarStage(country) : StateCraft.Interfaces.WarStage.Peace;
 
@@ -392,7 +371,6 @@ namespace StateCraft.UI
             _headlineBox.style.borderLeftColor   = new Color(accent.r, accent.g, accent.b, 0.5f);
             _headlineBox.style.borderRightColor  = new Color(accent.r, accent.g, accent.b, 0.5f);
 
-            // Tint the "▶ LATEST HEADLINE" label too
             var titleLbl = _headlineBox.Q<Label>();
             if (titleLbl != null && titleLbl != _headlineText) titleLbl.style.color = accent;
         }
@@ -405,18 +383,16 @@ namespace StateCraft.UI
 
             int tier = Mathf.Clamp(Mathf.FloorToInt(level / 25f) + 1, 1, 4);
 
-            // Cap the tier if the player has no real intel assets deployed/owned
             if (player != null && c != player)
             {
                 if (player.satelliteCount == 0 && player.droneCount == 0 && player.operativeCount < 5)
                 {
-                    tier = 1; // Force tier 1 if player has no intel assets
+                    tier = 1;
                 }
             }
 
             if (_intelText != null) _intelText.text = $"INTEL LEVEL {tier}: {GetIntelTierName(tier)}";
 
-            // ECONOMICS
             string sym = c.currencySymbol ?? "$";
             if (_gdpVal != null)     _gdpVal.text     = tier >= 1 ? UiFormat.Money(c.gdp * c.exchangeRate, sym) : "REDACTED";
             if (_gdpGrowthVal != null)
@@ -432,7 +408,6 @@ namespace StateCraft.UI
                 _debtRatioVal.style.color = ratio > 0.8f ? new Color(255/255f, 82/255f, 82/255f) : Color.white;
             }
 
-            // STABILITY
             if (_stabilityVal != null)
             {
                 _stabilityVal.text = tier >= 2 ? $"{c.stability:F0}%" : "UNCERTAIN";
@@ -451,7 +426,6 @@ namespace StateCraft.UI
                 _threatVal.style.color = tc;
             }
 
-            // MILITARY & ORDER OF BATTLE BREAKDOWN
             float milScore = c.GetMilitaryFirepowerScore();
             if (_milPersonnel != null) _milPersonnel.text = tier >= 3 ? $"{c.armyStats.personnel:N0}" : "CLASSIFIED";
             if (_milStrength != null)  _milStrength.text  = tier >= 3 ? $"{milScore:N0}" : "CLASSIFIED";
@@ -482,7 +456,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // CRISES
             if (_crisisContainer != null)
             {
                 _crisisContainer.Clear();
@@ -511,9 +484,7 @@ namespace StateCraft.UI
             }
         }
 
-        // ---- ACTIONS ----
-
-        private void OnInviteToFactionClicked()
+private void OnInviteToFactionClicked()
         {
             if (GameManager.Instance == null || _currentCountry == null) 
             {

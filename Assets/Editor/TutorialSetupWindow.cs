@@ -60,7 +60,6 @@ namespace StateCraft.Editor
         {
             Debug.Log("[TutorialSetupWindow] Setting up dedicated top-level [TutorialUIDocument]...");
 
-            // 1. Find or create dedicated [TutorialUIDocument] GameObject
             var tourGO = GameObject.Find("[TutorialUIDocument]");
             if (tourGO == null)
             {
@@ -69,7 +68,6 @@ namespace StateCraft.Editor
                 Debug.Log("[TutorialSetupWindow] Created GameObject '[TutorialUIDocument]'.");
             }
 
-            // 2. Add and configure UIDocument
             var uiDoc = tourGO.GetComponent<UIDocument>();
             if (uiDoc == null)
             {
@@ -89,7 +87,6 @@ namespace StateCraft.Editor
                 Debug.LogError("[TutorialSetupWindow] Could not find Assets/UI/Layouts/TutorialTour.uxml!");
             }
 
-            // 3. Add and bind TutorialTourController
             var tourCtrl = tourGO.GetComponent<TutorialTourController>();
             if (tourCtrl == null)
             {

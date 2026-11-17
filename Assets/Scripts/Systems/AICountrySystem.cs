@@ -1,10 +1,3 @@
-// ============================================================
-// FILE: Scripts/Systems/AICountrySystem.cs  (FULL REPLACEMENT)
-// PURPOSE: AI can now:
-//   - Declare war when conditions are met
-//   - Issue ultimatums (pre-war pressure)
-//   - All AI decisions driven by the RelationsMatrix
-// ============================================================
 
 using StateCraft.Interfaces;
 using StateCraft.Data;
@@ -16,15 +9,14 @@ namespace StateCraft.Systems
 {
     public class AICountrySystem : IAICountrySystem
     {
-        // ── Cooldowns so AI doesn't spam ─────────────────────
         private Dictionary<string, int> _lastUltimatumMonth = new Dictionary<string, int>();
         private Dictionary<string, int> _lastWarDeclaredMonth = new Dictionary<string, int>();
 
-        private const float WAR_DECLARATION_RELATION_THRESHOLD = -55f;  // below this score, AI may declare war
-        private const float ULTIMATUM_RELATION_THRESHOLD       = -35f;  // below this, AI may issue ultimatum
-        private const int   ULTIMATUM_COOLDOWN_MONTHS          = 12;    // don't repeat ultimatum within a year
-        private const int   WAR_COOLDOWN_MONTHS                = 24;    // don't declare war again within 2 years
-        private const float WAR_DECLARATION_POWER_THRESHOLD    = 0.75f; // AI declares war only if military ≥ 75% of target
+        private const float WAR_DECLARATION_RELATION_THRESHOLD = -55f;
+        private const float ULTIMATUM_RELATION_THRESHOLD       = -35f;
+        private const int   ULTIMATUM_COOLDOWN_MONTHS          = 12;
+        private const int   WAR_COOLDOWN_MONTHS                = 24;
+        private const float WAR_DECLARATION_POWER_THRESHOLD    = 0.75f;
 
         public void RunAI(CountryDataSO country)
         {
@@ -33,20 +25,15 @@ namespace StateCraft.Systems
 
             int currentMonth = gm.TurnSystem?.CurrentTurn ?? 0;
 
-            // ── Security & internal stability ──────────────
             HandleInternalSecurity(country, gm);
 
-            // ── Military expansion ──────────────────────────
             HandleMilitaryExpansion(country, gm);
 
-            // ── Relations-driven foreign policy ────────────
             HandleForeignPolicy(country, gm, currentMonth);
 
-            // ── Trade proposals ────────────────────────────
             HandleTradeProposals(country, gm);
         }
 
-        // ── Internal Security (unchanged from original) ─────
         private void HandleInternalSecurity(CountryDataSO country, GameManager gm)
         {
             if (country.stability < 60f)
@@ -67,7 +54,6 @@ namespace StateCraft.Systems
                 gm.WarSystem.SetWarStage(country, WarStage.Tension);
         }
 
-        // ── Military Expansion (unchanged from original) ─────
         private void HandleMilitaryExpansion(CountryDataSO country, GameManager gm)
         {
             if (country.treasury <= 5f) return;
@@ -121,13 +107,11 @@ namespace StateCraft.Systems
             }
         }
 
-        // ── FOREIGN POLICY — driven by RelationsMatrix ───────
         private void HandleForeignPolicy(CountryDataSO country, GameManager gm, int currentMonth)
         {
             if (gm.allCountries == null) return;
             if (gm.Relations == null)    return;
 
-            // Only check once every 2-3 months per country (add jitter)
             if (currentMonth % 2 != (Mathf.Abs(country.countryName.GetHashCode()) % 2)) return;
 
             foreach (var target in gm.allCountries)
@@ -137,22 +121,15 @@ namespace StateCraft.Systems
                 float relation = gm.Relations.GetScore(country.countryName, target.countryName);
                 var   warStage = gm.WarSystem.GetWarStage(country);
 
-                // Skip if already at war with this target
                 string warKey = country.countryName + "_" + target.countryName;
                 if (warStage == WarStage.Conflict) continue;
 
-                // ── ULTIMATUM LOGIC ──────────────────────────
-                // AI issues an ultimatum when:
-                //   - Relations below threshold
-                //   - Target is weak OR has something AI wants
-                //   - No recent ultimatum or war
                 if (relation <= ULTIMATUM_RELATION_THRESHOLD
                     && !target.hasNuclearWeapon
                     && !_lastUltimatumMonth.ContainsKey(warKey + "_ult")
                     || (_lastUltimatumMonth.ContainsKey(warKey + "_ult")
                         && currentMonth - _lastUltimatumMonth[warKey + "_ult"] > ULTIMATUM_COOLDOWN_MONTHS))
                 {
-                    // Only pursue if AI has meaningful military
                     if (country.armyStats.personnel > 5000 && Random.value < 0.25f)
                     {
                         DeclareUltimatum(country, target, gm, currentMonth);
@@ -161,11 +138,6 @@ namespace StateCraft.Systems
                     }
                 }
 
-                // ── WAR DECLARATION LOGIC ────────────────────
-                // AI declares war when:
-                //   - Relations below war threshold OR existing ultimatum expired
-                //   - Military power ≥ 75% of target's
-                //   - No recent war
                 bool ultimatumExpired = false;
                 var rel = gm.Relations.GetOrCreate(country.countryName, target.countryName);
                 if (rel.hasUltimatum
@@ -182,7 +154,6 @@ namespace StateCraft.Systems
                     && !target.hasNuclearWeapon
                     && country.armyStats.personnel > 3000)
                 {
-                    // Cooldown check
                     bool onCooldown = _lastWarDeclaredMonth.ContainsKey(warKey)
                         && currentMonth - _lastWarDeclaredMonth[warKey] < WAR_COOLDOWN_MONTHS;
 
@@ -195,7 +166,6 @@ namespace StateCraft.Systems
                         {
                             if (Random.value < (ultimatumExpired ? 0.85f : 0.20f))
                             {
-                                // Mark ultimatum resolved before war
                                 if (rel.hasUltimatum)
                                 {
                                     rel.ultimatumResolved = true;
@@ -205,14 +175,11 @@ namespace StateCraft.Systems
                                 gm.WarSystem.DeclareWar(country, target);
                                 _lastWarDeclaredMonth[warKey] = currentMonth;
 
-                                // Notify player if the player is involved
                                 if (gm.playerCountry == target)
                                 {
-                                    // Player is the defender — notifications come from DeclareWar
                                 }
                                 else if (gm.playerCountry != country)
                                 {
-                                    // Third-party observer
                                     UI.NotificationManager.Instance?.AddNotification(
                                         $"⚔ WAR: {country.countryName} declares war on {target.countryName}. " +
                                         $"World tension rising.",
@@ -222,7 +189,7 @@ namespace StateCraft.Systems
                                 gm.Relations.Adjust(country.countryName, target.countryName, -40f,
                                     $"{country.countryName} declared war", currentMonth);
 
-                                break; // Only declare one war per AI turn
+                                break;
                             }
                         }
                     }
@@ -230,31 +197,23 @@ namespace StateCraft.Systems
             }
         }
 
-        // ── ULTIMATUM ─────────────────────────────────────────
-        /// <summary>
-        /// AI issues a formal ultimatum to <paramref name="target"/>.
-        /// The demand is picked based on the AI's most pressing need.
-        /// If the target (player) does not comply within 3 months, war follows.
-        /// </summary>
         private void DeclareUltimatum(CountryDataSO sender, CountryDataSO target,
                                       GameManager gm, int currentMonth)
         {
             var rel = gm.Relations.GetOrCreate(sender.countryName, target.countryName);
-            if (rel.hasUltimatum) return; // already one pending
+            if (rel.hasUltimatum) return;
 
-            // Pick a demand based on what the AI needs most
             string demand = ChooseUltimatumDemand(sender, target);
 
             rel.hasUltimatum           = true;
             rel.ultimatumFromCountry   = sender.countryName;
             rel.ultimatumDemand        = demand;
-            rel.ultimatumDeadlineMonth = currentMonth + 3; // 3-month deadline
+            rel.ultimatumDeadlineMonth = currentMonth + 3;
             rel.ultimatumResolved      = false;
 
             gm.Relations.Adjust(sender.countryName, target.countryName, -15f,
                 $"Ultimatum issued by {sender.countryName}", currentMonth);
 
-            // If the target is the player, push an urgent inbox message
             if (gm.playerCountry == target)
             {
                 InboxSystem.Instance?.SendMessage(target,
@@ -278,7 +237,6 @@ namespace StateCraft.Systems
             }
             else
             {
-                // Third-party observer sees the headline
                 NewsSystem.Instance?.PublishNews(
                     $"ULTIMATUM: {sender.countryName} issues formal demands to {target.countryName}. " +
                     $"Regional tensions spike.");
@@ -287,7 +245,6 @@ namespace StateCraft.Systems
 
         private string ChooseUltimatumDemand(CountryDataSO sender, CountryDataSO target)
         {
-            // Priority 1: Resource access
             if (sender.resources != null)
             {
                 foreach (var res in sender.resources)
@@ -298,23 +255,19 @@ namespace StateCraft.Systems
                 }
             }
 
-            // Priority 2: Territory / border incidents
             if (sender.stability < 40f)
                 return $"Cease all cross-border activities that destabilise our border regions, " +
                        $"dismantle militia camps within 60 km of the shared border, " +
                        $"and submit to joint border monitoring within 30 days.";
 
-            // Priority 3: Prestige / sanctions
             if (target.globalPrestige > sender.globalPrestige + 20f)
                 return $"Publicly withdraw the economic sanctions imposed against our nation " +
                        $"and restore normal diplomatic relations by the stated deadline.";
 
-            // Fallback
             return $"Reduce your military presence along our shared border by 50% " +
                    $"and provide written assurance of non-aggression for the next 36 months.";
         }
 
-        // ── Helper: crude military power estimate ────────────
         private float EstimateMilitaryPower(CountryDataSO c)
         {
             return c.unitInfantry * 1f
@@ -334,12 +287,10 @@ namespace StateCraft.Systems
             return target;
         }
 
-        // ── Trade & Diplomatic Proposals ─────────────────────────
         private void HandleTradeProposals(CountryDataSO country, GameManager gm)
         {
             if (gm.playerCountry == null) return;
 
-            // 1. Peace Treaty Proposal from enemy AI country
             var warStage = gm.WarSystem != null ? gm.WarSystem.GetWarStage(country) : WarStage.Peace;
             if (warStage >= WarStage.Tension && Random.value < 0.15f)
             {
@@ -366,7 +317,6 @@ namespace StateCraft.Systems
                 return;
             }
 
-            // 2. Faction Alliance Invitation from friendly AI country
             if (!string.IsNullOrEmpty(country.globalFaction) && country.globalFaction != "Independent" && country.globalFaction != "Non-Aligned")
             {
                 if (gm.playerCountry.globalFaction == "Independent" || gm.playerCountry.globalFaction == "Non-Aligned")
@@ -398,7 +348,6 @@ namespace StateCraft.Systems
                 }
             }
 
-            // 3. Trade Agreement Offer
             if (Random.value >= 0.2f || gm.playerCountry.resources == null) return;
 
             foreach (var res in country.resources)

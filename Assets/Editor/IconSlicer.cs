@@ -43,14 +43,10 @@ public class IconSlicer : EditorWindow
             return;
         }
 
-        // We will perform a simple background separation since we can't easily access the SpriteEditor internals via reflection without a lot of fragile code.
-        // Instead, we will slice them into individual files for the user!
-        
-        Color32[] pixels = tex.GetPixels32();
+Color32[] pixels = tex.GetPixels32();
         int width = tex.width;
         int height = tex.height;
         
-        // Background color is top left pixel
         Color32 bg = pixels[0];
         
         bool[,] isForeground = new bool[width, height];
@@ -64,11 +60,9 @@ public class IconSlicer : EditorWindow
             }
         }
         
-        // Group connected components
         List<RectInt> rects = new List<RectInt>();
         bool[,] visited = new bool[width, height];
         
-        // Morphological dilate to connect text to icons
         int dilateDist = 8;
         bool[,] dilated = new bool[width, height];
         for (int y = 0; y < height; y++)
@@ -97,7 +91,6 @@ public class IconSlicer : EditorWindow
             {
                 if (dilated[x, y] && !visited[x, y])
                 {
-                    // Flood fill to find bounds
                     int minX = x, maxX = x, minY = y, maxY = y;
                     Queue<Vector2Int> q = new Queue<Vector2Int>();
                     q.Enqueue(new Vector2Int(x, y));
@@ -111,7 +104,6 @@ public class IconSlicer : EditorWindow
                         if (p.y < minY) minY = p.y;
                         if (p.y > maxY) maxY = p.y;
                         
-                        // Check neighbors
                         for (int dy = -1; dy <= 1; dy++)
                         {
                             for (int dx = -1; dx <= 1; dx++)
@@ -131,7 +123,6 @@ public class IconSlicer : EditorWindow
                     int h = maxY - minY;
                     if (w > 15 && h > 15 && w < 300 && h < 300)
                     {
-                        // Add padding
                         int pad = 10;
                         minX = Mathf.Max(0, minX - pad);
                         minY = Mathf.Max(0, minY - pad);
@@ -146,7 +137,6 @@ public class IconSlicer : EditorWindow
         
         Debug.Log("Found " + rects.Count + " icons!");
         
-        // Save them as individual transparent PNGs
         int count = 0;
         foreach (var r in rects)
         {
@@ -160,7 +150,7 @@ public class IconSlicer : EditorWindow
                     int diff = Mathf.Abs(c.r - bg.r) + Mathf.Abs(c.g - bg.g) + Mathf.Abs(c.b - bg.b);
                     if (diff < 40)
                     {
-                        c.a = 0; // transparent
+                        c.a = 0;
                     }
                     slicePixels[y * r.width + x] = c;
                 }

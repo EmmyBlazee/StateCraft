@@ -66,7 +66,6 @@ public class IconRenamerWindow : EditorWindow
         {
             GUILayout.BeginHorizontal("box");
             
-            // Draw the icon
             GUILayout.Box(icons[i], GUILayout.Width(64), GUILayout.Height(64));
             
             GUILayout.BeginVertical();
@@ -93,7 +92,7 @@ public class IconRenamerWindow : EditorWindow
             if (oldName != safeNewName && !string.IsNullOrWhiteSpace(safeNewName))
             {
                 string result = AssetDatabase.RenameAsset(assetPaths[i], safeNewName);
-                if (string.IsNullOrEmpty(result)) // Success
+                if (string.IsNullOrEmpty(result))
                 {
                     renamedCount++;
                 }

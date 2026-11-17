@@ -44,15 +44,9 @@ namespace StateCraft.UI
             var db = GameManager.Instance?.EconomyDatabase;
             if (db == null) { Debug.LogWarning("[IndustryUI] RefreshIndustryTab — GameManager.EconomyDatabase is NULL. Assign an EconomyDatabaseSO asset to GameManager.EconomyDatabase for this tab to show real data."); return; }
 
-            // Query from _panelIndustry (the ScrollView) rather than _root.
-            // _root is the EconomyDashboard scoped element; when PanelIndustry is display:none
-            // on the first RefreshDisplay call, Unity's Q<> traversal doesn't descend into it
-            // reliably, so every query returns null. Querying from the panel itself works
-            // regardless of its display state because the element is still in the tree.
             var panel = _panelIndustry ?? _root.Q<VisualElement>("PanelIndustry");
             if (panel == null) { Debug.LogWarning("[IndustryUI] PanelIndustry not found — aborting refresh."); return; }
 
-            // Re-attempt any static refs that were null at startup (panel was display:none then)
             if (_lblIndOverviewOutput == null) _lblIndOverviewOutput = panel.Q<Label>("IndustryOverview_Output");
             if (_lblIndOverviewGDPPct == null) _lblIndOverviewGDPPct = panel.Q<Label>("IndustryOverview_GDPPct");
             if (_lblIndOverviewMeter  == null) _lblIndOverviewMeter  = panel.Q<Label>("IndustryOverview_Meter");
@@ -81,7 +75,6 @@ namespace StateCraft.UI
                 if (rev < weakRev) { weakRev = rev; weakInd = ind; }
             }
 
-            // Overview Card
             if (_lblIndOverviewOutput != null) _lblIndOverviewOutput.text = UiFormat.Money(totalRev, sym) + " / mo";
             float pctGDP = country.gdp > 0 ? (totalRev / (country.gdp * country.exchangeRate / 12f)) * 100f : 0f;
             if (_lblIndOverviewGDPPct != null) _lblIndOverviewGDPPct.text = $"Total Contribution to GDP: {pctGDP:F1}%";
@@ -116,8 +109,6 @@ namespace StateCraft.UI
                 string synergy = StateCraft.Systems.EconomyLogicEvaluator.GetIndustrySynergy(country, ind.id);
                 float workforce = StateCraft.Systems.EconomyLogicEvaluator.GetIndustryWorkforce(country, ind.id) / 1000f;
 
-                // Cache this row's widgets once; retry only the ones still null (panel may not
-                // have existed in the tree yet the first time we looked).
                 if (!_industryRowRefs.TryGetValue(ind.id, out var refs))
                 {
                     refs = new IndustryRowRefs();
@@ -129,7 +120,6 @@ namespace StateCraft.UI
                     refs.Btn = panel.Q<Button>($"Industry{ind.id}_Btn");
                     if (refs.Btn != null)
                     {
-                        // Capture ind.id for the closure — do NOT capture the loop variable
                         string capturedId = ind.id;
                         refs.Btn.RegisterCallback<ClickEvent>(_ => UpgradeIndustry(capturedId));
                     }
@@ -245,19 +235,16 @@ namespace StateCraft.UI
                 if (refs.RingElem != null) refs.RingElem.SetValue(contrib);
             }
 
-            // Adviser
             if (_currentAdviserRec != null) {
                 if (_lblIndAdviserName != null) _lblIndAdviserName.text = AdviserEngine.GetEconomicAdviserName(country);
                 if (_lblIndAdviserRec  != null) _lblIndAdviserRec.text  = _currentAdviserRec.Value.Category;
                 if (_lblIndAdviserBody != null) _lblIndAdviserBody.text = _currentAdviserRec.Value.Rationale;
             }
 
-            // Alerts
             var alertsCont = _industryAlertsContainer;
             if (alertsCont != null) {
                 while (alertsCont.childCount > 1) alertsCont.RemoveAt(1);
                 var alerts = BuildUIAlerts(country).FindAll(a => a.Severity != AlertSeverity.Info);
-                // just pick top 3
                 int ct = 0;
                 foreach (var a in alerts) {
                     if (ct >= 3) break;

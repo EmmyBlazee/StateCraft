@@ -5,10 +5,10 @@ namespace StateCraft.Data
 {
     public enum RegionSpecialization
     {
-        Rural,           // Standard baseline
-        Urban,           // High impact on national stability if attacked
-        ResourceRich,    // Major GDP contributor, drops drastically if insurgency takes over
-        BorderConflict   // High natural base insurgency risk
+        Rural,
+        Urban,
+        ResourceRich,
+        BorderConflict
     }
 
     public enum InsurgencyIdeology
@@ -48,12 +48,11 @@ namespace StateCraft.Data
         
         [Header("Instability")]
         [Range(0, 100)]
-        public float intelCoverage = 0f; // High coverage = accurate threat estimates and combat bonuses
+        public float intelCoverage = 0f;
         public float insurgencyLevel = 0f;
         [Tooltip("Floor risk. Insurgency will rapidly bounce back to this minimum level if unattended.")]
         public float baseInsurgencyRisk = 0f;
         
-        // Advanced Insurgency Mechanics (Expansion II)
         public InsurgencyIdeology insurgencyIdeology = InsurgencyIdeology.None;
         [Tooltip("Number of turns/months this insurgency has been active without a major counter-operation.")]
         public int insurgencyDuration = 0; 
@@ -67,9 +66,9 @@ namespace StateCraft.Data
         }
 
         [Range(0, 100)]
-        public float heartsAndMinds = 50f; // High civilian support suppresses insurgency passively
+        public float heartsAndMinds = 50f;
         [Range(0, 100)]
-        public float insurgentSupplyLines = 100f; // Dips when covert ops sabotage them
+        public float insurgentSupplyLines = 100f;
         public string regionalGovernor = "Placeholder Governor";
 
         [Header("Insurgent Camp Intel")]

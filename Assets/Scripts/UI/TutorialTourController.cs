@@ -105,7 +105,6 @@ namespace StateCraft.UI
 
         public bool EnsureBound()
         {
-            // 1. Check if UIDocument already exists on this GameObject
             _uiDoc = GetComponent<UIDocument>();
 
             if (_uiDoc == null || _uiDoc.visualTreeAsset == null)
@@ -134,7 +133,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // Fallback: search scene for any existing TutorialTourRoot element
             if (_tourRoot == null)
             {
                 var docs = FindObjectsOfType<UIDocument>();
@@ -186,7 +184,6 @@ namespace StateCraft.UI
         {
             _steps = new List<TutorialStep>
             {
-                // Module 1: Command Essentials (Map View & Top Bar)
                 new TutorialStep("COMMAND ESSENTIALS", "Welcome Commander", "",
                     "Welcome to StateCraft! You are the Head of State. Guide your nation through economic growth, military power, intelligence black ops, and international diplomacy.", "", "", ""),
 
@@ -208,7 +205,6 @@ namespace StateCraft.UI
                 new TutorialStep("COMMAND ESSENTIALS", "Dashboard Navigation Bar", "",
                     "Use the bottom bar to navigate between your main government ministries: Economy, Military, Intelligence, Diplomacy, Events, and Global Power.", "", "", "BottomNavBar"),
 
-                // Module 2: Economy & Taxes (Economy Dashboard)
                 new TutorialStep("ECONOMY & TAXES", "Economy Overview", "",
                     "The Economy Dashboard tracks your GDP, annual growth rate, inflation, and public approval. A strong economy funds all national ambitions.", "Economy", "TabDashboard", "TabDashboard"),
 
@@ -224,7 +220,6 @@ namespace StateCraft.UI
                 new TutorialStep("ECONOMY & TAXES", "Infrastructure & National Projects", "",
                     "Commission mega infrastructure projects, energy grids, transport hubs, and industrial parks to boost national productivity.", "Economy", "TabConstruction", "TabConstruction"),
 
-                // Module 3: Military & National Defense (Military Dashboard)
                 new TutorialStep("MILITARY & DEFENSE", "Armed Forces Readiness", "",
                     "Manage Army, Navy, Air Force, and Rapid Deployment Forces. Keep readiness high and select your defense posture (Peacetime vs Mobilized).", "Military", "TabForces", "TabForces"),
 
@@ -252,7 +247,6 @@ namespace StateCraft.UI
                 new TutorialStep("MILITARY & DEFENSE", "Defense Budget & Upkeep", "",
                     "Monitor standing military expenses, equipment maintenance, and base upkeep to ensure military spending remains fiscally sustainable.", "Military", "TabBudget", "TabBudget"),
 
-                // Module 4: Intelligence & Covert Ops (Intel Dashboard)
                 new TutorialStep("INTELLIGENCE & BLACK OPS", "How Intelligence Works", "",
                     "Your intelligence agency runs automatically in the background. Field agents gather SIGINT, run surveillance, and execute counter-intel sweeps every month without your direct input. Your job as President is high-level oversight — not micromanagement.", "Intel", "TabOverview", "TabOverview"),
 
@@ -265,7 +259,6 @@ namespace StateCraft.UI
                 new TutorialStep("INTELLIGENCE & BLACK OPS", "Threat Assessment", "",
                     "The agency automatically compiles threat reports on domestic instability, foreign incursions, and regional hotspots. Check this tab regularly so you stay informed — critical threats pause the game and notify you directly.", "Intel", "TabThreats", "TabThreats"),
 
-                // Module 5: Diplomacy & Foreign Affairs (Diplomacy Dashboard)
                 new TutorialStep("DIPLOMACY & ALLIANCES", "Diplomatic Overview", "",
                     "Review international relations, diplomatic event logs, active treaties, and your nation's global reputation.", "Diplomacy", "TabOverview", "TabOverview"),
 
@@ -284,7 +277,6 @@ namespace StateCraft.UI
                 new TutorialStep("DIPLOMACY & ALLIANCES", "Trade & Natural Resources", "",
                     "Negotiate strategic resource exchange agreements, export crude oil, minerals, and food, and import advanced industrial machinery.", "Diplomacy", "TabTrade", "TabTrade"),
 
-                // Module 6: Strategic Events & Global Superpowers
                 new TutorialStep("STRATEGIC EVENTS", "National Events & Crises", "",
                     "Monitor ongoing national developments, geopolitical crises, economic shocks, and presidential decrees in your Events Dashboard.", "Events", "", "NavEvents"),
 
@@ -333,7 +325,6 @@ namespace StateCraft.UI
             SetTourVisibility(true);
             HidePrompt();
 
-            // Auto-Pause game time simulation during tutorial
             MainDashboardToolkitController.Instance?.SetTimeSpeed(0);
 
             ShowStep(0);
@@ -374,7 +365,6 @@ namespace StateCraft.UI
 
             if (_tourCard != null) _tourCard.style.display = DisplayStyle.Flex;
 
-            // 1. Panel Auto-Switching
             if (!string.IsNullOrEmpty(step.targetPanelName))
             {
                 MainDashboardToolkitController.Instance?.ShowPanel(step.targetPanelName);
@@ -384,7 +374,6 @@ namespace StateCraft.UI
                 MainDashboardToolkitController.Instance?.HideAllPanels();
             }
 
-            // 2. Auto-Trigger Click on Target Element (Sub-tabs, System Menu, Notifications)
             if (!string.IsNullOrEmpty(step.targetSubTabName))
             {
                 TriggerTargetClick(step.targetSubTabName);
@@ -394,7 +383,6 @@ namespace StateCraft.UI
                 TriggerTargetClick(step.targetElementQuery);
             }
 
-            // 3. Update Spotlight Position & Move Card
             StopAllCoroutines();
             StartCoroutine(DeferredUpdateSpotlight(step));
         }
@@ -403,7 +391,6 @@ namespace StateCraft.UI
         {
             if (string.IsNullOrEmpty(elementQuery)) return;
 
-            // Direct Controller Sub-Tab Switching
             var ecoCtrl = FindObjectOfType<EconomyDashboardController>(true);
             if (ecoCtrl != null) ecoCtrl.SwitchTabByName(elementQuery);
 
@@ -416,7 +403,6 @@ namespace StateCraft.UI
             var dipCtrl = FindObjectOfType<DiplomacyDashboardController>(true);
             if (dipCtrl != null) dipCtrl.SwitchTabByName(elementQuery);
 
-            // Universal UI Toolkit event dispatch fallback across all documents
             var docs = FindObjectsOfType<UIDocument>();
             foreach (var doc in docs)
             {
@@ -477,12 +463,10 @@ namespace StateCraft.UI
 
             bool isDashboardActive = !string.IsNullOrEmpty(step.targetPanelName);
 
-            // 1. Directly highlight target element with bright neon glow
             if (targetElement != null)
             {
                 HighlightTargetElement(targetElement);
 
-                // Smart positioning for TopBar / Header / Top-Right elements
                 if (_tourCard != null && (step.targetElementQuery == "TimeControls" || step.targetElementQuery == "BtnNotificationHistory" || step.targetElementQuery == "TopBar" || step.targetElementQuery == "BtnSystemMenu" || step.targetElementQuery == "PlayerFlag"))
                 {
                     _tourCard.style.position = Position.Absolute;
@@ -510,14 +494,12 @@ namespace StateCraft.UI
                 if (_spotlightFrame != null) _spotlightFrame.style.display = DisplayStyle.None;
             }
 
-            // 2. Position Tour Card smartly inside active Dashboard view vs Map
             if (_tourCard != null)
             {
                 _tourCard.style.position = Position.Absolute;
 
                 if (isDashboardActive)
                 {
-                    // Clean, anchored placement in lower-right of the active dashboard screen
                     _tourCard.style.translate = StyleKeyword.Null;
                     _tourCard.style.right = 30;
                     _tourCard.style.bottom = 40;
@@ -526,7 +508,6 @@ namespace StateCraft.UI
                 }
                 else
                 {
-                    // Center placement on map view for general intro steps
                     _tourCard.style.position = Position.Absolute;
                     _tourCard.style.left = Length.Percent(50);
                     _tourCard.style.top = Length.Percent(50);
@@ -565,10 +546,8 @@ namespace StateCraft.UI
             HidePrompt();
             if (_spotlightFrame != null) _spotlightFrame.style.display = DisplayStyle.None;
 
-            // Auto-Resume game time simulation when tutorial ends
             MainDashboardToolkitController.Instance?.SetTimeSpeed(1);
 
-            // Show the scenario briefing now that the tutorial is complete
             var player = GameManager.Instance?.playerCountry;
             if (player != null && !player.hasShownBriefing)
             {

@@ -4,7 +4,7 @@ using StateCraft.UI;
 
 namespace StateCraft.Map
 {
-    [RequireComponent(typeof(Collider2D))] // Assumes 2D map for now
+    [RequireComponent(typeof(Collider2D))]
     public class CountryController : MonoBehaviour
     {
         public CountryDataSO countryData;
@@ -50,7 +50,6 @@ namespace StateCraft.Map
 
         private void OnMouseDown()
         {
-            // Block click if mouse is over interactive UI elements
             if (UIStateManager.Instance != null && UIStateManager.Instance.IsPointerOverUI())
             {
                 return;
@@ -76,10 +75,8 @@ namespace StateCraft.Map
                 return;
             }
 
-            // Update color based on stability or other metrics
             if (countryData != null)
             {
-                // Dynamic coloring: Less stability = more red
                 float stabilityFactor = countryData.stability / 100f;
                 spriteRenderer.color = Color.Lerp(Color.red, originalColor, stabilityFactor);
             }

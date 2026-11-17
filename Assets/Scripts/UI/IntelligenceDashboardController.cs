@@ -9,7 +9,6 @@ using StateCraft.Interfaces;
 
 namespace StateCraft.UI
 {
-    // Run before MainDashboardToolkitController (which has order 10) so our Start() fires first
     [DefaultExecutionOrder(-10)]
     public class IntelligenceDashboardController : MonoBehaviour
     {
@@ -21,13 +20,12 @@ namespace StateCraft.UI
         private VisualElement _panelOverview, _panelSurveillance, _panelCovertOps, _panelThreatBoard, _panelCovertOperations, _panelDataAnalysis;
         private List<VisualElement> _allPanels = new List<VisualElement>();
 
-        // Overview Containers
         private VisualElement _overviewIntelSummaryContainer, _overviewCoverageGrid, _overviewFooterContainer;
         private ScrollView _overviewActiveOpsList, _overviewRecentReportsList, _overviewThreatsList;
 
         private Label _headerBudget, _headerOperatives, _headerCoverage, _exposureRiskLabel;
         private VisualElement _regionalCoverageList, _intelGridList, _intelInterceptFeed;
-        private VisualElement _recruitedAssetsList; // Kept to avoid breaking any other hidden references, but largely unused now
+        private VisualElement _recruitedAssetsList;
         private VisualElement _satellitePanelContainer;
         private VisualElement _foreignThreatsList, _insurgentThreatsList, _internalThreatsList;
         private ProgressBar _agencyIntegrityBar, _exposureRiskBar;
@@ -41,8 +39,6 @@ namespace StateCraft.UI
         private void Awake()
         {
             _uiDoc = GetComponent<UIDocument>();
-            // Do NOT query rootVisualElement here — UIDocument may not have built
-            // its visual tree yet, especially if the GameObject starts inactive.
         }
 
         private void Start()
@@ -71,8 +67,7 @@ namespace StateCraft.UI
             }
         }
 
-
-        private void OnEnable()
+private void OnEnable()
         {
             if (GameManager.Instance != null && GameManager.Instance.TurnSystem != null)
                 GameManager.Instance.TurnSystem.OnTurnEnded += RefreshIntelligenceData;
@@ -99,7 +94,7 @@ namespace StateCraft.UI
 
             _panelOverview = root.Q<VisualElement>("PanelOverview");
             _panelSurveillance = root.Q<VisualElement>("PanelSurveillance");
-            _panelCovertOps = root.Q<VisualElement>("PanelCovertOps"); // Note: This is Intel Network UI
+            _panelCovertOps = root.Q<VisualElement>("PanelCovertOps");
             _panelCovertOperations = root.Q<VisualElement>("PanelCovertOperations");
             _panelDataAnalysis = root.Q<VisualElement>("PanelDataAnalysis");
             _panelThreatBoard = root.Q<VisualElement>("PanelThreatBoard");
@@ -129,7 +124,6 @@ namespace StateCraft.UI
             _regionalCoverageList = root.Q<ScrollView>("RegionalCoverageList");
             _intelGridList        = root.Q<VisualElement>("IntelGridList");
             _intelInterceptFeed   = root.Q<ScrollView>("IntelInterceptFeed");
-            // Removed _covertOpsContainer
             _recruitedAssetsList  = root.Q<VisualElement>("RecruitedAssetsList");
             _foreignThreatsList   = root.Q<VisualElement>("ForeignThreatsList");
             _insurgentThreatsList = root.Q<VisualElement>("InsurgentThreatsList");
@@ -154,18 +148,15 @@ namespace StateCraft.UI
 
             root.Q<Button>("BtnInternalAudit")?.RegisterCallback<ClickEvent>(_ => RunInternalAudit());
             
-            // Hide the legacy UXML button since we build a customized one
             var legacyLaunchBtn = root.Q<Button>("BtnLaunchSatellite");
             if (legacyLaunchBtn != null) legacyLaunchBtn.style.display = DisplayStyle.None;
             
-            // Create a dedicated container for the satellite section
             _satellitePanelContainer = new VisualElement();
             if (_intelGridList != null && _intelGridList.parent != null)
             {
                 _intelGridList.parent.Insert(_intelGridList.parent.IndexOf(_intelGridList) + 1, _satellitePanelContainer);
             }
 
-            // Asset Procurement
             root.Q<Button>("BtnBuySatellite")?.RegisterCallback<ClickEvent>(_ => LaunchSatellite());
             root.Q<Button>("BtnBuyDrones")?.RegisterCallback<ClickEvent>(_ => ProcureDrones());
 
@@ -205,7 +196,6 @@ namespace StateCraft.UI
                 bool active = (i == index);
                 _allPanels[i].style.display = active ? DisplayStyle.Flex : DisplayStyle.None;
                 _allPanels[i].pickingMode = active ? PickingMode.Position : PickingMode.Ignore;
-                // Fix scrollviews in active panel so scrollbars work in builds
                 if (active) UIStateManager.FixScrollViews(_allPanels[i]);
             }
 
@@ -232,7 +222,7 @@ namespace StateCraft.UI
                 panel.style.display = DisplayStyle.Flex;
                 UIStateManager.Instance?.ApplySafeTransition(panel, true, 0.4f);
                 RefreshIntelligenceData();
-                UIStateManager.FixScrollViews(panel); // Fix scrollbars in builds after UI refresh
+                UIStateManager.FixScrollViews(panel);
             }
         }
 
@@ -257,8 +247,7 @@ namespace StateCraft.UI
 
             string sym = string.IsNullOrEmpty(country.currencySymbol) ? "$" : country.currencySymbol;
 
-
-            if (gm.TurnSystem != null && gm.TurnSystem.CurrentTurn != _lastSeenTurn)
+if (gm.TurnSystem != null && gm.TurnSystem.CurrentTurn != _lastSeenTurn)
             {
                 _lastSeenTurn = gm.TurnSystem.CurrentTurn;
                 _resolvedThreatNames.Clear();
@@ -275,13 +264,11 @@ namespace StateCraft.UI
 
             if (_headerBudget != null)
             {
-                // intelligenceBudget is stored as billions directly
                 _headerBudget.text = $"{UiFormat.Money(country.intelligenceBudget, sym)} / Turn";
             }
             if (_headerOperatives != null) _headerOperatives.text = country.operativeCount.ToString();
             if (_headerCoverage  != null) _headerCoverage.text   = $"{country.globalIntelCoverage:F0}/100";
 
-            // Exposure Risk display
             if (_exposureRiskLabel != null)
             {
                 _exposureRiskLabel.text = $"{country.exposureRisk:F0}%";
@@ -298,7 +285,6 @@ namespace StateCraft.UI
                 else if (country.exposureRisk > 40f) { _exposureRiskBarLabel.text = "ELEVATED RISK"; _exposureRiskBarLabel.style.color = new Color(1f, 0.67f, 0.25f); }
                 else { _exposureRiskBarLabel.text = "LOW RISK"; _exposureRiskBarLabel.style.color = new Color(0f, 0.82f, 0.39f); }
             }
-            // Sync slider to current budget
             if (_covertBudgetSlider != null) _covertBudgetSlider.SetValueWithoutNotify(country.covertBudget);
             if (_covertBudgetValueLabel != null) _covertBudgetValueLabel.text = $"${country.covertBudget:F1}B / Turn";
 
@@ -309,7 +295,6 @@ namespace StateCraft.UI
             }
 
             if (_foreignAgentsLabel != null) _foreignAgentsLabel.text = $"FOREIGN AGENTS DETECTED: {country.foreignAgentsDetected}";
-            // Active mole hunts = agents detected that haven't been neutralised yet
             int activeMoleHunts = Mathf.Max(0, country.foreignAgentsDetected - (country.agencyIntegrity > 70f ? 1 : 0));
             if (_moleHuntLabel != null) _moleHuntLabel.text = $"Active mole hunts: {activeMoleHunts}  |  Agency integrity: {country.agencyIntegrity:F0}%";
 
@@ -322,7 +307,6 @@ namespace StateCraft.UI
             PopulateDataAnalysisTab(country);
             PopulateOverviewTab(country);
 
-            // ── Intelligence Top Bar KPIs ──────────────────────────────────────
             var hdrCoverage = _headerCoverage ?? _dashboardRoot?.Q<Label>("HdrIntelCoverage");
             var hdrCoverageRating = _dashboardRoot?.Q<Label>("HdrIntelCoverageRating");
             if (hdrCoverage != null)
@@ -408,8 +392,7 @@ namespace StateCraft.UI
                     }
                     else
                     {
-                        // Synthesize a few key assets for the dashboard
-                        int itemsToShow = Mathf.Min(totalAssets, 6); // Just show top 6
+                        int itemsToShow = Mathf.Min(totalAssets, 6);
                         for (int i = 0; i < itemsToShow; i++)
                         {
                             bool isOnline = i < onlineAssets;
@@ -508,7 +491,6 @@ namespace StateCraft.UI
                 string daSym2 = string.IsNullOrEmpty(country.currencySymbol) ? "$" : country.currencySymbol;
                 if (donutVal != null) donutVal.text = $"{daSym2}{(country.intelligenceBudget * 0.25f * country.exchangeRate):F1}B";
 
-                // Ensure no placeholders exist for analytics list
                 var aList = panel.Q<VisualElement>("RS_AnalyticsList");
                 if (aList != null) {
                     aList.Clear();
@@ -572,8 +554,7 @@ namespace StateCraft.UI
             }
         }
 
-        
-        private void AddPlaceholder(VisualElement container, string text = "Data not available")
+private void AddPlaceholder(VisualElement container, string text = "Data not available")
         {
             if (container == null) return;
             container.Clear();
@@ -620,7 +601,6 @@ namespace StateCraft.UI
                 cell.style.borderTopLeftRadius = 4; cell.style.borderTopRightRadius = 4;
                 cell.style.borderBottomLeftRadius = 4; cell.style.borderBottomRightRadius = 4;
 
-                // Top accent stripe
                 var stripe = new VisualElement();
                 stripe.style.height = 2;
                 stripe.style.backgroundColor = new Color(0.73f, 0.41f, 0.78f, 0.9f);
@@ -633,7 +613,6 @@ namespace StateCraft.UI
                 _intelGridList.Add(cell);
             }
 
-            // ── Satellite Purchase Panel ──
             if (_satellitePanelContainer != null)
             {
                 _satellitePanelContainer.Clear();
@@ -787,7 +766,6 @@ namespace StateCraft.UI
             var panel = _dashboardRoot?.Q<VisualElement>("PanelCovertOps");
             if (panel == null) return;
 
-            // --- 1. KPI Top Strip ---
             int totalAgents = country.operativeCount;
             int totalInformants = Mathf.RoundToInt(country.intelligenceLevel * 1.5f);
             int activeMissions = country.activeCovertOps.Count;
@@ -808,7 +786,6 @@ namespace StateCraft.UI
             panel.Q<Label>("IN_NetworkExposure").text = country.exposureRisk > 70 ? "HIGH" : (country.exposureRisk > 40 ? "MEDIUM" : "LOW");
             panel.Q<Label>("IN_NetworkExposure").style.color = country.exposureRisk > 70 ? new Color(1f, 0.3f, 0.3f) : (country.exposureRisk > 40 ? new Color(1f, 0.6f, 0.2f) : new Color(0.137f, 0.929f, 0.337f));
 
-            // --- 2. Active Agents ---
             panel.Q<Label>("IN_ActiveAgentsTitle").text = $"ACTIVE AGENTS ({country.activeCovertOps.Count})";
             var agentsList = panel.Q<ScrollView>("IN_ActiveAgentsList");
             agentsList.Clear();
@@ -824,7 +801,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // --- 3. Recent Network Events ---
             var eventsList = panel.Q<ScrollView>("IN_RecentEventsList");
             eventsList.Clear();
             var realEvents = DashboardLiveContent.BuildIntelFeed(country, GameManager.Instance);
@@ -848,7 +824,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // --- 4. Foreign Assets ---
             var assetsList = panel.Q<VisualElement>("IN_ForeignAssetsList");
             assetsList.Clear();
             if (country.recruitedAssets.Count == 0)
@@ -884,7 +859,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // --- 5. Network Capabilities ---
             var capList = panel.Q<VisualElement>("IN_NetworkCapabilitiesList");
             capList.Clear();
             string[] capNames = { "Border Surveillance", "Cyber Intelligence", "Economic Intelligence", "Military Intelligence" };
@@ -909,7 +883,6 @@ namespace StateCraft.UI
                 capList.Add(row);
             }
 
-            // --- 6. Covert Budget Breakdown ---
             var brkList = panel.Q<VisualElement>("IN_BudgetBreakdownList");
             brkList.Clear();
             string[] brkNames = { "Agent Operations", "Surveillance & Recon", "Cyber Operations", "Informant Payments" };
@@ -925,11 +898,10 @@ namespace StateCraft.UI
                 brkList.Add(row);
             }
 
-            // --- 7. Recruit List ---
             var recruitList = panel.Q<ScrollView>("IN_RecruitList");
             recruitList.Clear();
             string[] recNames = { "Domestic Agent", "Foreign Asset", "Cyber Operative", "Double Agent" };
-            float[] recCosts = { 15f, 45f, 30f, 80f }; // in Millions
+            float[] recCosts = { 15f, 45f, 30f, 80f };
             for (int i=0; i<recNames.Length; i++)
             {
                 var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center, backgroundColor = new Color(1,1,1,0.03f), paddingBottom = 6, paddingTop = 6, paddingLeft = 8, paddingRight = 8, marginBottom = 4, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } };
@@ -968,11 +940,10 @@ namespace StateCraft.UI
                 recruitList.Add(row);
             }
 
-            // --- 8. Quick Actions ---
             var qaGrid = panel.Q<VisualElement>("IN_QuickActionsGrid");
             qaGrid.Clear();
             string[] qaNames = { "Dispatch Agent", "Fund Operation", "Secure Channel", "Increase Surv.", "Debrief Agents", "Counter Intel" };
-            float[] qaCosts = { 5f, 12f, 3f, 8f, 2f, 10f }; // in Millions
+            float[] qaCosts = { 5f, 12f, 3f, 8f, 2f, 10f };
             for (int i=0; i<qaNames.Length; i++)
             {
                 var btn = new Button { text = qaNames[i] };
@@ -1057,7 +1028,6 @@ namespace StateCraft.UI
         private void PopulateProxyWarPanel(CountryDataSO country, GameManager gm)
         {
             Debug.Log("[IntelligenceDashboard] Populating Proxy War Panel...");
-            // Provides a shortcut button in the Threat Board to fund enemy insurgencies
         }
 
         private void PopulateThreatBoard(CountryDataSO country, GameManager gm)
@@ -1068,8 +1038,6 @@ namespace StateCraft.UI
             _insurgentThreatsList.Clear();
             _internalThreatsList.Clear();
 
-            // ── Real detected insurgent camps from RegionDataSO ──
-            // These are discovered by IntelligenceSystem and shown here for Military to act on
             bool anyCampsDetected = false;
             foreach (var region in country.regions)
             {
@@ -1078,7 +1046,6 @@ namespace StateCraft.UI
                 _insurgentThreatsList.Add(BuildCampThreatCard(region, country));
             }
 
-            // ── Standard IntelligenceThreat objects (foreign + internal) ──
             var threats = new List<IntelligenceThreat>(country.detectedThreats);
             if (threats.Count == 0)
                 threats.AddRange(GenerateAmbientThreats(country, gm));
@@ -1101,11 +1068,6 @@ namespace StateCraft.UI
                 _internalThreatsList.Add(EmptyThreatLabel("No internal threats flagged."));
         }
 
-        /// <summary>
-        /// Builds a rich camp card for a detected insurgent camp.
-        /// Shows camp intel, threat level, and a "FLAG FOR AIRSTRIKE" button that
-        /// marks the camp so Military → Operations knows to target it.
-        /// </summary>
         private VisualElement BuildCampThreatCard(RegionDataSO region, CountryDataSO country)
         {
             var card = new VisualElement();
@@ -1122,7 +1084,6 @@ namespace StateCraft.UI
             card.style.borderTopLeftRadius = 4; card.style.borderTopRightRadius = 4;
             card.style.borderBottomLeftRadius = 4; card.style.borderBottomRightRadius = 4;
 
-            // ── Header row: name + CONFIRMED badge ──
             var header = new VisualElement();
             header.style.flexDirection = FlexDirection.Row;
             header.style.justifyContent = Justify.SpaceBetween;
@@ -1143,7 +1104,6 @@ namespace StateCraft.UI
             header.Add(badge);
             card.Add(header);
 
-            // ── Intel data grid ──
             string ideology = region.insurgencyIdeology != InsurgencyIdeology.None
                 ? region.insurgencyIdeology.ToString() : "Unknown Faction";
 
@@ -1171,7 +1131,6 @@ namespace StateCraft.UI
             AddDataCell("SUPPLY LINES", $"{region.insurgentSupplyLines:F0}%", new Color(0.7f, 0.7f, 0.8f));
             card.Add(dataGrid);
 
-            // ── Status line ──
             bool strikeOrdered = region.campStrikeOrdered;
             string statusText = strikeOrdered
                 ? "✅ AIRSTRIKE REQUESTED — Awaiting Military execution via OPERATIONS"
@@ -1183,7 +1142,6 @@ namespace StateCraft.UI
             statusLabel.style.marginBottom = 10;
             card.Add(statusLabel);
 
-            // ── Warning: camp growing ──
             if (region.campStrength > 70f && !strikeOrdered)
             {
                 var warn = new Label("🔴 CAMP APPROACHING FULL STRENGTH — strike window closing");
@@ -1193,10 +1151,8 @@ namespace StateCraft.UI
                 card.Add(warn);
             }
 
-            // ── Action buttons ──
             if (!strikeOrdered)
             {
-                // Primary: Flag for airstrike (Intel authorises → Military executes)
                 var flagBtn = new Button(() =>
                 {
                     region.campStrikeOrdered = true;
@@ -1244,7 +1200,6 @@ namespace StateCraft.UI
                 flagBtn.style.marginBottom = 6;
                 card.Add(flagBtn);
 
-                // Secondary: Fund counter-insurgency instead (softer option)
                 var cinBtn = new Button(() =>
                 {
                     float cost = 0.08f;
@@ -1277,7 +1232,6 @@ namespace StateCraft.UI
             }
             else
             {
-                // Strike already ordered — show reminder
                 var reminder = new Label("\uf061 Go to MILITARY \uf061 OPERATIONS to execute the strike");
                 reminder.AddToClassList("fa-icon");
                 reminder.style.color = new Color(0.6f, 0.6f, 0.7f);
@@ -1403,7 +1357,7 @@ namespace StateCraft.UI
                     var gm = GameManager.Instance;
                     if (country == null || gm == null) return;
 
-                    float cost = 0.05f; // $50M per asset deployment
+                    float cost = 0.05f;
                     if (gm.playerBudget < cost)
                     {
                         NotificationManager.Instance?.AddNotification($"INSUFFICIENT FUNDS: Need $0.05B to deploy intelligence assets.", Color.red);
@@ -1416,11 +1370,10 @@ namespace StateCraft.UI
                         return;
                     }
 
-                    // Deduct cost and allocate operative
                     gm.playerBudget -= cost;
                     country.treasury = gm.playerBudget;
                     country.operativeCount--;
-                    country.exposureRisk = Mathf.Min(100f, country.exposureRisk + 3f); // small exposure increase for deploying
+                    country.exposureRisk = Mathf.Min(100f, country.exposureRisk + 3f);
 
                     string effectDesc = "";
                     if (threat.category == "Foreign Interference")
@@ -1429,7 +1382,6 @@ namespace StateCraft.UI
                         country.security = Mathf.Min(100f, country.security + 8f);
                         effectDesc = $"Counter-intelligence net active. Intel Coverage +10%, Security +8%.";
 
-                        // Also surface a Proxy War retaliation option
                         var targetName = threat.threatName.Replace(" military buildup", "").Trim();
                         var targetCountry = gm?.allCountries?.Find(c => c.countryName == targetName);
                         if (targetCountry != null && gm?.DiplomacySystem is DiplomacySystem diplo)
@@ -1447,7 +1399,7 @@ namespace StateCraft.UI
                             item.Add(proxyBtn);
                         }
                     }
-                    else // Internal Threats
+                    else
                     {
                         country.agencyIntegrity = Mathf.Min(100f, country.agencyIntegrity + 15f);
                         country.corruptionIndex = Mathf.Max(0f, country.corruptionIndex - 5f);
@@ -1457,7 +1409,6 @@ namespace StateCraft.UI
                     NotificationManager.Instance?.AddNotification($"ASSET DEPLOYED: {threat.threatName}. {effectDesc}", new Color(186/255f, 104/255f, 200/255f));
                     NewsSystem.Instance?.PublishNews($"INTELLIGENCE: Assets deployed to address {threat.threatName}.");
                     
-                    // Add to resolved threat list and remove from country list
                     _resolvedThreatNames.Add(threat.threatName);
                     country.detectedThreats.Remove(threat);
 
@@ -1482,7 +1433,6 @@ namespace StateCraft.UI
                 foreach (var other in gm.allCountries)
                 {
                     if (other == c) continue;
-                    // Detect at Crisis normally, or at Tension if satellites are available
                     var requiredStage = c.satelliteCount > 0 ? WarStage.Tension : WarStage.Crisis;
                     if (gm.WarSystem != null && gm.WarSystem.GetWarStage(other) >= requiredStage)
                     {
@@ -1500,7 +1450,6 @@ namespace StateCraft.UI
 
             foreach (var region in c.regions)
             {
-                // Detect insurgency earlier with good satellite coverage
                 float threshold = c.satelliteCount >= 2 ? 55f : 40f;
                 if (region.security < threshold)
                 {
@@ -1532,7 +1481,6 @@ namespace StateCraft.UI
             var panel = _dashboardRoot?.Q<VisualElement>("PanelCovertOperations");
             if (panel == null) return;
 
-            // Colors
             var cGreen = new Color(0.137f, 0.929f, 0.337f);
             var cRed = new Color(1f, 0.32f, 0.32f);
             var cOrange = new Color(0.95f, 0.77f, 0.06f);
@@ -1541,9 +1489,8 @@ namespace StateCraft.UI
             var cWhiteAlpha = new Color(1, 1, 1, 0.1f);
 
             int intelLvl = Mathf.Clamp((int)country.intelligenceLevel, 10, 100);
-            float budget = country.covertBudget > 0 ? country.covertBudget : (country.intelligenceBudget * 0.15f); // Fallback to 15% of intel budget in billions
+            float budget = country.covertBudget > 0 ? country.covertBudget : (country.intelligenceBudget * 0.15f);
             
-            // --- KPIs ---
             int inProgress = country.activeCovertOps.Count(x => x.status == "In Progress");
             int planning = country.activeCovertOps.Count(x => x.status == "Planning");
             int onHold = country.activeCovertOps.Count(x => x.status == "On Hold");
@@ -1559,8 +1506,7 @@ namespace StateCraft.UI
             
             if (panel.Q<Label>("CO_IntelFundsLabel") != null) panel.Q<Label>("CO_IntelFundsLabel").text = $"FUNDS: {UiFormat.Money((country.intelligenceFunds / 1000f) * country.exchangeRate, sym)}";
 
-            // --- Budget Summary Strip ---
-            float annualBudgetLocal = country.intelligenceBudget * country.exchangeRate; // intelligenceBudget is in Billions
+            float annualBudgetLocal = country.intelligenceBudget * country.exchangeRate;
             float availableFundsLocal = (country.intelligenceFunds / 1000f) * country.exchangeRate;
             float monthlyUpkeepM = (country.satelliteCount * 50f) + (country.droneCount * 10f) + (country.operativeCount * 5f);
             float monthlyUpkeepLocal = (monthlyUpkeepM / 1000f) * country.exchangeRate;
@@ -1577,15 +1523,14 @@ namespace StateCraft.UI
             {
                 availLbl.text = UiFormat.Money(availableFundsLocal, sym);
                 availLbl.style.color = availableFundsLocal >= monthlyUpkeepLocal
-                    ? new Color(35/255f, 237/255f, 86/255f)  // green — healthy
-                    : new Color(1f, 0.32f, 0.32f);            // red — depleted
+                    ? new Color(35/255f, 237/255f, 86/255f)
+                    : new Color(1f, 0.32f, 0.32f);
             }
 
             var upkeepLbl = panel.Q<Label>("CO_MonthlyUpkeepLabel");
             if (upkeepLbl != null) upkeepLbl.text = UiFormat.Money(monthlyUpkeepLocal, sym);
 
-            
-            float successRate = Mathf.Clamp(40f + (country.intelligenceLevel * 0.4f) + (country.operativeCount * 2f), 10f, 95f);
+float successRate = Mathf.Clamp(40f + (country.intelligenceLevel * 0.4f) + (country.operativeCount * 2f), 10f, 95f);
             if (panel.Q<Label>("CO_SuccessRate") != null) panel.Q<Label>("CO_SuccessRate").text = $"{successRate:F0}%";
             if (panel.Q<Label>("CO_SuccessDelta") != null) panel.Q<Label>("CO_SuccessDelta").text = "Stable";
             
@@ -1601,7 +1546,6 @@ namespace StateCraft.UI
                 else { riskLbl.text = "LOW"; riskLbl.style.color = cGreen; if (panel.Q<VisualElement>("CO_RiskDot") != null) panel.Q<VisualElement>("CO_RiskDot").style.backgroundColor = cGreen; }
             }
 
-            // --- OPERATIONS BUDGET & UPKEEP (VERSION 1) ---
             var budgetList = panel.Q<ScrollView>("CO_BudgetRunningCostsList");
             if (budgetList != null)
             {
@@ -1624,13 +1568,12 @@ namespace StateCraft.UI
                     leftBox.Add(new Label(bNames[i]) { style = { color = Color.white, fontSize = 11, unityFontStyleAndWeight = (i == 3 ? FontStyle.Bold : FontStyle.Normal) } });
                     row.Add(leftBox);
                     
-                    float localVal = (bVals[i] / 1000f) * country.exchangeRate; // Convert Millions to Billions
+                    float localVal = (bVals[i] / 1000f) * country.exchangeRate;
                     row.Add(new Label(UiFormat.Money(localVal, sym)) { style = { color = bColors[i], fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
                     budgetList.Add(row);
                 }
             }
 
-            // --- ACTIVE COVERT OPERATIONS ---
             var activeList = panel.Q<ScrollView>("CO_ActiveOpsList");
             activeList.Clear();
             var activeOps = country.activeCovertOps.FindAll(x => x.status == "In Progress");
@@ -1655,7 +1598,7 @@ namespace StateCraft.UI
                 row.Add(nameCol);
 
                 row.Add(new Label(op.target) { style = { color = Color.grey, fontSize = 10, flexGrow = 1, whiteSpace = WhiteSpace.Normal } });
-                row.Add(new Label("Unknown") { style = { color = Color.white, fontSize = 10, width = 80 } }); // Add region later if in data
+                row.Add(new Label("Unknown") { style = { color = Color.white, fontSize = 10, width = 80 } });
                 
                 var rCol = op.riskLevel == "Extreme" ? cRed : op.riskLevel == "High" ? cRed : (op.riskLevel == "Medium" ? cOrange : cGreen);
                 row.Add(new Label(op.riskLevel.ToUpper()) { style = { color = rCol, fontSize = 9, width = 50 } });
@@ -1676,7 +1619,6 @@ namespace StateCraft.UI
                 activeList.Add(row);
             }
 
-            // --- OPERATION DETAILS ---
             var detailsContainer = panel.Q<VisualElement>("CO_OpDetailsContainer");
             detailsContainer.Clear();
 
@@ -1690,13 +1632,12 @@ namespace StateCraft.UI
             }
             else
             {
-                var op = activeOps[0]; // Display the first one by default for V1
+                var op = activeOps[0];
                 detailsContainer.style.flexDirection = FlexDirection.Row;
 
                 Color oCol = op.type == "Political" ? cPurple : op.type == "Economic" ? cOrange : op.type == "Military" ? cBlue : op.type == "Influence" ? cGreen : cRed;
                 string oIcn = op.type == "Political" ? "\uf0c0" : op.type == "Economic" ? "\uf153" : op.type == "Military" ? "\uf132" : op.type == "Influence" ? "\uf0a1" : "\uf108";
 
-                // Details Left
                 var dLeft = new VisualElement { style = { width = Length.Percent(50), paddingRight = 12, borderRightWidth = 1, borderRightColor = cWhiteAlpha } };
                 
                 var dHeader = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 12 } };
@@ -1746,7 +1687,6 @@ namespace StateCraft.UI
                 
                 detailsContainer.Add(dLeft);
 
-                // Details Right
                 var dRight = new VisualElement { style = { width = Length.Percent(50), paddingLeft = 12, flexDirection = FlexDirection.Column } };
                 dRight.Add(new Label("OBJECTIVES") { style = { color = Color.grey, fontSize = 10, marginBottom = 6 } });
                 string[] objTxt = { "Initial reconnaissance", "Deploy assets", "Execute primary directive" };
@@ -1791,7 +1731,6 @@ namespace StateCraft.UI
                 detailsContainer.Add(dRight);
             }
 
-            // --- UPCOMING OPERATIONS ---
             var upcomingList = panel.Q<ScrollView>("CO_UpcomingOpsList");
             upcomingList.Clear();
             var upcomingOps = country.activeCovertOps.FindAll(x => x.status == "Planning" || x.status == "On Hold");
@@ -1828,9 +1767,7 @@ namespace StateCraft.UI
                 upcomingList.Add(card);
             }
 
-
-            // --- RECENT ACTIVITY ---
-            var actList = panel.Q<ScrollView>("CO_RecentActivityList");
+var actList = panel.Q<ScrollView>("CO_RecentActivityList");
             actList.Clear();
             string[] raTxt = { "Operation Market Shift: Economic sanctions on target network initiated.", "Operation Whisper: Propaganda package successfully distributed.", "Operation Iron Shield: Asset recruited in Chad Basin.", "Operation Darknet: Access to server node established.", "Operation Ghost cancelled due to high detection risk." };
             string[] raTime = { "16 JAN 2026, 08:45", "16 JAN 2026, 07:30", "15 JAN 2026, 22:10", "15 JAN 2026, 18:40", "15 JAN 2026, 14:05" };
@@ -1849,9 +1786,7 @@ namespace StateCraft.UI
                 actList.Add(row);
             }
 
-
-
-            PopulateAssetRoster(country, panel);
+PopulateAssetRoster(country, panel);
         }
 
         private void PopulateAssetRoster(StateCraft.Data.CountryDataSO country, VisualElement panel)
@@ -1913,8 +1848,7 @@ namespace StateCraft.UI
             return box;
         }
 
-
-        private void LaunchReconMission()
+private void LaunchReconMission()
         {
             var root = _uiDoc?.rootVisualElement;
             var drpPriority = root?.Q<UnityEngine.UIElements.DropdownField>("DrpReconPriority");
@@ -1965,14 +1899,13 @@ namespace StateCraft.UI
             var gm = GameManager.Instance;
             if (country == null || gm == null) return;
 
-            // Pick a valid rival country to target
             var rivals = gm.allCountries.Where(c => c != country && gm.WarSystem != null && gm.WarSystem.GetWarStage(c) != WarStage.Peace).ToList();
             if (rivals.Count == 0) rivals = gm.allCountries.Where(c => c != country).ToList();
             var targetCountry = rivals.Count > 0 ? rivals[Random.Range(0, rivals.Count)].countryName : "Unknown";
 
             string[] types = { "Military", "Influence", "Political", "Cyber", "Economic" };
             
-            float opCost = 0.1f; // $100M per op
+            float opCost = 0.1f;
             var gm3 = GameManager.Instance;
             if (gm3 != null && gm3.playerBudget < opCost)
             {
@@ -2012,15 +1945,13 @@ namespace StateCraft.UI
             RefreshIntelligenceData();
         }
 
-
-
-        private void RunInternalAudit()
+private void RunInternalAudit()
         {
             var country = GameManager.Instance?.playerCountry;
             if (country == null) return;
 
             var gm2 = GameManager.Instance;
-            float auditCost = 0.05f; // $50M
+            float auditCost = 0.05f;
             if (gm2 != null && gm2.playerBudget < auditCost)
             {
                 NotificationManager.Instance?.AddNotification($"INSUFFICIENT FUNDS: Need $0.05B to run internal audit.", Color.red);
@@ -2041,12 +1972,10 @@ namespace StateCraft.UI
             Debug.Log($"[Overview] PanelOverview found: {panel != null}");
             if (panel == null) { Debug.LogError("[Overview] PanelOverview is NULL — check UXML name matches 'PanelOverview'"); return; }
 
-            // Colors
             var cGreen = new Color(0.137f, 0.929f, 0.337f);
             var cRed = new Color(1f, 0.32f, 0.32f);
             var cOrange = new Color(0.95f, 0.77f, 0.06f);
 
-            // 1. OVERALL THREAT LEVEL
             var threatCard     = panel.Q<VisualElement>("OverviewThreatCard");
             var threatTitle    = panel.Q<Label>("OverviewThreatTitle");
             var threatIcon     = panel.Q<Label>("OverviewThreatIcon");
@@ -2090,7 +2019,6 @@ namespace StateCraft.UI
                 Debug.LogWarning("[Overview] OverviewThreatLevel label is NULL — Threat Level block will be blank");
             }
 
-            // 2. THREAT MATRIX
             var threatList = panel.Q<ScrollView>("OverviewThreatMatrixList");
             Debug.Log($"[Overview] OverviewThreatMatrixList found: {threatList != null}");
             if (threatList != null)
@@ -2113,7 +2041,6 @@ namespace StateCraft.UI
                 Debug.LogWarning("[Overview] OverviewThreatMatrixList is NULL — Threat Matrix column will be blank");
             }
 
-            // 3. INTEL FEED
             var intelFeed = panel.Q<ScrollView>("OverviewIntelFeedList");
             Debug.Log($"[Overview] OverviewIntelFeedList found: {intelFeed != null}");
             if (intelFeed != null)
@@ -2132,7 +2059,6 @@ namespace StateCraft.UI
                 Debug.LogWarning("[Overview] OverviewIntelFeedList is NULL — Intel Feed column will be blank");
             }
 
-            // 4. BLINDSPOTS
             var blindspotList = panel.Q<ScrollView>("OverviewBlindspotsList");
             Debug.Log($"[Overview] OverviewBlindspotsList found: {blindspotList != null}");
             Debug.Log($"[Overview] Stats — Satellites:{country.satelliteCount} | Operatives:{country.operativeCount} | IntelLevel:{country.intelligenceLevel:F1} | Funds:{country.intelligenceFunds:F1}");
@@ -2210,7 +2136,7 @@ namespace StateCraft.UI
                 return;
             }
             
-            float cost = 500f; // 500M
+            float cost = 500f;
             if (country.intelligenceFunds < cost)
             {
                 NotificationManager.Instance?.AddNotification($"INSUFFICIENT FUNDS: Need $500M in Intelligence Funds to build spy satellite.", UnityEngine.Color.red);
@@ -2242,7 +2168,7 @@ namespace StateCraft.UI
             var country = GameManager.Instance?.playerCountry;
             if (country == null) return;
             
-            float cost = 150f; // 150M
+            float cost = 150f;
             if (country.intelligenceFunds < cost)
             {
                 NotificationManager.Instance?.AddNotification($"INSUFFICIENT FUNDS: Need $150M in Intelligence Funds to procure Recon Drones.", UnityEngine.Color.red);
@@ -2285,7 +2211,6 @@ namespace StateCraft.UI
             var gm = StateCraft.Core.GameManager.Instance;
             var threats = gm.ThreatAssessmentSystem.GenerateThreats(country, gm);
 
-            // --- KPIs ---
             panel.Q<Label>("TA_ActiveThreats").text = threats.Count.ToString();
             int criticals = 0;
             foreach (var t in threats) if (t.impact == "Critical") criticals++;
@@ -2301,7 +2226,6 @@ namespace StateCraft.UI
             }
             panel.Q<Label>("TA_CountriesConcern").text = concernCount.ToString();
 
-            // Dynamic Trends for KPIs
             bool isHighThreat = threats.Count >= 3 || criticals > 0;
             bool isMediumThreat = threats.Count > 0 && !isHighThreat;
             
@@ -2340,12 +2264,10 @@ namespace StateCraft.UI
                 trend30.style.color = isHighThreat ? cRed : (isMediumThreat ? cOrange : cGreen);
             }
 
-            // --- THREAT MATRIX ---
             var matrixContainer = panel.Q<VisualElement>("TA_MatrixGrid")?.parent;
             var matrix = panel.Q<VisualElement>("TA_MatrixGrid");
             if (matrix != null)
             {
-                // Clear and rebuild the whole container to add axis labels
                 matrix.Clear();
                 Color[] mColors = { cGreen, cGreen, cOrange, cOrange,
                                     cGreen, cOrange, cOrange, cRed,
@@ -2354,18 +2276,15 @@ namespace StateCraft.UI
                 string[] colHeaders = { "LOW", "MED", "HIGH", "CRIT" };
                 string[] rowHeaders = { "RARE", "LIKELY", "PROBABLE", "CERTAIN" };
 
-                // Column axis header (Probability →)
                 var colAxisRow = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 2, marginLeft = 55 } };
                 colAxisRow.Add(new Label("← IMPACT →") { style = { color = new Color(1,1,1,0.35f), fontSize = 9, flexGrow = 1, unityTextAlign = TextAnchor.MiddleCenter } });
                 matrix.Add(colAxisRow);
 
-                // Column header labels
                 var colLabelRow = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 4, marginLeft = 55 } };
                 foreach (var h in colHeaders)
                     colLabelRow.Add(new Label(h) { style = { color = new Color(1,1,1,0.4f), fontSize = 9, width = Length.Percent(23), marginRight = Length.Percent(2), unityTextAlign = TextAnchor.MiddleCenter } });
                 matrix.Add(colLabelRow);
 
-                // Grid rows with row axis label
                 for (int row = 0; row < 4; row++)
                 {
                     var rowEl = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 5, alignItems = Align.Center } };
@@ -2380,12 +2299,10 @@ namespace StateCraft.UI
                     matrix.Add(rowEl);
                 }
 
-                // Row axis label (Probability ↑)
                 var rowAxisLbl = new Label("← PROBABILITY →") { style = { color = new Color(1,1,1,0.35f), fontSize = 9, marginTop = 2, unityTextAlign = TextAnchor.MiddleCenter } };
                 matrix.Add(rowAxisLbl);
             }
 
-            // --- TOP THREATS ---
             var tList = panel.Q<ScrollView>("TA_TopThreatsList");
             tList.Clear();
             for(int i=0; i<threats.Count; i++)
@@ -2396,25 +2313,20 @@ namespace StateCraft.UI
                 row.Add(new Label(t.title) { style = { color = Color.white, fontSize = 10, width = 124 } });
                 row.Add(new Label(t.region) { style = { color = Color.grey, fontSize = 10, flexGrow = 1 } });
                 
-                // Impact dots
                 var impCol = new VisualElement { style = { flexDirection = FlexDirection.Row, width = 60 } };
                 for(int d=0; d<4; d++) impCol.Add(new VisualElement { style = { width = 6, height = 6, borderTopLeftRadius = 3, borderTopRightRadius = 3, borderBottomLeftRadius = 3, borderBottomRightRadius = 3, backgroundColor = (d < (t.impact == "Critical" ? 4 : t.impact == "High" ? 3 : 2)) ? (t.impact == "Critical" ? cRed : cOrange) : cWhiteAlpha, marginRight = 2 } });
                 row.Add(impCol);
                 
-                // Likelihood dots
                 var likCol = new VisualElement { style = { flexDirection = FlexDirection.Row, width = 60 } };
                 for(int d=0; d<4; d++) likCol.Add(new VisualElement { style = { width = 6, height = 6, borderTopLeftRadius = 3, borderTopRightRadius = 3, borderBottomLeftRadius = 3, borderBottomRightRadius = 3, backgroundColor = (d < (int)(t.probability/25f)) ? (t.impact == "Critical" ? cRed : cOrange) : cWhiteAlpha, marginRight = 2 } });
                 row.Add(likCol);
                 
-                // Trend
                 row.Add(new Label(t.impact == "Medium" ? "->" : "^") { style = { color = t.impact == "Medium" ? cOrange : cRed, fontSize = 12, width = 40, unityTextAlign = TextAnchor.MiddleCenter, unityFontStyleAndWeight = FontStyle.Bold } });
                 
-                // Risk Level
                 row.Add(new Label(t.impact.ToUpper()) { style = { color = t.impact == "Critical" ? cRed : cOrange, fontSize = 10, width = 60, unityTextAlign = TextAnchor.MiddleRight, unityFontStyleAndWeight = FontStyle.Bold } });
                 tList.Add(row);
             }
 
-            // --- CATEGORIES ---
             panel.Q<Label>("TA_CatDonut").text = threats.Count.ToString();
             var cList = panel.Q<VisualElement>("TA_CategoryList");
             cList.Clear();
@@ -2426,7 +2338,6 @@ namespace StateCraft.UI
             int cEconomic = threats.FindAll(t => t.title.Contains("Crime") || t.title.Contains("Smuggling")).Count;
             int cCyber = threats.FindAll(t => t.title.Contains("Cyber") || t.title.Contains("Exposure")).Count;
             
-            // Assign leftovers to Political
             int totalCategorized = cTerrorism + cPolitical + cEconomic + cCyber;
             if (threats.Count > totalCategorized) cPolitical += (threats.Count - totalCategorized);
 
@@ -2449,7 +2360,6 @@ namespace StateCraft.UI
                 cList.Add(row);
             }
 
-            // --- REGIONAL THREAT OVERVIEW ---
             var rList = panel.Q<VisualElement>("TA_RegionList");
             rList.Clear();
             if (country.regions != null && country.regions.Count > 0)
@@ -2475,7 +2385,6 @@ namespace StateCraft.UI
                 }
             }
 
-              // --- THREAT LEVEL OVER TIME (TREND CHART) ---
               var chart = panel.Q<VisualElement>("TA_TrendChart");
               if (chart != null)
               {
@@ -2500,7 +2409,6 @@ namespace StateCraft.UI
                   }
               }
                 
-              // --- MITIGATION PROGRESS ---
               var mitList = panel.Q<VisualElement>("TA_MitigationList");
               if (mitList != null)
               {
@@ -2535,7 +2443,6 @@ namespace StateCraft.UI
                   }
               }
 
-              // --- RECOMMENDATIONS ---
               var recList = panel.Q<VisualElement>("TA_RecommendationsList");
               if (recList != null)
               {
@@ -2555,7 +2462,7 @@ namespace StateCraft.UI
                               recText = $"Monitor {t.region} closely for escalating tensions.";
                               
                           var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 6, paddingBottom=4, borderBottomWidth=1, borderBottomColor=cWhiteAlpha } };
-                          row.Add(new Label("\uf0a9") { style = { color = cOrange, fontSize = 12, marginRight = 8 } }.WithClass("fa-icon")); // arrow-right
+                          row.Add(new Label("\uf0a9") { style = { color = cOrange, fontSize = 12, marginRight = 8 } }.WithClass("fa-icon"));
                           row.Add(new Label(recText) { style = { color = Color.white, fontSize = 11, whiteSpace = WhiteSpace.Normal, flexGrow=1 } });
                           recList.Add(row);
                       }
@@ -2580,7 +2487,6 @@ namespace StateCraft.UI
 
             int intelLvl = Mathf.Clamp((int)country.intelligenceLevel, 10, 100);
 
-            // --- KPIs ---
             int dataSources = Mathf.Clamp(10 + Mathf.RoundToInt(country.intelligenceLevel * 0.5f) + country.satelliteCount * 2, 10, 150);
             if (panel.Q<Label>("DA_DataSources") != null) panel.Q<Label>("DA_DataSources").text = dataSources.ToString();
             
@@ -2599,7 +2505,6 @@ namespace StateCraft.UI
             if (panel.Q<Label>("DA_Budget") != null) panel.Q<Label>("DA_Budget").text = $"{UiFormat.Money(budgetLocal * 0.8f, daSym)} / month";
             if (panel.Q<Label>("DA_BudgetRem") != null) panel.Q<Label>("DA_BudgetRem").text = $"{UiFormat.Money(budgetLocal * 0.32f, daSym)} remaining";
 
-            // --- DATA SOURCES OVERVIEW ---
             var srcList = panel.Q<VisualElement>("DA_SourcesList");
             srcList.Clear();
             string[] sNames = { "Human Intelligence (HUMINT)", "Signals Intelligence (SIGINT)", "Imagery Intelligence (IMINT)", "Open Source Intelligence (OSINT)", "Cyber Intelligence (CYBINT)", "Financial Intelligence (FININT)", "Technical Intelligence (TECHINT)" };
@@ -2626,7 +2531,6 @@ namespace StateCraft.UI
                 srcList.Add(row);
             }
 
-            // --- INTELLIGENCE TRENDS ---
             var chart = panel.Q<VisualElement>("DA_TrendChart");
             chart.Clear();
             for(int i=0; i<30; i++)
@@ -2651,7 +2555,6 @@ namespace StateCraft.UI
                 chart.Add(barCont);
             }
 
-            // --- KEY INSIGHTS ---
             var inList = panel.Q<ScrollView>("DA_InsightsList");
             inList.Clear();
             string[] iNames = { "Rising Political Tensions", "Economic Pressure Building", "Cyber Threat Activity Spike", "Smuggling Network Expansion" };
@@ -2680,8 +2583,6 @@ namespace StateCraft.UI
                 inList.Add(card);
             }
 
-            // --- DATA QUALITY ---
-            // --- DATA QUALITY ---
             float highQ = Mathf.Clamp(20f + (country.intelligenceLevel * 0.5f), 10f, 60f);
             float medQ = Mathf.Clamp(50f - (country.intelligenceLevel * 0.2f), 20f, 50f);
             float lowQ = Mathf.Clamp(20f - (country.intelligenceLevel * 0.2f), 5f, 20f);
@@ -2704,7 +2605,6 @@ namespace StateCraft.UI
                 qList.Add(row);
             }
 
-            // --- GEOGRAPHIC FOCUS ---
             var gList = panel.Q<VisualElement>("DA_GeographicList");
             gList.Clear();
             string[] gNames = { "Northern Region", "Coastal Corridor", "Central Region", "Southern Region", "Border Areas" };
@@ -2726,7 +2626,6 @@ namespace StateCraft.UI
                 gList.Add(row);
             }
 
-            // --- PATTERN DETECTION ---
             var pList = panel.Q<ScrollView>("DA_PatternList");
             pList.Clear();
             string[] pNames = { "Unusual Financial Transactions", "Arms Movement Pattern", "Communications Anomaly", "Social Media Sentiment Shift", "Supply Chain Disruption" };
@@ -2745,7 +2644,6 @@ namespace StateCraft.UI
                 pList.Add(row);
             }
 
-            // --- DATA PROCESSING ---
             var prList = panel.Q<ScrollView>("DA_ProcessingList");
             prList.Clear();
             string[] prNames = { "Data Collection", "Data Processing", "Pattern Recognition", "Report Generation" };
@@ -2766,7 +2664,6 @@ namespace StateCraft.UI
                 prList.Add(row);
             }
 
-            // --- RECENT ANALYTIC REPORTS ---
             var repList = panel.Q<ScrollView>("DA_ReportsList");
             repList.Clear();
             string[] rTits = { "Northern Border Security Assessment", "Economic Instability Risk Analysis", "Cyber Threat Landscape Report", "Political Opposition Activity Review", "Maritime Security Intelligence Brief" };
@@ -2784,13 +2681,12 @@ namespace StateCraft.UI
                 repList.Add(row);
             }
 
-            // --- ANALYTIC TOOLS ---
             var tGrid = panel.Q<VisualElement>("DA_ToolsGrid");
             tGrid.Clear();
             string[] tlNames = { "Data Correlation", "Risk Modeling", "Scenario Analysis", "Network Analysis", "Sentiment Analysis", "Predictive Analytics" };
             string[] tlDesc = { "Find relationships", "Predict threats", "What-if scenarios", "Entity connections", "Social monitoring", "Trend forecasting" };
             string[] tlIco = { "\uf0e8", "\uf071", "\uf126", "\uf247", "\uf118", "\uf201" };
-            float[] tlCosts = { 10f, 15f, 25f, 12f, 8f, 30f }; // in Millions
+            float[] tlCosts = { 10f, 15f, 25f, 12f, 8f, 30f };
             for(int i=0; i<6; i++)
             {
                 var btn = new Button { style = { width = Length.Percent(48), height = 36, flexDirection = FlexDirection.Row, justifyContent = Justify.FlexStart, alignItems = Align.Center, backgroundColor = new Color(1,1,1,0.02f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = cWhiteAlpha, borderBottomColor = cWhiteAlpha, borderLeftColor = cWhiteAlpha, borderRightColor = cWhiteAlpha, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4, marginBottom = 6, paddingLeft = 12 } };
@@ -2822,12 +2718,11 @@ namespace StateCraft.UI
                 tGrid.Add(btn);
             }
 
-            // --- QUICK ACTIONS ---
             var qaList = panel.Q<VisualElement>("DA_QuickActions");
             qaList.Clear();
             string[] qTxts = { "REQUEST DEEP ANALYSIS", "GENERATE THREAT REPORT", "EXPORT INTELLIGENCE DATA", "SHARE WITH STAKEHOLDERS" };
             string[] qIcos = { "\uf002", "\uf15c", "\uf56e", "\uf1e0" };
-            float[] qCosts = { 50f, 20f, 5f, 10f }; // in Millions
+            float[] qCosts = { 50f, 20f, 5f, 10f };
             for(int i=0; i<4; i++)
             {
                 var btn = new Button { style = { height = 28, flexDirection = FlexDirection.Row, justifyContent = Justify.FlexStart, alignItems = Align.Center, backgroundColor = new Color(1,1,1,0.05f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = cWhiteAlpha, borderBottomColor = cWhiteAlpha, borderLeftColor = cWhiteAlpha, borderRightColor = cWhiteAlpha, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2, paddingLeft = 12 } };

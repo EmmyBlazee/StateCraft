@@ -18,18 +18,18 @@ namespace StateCraft.Data
         public bool isOperational;
         public int staffCount;
         public float influencePercentage;
-        public string economicReportQuality; // Poor, Average, High, Excellent
-        public string politicalReportQuality; // Poor, Average, High, Excellent
+        public string economicReportQuality;
+        public string politicalReportQuality;
     }
 
     [Serializable]
     public class InternationalOrganization
     {
         public string orgName;
-        public string membershipStatus; // Member, Observer, Suspended, None
-        public string votingPower; // Low, Medium, High, Veto
+        public string membershipStatus;
+        public string votingPower;
         public string currentResolution;
-        public string voteStatus; // Approve, Abstain, Reject, Pending
+        public string voteStatus;
     }
 
     [Serializable]

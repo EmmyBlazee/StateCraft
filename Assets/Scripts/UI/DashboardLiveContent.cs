@@ -9,9 +9,6 @@ using StateCraft.Systems;
 
 namespace StateCraft.UI
 {
-    /// <summary>
-    /// Shared builders for live dashboard feeds, briefings, and game-driven status text.
-    /// </summary>
     public static class DashboardLiveContent
     {
         public struct FeedLine
@@ -378,7 +375,6 @@ namespace StateCraft.UI
             {
                 var line = lines[i];
 
-                // Outer row — horizontal, with a bottom border separator
                 var row = new VisualElement
                 {
                     style =
@@ -392,7 +388,6 @@ namespace StateCraft.UI
                     }
                 };
 
-                // Coloured tag pill — fixed width so it never bleeds into the message
                 var tagPill = new VisualElement
                 {
                     style =
@@ -425,7 +420,6 @@ namespace StateCraft.UI
                 });
                 row.Add(tagPill);
 
-                // Message — takes up remaining space and wraps naturally
                 var msg = new Label(line.Message)
                 {
                     style =

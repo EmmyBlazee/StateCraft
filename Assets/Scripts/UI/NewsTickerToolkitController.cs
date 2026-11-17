@@ -13,7 +13,6 @@ namespace StateCraft.UI
         [Header("Ticker Settings")]
         [SerializeField] private float scrollSpeed = 220f;
 
-        // BUG 1 FIX: Hard cap on pending queue to prevent unbounded growth
         private const int MaxPendingHeadlines = 20;
 
         private UIDocument _uiDocument;
@@ -27,17 +26,13 @@ namespace StateCraft.UI
         private bool _initialized;
         private bool _isScrolling;
 
-        // Startup headlines (from GlobalNewsHistory) scroll exactly once, then the
-        // ticker goes blank and waits silently until real in-game news arrives.
         private bool _isStartupScroll;
 
         private float _currentX;
         private float _textWidth;
         private float _trackWidth;
 
-        // ─────────────────────────────────────────────
-
-        private void Awake()
+private void Awake()
         {
             if (Instance == null)
                 Instance = this;
@@ -59,11 +54,7 @@ namespace StateCraft.UI
                 NewsSystem.Instance.OnGlobalNewsPublished -= AddNews;
         }
 
-        // ─────────────────────────────────────────────
-        // INIT
-        // ─────────────────────────────────────────────
-
-        private IEnumerator Initialize()
+private IEnumerator Initialize()
         {
             yield return new WaitForEndOfFrame();
 
@@ -80,7 +71,6 @@ namespace StateCraft.UI
 
             NewsSystem.Instance.OnGlobalNewsPublished += AddNews;
 
-            // Load startup boot messages and flag them as the startup scroll
             var history = NewsSystem.Instance.GlobalNewsHistory;
             if (history != null)
             {
@@ -90,12 +80,9 @@ namespace StateCraft.UI
             if (_headlines.Count > 0)
                 _isStartupScroll = true;
 
-            // Rebuild label with startup text (set before container becomes visible)
             if (_headlines.Count > 0)
                 SetLabelText();
 
-            // CRITICAL: Wait until UIStateManager makes the container visible (display != None)
-            // UI Toolkit returns width=0 for display:none elements regardless of wait time.
             float visWait = 0f;
             while (visWait < 30f)
             {
@@ -106,11 +93,9 @@ namespace StateCraft.UI
                 visWait += Time.deltaTime;
                 yield return null;
             }
-// Wait two frames for layout to settle after becoming visible
             yield return null;
             yield return null;
 
-            // Now wait for widths to resolve and stabilise
             float waitTime = 0f;
             float lastWidth = 0f;
             while (waitTime < 5f)
@@ -127,12 +112,10 @@ namespace StateCraft.UI
                 yield return null;
             }
 
-            // If trackWidth is still 0 the USS may not have a fixed width on TickerTrack.
-            // Retry for up to 60 more seconds before falling back to the panel width.
             if (_trackWidth <= 0f)
             {
                 float retryWait = 0f;
-                while (retryWait < 2f && _trackWidth <= 0f) // Reduced wait time since fallback works well
+                while (retryWait < 2f && _trackWidth <= 0f)
                 {
                     yield return new WaitForSeconds(0.5f);
                     retryWait += 0.5f;
@@ -141,10 +124,8 @@ namespace StateCraft.UI
                 }
             }
 
-            // Final fallback: use the UIDocument panel width, or a hardcoded safe value.
             if (_trackWidth <= 0f)
             {
-                // Try to read the panel's resolved width from the root element
                 var root = _uiDocument?.rootVisualElement;
                 float panelW = root != null && !float.IsNaN(root.resolvedStyle.width)
                     ? root.resolvedStyle.width : 0f;
@@ -155,17 +136,12 @@ namespace StateCraft.UI
             _isScrolling = true;
             _initialized = true;
 
-            // Any news that arrived while we were waiting — activate immediately
             if (!_isStartupScroll && _pendingHeadlines.Count > 0)
                 StartCoroutine(ActivateWithPending());
 
 }
 
-        // ─────────────────────────────────────────────
-        // FIND UI
-        // ─────────────────────────────────────────────
-
-        private void FindUI()
+private void FindUI()
         {
             var root = _uiDocument.rootVisualElement;
 
@@ -182,26 +158,19 @@ namespace StateCraft.UI
             _newsLabel.text             = "";
         }
 
-        // ─────────────────────────────────────────────
-        // ADD NEWS  (called by NewsSystem for real in-game news)
-        // ─────────────────────────────────────────────
-
-        public void AddNews(string message)
+public void AddNews(string message)
         {
             if (string.IsNullOrWhiteSpace(message))
                 return;
 
             string formatted = message.ToUpper();
 
-            // BUG 1 FIX: Drop oldest pending headline when the queue is at capacity
-            // so it never grows unbounded regardless of how fast news is generated.
             if (_pendingHeadlines.Count >= MaxPendingHeadlines)
             {
                 _pendingHeadlines.Dequeue();
 }
 
             _pendingHeadlines.Enqueue(formatted);
-// If ticker is idle (startup done, nothing scrolling), kick it off now
             if (_initialized && !_isScrolling)
                 StartCoroutine(ActivateWithPending());
         }
@@ -215,11 +184,7 @@ namespace StateCraft.UI
             _isScrolling = true;
         }
 
-        // ─────────────────────────────────────────────
-        // HELPERS
-        // ─────────────────────────────────────────────
-
-        private void SetLabelText()
+private void SetLabelText()
         {
             if (_newsLabel == null) return;
             string finalText = string.Join("     •     ", _headlines) + "     •     ";
@@ -237,7 +202,6 @@ namespace StateCraft.UI
 
         private IEnumerator ResetScrollAfterLayout()
         {
-            // Wait two frames then wait for width to stabilise
             yield return null;
             yield return null;
             float waited = 0f;
@@ -273,11 +237,7 @@ namespace StateCraft.UI
             _trackWidth = _tickerTrack.resolvedStyle.width;
         }
 
-        // ─────────────────────────────────────────────
-        // UPDATE
-        // ─────────────────────────────────────────────
-
-        private void Update()
+private void Update()
         {
             if (!_initialized || !_isScrolling)
                 return;
@@ -292,24 +252,20 @@ namespace StateCraft.UI
 
             _newsLabel.style.translate = new Translate(_currentX, 0, 0);
 
-            // Text has fully scrolled off the left edge
             if (_currentX < -_textWidth)
             {
                 if (_isStartupScroll)
                 {
-                    // Startup pass is done — clear everything and go silent
                     _isStartupScroll = false;
                     _headlines.Clear();
                     _newsLabel.text  = "";
                     _isScrolling     = false;
-// If real news already queued during startup, activate immediately
                     if (_pendingHeadlines.Count > 0)
                         StartCoroutine(ActivateWithPending());
 
                     return;
                 }
 
-                // Normal loop — drain any pending headlines
                 if (_pendingHeadlines.Count > 0)
                 {
                     DrainPendingIntoHeadlines();
@@ -318,7 +274,6 @@ namespace StateCraft.UI
                 }
                 else
                 {
-                    // No new news — loop seamlessly
                     _currentX = _trackWidth;
                 }
             }

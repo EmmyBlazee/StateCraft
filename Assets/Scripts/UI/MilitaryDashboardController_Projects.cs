@@ -18,7 +18,6 @@ namespace StateCraft.UI
 
             string sym = string.IsNullOrEmpty(country.currencySymbol) ? "₦" : country.currencySymbol;
 
-            // ── ACTIVE PROJECTS ──────────────────────────────────────────────
             if (country.militaryProjects == null || country.militaryProjects.Count == 0)
             {
                 var emptyLabel = new Label("No active projects. Commission a directive below.");
@@ -40,7 +39,6 @@ namespace StateCraft.UI
                     card.style.paddingLeft = 16;
                     card.style.paddingRight = 16;
 
-                    // Branch color
                     Color branchColor = proj.branch switch
                     {
                         "Army"     => new Color(255/255f, 152/255f, 0),
@@ -50,7 +48,6 @@ namespace StateCraft.UI
                         _          => Color.grey
                     };
 
-                    // Header row: name + branch badge
                     var headerRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, marginBottom = 8 } };
                     var nameLabel = new Label(proj.projectName) { style = { color = Color.white, unityFontStyleAndWeight = FontStyle.Bold, fontSize = 11 } };
                     var branchBadge = new Label(proj.branch.ToUpper()) { style = { color = branchColor, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } };
@@ -63,7 +60,6 @@ namespace StateCraft.UI
                     headerRow.Add(branchBadge);
                     card.Add(headerRow);
 
-                    // Progress bar
                     float elapsed = Mathf.Max(0, proj.totalMonths - proj.monthsRemaining);
                     float pct = proj.totalMonths > 0 ? (elapsed / proj.totalMonths) * 100f : 0f;
                     var barBg = new VisualElement() { style = { height = 6, backgroundColor = new Color(0, 0, 0, 0.4f), marginBottom = 6 } };
@@ -75,7 +71,6 @@ namespace StateCraft.UI
                     barBg.Add(fill);
                     card.Add(barBg);
 
-                    // Info row: time remaining + strength gain
                     var infoRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween } };
                     infoRow.Add(new Label($"⏱ {proj.monthsRemaining} months remaining") { style = { color = new Color(255/255f, 152/255f, 0), fontSize = 9 } });
                     infoRow.Add(new Label($"+{proj.strengthGain:F0}% Strength on completion") { style = { color = new Color(0.14f, 0.93f, 0.34f), fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
@@ -85,32 +80,25 @@ namespace StateCraft.UI
                 }
             }
 
-            // ── AVAILABLE PROJECTS CATALOG ───────────────────────────────────
-            // Define the full catalog of unlockable directives
             var catalog = new System.Collections.Generic.List<(string name, string branch, float strengthGain, float costBillions, int months, string desc)>
             {
-                // ARMY
                 ("Iron Fist Armour Programme",  "Army",     12f, 0.80f, 12, "Procure 50 MBTs & 100 APCs. +12% Army Strength."),
                 ("Artillery Modernization",     "Army",     8f,  0.40f,  8, "Upgrade field artillery systems. +8% Army Strength."),
                 ("Infantry Combat System",      "Army",     6f,  0.25f,  6, "Advanced body armour & small arms. +6% Army Strength."),
                 ("Rapid Reaction Force Uplift", "Army",     5f,  0.30f,  6, "Pre-position stockpiles for fast deployment. +5% Army."),
-                // NAVY
                 ("Blue-Water Fleet Expansion",  "Navy",     15f, 2.50f, 18, "Commission 2 Destroyers & 1 Frigate. +15% Navy Strength."),
                 ("Submarine Stealth Pack",      "Navy",     10f, 1.80f, 14, "Acquire 2 SSK attack submarines. +10% Navy Strength."),
                 ("Coastal Defence Network",     "Navy",     7f,  0.60f,  9, "Mine layers, patrol boats, radar. +7% Navy Strength."),
                 ("Naval Air Integration",       "Navy",     8f,  1.00f, 12, "Carrier-capable aircraft & EW systems. +8% Navy Strength."),
-                // AIR FORCE
                 ("Generation-5 Fighter Block",  "AirForce", 18f, 3.50f, 24, "Procure 12 5th-gen multi-role jets. +18% Air Strength."),
                 ("Strategic Bomber Fleet",      "AirForce", 14f, 2.80f, 20, "4 long-range strategic bombers. +14% Air Strength."),
                 ("UAV Swarm Programme",         "AirForce", 9f,  0.70f, 10, "50 tactical & 10 MALE UAVs. +9% Air Strength."),
                 ("Air Defence Umbrella",        "AirForce", 11f, 1.20f, 12, "S-400 class SAM network. +11% Air Strength."),
-                // RDF / SPECIAL OPS
                 ("Black Sabre Spec-Ops",        "RDF",      20f, 0.50f,  8, "Elite tier-1 operators & equipment. +20% RDF Readiness."),
                 ("SIGINT & Cyber Warfare",      "RDF",      12f, 0.35f,  6, "Electronic warfare & signals intel. +12% RDF Readiness."),
                 ("Hostage Rescue Unit",         "RDF",      8f,  0.20f,  4, "Dedicated HRU with transport helis. +8% RDF Readiness."),
             };
 
-            // Check which are already active (by name) to prevent duplicate queuing
             var activeNames = new System.Collections.Generic.HashSet<string>();
             if (country.militaryProjects != null)
                 foreach (var p in country.militaryProjects) activeNames.Add(p.projectName);
@@ -139,7 +127,6 @@ namespace StateCraft.UI
                 card.style.paddingRight = 16;
                 card.style.opacity = isActive ? 0.45f : 1.0f;
 
-                // Header
                 var headerRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, marginBottom = 6 } };
                 var nameLabel = new Label(name) { style = { color = Color.white, unityFontStyleAndWeight = FontStyle.Bold, fontSize = 11, flexShrink = 1 } };
                 var branchBadge = new Label(branch.ToUpper()) { style = { color = branchColor, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } };
@@ -152,18 +139,15 @@ namespace StateCraft.UI
                 headerRow.Add(branchBadge);
                 card.Add(headerRow);
 
-                // Description
                 var descLabel = new Label(desc) { style = { color = Color.grey, fontSize = 9, whiteSpace = WhiteSpace.Normal, marginBottom = 8 } };
                 card.Add(descLabel);
 
-                // Cost / time / strength row
                 var statsRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, marginBottom = 10 } };
                 statsRow.Add(new Label($"Cost: {UiFormat.Money(localCost, sym)}") { style = { color = canAfford ? new Color(0.14f, 0.93f, 0.34f) : new Color(255/255f, 82/255f, 82/255f), fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
                 statsRow.Add(new Label($"Duration: {months} months") { style = { color = Color.grey, fontSize = 9 } });
                 statsRow.Add(new Label($"+{strengthGain:F0}% on completion") { style = { color = new Color(0.1f, 0.5f, 0.9f), fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
                 card.Add(statsRow);
 
-                // Commission button
                 var btn = new Button();
                 btn.AddToClassList("button-premium");
                 btn.style.height = 26;

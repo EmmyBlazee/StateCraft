@@ -8,9 +8,6 @@ namespace StateCraft.UI
     {
         public enum SliderSize { Small, Medium, Large }
 
-        /// <summary>
-        /// Creates a universal progress bar with dynamic color filling.
-        /// </summary>
         public static VisualElement CreateProgressBar(float initialValue, float max, SliderSize size = SliderSize.Medium)
         {
             var bg = new VisualElement();
@@ -27,7 +24,6 @@ namespace StateCraft.UI
             fill.AddToClassList("sc-progress-bar-fill");
             bg.Add(fill);
 
-            // Helper to set value
             bg.userData = new Action<float>((val) => 
             {
                 float pct = Mathf.Clamp01(val / max);
@@ -44,7 +40,6 @@ namespace StateCraft.UI
                 else fill.AddToClassList("sc-fill-full");
             });
 
-            // Initialize
             ((Action<float>)bg.userData).Invoke(initialValue);
             return bg;
         }
@@ -57,9 +52,6 @@ namespace StateCraft.UI
             }
         }
 
-        /// <summary>
-        /// Creates a universal interactive slider.
-        /// </summary>
         public static SliderInt CreateSliderInt(int min, int max, int current, Action<int> onChanged)
         {
             var slider = new SliderInt(min, max, SliderDirection.Horizontal) { value = current };
@@ -72,9 +64,6 @@ namespace StateCraft.UI
             return slider;
         }
 
-        /// <summary>
-        /// Creates a universal numeric stepper.
-        /// </summary>
         public static VisualElement CreateStepper(int currentVal, int step, int maxAllowed, Action<int> onValueChanged)
         {
             var container = new VisualElement() { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
@@ -97,7 +86,6 @@ namespace StateCraft.UI
             }) { text = "+" };
             btnPlus.AddToClassList("sc-stepper-btn");
 
-            // Expose the setter via userData if the consumer needs to update it externally
             container.userData = new Action<int, int>((newVal, newMax) => {
                 currentVal = newVal;
                 maxAllowed = newMax;

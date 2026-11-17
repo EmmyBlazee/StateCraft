@@ -50,7 +50,6 @@ namespace StateCraft.UI
             var gm = GameManager.Instance;
             if (gm.allCountries == null || gm.allCountries.Count == 0) return;
 
-            // Sort all countries by their military firepower score
             var sortedCountries = new List<CountryDataSO>(gm.allCountries);
             sortedCountries.Sort((a, b) => b.GetMilitaryFirepowerScore().CompareTo(a.GetMilitaryFirepowerScore()));
 
@@ -73,7 +72,6 @@ namespace StateCraft.UI
                 row.style.paddingLeft = 15;
                 row.style.paddingRight = 15;
 
-                // Left element: Rank & Country Name
                 var leftGroup = new VisualElement() { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
                 
                 var rankLabel = new Label($"#{i + 1}") 
@@ -100,7 +98,6 @@ namespace StateCraft.UI
                 leftGroup.Add(nameLabel);
                 row.Add(leftGroup);
 
-                // Middle: Visual comparison bar
                 var barContainer = new VisualElement() { style = { flexGrow = 1, height = 8, backgroundColor = new Color(0, 0, 0, 0.4f), marginLeft = 20, marginRight = 20 } };
                 barContainer.style.borderTopLeftRadius = 4;
                 barContainer.style.borderTopRightRadius = 4;
@@ -124,7 +121,6 @@ namespace StateCraft.UI
                 barContainer.Add(fillBar);
                 row.Add(barContainer);
 
-                // Right element: Firepower Index & Threat Tag
                 var rightGroup = new VisualElement() { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
                 
                 var scoreLabel = new Label($"{score:N0} MPI") 
@@ -193,7 +189,6 @@ namespace StateCraft.UI
             var branchImgRDF = root.Q<VisualElement>("BranchImgRDF");
             if (branchImgRDF != null) branchImgRDF.style.backgroundImage = new StyleBackground(Resources.Load<Texture2D>("BranchImages/rdf"));
 
-            // Inject the same images into the Recruitment academy cards
             var recruitImgArmy = root.Q<VisualElement>("RecruitImgArmy");
             if (recruitImgArmy != null) recruitImgArmy.style.backgroundImage = new StyleBackground(Resources.Load<Texture2D>("BranchImages/army (2)"));
 
@@ -218,7 +213,6 @@ namespace StateCraft.UI
             UpdateBranchUI("AF", country.airForceStats);
             UpdateBranchUI("RDF", country.rdfStats);
 
-            // -- ROW 1: FORCE READINESS OVERVIEW --
             if (_root.Q<ProgressBar>("ReadinessArmyBar") is ProgressBar rArmy) rArmy.value = country.armyStats.readiness;
             if (_root.Q<Label>("ReadinessArmyPct") is Label lArmy) lArmy.text = $"{country.armyStats.readiness:F0}%";
 
@@ -231,7 +225,6 @@ namespace StateCraft.UI
             if (_root.Q<ProgressBar>("ReadinessRDFBar") is ProgressBar rRDF) rRDF.value = country.rdfStats.readiness;
             if (_root.Q<Label>("ReadinessRDFPct") is Label lRDF) lRDF.text = $"{country.rdfStats.readiness:F0}%";
 
-            // -- ROW 1: MILITARY SUMMARY --
             float totalPersonnel = country.armyStats.personnel + country.navyStats.personnel + country.airForceStats.personnel + country.rdfStats.personnel;
             float totalEquipment = country.armyStats.equipment + country.navyStats.equipment + country.airForceStats.equipment + country.rdfStats.equipment;
             
@@ -243,7 +236,7 @@ namespace StateCraft.UI
             if (_root.Q<Label>("SumEquipment") is Label sumEq) sumEq.text = totalEquipment.ToString("N0");
             if (_root.Q<Label>("SumAnnualBudget") is Label sumBud) sumBud.text = UiFormat.Money(annualBudget, sym);
             if (_root.Q<Label>("SumDefenceGDP") is Label sumGDP) sumGDP.text = $"{defenceGDP:F1}% of GDP";
-            if (_root.Q<Label>("SumVeterans") is Label sumVet) sumVet.text = country.totalWounded.ToString("N0"); // Simple approximation for now
+            if (_root.Q<Label>("SumVeterans") is Label sumVet) sumVet.text = country.totalWounded.ToString("N0");
 
             PopulateBottomSection(country);
         }
@@ -252,8 +245,6 @@ namespace StateCraft.UI
         {
             if (_root == null || country == null) return;
 
-            // 1. DEFENCE READINESS FACTORS
-            // Approximating from available stats
             float avgReadiness = (country.armyStats.readiness + country.navyStats.readiness + country.airForceStats.readiness + country.rdfStats.readiness) / 4f;
             
             UpdateFactor("FactorEquip", avgReadiness + 5f);
@@ -262,7 +253,6 @@ namespace StateCraft.UI
             UpdateFactor("FactorLog", Mathf.Clamp(avgReadiness - 15f, 0, 100));
             UpdateFactor("FactorWelf", country.publicApproval);
 
-            // 2. RECENT OPERATIONS
             var opsList = _root.Q<VisualElement>("RecentOpsList");
             if (opsList != null)
             {
@@ -270,12 +260,10 @@ namespace StateCraft.UI
                 
                 Debug.Log($"[Military Dashboard] FORCES Tab -> PopulateBottomSection -> ActiveOps Count: {activeOps.Count}");
 
-                // Get ALL direct children of RecentOpsList — one per op row
                 var rows = opsList.Children().ToList();
 
                 for (int i = 0; i < 3; i++)
                 {
-                    // The row container is the i-th child of RecentOpsList
                     VisualElement row = i < rows.Count ? rows[i] : null;
 
                     var opName   = _root.Q<Label>($"RecentOp{i + 1}Name");
@@ -296,7 +284,6 @@ namespace StateCraft.UI
                     }
                     else
                     {
-                        // Blank AND hide the entire row so UXML placeholders don't show
                         opName.text = "";
                         if (opDesc   != null) opDesc.text   = "";
                         if (opDate   != null) opDate.text   = "";
@@ -305,7 +292,6 @@ namespace StateCraft.UI
                     }
                 }
 
-                // If no ops at all, show a small "No active operations" message
                 if (activeOps.Count == 0)
                 {
                     var noOpsMsg = opsList.Q<Label>("NoOpsMessage");
@@ -328,7 +314,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // Calculate personnel in training
             int personnelInTraining = 0;
             if (country.trainingPipelines != null)
             {
@@ -338,7 +323,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // 3. FORCE STATUS
             if (_root.Q<Label>("ForceStatusDeployments") is Label lDeploy) 
                 lDeploy.text = (country.activeOperations != null) ? country.activeOperations.Count.ToString() : "0";
                 
@@ -393,13 +377,12 @@ namespace StateCraft.UI
             var moralePct = _root.Q<Label>($"{prefix}MoralePct");
             if (moralePct != null) moralePct.text = $"{stats.morale:F0}%";
             
-            // Commanders could be updated here if stats contained commander info
         }
         private void PopulateWMD(CountryDataSO country)
         {
             if (_wmdProgressBar == null || _wmdStatusLabel == null || _wmdOperationalBadge == null) return;
 
-            _wmdProgressBar.value = country.wmdDevelopmentProgress; // 0-100
+            _wmdProgressBar.value = country.wmdDevelopmentProgress;
 
             if (country.hasNuclearWeapon)
             {
@@ -475,9 +458,7 @@ namespace StateCraft.UI
             }
         }
 
-
-
-        private void UpdateIntelAssessment(CountryDataSO country)
+private void UpdateIntelAssessment(CountryDataSO country)
         {
             if (country == null || country.regions == null || country.regions.Count == 0) return;
             var validRegions = country.regions.Where(r => r != null).ToList();

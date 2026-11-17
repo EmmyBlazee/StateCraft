@@ -9,7 +9,7 @@ namespace StateCraft.UI
     public class AIDiplomaticProposalData
     {
         public CountryDataSO senderCountry;
-        public string proposalType; // "Peace Treaty", "Alliance Invitation", "Trade Agreement"
+        public string proposalType;
         public string title;
         public string message;
         public Action onAccept;
@@ -107,7 +107,7 @@ namespace StateCraft.UI
                 _flagImg.sprite = flagSprite != null ? flagSprite : proposal.senderCountry.countryFlag;
             }
 
-            if (_uiDocument != null) _uiDocument.sortingOrder = 200; // Force overlay to front
+            if (_uiDocument != null) _uiDocument.sortingOrder = 200;
             _modal.style.display = DisplayStyle.Flex;
             _modal.pickingMode = PickingMode.Position;
         }

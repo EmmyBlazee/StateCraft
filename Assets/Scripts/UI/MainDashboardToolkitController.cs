@@ -7,7 +7,6 @@ using StateCraft.Systems;
 
 namespace StateCraft.UI
 {
-    // Run after all sub-dashboard controllers have initialized (default order = 0)
     [DefaultExecutionOrder(10)]
     public class MainDashboardToolkitController : MonoBehaviour
     {
@@ -20,7 +19,6 @@ namespace StateCraft.UI
         private System.Collections.Generic.Dictionary<string, VisualElement> _panels = new System.Collections.Generic.Dictionary<string, VisualElement>();
         private VisualElement _bottomNavBar;
         
-        // Navigation Buttons
         private Button _btnEconomy;
         private Button _btnMilitary;
         private Button _btnIntel;
@@ -29,7 +27,6 @@ namespace StateCraft.UI
         private Button _btnSearch;
         private Button _btnTutorial;
 
-        // Player Vitals
         private Label _treasuryLabel;
         private Label _stabilityLabel;
         private Label _readinessLabel;
@@ -38,23 +35,19 @@ namespace StateCraft.UI
         private Image _playerFlag;
         private VisualElement _approvalFill;
         
-        // Time Controls
         private Label _dateLabel;
         private Button _btnPause, _btn1x, _btn2x, _btn3x;
         private Button _btnNotificationHistory;
         private Button _btnSystemMenu;
 
-        // System Menu Modal
         private VisualElement _systemMenuRoot;
         private Button _btnResume;
         private VisualElement _howToPlayRoot;
         
-        // War Declared Modal
         private VisualElement _warDeclaredModal;
         private Label _warDeclaredMessage;
         private Button _btnAckWar;
 
-        // Game Over Screen
         private VisualElement _gameOverRoot;
         private Label _gameOverTitle;
         private Label _gameOverSummary;
@@ -62,11 +55,9 @@ namespace StateCraft.UI
         private Button _btnQuitToMenuFromGameOver;
         private Button _btnSaveScreenshot;
 
-        // Event Log
         private VisualElement _eventLogPanel;
         private ScrollView _eventLogScrollView;
 
-        // President Profile Modal
         private VisualElement _presidentProfileModal;
         private Label _presidentNameLabel;
         private Label _presidentCountryLabel;
@@ -74,8 +65,7 @@ namespace StateCraft.UI
         private Label _presidentScenarioLabel;
         private Button _btnClosePresidentProfile;
 
-
-        private void Awake()
+private void Awake()
         {
             if (Instance == null) Instance = this;
             else Destroy(gameObject);
@@ -95,7 +85,6 @@ namespace StateCraft.UI
 
         private void InitializeElements()
         {
-            // Vitals
             _treasuryLabel = _root.Q<Label>("TreasuryValue");
             _stabilityLabel = _root.Q<Label>("StabilityValue");
             _readinessLabel = _root.Q<Label>("ReadinessValue");
@@ -104,7 +93,6 @@ namespace StateCraft.UI
             _playerFlag = _root.Q<Image>("PlayerFlag");
             _approvalFill = _root.Q<VisualElement>("ApprovalFill");
 
-            // Time
             _dateLabel = _root.Q<Label>("CurrentDateValue");
             _btnPause = _root.Q<Button>("TimePause");
             _btn1x = _root.Q<Button>("Time1x");
@@ -163,7 +151,6 @@ namespace StateCraft.UI
                     PerformSave();
                 };
 
-                // In-Game Settings Modal Wiring
                 var settingsModal = _systemMenuRoot.Q<VisualElement>("InGameSettingsModal");
                 var btnSettings = _systemMenuRoot.Q<Button>("BtnSettings");
                 var btnCloseSettings = _systemMenuRoot.Q<Button>("BtnCloseInGameSettings");
@@ -177,7 +164,6 @@ namespace StateCraft.UI
 
                 if (settingsModal != null) settingsModal.style.display = DisplayStyle.None;
 
-                // Load initial values from PlayerPrefs
                 float savedMusic = PlayerPrefs.GetFloat("Settings_MusicVolume", 1.0f);
                 bool savedFullscreen = PlayerPrefs.GetInt("Settings_Fullscreen", Screen.fullScreen ? 1 : 0) == 1;
                 int savedResIndex = PlayerPrefs.GetInt("Settings_ResolutionIndex", 0);
@@ -252,7 +238,6 @@ namespace StateCraft.UI
                 };
             }
 
-            // How To Play panel
             _howToPlayRoot = _root.Q<VisualElement>("HowToPlayRoot");
             if (_howToPlayRoot != null)
             {
@@ -292,7 +277,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // President Profile Modal
             _presidentProfileModal = _root.Q<VisualElement>("PresidentProfileModal");
             if (_presidentProfileModal != null)
             {
@@ -331,12 +315,10 @@ namespace StateCraft.UI
             };
             if (_btnSystemMenu != null) _btnSystemMenu.clicked += () => ToggleSystemMenu(true);
 
-            // Navigation (Modern Age Style - Bottom Bar)
             _topBar = _root.Q<VisualElement>("TopBar");
             _bottomNavBar = _root.Q<VisualElement>("BottomNavBar");
             _panelContainer = _root.Q<VisualElement>("PanelContainer");
 
-            // Game Over Screen Setup
             _gameOverRoot = _root.Q<VisualElement>("GameOverRoot");
             if (_gameOverRoot != null)
             {
@@ -370,7 +352,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // Register for Game Over
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.OnGameOver += HandleGameOver;
@@ -440,12 +421,10 @@ namespace StateCraft.UI
         {
             if (_panelContainer == null) return;
 
-            // Harvest sub-dashboards and parent them into the PanelContainer for SPA routing
             void InjectPanel(VisualElement p, string key)
             {
                 if (p == null) return;
                 p.RemoveFromHierarchy();
-                // Override the standard-dashboard absolute position rules so it fills the container
                 p.style.position = Position.Relative;
                 p.style.left = StyleKeyword.Auto;
                 p.style.top = StyleKeyword.Auto;
@@ -460,21 +439,14 @@ namespace StateCraft.UI
                 _panels[key] = p;
             }
 
-            // Helper: get a dashboard panel VisualElement from a controller's UIDocument.
-            // Prefers rootVisualElement (already built), but falls back to CloneTree() directly
-            // from the visualTreeAsset when rootVisualElement is empty — this happens when
-            // UIDocument defers its build past our Start() call. The element will be injected
-            // into MainDashboard's own panel container, so IntelUI's runtime panel is irrelevant.
             VisualElement GetDashboardPanel(MonoBehaviour ctrl, string panelName)
             {
                 if (ctrl == null) return null;
                 var doc = ctrl.GetComponent<UIDocument>();
                 if (doc == null) return null;
 
-                // First try: rootVisualElement (works if UIDocument has already built the tree)
                 var panel = doc.rootVisualElement?.Q(panelName);
 
-                // Fallback: clone directly from the visual tree asset
                 if (panel == null && doc.visualTreeAsset != null)
                 {
                     var container = new VisualElement();
@@ -529,8 +501,7 @@ namespace StateCraft.UI
             }
         }
 
-        
-        public VisualElement GetPanelVisualElement(string key)
+public VisualElement GetPanelVisualElement(string key)
         {
             if (_panels != null && _panels.ContainsKey(key)) return _panels[key];
             return _panelContainer?.Q<VisualElement>($"{key}Dashboard");
@@ -548,7 +519,6 @@ namespace StateCraft.UI
                 SetDashboardHeaderMode(true);
                 _panels[name].style.display = DisplayStyle.Flex;
                 
-                // Trigger refresh if needed on the controller
                 switch (name)
                 {
                     case "Economy": FindObjectOfType<EconomyDashboardController>(true)?.Show(); break;
@@ -559,7 +529,6 @@ namespace StateCraft.UI
                     case "Global": FindObjectOfType<GlobalDashboardController>(true)?.Show(); break;
                 }
 
-                // Log any overflowing UI elements in this panel (runs after next layout pass)
                 UIStateManager.LogOverflowingElements(_panels[name], name);
             }
             else
@@ -569,8 +538,7 @@ namespace StateCraft.UI
             UpdateActiveNavButton(name);
         }
 
-
-        public void HideAllPanels()
+public void HideAllPanels()
         {
             if (_panelContainer != null) _panelContainer.style.display = DisplayStyle.None;
 
@@ -581,7 +549,6 @@ namespace StateCraft.UI
 
             SetDashboardHeaderMode(false);
             
-            // Reset nav buttons
             _btnEconomy?.RemoveFromClassList("modern-nav-btn-active");
             _btnMilitary?.RemoveFromClassList("modern-nav-btn-active");
             _btnIntel?.RemoveFromClassList("modern-nav-btn-active");
@@ -650,12 +617,10 @@ namespace StateCraft.UI
 
             if (show)
             {
-                // Pause the game when opening the menu
                 if (GameManager.Instance != null) SetTimeSpeed(0);
             }
             else
             {
-                // Resume the game at 1x speed when unpausing / closing menu
                 if (GameManager.Instance != null) SetTimeSpeed(1);
             }
         }
@@ -684,7 +649,6 @@ namespace StateCraft.UI
         {
             if (GameManager.Instance == null) return;
 
-            // Update UI State
             _btnPause?.RemoveFromClassList("time-btn-active");
             _btn1x?.RemoveFromClassList("time-btn-active");
             _btn2x?.RemoveFromClassList("time-btn-active");
@@ -733,7 +697,6 @@ namespace StateCraft.UI
 
             var country = GameManager.Instance.playerCountry;
             
-            // Treasury display (using local currency)
             if (_treasuryLabel != null) 
             {
                 string symbol = (country != null && !string.IsNullOrEmpty(country.currencySymbol)) ? country.currencySymbol : "$";
@@ -771,7 +734,6 @@ namespace StateCraft.UI
                     }
                 }
                 
-                // Update Approval Bar
                 if (_approvalFill != null)
                     _approvalFill.style.width = Length.Percent(country.stability);
             }
@@ -783,7 +745,6 @@ namespace StateCraft.UI
                 if (_approvalFill != null) _approvalFill.style.width = Length.Percent(0);
             }
             
-            // Readiness linked to security/military power (hypothetical)
             if (_readinessLabel != null) _readinessLabel.text = $"{70 + Random.Range(-2, 2)}%"; 
         }
 
@@ -814,28 +775,23 @@ namespace StateCraft.UI
             if (_dateLabel != null)
                 _dateLabel.text = currentDate;
 
-            // Update date across all integrated dashboards
             _root.Query<Label>("DateMain").ForEach(lbl => lbl.text = currentDate);
             _root.Query<Label>("HdrDate").ForEach(lbl => lbl.text = currentDate);
 
-            // ── Election countdown in header ──
             var country = GameManager.Instance.playerCountry;
             if (country == null) return;
 
             int currentTurn = GameManager.Instance.TurnSystem.CurrentTurn;
             int electionEvery = 48;
             int monthsUntilElection = electionEvery - (currentTurn % electionEvery);
-            if (monthsUntilElection == electionEvery) monthsUntilElection = 0; // just had one
+            if (monthsUntilElection == electionEvery) monthsUntilElection = 0;
 
-            // Calculate approval for display
             float stability     = country.stability;
             float econScore     = country.income > country.spending ? 30f : 15f;
             float prestigeScore = country.globalPrestige * 0.15f;
             float inflation     = Mathf.Clamp(country.inflationRate * 0.15f, 0f, 10f);
             float approvalEst   = Mathf.Clamp((stability * 0.40f) + econScore + prestigeScore - inflation, 0f, 100f);
 
-            // Update IntelLabel repurposed as election/approval bar
-            // (or add a dedicated label if IntelValue exists)
             if (_intelLabel != null)
             {
                 string electionText;
@@ -850,13 +806,11 @@ namespace StateCraft.UI
 
                 _intelLabel.text = electionText;
 
-                // Colour: red if losing, amber if marginal, green if safe
                 _intelLabel.style.color = approvalEst >= 60f ? new Color(0.3f, 0.9f, 0.45f) :
                                           approvalEst >= 50f ? new Color(1f, 0.82f, 0.2f) :
                                                                new Color(1f, 0.35f, 0.35f);
             }
 
-            // ── Pending event badge on NavEvents button ──
             var btnEvents = _root?.Q<Button>("NavEvents");
             if (btnEvents != null)
             {
@@ -918,7 +872,6 @@ namespace StateCraft.UI
                 _warDeclaredModal.style.display = DisplayStyle.Flex;
                 AudioManager.Instance?.PlayWarAlert();
                 
-                // Force pause when war is declared
                 if (GameManager.Instance != null)
                 {
                     SetTimeSpeed(0);

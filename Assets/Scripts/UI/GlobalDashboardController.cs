@@ -98,12 +98,11 @@ namespace StateCraft.UI
             var all = GameManager.Instance.allCountries;
 
             float worldStab = all.Average(c => c.stability);
-            float afrStab = all.Where(c => !string.IsNullOrEmpty(c.countryName)).Average(c => c.stability); // Mock filter
+            float afrStab = all.Where(c => !string.IsNullOrEmpty(c.countryName)).Average(c => c.stability);
 
             if (_kpiWorldStab != null) _kpiWorldStab.text = $"{worldStab:F0}%";
             if (_kpiAfrStab != null) _kpiAfrStab.text = $"{afrStab:F0}%";
             
-            // Mock Global metrics
             if (_kpiOil != null) _kpiOil.text = $"${Random.Range(70f, 95f):F1}";
             if (_kpiInflation != null) _kpiInflation.text = $"{Random.Range(2f, 8f):F1}%";
             if (_kpiWars != null) _kpiWars.text = Random.Range(1, 4).ToString();

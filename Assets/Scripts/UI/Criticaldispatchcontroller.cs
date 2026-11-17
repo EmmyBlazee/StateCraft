@@ -8,14 +8,6 @@ using StateCraft.Core;
 
 namespace StateCraft.UI
 {
-    /// <summary>
-    /// CriticalDispatchController — shows incoming Critical inbox messages
-    /// as a blocking modal overlay that the player must acknowledge.
-    /// Queues multiple messages and shows them one at a time.
-    /// Attach this MonoBehaviour to the same GameObject as MainDashboard UIDocument,
-    /// OR let UIStateManager add it via AddComponent — both work because we defer
-    /// rootVisualElement access to the first ShowDispatch call (not Awake/Start).
-    /// </summary>
     public class CriticalDispatchController : MonoBehaviour
     {
         public static CriticalDispatchController Instance { get; private set; }
@@ -39,20 +31,9 @@ namespace StateCraft.UI
         {
             if (Instance == null) Instance = this;
             else { Destroy(gameObject); return; }
-            // Do NOT access rootVisualElement here — UI Toolkit panel may not be ready yet.
         }
 
-        // ─────────────────────────────────────────────────────────
-        // Lazy root resolution — called the first time we need to show something
-        // ─────────────────────────────────────────────────────────
-
-        // TryResolveRoot removed — we now always spawn a dedicated host document at Order 999
-
-        // ─────────────────────────────────────────────────────────
-        // Public API — called from InboxSystem
-        // ─────────────────────────────────────────────────────────
-
-        public void ShowDispatch(string sender, string subject, string body, Color accentColor)
+public void ShowDispatch(string sender, string subject, string body, Color accentColor)
         {
             _queue.Enqueue(new CriticalDispatch
             {
@@ -66,10 +47,9 @@ namespace StateCraft.UI
                 StartCoroutine(ShowNextDelayed());
         }
 
-        // Defer one frame so UI Toolkit has time to finish layout after a component add
         private IEnumerator ShowNextDelayed()
         {
-            yield return null; // wait one frame
+            yield return null;
             if (!_overlayBuilt)
             {
                 BuildModalOverlay();
@@ -77,24 +57,17 @@ namespace StateCraft.UI
             ShowNext();
         }
 
-        // ─────────────────────────────────────────────────────────
-        // Build the modal overlay once and reuse it
-        // ─────────────────────────────────────────────────────────
-
-        private void BuildModalOverlay()
+private void BuildModalOverlay()
         {
-            // ── Spawn Dedicated Host Document ─────────────────────────────────
             var hostGO = new GameObject("CriticalDispatchHost");
             var hostDoc = hostGO.AddComponent<UIDocument>();
             
-            // Try to find a panel settings reference from the scene
             var existingDoc = FindObjectOfType<UIDocument>();
             if (existingDoc != null) hostDoc.panelSettings = existingDoc.panelSettings;
             
             hostDoc.sortingOrder = 100;
             _root = hostDoc.rootVisualElement;
 
-            // Full-screen dimmer
             _modalOverlay = new VisualElement();
             _modalOverlay.name = "CriticalDispatchOverlay";
             _modalOverlay.style.position        = Position.Absolute;
@@ -137,7 +110,6 @@ namespace StateCraft.UI
             if (_modalOverlay == null) return;
             _modalOverlay.Clear();
 
-            // ── Dispatch card ──
             var card = new VisualElement();
             card.style.width    = new StyleLength(new Length(55f, LengthUnit.Percent));
             card.style.maxWidth = 620;
@@ -156,14 +128,12 @@ namespace StateCraft.UI
             card.style.paddingRight  = 0;
             card.pickingMode = PickingMode.Position;
 
-            // ── Accent header stripe ──
             var stripe = new VisualElement();
             stripe.style.height          = 4;
             stripe.style.backgroundColor = d.accentColor;
             stripe.style.marginBottom    = 0;
             card.Add(stripe);
 
-            // ── Header bar ──
             var header = new VisualElement();
             header.style.flexDirection   = FlexDirection.Row;
             header.style.justifyContent  = Justify.SpaceBetween;
@@ -190,7 +160,6 @@ namespace StateCraft.UI
             }
             card.Add(header);
 
-            // ── Sender + Subject ──
             var senderBox = new VisualElement();
             senderBox.style.paddingTop    = 14; senderBox.style.paddingBottom = 10;
             senderBox.style.paddingLeft   = 20; senderBox.style.paddingRight  = 20;
@@ -211,7 +180,6 @@ namespace StateCraft.UI
             senderBox.Add(subjectLabel);
             card.Add(senderBox);
 
-            // ── Body text ──
             var bodyScroll = new ScrollView();
             bodyScroll.style.maxHeight   = 280;
             bodyScroll.style.paddingTop  = 14; bodyScroll.style.paddingBottom = 14;
@@ -225,7 +193,6 @@ namespace StateCraft.UI
             bodyScroll.Add(bodyLabel);
             card.Add(bodyScroll);
 
-            // ── Footer buttons ──
             var footer = new VisualElement();
             footer.style.flexDirection  = FlexDirection.Row;
             footer.style.justifyContent = Justify.FlexEnd;

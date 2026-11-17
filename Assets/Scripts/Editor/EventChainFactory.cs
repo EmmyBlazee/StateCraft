@@ -12,7 +12,6 @@ namespace StateCraft.Editor
         {
             string folderPath = "Assets/Resources/Events/Chains";
             
-            // Create directories safely
             if (!AssetDatabase.IsValidFolder("Assets/Resources"))
                 AssetDatabase.CreateFolder("Assets", "Resources");
             if (!AssetDatabase.IsValidFolder("Assets/Resources/Events"))
@@ -20,9 +19,6 @@ namespace StateCraft.Editor
             if (!AssetDatabase.IsValidFolder("Assets/Resources/Events/Chains"))
                 AssetDatabase.CreateFolder("Assets/Resources/Events", "Chains");
 
-            // ==========================================
-            // CHAIN 1: Economic Crisis -> Inflation / Debt
-            // ==========================================
             GameEventSO crisis = ScriptableObject.CreateInstance<GameEventSO>();
             crisis.eventTitle = "Economic Crisis";
             crisis.description = "Treasury reserves are dwindling rapidly due to unforeseen market shocks. The people are looking for an immediate solution.";
@@ -51,7 +47,7 @@ namespace StateCraft.Editor
                 },
                 new GameEventChoice {
                     choiceText = "Borrow Foreign Aid",
-                    costUSD = -5f, // Gain 5B
+                    costUSD = -5f,
                     stabilityEffect = 0f,
                     nextEvent = debtCrisis
                 }
@@ -83,14 +79,10 @@ namespace StateCraft.Editor
                 }
             };
 
-            // Save Chain 1
             AssetDatabase.CreateAsset(debtCrisis, $"{folderPath}/Event_DebtCrisis.asset");
             AssetDatabase.CreateAsset(inflation, $"{folderPath}/Event_InflationSurge.asset");
             AssetDatabase.CreateAsset(crisis, $"{folderPath}/Event_EconomicCrisis.asset");
 
-            // ==========================================
-            // CHAIN 2: Coup Attempt -> Human Rights / Fracture
-            // ==========================================
             GameEventSO coup = ScriptableObject.CreateInstance<GameEventSO>();
             coup.eventTitle = "Coup Attempt";
             coup.description = "Dissident generals have mobilized troops in the capital. They demand your immediate resignation.";
@@ -148,7 +140,6 @@ namespace StateCraft.Editor
                 }
             };
 
-            // Save Chain 2
             AssetDatabase.CreateAsset(humanRights, $"{folderPath}/Event_HumanRights.asset");
             AssetDatabase.CreateAsset(factionSplit, $"{folderPath}/Event_MilitaryFracture.asset");
             AssetDatabase.CreateAsset(coup, $"{folderPath}/Event_CoupAttempt.asset");

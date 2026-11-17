@@ -39,10 +39,9 @@ namespace StateCraft.UI
 
             if (panelRoot != gameObject) panelRoot.SetActive(false);
             
-            // Try to find the Budget Display if it's missing (helps when spawning as prefab)
             if (budgetDisplay == null)
             {
-                var budgetObj = GameObject.Find("Budget_Text"); // Searches by name
+                var budgetObj = GameObject.Find("Budget_Text");
                 if (budgetObj != null) budgetDisplay = budgetObj.GetComponent<TMP_Text>();
             }
         }
@@ -109,7 +108,7 @@ namespace StateCraft.UI
             if (currentCountry == null || GameManager.Instance == null) return;
 
             var pc = GameManager.Instance.playerCountry;
-            float cost = 1.0f * (pc != null ? pc.exchangeRate : 1.0f); // $1 Billion USD converted to local currency (Billions)
+            float cost = 1.0f * (pc != null ? pc.exchangeRate : 1.0f);
             if (GameManager.Instance.playerBudget >= cost)
             {
                 GameManager.Instance.playerBudget -= cost;

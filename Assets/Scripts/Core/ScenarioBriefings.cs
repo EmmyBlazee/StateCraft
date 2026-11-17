@@ -1,16 +1,3 @@
-// ============================================================
-// FILE: Scripts/Core/ScenarioBriefings.cs
-// PURPOSE: Sets scenario briefing text for each country at
-//          runtime via GameManager.InitializeSystems().
-//          This avoids editing 54 .asset files manually — just
-//          add/edit entries in the dictionary below.
-//
-// HOW TO ADD/EDIT:
-//   Find the country name in SetAllBriefings() below and update
-//   the three fields: title, context, priorities.
-//   Countries not listed here get auto-generated fallback text
-//   from UIStateManager.ShowScenarioBriefing().
-// ============================================================
 
 using System.Collections.Generic;
 using StateCraft.Data;
@@ -477,14 +464,8 @@ namespace StateCraft.Core
                 priorities = "• Boost tourism and high-tech sectors to ensure economic independence\n• Establish maritime security to protect exclusive economic zones\n• Secure climate resilience funding from international organizations"
             },
 
+};
 
-        };
-
-        /// <summary>
-        /// Called once from GameManager.InitializeSystems() after allCountries is populated.
-        /// Sets scenario briefing text on each country's CountryDataSO.
-        /// Countries without an entry get blank fields and the UI generates fallback text.
-        /// </summary>
         public static void Apply(System.Collections.Generic.List<CountryDataSO> allCountries)
         {
             if (allCountries == null) return;
@@ -497,7 +478,6 @@ namespace StateCraft.Core
                     country.scenarioContext    = b.context;
                     country.scenarioPriorities = b.priorities;
                 }
-                // hasShownBriefing intentionally left as-is (false by default = show once)
             }
         }
     }

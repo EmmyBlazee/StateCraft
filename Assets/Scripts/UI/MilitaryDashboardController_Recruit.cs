@@ -18,7 +18,6 @@ namespace StateCraft.UI
             if (country.treasury >= 250f)
             {
                 country.treasury -= 250f;
-                // Add a random 1-2 star general
                 string[] firstNames = { "John", "Ahmed", "David", "Sani", "Ibrahim", "James", "Victor" };
                 string[] lastNames = { "Okafor", "Adeyemi", "Bello", "Ojo", "Musa", "Dogo", "Umar" };
                 string name = $"{firstNames[Random.Range(0, firstNames.Length)]} {lastNames[Random.Range(0, lastNames.Length)]}";
@@ -37,19 +36,15 @@ namespace StateCraft.UI
 
         private void InitializeRecruitTab(VisualElement root)
         {
-            // Army RECRUIT button — opens modal with slider
             var btnArmy = root.Q<Button>("BtnArmyRecruit");
             if (btnArmy != null) btnArmy.clicked += () => ShowPurchaseModal("Infantry Battalion", "INF", 0.005f, 100, true, false, 0);
 
-            // Air Force RECRUIT button
             var btnAF = root.Q<Button>("BtnAFRecruit");
             if (btnAF != null) btnAF.clicked += () => ShowPurchaseModal("Airforce Flight Academy", "AIR_PERS", 0.01f, 25, true, false, 0);
 
-            // Navy RECRUIT button
             var btnNavy = root.Q<Button>("BtnNavyRecruit");
             if (btnNavy != null) btnNavy.clicked += () => ShowPurchaseModal("Naval Crew Training", "NAVY_PERS", 0.008f, 50, true, false, 0);
 
-            // RDF RECRUIT button
             var btnRDF = root.Q<Button>("BtnRDFRecruit");
             if (btnRDF != null) btnRDF.clicked += () => ShowPurchaseModal("Elite Spec-Ops RDF", "RDF_PERS", 0.20f, 250, true, false, 0);
         }
@@ -59,7 +54,6 @@ namespace StateCraft.UI
             if (_root == null) return;
             if (_panelRecruit == null) return;
 
-            // Overview Stats
             long totalPop = country.population;
             int availableManpower = UnityEngine.Mathf.FloorToInt(totalPop * 0.15f); 
             int militaryEligible = UnityEngine.Mathf.FloorToInt(availableManpower * 0.6f);
@@ -75,7 +69,7 @@ namespace StateCraft.UI
             var lblMonthlyRecruits = _panelRecruit.Q<Label>("RctMonthlyRecruits");
             if (lblMonthlyRecruits != null) lblMonthlyRecruits.text = $"+{monthlyRecruits:N0}";
             
-            float monthlyCostB = (totalInTraining * 0.000005f); // Rough estimate of $5k per recruit training cost
+            float monthlyCostB = (totalInTraining * 0.000005f);
             var lblCost = _panelRecruit.Q<Label>("RctMonthlyCost");
             string sym = string.IsNullOrEmpty(country.currencySymbol) ? "₦" : country.currencySymbol;
             if (lblCost != null) lblCost.text = $"{sym}{monthlyCostB * country.exchangeRate:F1}B";
@@ -84,7 +78,6 @@ namespace StateCraft.UI
             var lblEfficiency = _panelRecruit.Q<Label>("RctEfficiency");
             if (lblEfficiency != null) lblEfficiency.text = $"{UnityEngine.Mathf.Clamp(efficiency, 0, 100):F0}%";
             
-            // RESERVES & MANPOWER
             int activePersonnel = country.armyStats.personnel + country.navyStats.personnel + country.airForceStats.personnel + country.rdfStats.personnel + country.nationalPoliceSize;
             int reservePersonnel = UnityEngine.Mathf.FloorToInt(activePersonnel * 1.5f);
             int veterans = UnityEngine.Mathf.FloorToInt(activePersonnel * 0.8f);
@@ -104,27 +97,22 @@ namespace StateCraft.UI
             var lblResvVet = _panelRecruit.Q<Label>("ResvVeterans");
             if (lblResvVet != null) lblResvVet.text = veterans.ToString("N0");
 
-            // ARMY ACADEMY
             int infantryCapacity = 5000 + (country.baseArmyCount * 15000);
             int inTrainingInfantry = GetTotalInTraining(country, "INF");
             UpdateAcademyCard(_panelRecruit, "Army", infantryCapacity, inTrainingInfantry, country.armyStats.readiness);
 
-            // AIR FORCE ACADEMY
             int airCapacity = 500 + (country.baseAirForceCount * 2000);
             int inTrainingAir = GetTotalInTraining(country, "AIR_PERS");
             UpdateAcademyCard(_panelRecruit, "AF", airCapacity, inTrainingAir, country.airForceStats.readiness);
 
-            // NAVY ACADEMY
             int navyCapacity = 1000 + (country.baseNavyCount * 3000);
             int inTrainingNavy = GetTotalInTraining(country, "NAVY_PERS");
             UpdateAcademyCard(_panelRecruit, "Navy", navyCapacity, inTrainingNavy, country.navyStats.readiness);
 
-            // RDF ACADEMY
             int rdfCapacity = 200 + (country.baseRDFCount * 1000);
             int inTrainingRDF = GetTotalInTraining(country, "RDF_PERS");
             UpdateAcademyCard(_panelRecruit, "RDF", rdfCapacity, inTrainingRDF, country.rdfStats.readiness);
 
-            // ACTIVE TRAINING QUEUE
             UpdateQueueUI(country, "INF", "QueueArmy");
             UpdateQueueUI(country, "AIR_PERS", "QueueAF");
             UpdateQueueUI(country, "NAVY_PERS", "QueueNavy");
@@ -149,7 +137,6 @@ namespace StateCraft.UI
             var lblReadiness = root.Q<Label>($"{prefix}AcadReadinessPct");
             if (lblReadiness != null) lblReadiness.text = $"{readiness:F0}%";
 
-            // Graduation rate can be based on readiness
             float gradRate = Mathf.Clamp(readiness + 5f, 50f, 98f);
             var barGrad = root.Q<ProgressBar>($"{prefix}AcadGradBar");
             if (barGrad != null) barGrad.value = gradRate;
@@ -303,7 +290,6 @@ namespace StateCraft.UI
 
             if (isPersonnel)
             {
-                // Enforce Training Academy capacity limit
                 int capacity = 0;
                 int currentTrainees = GetTotalInTraining(country, id);
                 string academyName = "";
@@ -338,7 +324,6 @@ namespace StateCraft.UI
                     return;
                 }
 
-                // Enforce Base Housing Capacity limit
                 int housingCapacity = 0;
                 int currentTotal = 0;
                 string baseBranch = "";
@@ -383,7 +368,6 @@ namespace StateCraft.UI
                 string tag = isPersonnel ? "TRAINING" : (isProduce ? "MANUFACTURE" : "IMPORT");
                 string unitLabel = "";
 
-                // Determine label
                 switch (id)
                 {
                     case "INF": unitLabel = "Ground Troops"; break;
@@ -413,7 +397,6 @@ namespace StateCraft.UI
 
                 if (isPersonnel)
                 {
-                    // Queue for 6 months of training!
                     if (country.trainingPipelines == null)
                     {
                         UnityEngine.Debug.LogError($"[RecruitUnit] trainingPipelines is NULL! Aborting recruitment.");
@@ -429,7 +412,6 @@ namespace StateCraft.UI
                 }
                 else
                 {
-                    // Direct Hardware procurement / Base Construction
                     switch (id)
                     {
                         case "RIFLE": 
@@ -517,7 +499,6 @@ namespace StateCraft.UI
                             break;
                     }
 
-                    // Update combined strength
                     country.militaryStrength = (country.armyStrength * 0.5f) + (country.navyStrength * 0.2f) + (country.airForceStrength * 0.3f);
                     country.militaryReadiness = Mathf.Min(100f, country.militaryReadiness + 1.0f);
 
@@ -671,7 +652,6 @@ namespace StateCraft.UI
 
             if (amountRemoved > 0)
             {
-                // Simple recalculation based on actual hardware
                 country.militaryStrength = (country.armyStrength * 0.5f) + (country.navyStrength * 0.2f) + (country.airForceStrength * 0.3f);
                 
                 NotificationManager.Instance?.AddNotification($"DECOMMISSIONED: {amountRemoved:N0} {unitLabel} removed from active service.", new Color(255/255f, 82/255f, 82/255f));
@@ -690,7 +670,7 @@ namespace StateCraft.UI
             var gm = GameManager.Instance;
             if (country == null || gm == null) return;
 
-            float refund = cost * 0.40f; // Reclaim 40% of the training/construction budget!
+            float refund = cost * 0.40f;
 
             if (isPersonnel)
             {
@@ -816,6 +796,5 @@ namespace StateCraft.UI
             return total;
         }
 
-
-    }
+}
 }

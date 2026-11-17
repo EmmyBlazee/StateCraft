@@ -19,7 +19,7 @@ namespace StateCraft.Systems
         public string ExportState()
         {
             var data = new DiplomacySaveData();
-            data.ActiveDeals = ActiveDeals; // TradeDeal is already Serializable
+            data.ActiveDeals = ActiveDeals;
 
             foreach (var kvp in PendingProposals)
             {
@@ -55,12 +55,9 @@ namespace StateCraft.Systems
 
         public void UpdateRelations(CountryDataSO country)
         {
-            // Future: Relations matrix logic
         }
 
-        
-        // ─── FACTION SYSTEM ───────────────────────────────────────────────────
-        public bool JoinFaction(CountryDataSO country, string factionName)
+public bool JoinFaction(CountryDataSO country, string factionName)
         {
             var gm = GameManager.Instance;
             if (gm == null || country == null) return false;
@@ -71,7 +68,6 @@ namespace StateCraft.Systems
                 return false;
             }
 
-            // Check if at war
             if (gm.WarSystem?.GetWarStage(country) == WarStage.Conflict)
             {
                 UI.NotificationManager.Instance?.AddNotification("Cannot join a faction while at war!", UnityEngine.Color.red);
@@ -84,7 +80,6 @@ namespace StateCraft.Systems
             NewsSystem.Instance?.PublishNews($"GEOPOLITICS: {country.countryName} has officially joined the {factionName}.");
             UI.NotificationManager.Instance?.AddNotification($"✅ Joined {factionName}. Free trade and mutual defence activated.", new UnityEngine.Color(0f, 0.85f, 0.4f));
 
-            // Small prestige boost for joining major faction
             country.globalPrestige = UnityEngine.Mathf.Min(100f, country.globalPrestige + 2f);
 
             return true;
@@ -104,16 +99,13 @@ namespace StateCraft.Systems
             NewsSystem.Instance?.PublishNews($"GEOPOLITICS: {country.countryName} has withdrawn from the {oldFaction} and is now Independent.");
             UI.NotificationManager.Instance?.AddNotification($"Withdrew from {oldFaction}. You have lost mutual defence protection.", UnityEngine.Color.yellow);
             
-            // Prestige hit
             country.globalPrestige = UnityEngine.Mathf.Max(0f, country.globalPrestige - 5f);
         }
 
         public static bool CanTrade(CountryDataSO a, CountryDataSO b)
         {
             if (a == null || b == null) return false;
-            // Same faction = always can trade
             if (a.globalFaction == b.globalFaction && a.globalFaction != "Independent") return true;
-            // Otherwise, relations must be decent (> -20)
             var gm = GameManager.Instance;
             float rel = gm?.Relations?.GetScore(a.countryName, b.countryName) ?? 0f;
             return rel > -20f;
@@ -121,7 +113,6 @@ namespace StateCraft.Systems
 
         public void SignTradeDeal(CountryDataSO seller, CountryDataSO buyer, TradeResourceType resource, float paymentUSD)
         {
-            // ── GATE: Trade Agreement treaty must be signed first ──────────
             if (!CanTrade(seller, buyer))
             {
                 bool isPlayer = seller == GameManager.Instance?.playerCountry
@@ -144,7 +135,7 @@ namespace StateCraft.Systems
                 buyerCountry = buyer.countryName,
                 resource = resource,
                 monthlyPaymentUSD = paymentUSD,
-                durationTurns = 24 // 2 year standard deal
+                durationTurns = 24
             };
 
             ActiveDeals.Add(deal);
@@ -157,10 +148,8 @@ namespace StateCraft.Systems
                     "Trade agreement signed", month2);
             }
             
-            // Log to news
             NewsSystem.Instance?.PublishNews($"TRADE DEAL: {seller.countryName} to supply {resource} to {buyer.countryName} for ${paymentUSD/1e6f:N1}M monthly.");
             
-            // Immediate Effect: If Uranium, buyer is now cleared to build Nuclear Plant
             if (resource == TradeResourceType.Uranium)
             {
                 buyer.isImportingUranium = true;
@@ -178,11 +167,9 @@ namespace StateCraft.Systems
                     country.income += paymentInBillions;
             }
 
-            
-            // Faction economic integration bonus
-            if (country.globalFaction != "Independent" && country.globalFaction != "Non-Aligned")
+if (country.globalFaction != "Independent" && country.globalFaction != "Non-Aligned")
             {
-                country.income += country.income * 0.05f; // 5% bonus for faction market integration
+                country.income += country.income * 0.05f;
             }
 
         }
@@ -230,11 +217,10 @@ namespace StateCraft.Systems
         
         public TradeAgreementProposal CreateProposal(CountryDataSO player, CountryDataSO ai, TradeResourceType resource, float basePayment, int duration, bool playerIsSeller)
         {
-            // ── GATE ──────────────────────────────────────────────────────
             bool hasTreaty = HasSignedTradeAgreementTreaty(player, ai);
             bool sameFaction = (player.globalFaction == ai.globalFaction && player.globalFaction != "Independent" && player.globalFaction != "Non-Aligned");
             if (!hasTreaty && !sameFaction)
-                return null; // caller (TradeAgreementController) checks for null
+                return null;
 
             var proposal = new TradeAgreementProposal
             {
@@ -245,7 +231,6 @@ namespace StateCraft.Systems
                 playerIsSeller = playerIsSeller
             };
             
-            // Forward to AI for counter-offer
             var aiSystem = GameManager.Instance.AICountrySystem;
             if (aiSystem != null)
             {
@@ -277,7 +262,6 @@ namespace StateCraft.Systems
                 counterReason = ""
             };
             
-            // Assuming player is always the initiator in this context (as per UI)
             var gm = GameManager.Instance;
             CountryDataSO player = gm.playerCountry;
             CountryDataSO partner = null;
@@ -298,7 +282,6 @@ namespace StateCraft.Systems
             
             if (partner != null)
             {
-                // We add a mirror agreement for the AI partner
                 var mirror = new TradeAgreement
                 {
                     id = agreement.id,
@@ -326,11 +309,6 @@ namespace StateCraft.Systems
             }
         }
 
-        /// <summary>
-        /// Proxy War: Secretly transfer sponsorAmount (USD billions) from 'sponsor' to boost
-        /// insurgency strength in a random region of 'target'. Leaves no diplomatic fingerprints
-        /// unless the operation is discovered.
-        /// </summary>
         public void FundProxyInsurgency(CountryDataSO sponsor, CountryDataSO target, float amountBillions)
         {
             if (sponsor == null || target == null || target.regions == null || target.regions.Count == 0) return;
@@ -342,23 +320,19 @@ namespace StateCraft.Systems
 
             sponsor.treasury -= amountBillions;
 
-            // Pick the most volatile region or a random one
             var borderRegions = target.regions.FindAll(r => r.specialization == Data.RegionSpecialization.BorderConflict);
             var targetRegion = borderRegions.Count > 0
                 ? borderRegions[UnityEngine.Random.Range(0, borderRegions.Count)]
                 : target.regions[UnityEngine.Random.Range(0, target.regions.Count)];
 
-            // Scale boost to amount invested
             float boost = amountBillions * 10f;
             targetRegion.insurgencyLevel = Mathf.Min(100f, targetRegion.insurgencyLevel + boost);
             targetRegion.insurgentSupplyLines = Mathf.Min(100f, targetRegion.insurgentSupplyLines + boost * 0.5f);
             targetRegion.heartsAndMinds = Mathf.Max(0f, targetRegion.heartsAndMinds - boost * 0.3f);
 
-            // Detection check: Based on target country's counter-intelligence
             float detectionChance = (target.counterIntelligence / 100f) * 0.25f;
             if (UnityEngine.Random.value < detectionChance)
             {
-                // EXPOSED!
                 sponsor.globalPrestige -= 15f;
                 sponsor.exposureRisk += 30f;
                 target.globalPrestige += 5f;
@@ -374,7 +348,6 @@ namespace StateCraft.Systems
             }
             else
             {
-                // Silent success
                 UI.NotificationManager.Instance?.AddNotification($"PROXY WAR: ${amountBillions:F1}B routed to destabilize {targetRegion.regionName}, {target.countryName}.", new Color(186/255f, 104/255f, 200/255f));
             }
         }
@@ -393,7 +366,6 @@ namespace StateCraft.Systems
 
             if (comply)
             {
-                // Player accepts terms — avoids war, pays prestige
                 gm.Relations.Adjust(player.countryName, sender.countryName, +15f,
                     "Ultimatum accepted — tensions defused", currentMonth);
                 VictorySystem.AwardPrestige(player, -5f, $"Conceded to {sender.countryName} ultimatum");
@@ -404,7 +376,6 @@ namespace StateCraft.Systems
             }
             else
             {
-                // Player refuses — sender may now declare war
                 gm.Relations.Adjust(player.countryName, sender.countryName, -20f,
                     "Ultimatum refused", currentMonth);
                 VictorySystem.AwardPrestige(player, +3f, $"Refused to bow to {sender.countryName}");
@@ -424,7 +395,6 @@ namespace StateCraft.Systems
                     treaty.turnsUntilResolution--;
                     if (treaty.turnsUntilResolution <= 0)
                     {
-                        // Simplistic resolution for now: AI accepts if relations > 30 (would be better in AICountrySystem)
                         var aiCountry = gm.GetCountryByName(treaty.partnerCountry);
                         if (aiCountry != null)
                         {
@@ -433,7 +403,6 @@ namespace StateCraft.Systems
                             {
                                 treaty.status = "Active";
                                 UI.NotificationManager.Instance?.AddNotification($"TREATY ACCEPTED: {treaty.partnerCountry} signed the {treaty.treatyName}.", UnityEngine.Color.cyan);
-                                // add to AI as well
                                 if (aiCountry.activeTreaties == null) aiCountry.activeTreaties = new System.Collections.Generic.List<DiplomaticTreaty>();
                                 aiCountry.activeTreaties.Add(new DiplomaticTreaty {
                                     treatyName = treaty.treatyName,

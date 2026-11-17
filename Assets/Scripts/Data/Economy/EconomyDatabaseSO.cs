@@ -3,11 +3,6 @@ using UnityEngine;
 
 namespace StateCraft.Data.Economy
 {
-    /// <summary>
-    /// Master database ScriptableObject. Assign one instance to GameManager.EconomyDatabase.
-    /// Populate the lists in the Unity Inspector via the asset menu:
-    /// StateCraft/Economy/Infrastructure, Industry, Commodity, Blueprint.
-    /// </summary>
     [CreateAssetMenu(fileName = "EconomyDatabase", menuName = "StateCraft/Economy/Database")]
     public class EconomyDatabaseSO : ScriptableObject
     {
@@ -23,9 +18,7 @@ namespace StateCraft.Data.Economy
         [Header("Construction Blueprints")]
         public List<BlueprintDataSO> blueprints = new List<BlueprintDataSO>();
 
-        // ── Convenience lookups ──────────────────────────────────────────────
-
-        public InfraDataSO GetInfra(string id)
+public InfraDataSO GetInfra(string id)
             => infrastructure?.Find(x => x.id == id);
 
         public IndustryDataSO GetIndustry(string id)

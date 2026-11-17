@@ -11,12 +11,6 @@ using System.IO;
 
 namespace StateCraft.Editor
 {
-    /// <summary>
-    /// One-click builder: StateCraft → Build Splash Scene
-    /// Creates SplashScene.unity with all GameObjects, components and
-    /// cross-references already wired.  Run this once; edit the scene
-    /// normally afterwards.
-    /// </summary>
     public static class SplashSceneBuilder
     {
         private const string SCENE_PATH       = "Assets/Scenes/SplashScene.unity";
@@ -31,18 +25,13 @@ namespace StateCraft.Editor
         private const string PANEL_SETTINGS_SELECTOR = "Assets/Scripts/UI/SelectorPanelSettings.asset";
         private const string MAIN_SCENE_NAME         = "SampleScene";
 
-        // ── Entry point ────────────────────────────────────────────────
         [MenuItem("StateCraft/Build Splash Scene")]
         public static void Build()
         {
-            // 1. Save current scene
             EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
 
-            // 2. Create / open a blank scene
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
-            // ── Camera ─────────────────────────────────────────────────
-            // UIToolkit UIDocuments need a camera to render to the Game view.
             var camGO = new GameObject("MainCamera");
             camGO.tag = "MainCamera";
             var cam = camGO.AddComponent<Camera>();
@@ -51,40 +40,29 @@ namespace StateCraft.Editor
             cam.orthographic     = true;
             cam.depth            = 0;
 
-            // ── EventSystem ────────────────────────────────────────────
-            // Required for UI Toolkit pointer raycasting & input processing
             var eventSysGO = new GameObject("EventSystem");
             eventSysGO.AddComponent<UnityEngine.EventSystems.EventSystem>();
             eventSysGO.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
 
-            // ── Render Texture ─────────────────────────────────────────
             var rt = EnsureRenderTexture();
 
-            // ── Video Canvas (Sort 10) ─────────────────────────────────
             var videoCanvas    = CreateCanvas("VideoCanvas", sortOrder: 10, cam: cam);
             var videoCanvasGrp = videoCanvas.gameObject.AddComponent<CanvasGroup>();
 
             var videoDisplay = CreateRawImage(videoCanvas.transform, "VideoDisplay", rt);
 
-            // VideoPlayer lives on the SplashController GO (RequireComponent)
-            // We create VideoCanvas just for display; VideoPlayer goes on controller.
-
-            // ── Splash Canvas (Sort 5) ─────────────────────────────────
-            var splashCanvas    = CreateCanvas("SplashCanvas", sortOrder: 5, cam: cam);
+var splashCanvas    = CreateCanvas("SplashCanvas", sortOrder: 5, cam: cam);
             var splashCanvasGrp = splashCanvas.gameObject.AddComponent<CanvasGroup>();
-            splashCanvasGrp.alpha = 0f;   // starts hidden
+            splashCanvasGrp.alpha = 0f;
 
             CreateSplashImage(splashCanvas.transform);
 
-            // ── UI Document GO (child of SplashCanvas) ─────────────────
             var uiDocGO = new GameObject("SplashUI");
             uiDocGO.transform.SetParent(splashCanvas.transform, false);
             var uiDoc = uiDocGO.AddComponent<UIDocument>();
             AssignUIDocumentAssets(uiDoc);
 
-            // ── SplashController GO ────────────────────────────────────
             var controllerGO = new GameObject("SplashController");
-            // VideoPlayer must be on same GO as SplashController (RequireComponent)
             var vp = controllerGO.AddComponent<VideoPlayer>();
             ConfigureVideoPlayer(vp, rt);
 
@@ -97,19 +75,16 @@ namespace StateCraft.Editor
             ctrl.fadeDuration       = 0.8f;
             ctrl.minLoaderTime      = 2.5f;
 
-            // ── Menu UI Document ───────────────────────────────────────────
             var menuDocGO = new GameObject("MenuUI");
             var menuDoc = menuDocGO.AddComponent<UIDocument>();
             AssignUIDocumentAssets(menuDoc, UXML_MENU, PANEL_SETTINGS_MENU, sortOrder: 25);
             ctrl.menuUIDocument = menuDoc;
 
-            // ── Country Selector UI Document ───────────────────────────────
             var selectorDocGO = new GameObject("SelectorUI");
             var selectorDoc = selectorDocGO.AddComponent<UIDocument>();
             AssignUIDocumentAssets(selectorDoc, UXML_SELECTOR, PANEL_SETTINGS_SELECTOR, sortOrder: 30);
             ctrl.selectorUIDocument = selectorDoc;
 
-            // ── Auto-assign CountryDataSO list ────────────────────────────
             var countryGuids = AssetDatabase.FindAssets("t:CountryDataSO", new[] { "Assets/Data/Countries" });
             var countryList  = new System.Collections.Generic.List<StateCraft.Data.CountryDataSO>();
             foreach (var guid in countryGuids)
@@ -122,8 +97,6 @@ namespace StateCraft.Editor
             ctrl.countryDataList = countryList.ToArray();
             Debug.Log($"[SplashSceneBuilder] Auto-assigned {ctrl.countryDataList.Length} countries to SplashController.");
 
-            // ── Create / update CountryRegistry in Resources/ ─────────────
-            // This is the runtime asset loaded by builds (no AssetDatabase available).
             const string registryPath = "Assets/Resources/CountryRegistry.asset";
             var registry = AssetDatabase.LoadAssetAtPath<StateCraft.Data.CountryRegistry>(registryPath);
             if (registry == null)
@@ -136,11 +109,9 @@ namespace StateCraft.Editor
             AssetDatabase.SaveAssets();
             Debug.Log($"[SplashSceneBuilder] CountryRegistry saved at {registryPath} with {registry.countries.Length} countries.");
 
-            // ── Save scene ─────────────────────────────────────────────
             EditorSceneManager.SaveScene(scene, SCENE_PATH);
             AssetDatabase.Refresh();
 
-            // ── Register in Build Settings ─────────────────────────────
             RegisterInBuildSettings();
 
             Debug.Log("[SplashSceneBuilder] SplashScene built and saved to " + SCENE_PATH);
@@ -150,10 +121,7 @@ namespace StateCraft.Editor
                 "OK");
         }
 
-        // ── Helpers ────────────────────────────────────────────────────
-
-        /// Creates or reuses the VideoRT render texture asset.
-        private static RenderTexture EnsureRenderTexture()
+private static RenderTexture EnsureRenderTexture()
         {
             var existing = AssetDatabase.LoadAssetAtPath<RenderTexture>(RT_PATH);
             if (existing != null) return existing;
@@ -164,8 +132,6 @@ namespace StateCraft.Editor
             return rt;
         }
 
-        /// Creates a full-screen Screen Space — Camera Canvas (requires a camera so UIToolkit
-        /// UIDocuments can also render in the Game view).
         private static Canvas CreateCanvas(string name, int sortOrder, Camera cam = null)
         {
             var go = new GameObject(name);
@@ -194,7 +160,6 @@ namespace StateCraft.Editor
             return canvas;
         }
 
-        /// Creates a full-stretch RawImage parented to `parent` showing `rt`.
         private static RawImage CreateRawImage(Transform parent, string name, RenderTexture rt)
         {
             var go  = new GameObject(name);
@@ -212,7 +177,6 @@ namespace StateCraft.Editor
             return img;
         }
 
-        /// Creates a full-stretch Image parented to `parent` using Splash.png.
         private static void CreateSplashImage(Transform parent)
         {
             var go   = new GameObject("SplashImage");
@@ -234,7 +198,6 @@ namespace StateCraft.Editor
             img.preserveAspect = false;
         }
 
-        /// Assigns the UXML and PanelSettings to a UIDocument component.
         private static void AssignUIDocumentAssets(UIDocument doc, string uxmlPath = null, string panelSettingsPath = null, int sortOrder = 20)
         {
             string path = uxmlPath ?? UXML_SPLASH;
@@ -254,7 +217,6 @@ namespace StateCraft.Editor
             doc.sortingOrder = sortOrder;
         }
 
-        /// Configures the VideoPlayer to use the render texture and the intro clip.
         private static void ConfigureVideoPlayer(VideoPlayer vp, RenderTexture rt)
         {
             var clip = AssetDatabase.LoadAssetAtPath<VideoClip>(VIDEO_PATH);
@@ -265,23 +227,20 @@ namespace StateCraft.Editor
 
             vp.renderMode        = VideoRenderMode.RenderTexture;
             vp.targetTexture     = rt;
-            vp.playOnAwake       = false; // SplashController calls Play()
+            vp.playOnAwake       = false;
             vp.isLooping         = false;
             vp.waitForFirstFrame = true;
             vp.skipOnDrop        = false;
             vp.audioOutputMode   = VideoAudioOutputMode.Direct;
         }
 
-        /// Inserts SplashScene as index 0 and keeps existing scenes at higher indices.
         private static void RegisterInBuildSettings()
         {
             var scenes = new System.Collections.Generic.List<EditorBuildSettingsScene>(
                 EditorBuildSettings.scenes);
 
-            // Remove any stale entry for SplashScene
             scenes.RemoveAll(s => s.path == SCENE_PATH);
 
-            // Insert at index 0
             scenes.Insert(0, new EditorBuildSettingsScene(SCENE_PATH, true));
 
             EditorBuildSettings.scenes = scenes.ToArray();

@@ -44,7 +44,6 @@ namespace StateCraft.UI
             float elapsed = 0;
             canvasGroup.alpha = 0;
 
-            // Set starting state
             if (animationType == AnimationType.SlideLeft)
                 rectTransform.anchoredPosition = originalPosition + new Vector2(slideDistance, 0);
             else if (animationType == AnimationType.SlideRight)
@@ -56,7 +55,7 @@ namespace StateCraft.UI
             {
                 elapsed += Time.unscaledDeltaTime;
                 float t = elapsed / duration;
-                float curve = Mathf.SmoothStep(0, 1, t); // Nice smooth curve
+                float curve = Mathf.SmoothStep(0, 1, t);
 
                 canvasGroup.alpha = curve;
 

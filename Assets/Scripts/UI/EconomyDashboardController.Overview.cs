@@ -78,17 +78,13 @@ namespace StateCraft.UI
             float totalIncome = 0f;
             float totalExpense = 0f;
 
-            // All base estimates (GDP, income, debt, spending) are stored in Billions of USD.
-            // We multiply by exchangeRate to get Billions of Local Currency, ready for AddLedgerRow.
-
-            float monthlyGDP = country.gdp / 12f;
+float monthlyGDP = country.gdp / 12f;
             float taxEstUSD = monthlyGDP * (country.taxRate / 100f) * 0.35f;
             float taxEstB = taxEstUSD * country.exchangeRate;
             
             float tariffEstUSD = monthlyGDP * 0.015f * (country.importTariffRate / 100f);
             float tariffEstB = tariffEstUSD * country.exchangeRate;
             
-            // Extract approximate resource dividend from income formula, backing out tax and tariff
             float resourceEstUSD = Mathf.Max(0f, country.income - taxEstUSD - tariffEstUSD);
             float resourceEstB = resourceEstUSD * country.exchangeRate;
 
@@ -105,7 +101,6 @@ namespace StateCraft.UI
             
             if (country.foreignAidReceived > 0f)
             {
-                // foreignAidReceived is mostly stored in Billions in CountryDataSO as well
                 float aidB = country.foreignAidReceived * country.exchangeRate;
                 totalIncome += aidB;
                 AddLedgerRow(_incomeList, "Foreign Aid", aidB, true, sym);
@@ -113,7 +108,6 @@ namespace StateCraft.UI
 
             if (country.activeTradeAgreements != null)
             {
-                // Group duplicates (e.g. multiple deals of the same resource to the same country)
                 var activeDeals = country.activeTradeAgreements
                     .Where(a => a.status == TradeAgreementStatus.Active)
                     .GroupBy(a => new { a.isSeller, a.resource, a.partnerCountry });
@@ -136,7 +130,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // Military budget is directly in Billions USD
             float militaryB = country.militaryBudgetUSD * country.exchangeRate;
             totalExpense += militaryB;
             AddLedgerRow(_expenseList, "Military Budget", militaryB, false, sym);
@@ -153,7 +146,6 @@ namespace StateCraft.UI
                 AddLedgerRow(_expenseList, "Active Operations", totalOpCostLocal, false, sym);
             }
 
-            // Welfare Subsidies: country.gdp is in Billions. 
             float subsidyCostUSD = (country.gdp / 12f) * (country.subsidyLevel / 100f);
             float subsidyCostB = subsidyCostUSD * country.exchangeRate;
             totalExpense += subsidyCostB;
@@ -161,7 +153,6 @@ namespace StateCraft.UI
 
             if (country.isImportingUranium)
             {
-                // Uranium imports is 0.05f Billions of USD.
                 float uraniumCostB = 0.05f * country.exchangeRate;
                 totalExpense += uraniumCostB;
                 AddLedgerRow(_expenseList, "Uranium Imports", uraniumCostB, false, sym);
@@ -169,8 +160,8 @@ namespace StateCraft.UI
 
             if (gm.DebtSystem != null && country.debt > 0f)
             {
-                float interestUSD = gm.DebtSystem.CalculateInterest(country); // returns Billions
-                float principalPaymentUSD = (country.debt * 0.01f) * (country.debtServiceRatio / 100f); // returns Billions
+                float interestUSD = gm.DebtSystem.CalculateInterest(country);
+                float principalPaymentUSD = (country.debt * 0.01f) * (country.debtServiceRatio / 100f);
                 float totalMonthlyUSD = interestUSD + principalPaymentUSD;
                 
                 float totalDebtCostB = totalMonthlyUSD * country.exchangeRate;
@@ -178,7 +169,6 @@ namespace StateCraft.UI
                 AddLedgerRow(_expenseList, "Central Bank Debt Servicing", totalDebtCostB, false, sym);
             }
 
-            // Update Total Mirror Labels
             var root = _dashboardRoot;
             if (root != null)
             {
@@ -214,16 +204,10 @@ namespace StateCraft.UI
             RefreshDebtFinancing(country, sym);
         }
 
-        /// <summary>
-        /// Replaces the four static Economic Reports rows with live FeedLines
-        /// from BuildEconomyFeed. The panel header is preserved.
-        /// Same CSS classes — design unchanged.
-        /// </summary>
         private void RefreshOverviewReports(CountryDataSO country, GameManager gm)
         {
             if (_econReportsPanel == null) return;
 
-            // Keep only the header (index 0), remove all report rows below it
             while (_econReportsPanel.childCount > 1)
                 _econReportsPanel.RemoveAt(1);
 
@@ -234,10 +218,8 @@ namespace StateCraft.UI
             {
                 var line = feed[i];
 
-                // Decide row class from Color (matches UXML classes: alert/good/warning/market)
                 string rowClass = ColorToReportClass(line.Color);
 
-                // Icon glyph by class — using Font Awesome 6 Solid codepoints
                 string icon = rowClass == "alert"  ? FaIcons.Fire
                             : rowClass == "good"   ? FaIcons.ArrowTrendUp
                             : rowClass == "market" ? FaIcons.Globe
@@ -248,10 +230,8 @@ namespace StateCraft.UI
                                  : rowClass == "market" ? "fa-cyan"
                                  :                       "fa-gold";
 
-                // Category label class
                 string catClass = rowClass == "alert" ? "negative" : (rowClass == "good" ? "positive" : (rowClass == "market" ? "market" : "warning"));
 
-                // Category display name
                 string catLabel = rowClass == "alert" ? "ECONOMIC ALERT"
                                 : rowClass == "good"  ? "POSITIVE DEVELOPMENT"
                                 : rowClass == "market"? "GLOBAL MARKET UPDATE"
@@ -296,17 +276,12 @@ namespace StateCraft.UI
 
         private static string ColorToReportClass(Color c)
         {
-            // Green → good, Red → alert, Yellow/amber → warning, everything else → market
             if (c.r < 0.2f && c.g > 0.7f) return "good";
             if (c.r > 0.7f && c.g < 0.5f) return "alert";
             if (c.r > 0.7f && c.g > 0.6f) return "warning";
             return "market";
         }
 
-        /// <summary>
-        /// Replaces the four static sector cards with live data from Industries[].
-        /// Same CSS classes — design unchanged.
-        /// </summary>
         private void RefreshOverviewSectors(CountryDataSO country, string sym)
         {
             if (_econSectorsGrid == null) return;
@@ -319,7 +294,6 @@ namespace StateCraft.UI
             foreach (var ind in db.industries)
                 totalRev += StateCraft.Systems.EconomyLogicEvaluator.GetIndustryRevenue(country, ind);
 
-            // The grid design supports exactly 4 cards; taking the top 4 by revenue prevents layout crushing
             var topSectors = new System.Collections.Generic.List<StateCraft.Data.Economy.IndustryDataSO>(db.industries);
             topSectors.Sort((a, b) => StateCraft.Systems.EconomyLogicEvaluator.GetIndustryRevenue(country, b).CompareTo(StateCraft.Systems.EconomyLogicEvaluator.GetIndustryRevenue(country, a)));
             int maxSectors = UnityEngine.Mathf.Min(topSectors.Count, 4);
@@ -337,7 +311,6 @@ namespace StateCraft.UI
                         ? $"{workforce / 1000f:F1}k"
                         : $"{workforce:F0}";
 
-                // Map sorted sector back to original index for consistent icon assignment
                 int origIdx = db.industries.IndexOf(ind);
                 string faIcon = (origIdx >= 0 && origIdx < FaIcons.SectorIcons.Length)
                     ? FaIcons.SectorIcons[origIdx]
@@ -346,10 +319,8 @@ namespace StateCraft.UI
 
                 var card = new VisualElement();
                 card.AddToClassList("econ-sector-card");
-                // Right column cards (i=1,3) need no right margin — USS nth-child not supported in Unity
                 if (i % 2 == 1) card.style.marginRight = 0;
 
-                // Title row: FA icon + sector name
                 var titleRow = new VisualElement();
                 titleRow.style.flexDirection = FlexDirection.Row;
                 titleRow.style.alignItems = Align.Center;
@@ -364,11 +335,10 @@ namespace StateCraft.UI
 
                 var titleLbl = new Label(safeTitle);
                 titleLbl.AddToClassList("econ-sector-title");
-                titleLbl.style.marginBottom = 0; // already handled by titleRow marginBottom
+                titleLbl.style.marginBottom = 0;
                 titleRow.Add(titleLbl);
                 card.Add(titleRow);
 
-                // Real growth calculation tied to the national GDP growth rate (YoY) + sector-specific modifiers
                 float baseGrowthYoY = country.gdpGrowthRate * 12f * 100f;
                 float realGrowth = baseGrowthYoY + (bullish ? 1.5f : -0.8f);
                 var contribLbl = new Label($"Contribution  {contrib:F0}%");
@@ -399,16 +369,10 @@ namespace StateCraft.UI
             }
         }
 
-        /// <summary>
-        /// Replaces the three static project rows with live activeProjects data.
-        /// Falls back to hiding the section if no active projects exist.
-        /// Same CSS classes — design unchanged.
-        /// </summary>
         private void RefreshOverviewProjects(CountryDataSO country, string sym)
         {
             if (_overviewProjectsPanel == null) return;
 
-            // Keep only the panel header (index 0)
             while (_overviewProjectsPanel.childCount > 1)
                 _overviewProjectsPanel.RemoveAt(1);
 
@@ -438,10 +402,8 @@ namespace StateCraft.UI
                     : 0f;
                 float monthlyCost = p.totalMonths > 0 ? p.totalCost / p.totalMonths : p.totalCost;
 
-                // CSS class for the progress bar (match original "econ-progress" / "econ-progress warning-bar")
                 string barClass = pct < 40f ? "econ-progress warning-bar" : "econ-progress";
 
-                // Thumb class derived from project type string
                 string thumbClass = p.projectType?.ToLower().Contains("tech") == true ? "tech"
                                   : p.projectType?.ToLower().Contains("rail") == true ? "rail"
                                   : "";

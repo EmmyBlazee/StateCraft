@@ -7,8 +7,8 @@ namespace StateCraft.Data.Economy
     {
         [Header("Identity")]
         public string blueprintName;
-        public string type;       // "Infra", "Energy", "Agri", "Tech"
-        public string targetId;   // Maps to the field/SO Id it upgrades
+        public string type;
+        public string targetId;
         public string regionHint;
 
         [Header("Project Parameters")]

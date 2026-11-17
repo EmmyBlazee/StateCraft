@@ -27,15 +27,9 @@ namespace StateCraft.UI
 
         private string _procurementCategoryFilter = "All Categories";
 
-        // Cached root used for lazy re-query on PopulateWeapons
         private VisualElement _weaponsRoot;
         private bool _weaponsWired = false;
 
-        /// <summary>
-        /// Recursively pierces TemplateContainer shadow trees at any depth.
-        /// Unity's Q() only crosses one shadow-tree boundary; nested
-        /// ui:Instance elements require this deeper walk.
-        /// </summary>
         private static T DeepQ<T>(VisualElement root, string name) where T : VisualElement
         {
             if (root == null) return null;
@@ -52,18 +46,11 @@ namespace StateCraft.UI
             return null;
         }
 
-        /// <summary>
-        /// Called during Awake. Only caches the root and attempts to wire sub-tab
-        /// buttons. The grid/panel elements inside nested ui:Instance templates are
-        /// NOT yet in the visual tree at Awake time — Unity instantiates them lazily.
-        /// All inner queries are deferred to EnsureWeaponsWired().
-        /// </summary>
         private void InitializeWeapons(VisualElement root)
         {
             UnityEngine.Debug.Log("[Weapons] InitializeWeapons called — deferring inner queries to first tab open.");
             _weaponsRoot = root;
 
-            // Attempt early wire of sub-tab buttons (one shadow layer — may succeed)
             _wTabArsenal     = DeepQ<Button>(root, "WTabArsenal");
             _wTabProduction  = DeepQ<Button>(root, "WTabProduction");
             _wTabProcurement = DeepQ<Button>(root, "WTabProcurement");
@@ -78,44 +65,27 @@ namespace StateCraft.UI
             UnityEngine.Debug.Log($"[Weapons] Early wire — Arsenal={_wTabArsenal!=null}, Production={_wTabProduction!=null}");
         }
 
-        /// <summary>
-        /// Queries all inner weapon elements. Called every time the Weapons main tab
-        /// is activated (SwitchTab(2)) — by that point _panelWeapons is visible so
-        /// Unity has fully resolved all nested TemplateContainers inside it.
-        /// Marks _weaponsWired=true once the required grids are found, so subsequent
-        /// calls short-circuit immediately.
-        /// </summary>
         private void EnsureWeaponsWired()
         {
             if (_weaponsWired) return;
 
-            // _panelWeapons is cached by InitializeElements (root.Q("PanelWeapons")).
-            // It is a direct child of the dashboard root, so it is always resolved.
-            // Sub-panels (WPanelArsenal etc.) and grids (WeaponsGrid etc.) live inside
-            // it — but in nested <ui:Instance> templates.  Unity only instantiates
-            // nested template content once the ancestor is visible, so we must wait
-            // until SwitchTab(2) makes _panelWeapons Flex before querying here.
             var searchRoot = _panelWeapons ?? (_root ?? _weaponsRoot);
             if (searchRoot == null) return;
 
-            // Sub-panels — direct children of _panelWeapons (one shadow layer max)
             _wPanelArsenal     = DeepQ<VisualElement>(searchRoot, "WPanelArsenal");
             _wPanelProduction  = DeepQ<VisualElement>(searchRoot, "WPanelProduction");
             _wPanelProcurement = DeepQ<VisualElement>(searchRoot, "WPanelProcurement");
             _wPanelResearch    = DeepQ<VisualElement>(searchRoot, "WPanelResearch");
 
-            // Grids live inside the Arsenal sub-panel
             var arsenalRoot = _wPanelArsenal ?? searchRoot;
             _wGridArmy  = DeepQ<VisualElement>(arsenalRoot, "WeaponsGrid");
             _wGridAir   = DeepQ<VisualElement>(arsenalRoot, "WeaponsGridAir");
             _wGridNavy  = DeepQ<VisualElement>(arsenalRoot, "WeaponsGridNavy");
 
-            // Fallback: search full root if still null
             if (_wGridArmy == null) _wGridArmy  = DeepQ<VisualElement>(searchRoot, "WeaponsGrid");
             if (_wGridAir  == null) _wGridAir   = DeepQ<VisualElement>(searchRoot, "WeaponsGridAir");
             if (_wGridNavy == null) _wGridNavy  = DeepQ<VisualElement>(searchRoot, "WeaponsGridNavy");
 
-            // Wire sub-tab buttons if not yet wired (should already be from InitializeWeapons)
             if (_wTabArsenal == null)
             {
                 _wTabArsenal     = DeepQ<Button>(searchRoot, "WTabArsenal");
@@ -135,8 +105,7 @@ namespace StateCraft.UI
             UnityEngine.Debug.Log($"[Weapons] EnsureWeaponsWired — searchRoot={searchRoot?.name} | Arsenal={_wPanelArsenal!=null} | Production={_wPanelProduction!=null} | Army={_wGridArmy!=null}, Air={_wGridAir!=null}, Navy={_wGridNavy!=null} | Wired={_weaponsWired}");
         }
 
-
-        public void SwitchWeaponsTab(int index)
+public void SwitchWeaponsTab(int index)
         {
             EnsureWeaponsWired();
             if (_wPanelArsenal    != null) _wPanelArsenal.style.display    = index == 0 ? DisplayStyle.Flex : DisplayStyle.None;
@@ -149,7 +118,6 @@ namespace StateCraft.UI
             if (_wTabProcurement!= null) { if (index == 2) _wTabProcurement.AddToClassList("active-tab");else _wTabProcurement.RemoveFromClassList("active-tab"); }
             if (_wTabResearch   != null) { if (index == 3) _wTabResearch.AddToClassList("active-tab");   else _wTabResearch.RemoveFromClassList("active-tab"); }
 
-            // Populate sub-tab content on demand
             var country = GameManager.Instance?.playerCountry;
             if (country != null)
             {
@@ -163,12 +131,8 @@ namespace StateCraft.UI
         {
             UnityEngine.Debug.Log($"[Weapons] PopulateWeapons called for country: {country?.name}.");
 
-            // Ensure inner elements are wired — deferred from Awake because
-            // nested ui:Instance content is not in the visual tree until shown.
             EnsureWeaponsWired();
 
-            // If grids are still null the weapons panel has not been shown yet;
-            // rows will be populated by SwitchTab(2) once the user opens the tab.
             if (_wGridArmy == null && _wGridAir == null && _wGridNavy == null)
             {
                 UnityEngine.Debug.Log("[Weapons] PopulateWeapons — grids not yet resolved (panel not shown). Skipping until tab is opened.");
@@ -186,28 +150,23 @@ namespace StateCraft.UI
                 AddWeaponRow(title, desc, act, pct, condition, grid, img);
             }
 
-            // Army
             AddRow("Assault Rifles",    "Standard Infantry Weapon",   country.unitRifles,    country.oosRifles,    _wGridArmy, "rifle1");
             AddRow("APCs",              "Armored Personnel Carriers", country.unitAPCs,      country.oosAPCs,      _wGridArmy, "Apcs");
             AddRow("Main Battle Tanks", "Heavy Armor",                country.unitTanks,     country.oosTanks,     _wGridArmy, "maintank");
             AddRow("Artillery Systems", "Towed & Self-Propelled",     country.unitArtillery, country.oosArtillery, _wGridArmy, "artilery");
 
-            // Air Force
             AddRow("Fighter Jets",      "Multi-Role Combat Aircraft", country.unitFighters,   country.oosFighters,   _wGridAir, "fighter aircaft");
             AddRow("Strategic Bombers", "Heavy Payloads",             country.unitBombers,    country.oosBombers,    _wGridAir, "bomber1");
             AddRow("Helicopters",       "Attack & Utility Helicopters",country.unitAttackHelis,country.oosAttackHelis,_wGridAir, "helicopter1");
             AddRow("UAV Drones",        "Unmanned Aerial Vehicles",   country.unitUAVs,       country.oosUAVs,       _wGridAir, "uav");
 
-            // Navy
             AddRow("Patrol Boats",  "Coastal Patrol Vessels",    country.unitPatrolBoats, country.oosPatrolBoats, _wGridNavy, "patrol boat");
             AddRow("Frigates",      "Multi-Role Frigates",        country.unitFrigates,    country.oosFrigates,    _wGridNavy, "frigate");
             AddRow("Submarines",    "Attack Submarines",          country.unitSubmarines,  country.oosSubmarines,  _wGridNavy, "submarine");
             AddRow("Destroyers",    "Guided Missile Destroyers",  country.unitDestroyers,  country.oosDestroyers,  _wGridNavy, "destroyer");
 
-            // Populate the left and right sidebars with live data
             PopulateArsenalSidebars(country);
 
-            // Refresh visible sub-tabs within Weapons
             if (_wPanelProduction != null && _wPanelProduction.style.display == DisplayStyle.Flex)
                 PopulateProduction(country);
             if (_wPanelProcurement != null && _wPanelProcurement.style.display == DisplayStyle.Flex)
@@ -220,7 +179,6 @@ namespace StateCraft.UI
 
         private void PopulateArsenalSidebars(CountryDataSO country)
         {
-            // ── Totals ───────────────────────────────────────────────────────
             int armyTotal  = country.unitRifles + country.unitAPCs + country.unitTanks
                            + country.unitArtillery;
             int airTotal   = country.unitFighters + country.unitBombers
@@ -229,33 +187,27 @@ namespace StateCraft.UI
                            + country.unitSubmarines + country.unitPatrolBoats;
             int grandTotal = armyTotal + airTotal + navyTotal;
 
-            // Branch share percentages
             float armyPct  = grandTotal > 0 ? (armyTotal  / (float)grandTotal) * 100f : 0f;
             float airPct   = grandTotal > 0 ? (airTotal   / (float)grandTotal) * 100f : 0f;
             float navyPct  = grandTotal > 0 ? (navyTotal  / (float)grandTotal) * 100f : 0f;
             float otherPct = Mathf.Max(0f, 100f - armyPct - airPct - navyPct);
 
-            // Average readiness across branches
             float avgReadiness = (country.armyStats.readiness
                                 + country.airForceStats.readiness
                                 + country.navyStats.readiness) / 3f;
 
-            // Operational breakdown: operational = avg readiness %, maintenance = ~10% buffer, rest = out of service
             int operational  = Mathf.RoundToInt(grandTotal * (avgReadiness / 100f));
             int maintenance  = Mathf.RoundToInt(grandTotal * 0.10f);
             int outOfService = Mathf.Max(0, grandTotal - operational - maintenance);
 
-            // Tech level: derive from armyStats/airForce readiness → 1-5 tiers
             float techScore = (country.armyStats.readiness + country.airForceStats.readiness) / 2f;
             string grade    = techScore >= 90f ? "A" : techScore >= 75f ? "B" : techScore >= 60f ? "C" : techScore >= 45f ? "D" : "F";
             string techLabel= grade switch { "A" => "COMBAT READY", "B" => "HIGH READINESS", "C" => "MODERATE", "D" => "LOW READINESS", _ => "CRITICAL DEFICIT" };
-            float techXP    = techScore; // 0-100 used as XP %
+            float techXP    = techScore;
 
-            // Maintenance status label
             string maintLabel = avgReadiness >= 85f ? "Excellent" : avgReadiness >= 70f ? "Good"
                               : avgReadiness >= 50f ? "Fair" : "Poor";
 
-            // ── Resolve elements from the Arsenal panel ──────────────────────
             if (_wPanelArsenal == null) return;
 
             void Set(string name, string val)
@@ -272,7 +224,6 @@ namespace StateCraft.UI
                     el.value = val;
                     if (fillColor.HasValue)
                     {
-                        // Tint the progress bar fill using UI Toolkit's internal class
                         el.schedule.Execute(() => {
                             var progress = el.Q<VisualElement>(className: "unity-progress-bar__progress");
                             if (progress != null) progress.style.backgroundColor = fillColor.Value;
@@ -281,13 +232,12 @@ namespace StateCraft.UI
                 }
             }
 
-            // Tech Level Styling
             Color techColor = grade switch {
-                "A" => new Color(0.1f, 0.5f, 0.9f),       // Blue
-                "B" => new Color(0.9f, 0.6f, 0f),       // Orange
-                "C" => new Color(0.9f, 0.6f, 0f),  // Yellow
-                "D" => new Color(255/255f, 82/255f, 82/255f),   // Red
-                _ => new Color(160/255f, 160/255f, 160/255f)  // Grey
+                "A" => new Color(0.1f, 0.5f, 0.9f),
+                "B" => new Color(0.9f, 0.6f, 0f),
+                "C" => new Color(0.9f, 0.6f, 0f),
+                "D" => new Color(255/255f, 82/255f, 82/255f),
+                _ => new Color(160/255f, 160/255f, 160/255f)
             };
 
             var lblLevel = DeepQ<Label>(_wPanelArsenal, "WArsTechLevel");
@@ -308,7 +258,6 @@ namespace StateCraft.UI
             var lblLabel = DeepQ<Label>(_wPanelArsenal, "WArsTechLabel");
             if (lblLabel != null) lblLabel.style.color = techColor;
 
-            // ── LEFT sidebar ─────────────────────────────────────────────────
             Set("WArsDonutTotal",  $"{grandTotal:N0}");
             Set("WArsLegArmy",     $"{armyPct:F0}%");
             Set("WArsLegAF",       $"{airPct:F0}%");
@@ -330,20 +279,17 @@ namespace StateCraft.UI
             Set("WArsMaintPct",    $"{avgReadiness:F0}%");
             SetBar("WArsMaintBar", avgReadiness, maintColor);
 
-            // Tint the maintenance label colour based on status
             var maintLabelEl = DeepQ<Label>(_wPanelArsenal, "WArsMaintLabel");
             var maintPctEl   = DeepQ<Label>(_wPanelArsenal, "WArsMaintPct");
             
             if (maintLabelEl != null) maintLabelEl.style.color = maintColor;
             if (maintPctEl   != null) maintPctEl.style.color   = maintColor;
 
-            // ── RIGHT sidebar ─────────────────────────────────────────────────
             Set("WArsQSTotal",       $"{grandTotal:N0}");
             Set("WArsQSOperational", $"{operational:N0}");
             Set("WArsQSMaintenance", $"{maintenance:N0}");
             Set("WArsQSOutOfService",$"{outOfService:N0}");
 
-            // Recently Acquired — from completed production log
             var recentList = DeepQ<ScrollView>(_wPanelArsenal, "WArsRecentList");
             if (recentList != null)
             {
@@ -382,7 +328,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // Low Stock Alerts — check units vs minimum thresholds
             var alertsList = DeepQ<ScrollView>(_wPanelArsenal, "WArsAlertsList");
             if (alertsList != null)
             {
@@ -428,13 +373,7 @@ namespace StateCraft.UI
             }
         }
 
-
-        // ════════════════════════════════════════════════════════════════════
-        //  PRODUCTION TAB
-        // ════════════════════════════════════════════════════════════════════
-
-
-        private string GetImageNameForUnit(string label)
+private string GetImageNameForUnit(string label)
         {
             if (string.IsNullOrEmpty(label)) return null;
             label = label.ToLower();
@@ -460,7 +399,6 @@ namespace StateCraft.UI
             if (_wPanelProduction == null) return;
             _wPanelProduction.Clear();
 
-            // Colour palette
             var cGreen  = new Color(0f,         210/255f, 130/255f);
             var cCyan   = new Color(0.1f, 0.5f, 0.9f);
             var cYellow = new Color(0.9f, 0.6f, 0f);
@@ -472,12 +410,10 @@ namespace StateCraft.UI
 
             string sym = string.IsNullOrEmpty(country.currencySymbol) ? "₦" : country.currencySymbol;
 
-            // Seed demo data if empty
             EnsureProductionData(country);
 
-            // ── Scroll root ──────────────────────────────────────────────────
             var scroll = new ScrollView(ScrollViewMode.Vertical);
-            scroll.horizontalScrollerVisibility = ScrollerVisibility.Hidden; // Force hide horizontal bar
+            scroll.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
             scroll.style.flexGrow = 1;
             scroll.style.paddingLeft = 12;
             scroll.style.paddingTop = 8;
@@ -485,16 +421,9 @@ namespace StateCraft.UI
             _wPanelProduction.Add(scroll);
 
             var root = scroll.contentContainer;
-            root.style.paddingRight = 20; // Add padding to the content to dodge the scrollbar!
+            root.style.paddingRight = 20;
 
-            // (Two-column layout moved below Production Overview)
-
-            // ════════════════════════════════════════════════════════════════
-            // LEFT COLUMN
-            // ════════════════════════════════════════════════════════════════
-
-            // ── Section label helper ─────────────────────────────────────────
-            void AddSectionLabel(VisualElement parent, string text)
+void AddSectionLabel(VisualElement parent, string text)
             {
                 var lbl = new Label(text);
                 lbl.style.alignSelf = Align.FlexStart;
@@ -509,7 +438,6 @@ namespace StateCraft.UI
                 parent.Add(lbl);
             }
 
-            // ── PRODUCTION OVERVIEW ──────────────────────────────────────────
             AddSectionLabel(root, "PRODUCTION OVERVIEW");
 
             int activeFactories = country.defenseFactories.Count;
@@ -593,7 +521,6 @@ namespace StateCraft.UI
             AddOverviewCard(overviewRow, "\uf1b2", UiFormat.Money(totalMonthlyValue * country.exchangeRate, sym), "MONTHLY OUTPUT VALUE", "Total production value", cGreen);
             AddOverviewCard(overviewRow, "\uf017", $"{avgCompletion:F1}", "AVG. COMPLETION TIME", "Months", cCyan, 0.8f);
 
-            // ── Two-column layout: left=main, right=sidebar ──────────────────
             var twoCols = new VisualElement();
             twoCols.style.flexDirection = FlexDirection.Row;
             twoCols.style.flexGrow = 1;
@@ -603,17 +530,16 @@ namespace StateCraft.UI
             var leftCol = new VisualElement();
             leftCol.style.flexGrow = 1;
             leftCol.style.marginRight = 10;
-            leftCol.style.minWidth = 0; // CRITICAL: Prevents children from forcing leftCol to overlap rightCol
-            leftCol.style.overflow = Overflow.Hidden; // Failsafe to strictly prevent horizontal overflow
+            leftCol.style.minWidth = 0;
+            leftCol.style.overflow = Overflow.Hidden;
             twoCols.Add(leftCol);
 
             var rightCol = new VisualElement();
-            rightCol.style.width = 340; // Widened to prevent squishing the order forms
+            rightCol.style.width = 340;
             rightCol.style.minWidth = 340; 
             rightCol.style.flexShrink = 0;
             twoCols.Add(rightCol);
 
-            // ── ACTIVE PRODUCTION ────────────────────────────────────────────
             AddSectionLabel(leftCol, "ACTIVE PRODUCTION");
 
             if (country.productionOrders.Count == 0)
@@ -626,7 +552,6 @@ namespace StateCraft.UI
             }
             else
             {
-                // 2-column grid for facility cards
                 var facilityGrid = new VisualElement();
                 facilityGrid.style.flexDirection = FlexDirection.Row;
                 facilityGrid.style.flexWrap      = Wrap.Wrap;
@@ -637,7 +562,6 @@ namespace StateCraft.UI
                     AddProductionFacilityCard(facilityGrid, order, country, sym, cGreen, cCyan, cYellow, cOrange, cRed, cDim, cPanel, cBorder, GetImageNameForUnit(order.unitLabel));
             }
 
-            // ── RECENTLY COMPLETED ───────────────────────────────────────────
             if (country.completedProductions != null && country.completedProductions.Count > 0)
             {
                 AddSectionLabel(leftCol, "RECENTLY COMPLETED");
@@ -648,7 +572,6 @@ namespace StateCraft.UI
                 completedRow.style.marginBottom  = 10;
                 leftCol.Add(completedRow);
 
-                // Prev arrow
                 int completedPage = 0;
                 var prevArrow = new Button() { text = "‹" };
                 prevArrow.style.fontSize          = 18;
@@ -659,7 +582,6 @@ namespace StateCraft.UI
                 prevArrow.style.marginRight       = 6;
                 completedRow.Add(prevArrow);
 
-                // Scrollable completed items (show up to 4)
                 var completedList = new VisualElement();
                 completedList.style.flexDirection = FlexDirection.Row;
                 completedList.style.flexGrow      = 1;
@@ -695,7 +617,6 @@ namespace StateCraft.UI
                         card.style.marginRight   = 6;
                         card.style.alignItems    = Align.FlexStart;
 
-                        // Image placeholder
                                                 var img = new VisualElement();
                         img.style.width  = 50;
                         img.style.height = 32;
@@ -753,12 +674,7 @@ namespace StateCraft.UI
                 nextArrow.clicked += () => { completedPage = Mathf.Min(totalPages - 1, completedPage + 1); RenderCompletedPage(); };
             }
 
-            // ════════════════════════════════════════════════════════════════
-            // RIGHT COLUMN
-            // ════════════════════════════════════════════════════════════════
-
-            // ── NEW PRODUCTION ORDER ─────────────────────────────────────────
-            var ordSection = new Label("NEW PRODUCTION ORDER");
+var ordSection = new Label("NEW PRODUCTION ORDER");
             ordSection.style.alignSelf = Align.FlexStart;
             ordSection.style.color    = cGreen;
             ordSection.style.unityFontStyleAndWeight = FontStyle.Bold;
@@ -769,7 +685,6 @@ namespace StateCraft.UI
             ordSection.style.paddingBottom = 4;
             rightCol.Add(ordSection);
 
-            // Order forms
             var orderForms = new VisualElement();
             orderForms.style.backgroundColor = cPanel;
             SetBorderWidth(orderForms.style, 1);
@@ -783,22 +698,18 @@ namespace StateCraft.UI
             orderForms.style.marginBottom  = 10;
             rightCol.Add(orderForms);
 
-            // Full list of available weapons to produce
             var orderDefs = new (string cat, string item, string id, int qty)[]
             {
-                // Army
                 ("Army Equipment", "Assault Rifles",   "RIFLE",  1000),
                 ("Army Equipment", "Artillery",        "ARTILLERY", 10),
                 ("Vehicles",       "APC",               "APC",     50),
                 ("Vehicles",       "Battle Tanks",      "TNK",     20),
                 
-                // Aviation
                 ("Aviation",       "UAVs",              "UAV",     10),
                 ("Aviation",       "Attack Helicopters","HEL",     5),
                 ("Aviation",       "Fighter Jets",      "FTR",     5),
                 ("Aviation",       "Bombers",           "BOMBER",  1),
                 
-                // Naval
                 ("Naval Vessels",  "Patrol Boats",      "PATROL_BOAT", 5),
                 ("Naval Vessels",  "Frigates",          "FRG",     2),
                 ("Naval Vessels",  "Submarines",        "SUB",     1),
@@ -808,10 +719,7 @@ namespace StateCraft.UI
             foreach (var (cat, item, id, qty) in orderDefs)
                 AddNewOrderForm(orderForms, cat, item, id, qty, country, sym, cGreen, cCyan, cDim, cBorder, cPanel);
 
-
-
-            // ── PRODUCTION FACILITIES ────────────────────────────────────────
-            var facSection = new Label("PRODUCTION FACILITIES");
+var facSection = new Label("PRODUCTION FACILITIES");
             facSection.style.alignSelf = Align.FlexStart;
             facSection.style.color    = cGreen;
             facSection.style.unityFontStyleAndWeight = FontStyle.Bold;
@@ -890,7 +798,6 @@ namespace StateCraft.UI
                 facList.Add(row);
             }
 
-            // Manage Facilities button
             var manageFacBtn = new Button();
             manageFacBtn.text = "⚙  MANAGE FACILITIES";
             manageFacBtn.style.width           = Length.Percent(100);
@@ -905,7 +812,7 @@ namespace StateCraft.UI
             rightCol.Add(manageFacBtn);
             manageFacBtn.clicked += () =>
             {
-                SwitchTab(3); // Switch to the Bases tab
+                SwitchTab(3);
             };
         }
 
@@ -936,7 +843,6 @@ namespace StateCraft.UI
                 SetBorderColor(card.style, cBorder);
             });
 
-            // Top row: facility name + icon
             var topRow = new VisualElement();
             topRow.style.flexDirection  = FlexDirection.Row;
             topRow.style.justifyContent = Justify.SpaceBetween;
@@ -955,13 +861,11 @@ namespace StateCraft.UI
             settingsIcon.style.fontSize = 10;
             topRow.Add(settingsIcon);
 
-            // Body Row to hold image on left and stats on right
             var bodyRow = new VisualElement();
             bodyRow.style.flexDirection = FlexDirection.Row;
             bodyRow.style.marginBottom  = 6;
             card.Add(bodyRow);
 
-            // Image placeholder
             var imgBox = new VisualElement();
             imgBox.style.width           = 80;
             imgBox.style.height          = 55;
@@ -985,20 +889,17 @@ namespace StateCraft.UI
             }
             bodyRow.Add(imgBox);
 
-            // Stats Column
             var statsCol = new VisualElement();
             statsCol.style.flexGrow = 1;
             statsCol.style.flexDirection = FlexDirection.Column;
             bodyRow.Add(statsCol);
 
-            // Unit type subtitle
             var unitTypeLbl = new Label(order.unitLabel);
             unitTypeLbl.style.color   = cDim;
             unitTypeLbl.style.fontSize = 11;
             unitTypeLbl.style.marginBottom = 6;
             statsCol.Add(unitTypeLbl);
 
-            // Order quantity
             var qtyHeader = new Label("ORDER QUANTITY");
             qtyHeader.style.color    = cDim;
             qtyHeader.style.fontSize = 10;
@@ -1015,7 +916,6 @@ namespace StateCraft.UI
             qtyLbl.style.marginBottom = 4;
             statsCol.Add(qtyLbl);
 
-            // Progress
             var progHeader = new Label("PROGRESS");
             progHeader.style.color    = cDim;
             progHeader.style.fontSize = 10;
@@ -1066,7 +966,6 @@ namespace StateCraft.UI
             barBg.Add(barFill);
             progRow.Add(barBg);
 
-            // ETA and Monthly Output
             var statsRow = new VisualElement();
             statsRow.style.flexDirection  = FlexDirection.Row;
             statsRow.style.justifyContent = Justify.SpaceBetween;
@@ -1090,7 +989,6 @@ namespace StateCraft.UI
             AddMiniStat(statsRow, "ETA",           $"{order.monthsRemaining} Months");
             AddMiniStat(statsRow, "MONTHLY OUTPUT", $"{order.monthlyOutput:F0} {unitPlural}");
 
-            // View Details button
             var detailsBtn = new Button();
             detailsBtn.text = "VIEW DETAILS";
             detailsBtn.style.width           = Length.Percent(100);
@@ -1120,13 +1018,11 @@ namespace StateCraft.UI
             form.style.paddingBottom = 10;
             form.style.marginBottom  = 10;
 
-            // Image thumbnail + controls side by side
             var row = new VisualElement();
             row.style.flexDirection  = FlexDirection.Row;
             row.style.alignItems     = Align.Center;
             form.Add(row);
 
-            // Thumbnail
             var thumb = new VisualElement();
             thumb.style.width           = 52;
             thumb.style.height          = 38;
@@ -1152,12 +1048,10 @@ namespace StateCraft.UI
 
             row.Add(thumb);
 
-            // Controls
             var controls = new VisualElement();
             controls.style.flexGrow = 1;
             row.Add(controls);
 
-            // Category row
             var catRow = new VisualElement();
             catRow.style.flexDirection  = FlexDirection.Row;
             catRow.style.alignItems     = Align.Center;
@@ -1191,7 +1085,6 @@ namespace StateCraft.UI
             qtyCaption.style.marginLeft = 8;
             catRow.Add(qtyCaption);
 
-            // Item + quantity stepper row
             var itemRow = new VisualElement();
             itemRow.style.flexDirection = FlexDirection.Row;
             itemRow.style.alignItems    = Align.Center;
@@ -1218,7 +1111,6 @@ namespace StateCraft.UI
             itemField.style.paddingBottom = 2;
             itemRow.Add(itemField);
 
-            // Quantity stepper
             int[] qtyRef = { defaultQty };
             var qtyBox = new VisualElement();
             qtyBox.style.flexDirection  = FlexDirection.Row;
@@ -1302,10 +1194,7 @@ namespace StateCraft.UI
             qtyBox.Add(qtyDisplay);
             qtyBox.Add(plusBtn);
 
-
-
-            // START PRODUCTION button
-            var startBtn = new Button();
+var startBtn = new Button();
             startBtn.text = "START PRODUCTION";
             startBtn.style.width  = Length.Percent(100);
             startBtn.style.height = 24;
@@ -1343,7 +1232,6 @@ namespace StateCraft.UI
                 }
                 UnityEngine.Debug.Log($"[Production] Success! Adding {qtyRef[0]} {item} to queue. Cost: {totalCost}");
 
-                // Create order
                 string facName = GetFacilityName(id);
                 var order = new ProductionOrder
                 {
@@ -1359,7 +1247,6 @@ namespace StateCraft.UI
                 };
                 country.productionOrders.Insert(0, order);
 
-                // Deduct first month upfront
                 gm.playerBudget -= costPerMonth;
                 country.treasury = gm.playerBudget;
 
@@ -1367,15 +1254,13 @@ namespace StateCraft.UI
                     $"PRODUCTION STARTED: {qtyRef[0]:N0} {item} — {months} months estimated. Monthly cost: {UiFormat.Money(costPerMonth * country.exchangeRate, sym)}", Color.cyan);
 
                 RefreshMilitaryData();
-                SwitchWeaponsTab(1); // Refresh Production tab
+                SwitchWeaponsTab(1);
             };
 
             parent.Add(form);
         }
 
-        // ── Production helper utilities ───────────────────────────────────────────
-
-        private static float GetUnitCostB(string id)
+private static float GetUnitCostB(string id)
         {
             return id switch
             {
@@ -1397,7 +1282,7 @@ namespace StateCraft.UI
 
         private static float GetUnitValueB(string id)
         {
-            return GetUnitCostB(id) * 1.2f; // Produced value is 20% above cost
+            return GetUnitCostB(id) * 1.2f;
         }
 
         private static string GetRequiredFactoryType(string id)
@@ -1474,7 +1359,6 @@ namespace StateCraft.UI
             if (country.completedProductions == null)
                 country.completedProductions = new System.Collections.Generic.List<CompletedProductionItem>();
 
-            // Seed default factories from base counts if list is empty
             if (country.defenseFactories.Count == 0 && country.baseDefenseFactoryCount >= 0)
             {
                 if (country.unitTanks > 0 || country.unitAPCs > 0)
@@ -1487,7 +1371,6 @@ namespace StateCraft.UI
                     country.defenseFactories.Add(new DefenseFactory { id = "FAC_ART",   factoryName = "Artillery Works",     produceType = "ARTILLERY", level = 1, utilizationPct = 59f });
             }
 
-            // Demo seed data for production orders and completed items has been removed.
         }
 
         private void EnsureProcurementData(CountryDataSO country)
@@ -1500,8 +1383,6 @@ namespace StateCraft.UI
             country.availableOffers.Clear();
             StateCraft.Systems.ProcurementMarketSystem.RefreshMarket(country);
 
-            // No more mock active contracts, use live data.
-            // Purge any lingering mock data that got saved into the ScriptableObject asset:
             if (country.activeContracts != null)
             {
                 country.activeContracts.RemoveAll(c => c.id == "CON_CAESAR" || c.id == "CON_C130" || c.id == "CON_RADAR");
@@ -1544,9 +1425,7 @@ namespace StateCraft.UI
             }
         }
 
-
-
-        private void AddWeaponRow(string name, string weaponClass, int quantity, float readinessPct, string condition, VisualElement grid, string imageName = null)
+private void AddWeaponRow(string name, string weaponClass, int quantity, float readinessPct, string condition, VisualElement grid, string imageName = null)
         {
             if (grid == null) return;
 
@@ -1563,7 +1442,6 @@ namespace StateCraft.UI
             row.RegisterCallback<MouseEnterEvent>(e => row.style.backgroundColor = new Color(255/255f, 255/255f, 255/255f, 0.03f));
             row.RegisterCallback<MouseLeaveEvent>(e => row.style.backgroundColor = Color.clear);
 
-            // 1. Image placeholder
             var imgCol = new VisualElement();
             imgCol.style.width = 90;
             imgCol.style.height = 52;
@@ -1587,7 +1465,6 @@ namespace StateCraft.UI
 
             row.Add(imgCol);
 
-            // 2. Name / Class
             var nameCol = new VisualElement();
             nameCol.style.flexGrow = 1;
             nameCol.style.flexDirection = FlexDirection.Column;
@@ -1606,7 +1483,6 @@ namespace StateCraft.UI
             nameCol.Add(classLbl);
             row.Add(nameCol);
 
-            // 3. Quantity
             var qtyLbl = new Label(quantity == 0 ? "0" : quantity.ToString("N0"));
             qtyLbl.style.width = 68;
             qtyLbl.style.unityTextAlign = TextAnchor.MiddleCenter;
@@ -1614,7 +1490,6 @@ namespace StateCraft.UI
             qtyLbl.style.fontSize = 18;
             row.Add(qtyLbl);
 
-            // 4. Readiness
             var readinessCol = new VisualElement();
             readinessCol.style.width = 135;
             readinessCol.style.flexDirection = FlexDirection.Row;
@@ -1660,7 +1535,6 @@ namespace StateCraft.UI
             }
             row.Add(readinessCol);
 
-            // 5. Condition
             var condCol = new VisualElement();
             condCol.style.width = 72;
             condCol.style.flexDirection = FlexDirection.Row;
@@ -1787,7 +1661,6 @@ namespace StateCraft.UI
 
             string sym = string.IsNullOrEmpty(country.currencySymbol) ? "$" : country.currencySymbol;
 
-            // Local helper — also invoked immediately so quantity/cost show on open
             System.Action<int> updateLabels = batches => {
                 int totalUnits = batches * batchSize;
                 float totalCost = batches * baseCostB;
@@ -1800,11 +1673,10 @@ namespace StateCraft.UI
 
             amountSlider.RegisterValueChangedCallback(evt => updateLabels(evt.newValue));
             amountSlider.value = 1;
-            updateLabels(1); // populate immediately — setting value=1 won't fire callback
+            updateLabels(1);
             content.Insert(1, amountSlider);
 
-
-            var actionRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.FlexEnd, marginTop = 10 } };
+var actionRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.FlexEnd, marginTop = 10 } };
             
             var cancelBtn = new Button(() => overlay.parent?.Remove(overlay)) { text = "CANCEL" };
             cancelBtn.AddToClassList("button-premium");
@@ -1817,13 +1689,12 @@ namespace StateCraft.UI
             cancelBtn.style.unityFontStyleAndWeight = FontStyle.Bold;
             actionRow.Add(cancelBtn);
 
-            // Button label: RECRUIT for personnel, PRODUCE for local, IMPORT ORDER for weapons
             string confirmLabel = isPersonnel ? "RECRUIT" : (isProduce ? "PRODUCE" : "IMPORT ORDER");
             Color confirmColor = isPersonnel
-                ? new Color(36/255f, 174/255f, 96/255f)   // green for recruit
+                ? new Color(36/255f, 174/255f, 96/255f)
                 : isProduce
-                ? new Color(0f, 140/255f, 220/255f)       // blue for produce
-                : new Color(25/255f, 127/255f, 229/255f); // blue for import
+                ? new Color(0f, 140/255f, 220/255f)
+                : new Color(25/255f, 127/255f, 229/255f);
             var confirmBtn = new Button() { text = confirmLabel };
             confirmBtn.AddToClassList("button-premium");
             confirmBtn.style.backgroundColor = confirmColor;
@@ -1840,14 +1711,12 @@ namespace StateCraft.UI
                 overlay.parent?.Remove(overlay);
             };
             
-            // Hover effect for Confirm Button
             Color confirmHover = isPersonnel
                 ? new Color(46/255f, 194/255f, 116/255f)
                 : new Color(35/255f, 147/255f, 249/255f);
             confirmBtn.RegisterCallback<MouseEnterEvent>(e => confirmBtn.style.backgroundColor = confirmHover);
             confirmBtn.RegisterCallback<MouseLeaveEvent>(e => confirmBtn.style.backgroundColor = confirmColor);
             
-            // Hover effect for Cancel Button
             cancelBtn.RegisterCallback<MouseEnterEvent>(e => cancelBtn.style.backgroundColor = new Color(0.3f, 0.3f, 0.3f, 1f));
             cancelBtn.RegisterCallback<MouseLeaveEvent>(e => cancelBtn.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f, 1f));
 
@@ -1960,7 +1829,6 @@ namespace StateCraft.UI
             var root = scroll.contentContainer;
             root.style.paddingRight = 20;
 
-            // ── HEADER ───────────────────────────────────────────────────────
             EnsureProcurementData(country);
             var headerLbl = new Label("DEFENSE PROCUREMENT");
             headerLbl.style.color = Color.white;
@@ -1974,7 +1842,6 @@ namespace StateCraft.UI
             subLbl.style.marginBottom = 16;
             root.Add(subLbl);
 
-            // ── KPIs ─────────────────────────────────────────────────────────
             var kpiRow = new VisualElement();
             kpiRow.style.flexDirection = FlexDirection.Row;
             kpiRow.style.flexWrap = Wrap.Wrap;
@@ -1985,7 +1852,7 @@ namespace StateCraft.UI
             {
                 var card = new VisualElement();
                 card.style.flexGrow = 1;
-                card.style.flexBasis = Length.Percent(18); // ~5 items per row
+                card.style.flexBasis = Length.Percent(18);
                 card.style.backgroundColor = cPanel;
                 SetBorderWidth(card.style, 1);
                 SetBorderColor(card.style, cBorder);
@@ -2054,7 +1921,6 @@ namespace StateCraft.UI
             AddKpi("TOTAL COMMITMENTS", $"₦{totalCommitments:F1}B", "Value of all contracts", "\uf15c");
             AddKpi("AVERAGE DELIVERY TIME", $"{avgDelivery:F1}", "Months", "\uf017");
 
-            // ── 3 COLUMN LAYOUT ─────────────────────────────────────────────
             var columns = new VisualElement();
             columns.style.flexDirection = FlexDirection.Row;
             columns.style.flexGrow = 1;
@@ -2080,7 +1946,6 @@ namespace StateCraft.UI
             rightCol.style.flexShrink = 0;
             columns.Add(rightCol);
 
-            // ── LEFT COL (Filters) ──────────────────────────────────────────
             var filterHeader = new VisualElement();
             filterHeader.style.flexDirection = FlexDirection.Row;
             filterHeader.style.justifyContent = Justify.SpaceBetween;
@@ -2155,10 +2020,7 @@ namespace StateCraft.UI
                 leftCol.Add(row);
             }
 
-
-
-            // ── MID COL (Available Offers) ──────────────────────────────────
-            var offersHeader = new Label("AVAILABLE OFFERS");
+var offersHeader = new Label("AVAILABLE OFFERS");
             offersHeader.style.color = Color.white;
             offersHeader.style.fontSize = 12;
             offersHeader.style.unityFontStyleAndWeight = FontStyle.Bold;
@@ -2192,7 +2054,6 @@ namespace StateCraft.UI
                 card.style.paddingLeft = card.style.paddingRight = 10;
                 card.style.marginBottom = 8;
 
-                // Thumb Placeholder
                 var thumb = new VisualElement();
                 thumb.style.width = 100;
                 thumb.style.height = 70;
@@ -2220,7 +2081,6 @@ namespace StateCraft.UI
                 thumb.Add(flagLbl);
                 card.Add(thumb);
 
-                // Info Col
                 var infoCol = new VisualElement();
                 infoCol.style.flexGrow = 1;
                 infoCol.style.justifyContent = Justify.SpaceBetween;
@@ -2271,7 +2131,6 @@ namespace StateCraft.UI
                 ctryRow.Add(ctryL1); ctryRow.Add(ctryL2);
                 infoCol.Add(ctryRow);
 
-                // Stats Col
                 var statsCol = new VisualElement();
                 statsCol.style.width = 240;
                 statsCol.style.marginLeft = 20;
@@ -2315,8 +2174,6 @@ namespace StateCraft.UI
                         float monthly = offer.totalCostB / offer.deliveryMonths;
                         UnityEngine.Debug.Log($"[Procurement] treasury={c.treasury}, monthly={monthly}, playerBudget={GameManager.Instance.playerBudget}");
                         
-                        // Treat costs as Local Currency, while Treasury is in USD.
-                        // So the required USD is monthly / exchangeRate.
                         float monthlyUSD = monthly / c.exchangeRate;
 
                         if (GameManager.Instance.playerBudget >= monthlyUSD)
@@ -2368,7 +2225,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // ── RIGHT COL (Negotiations & Summary) ──────────────────────────
             var rightTopRow = new VisualElement(); rightTopRow.style.flexDirection = FlexDirection.Row; rightTopRow.style.justifyContent = Justify.SpaceBetween; rightTopRow.style.marginBottom = 10;
             var anLbl = new Label("ACTIVE NEGOTIATIONS"); anLbl.style.color = Color.white; anLbl.style.fontSize = 12; anLbl.style.unityFontStyleAndWeight = FontStyle.Bold;
             rightTopRow.Add(anLbl);
@@ -2414,11 +2270,11 @@ namespace StateCraft.UI
                 else if (contract.status == "Contract Drafting") statColor = new Color(200/255f, 100/255f, 255/255f);
                 else if (contract.status == "In Transit") statColor = cGreen;
 
-                string icon = "\uf013"; // default gear
-                if (contract.produceType == "RIFLE" || contract.produceType == "APC" || contract.produceType == "TNK") icon = "\uf51e"; // crosshairs
-                else if (contract.produceType == "ARTILLERY") icon = "\uf1e2"; // bomb
-                else if (contract.produceType == "FTR" || contract.produceType == "BOMBER" || contract.produceType == "HEL" || contract.produceType == "UAV") icon = "\uf0fb"; // fighter jet
-                else if (contract.produceType == "PATROL_BOAT" || contract.produceType == "FRG" || contract.produceType == "SUB" || contract.produceType == "DESTROYER") icon = "\uf21a"; // ship
+                string icon = "\uf013";
+                if (contract.produceType == "RIFLE" || contract.produceType == "APC" || contract.produceType == "TNK") icon = "\uf51e";
+                else if (contract.produceType == "ARTILLERY") icon = "\uf1e2";
+                else if (contract.produceType == "FTR" || contract.produceType == "BOMBER" || contract.produceType == "HEL" || contract.produceType == "UAV") icon = "\uf0fb";
+                else if (contract.produceType == "PATROL_BOAT" || contract.produceType == "FRG" || contract.produceType == "SUB" || contract.produceType == "DESTROYER") icon = "\uf21a";
 
                 AddNegItem(icon, contract.unitLabel, contract.supplier, $"₦{contract.totalCostB:F1}B", contract.status, statColor);
             }
@@ -2441,7 +2297,6 @@ namespace StateCraft.UI
             sumBox.style.marginBottom = 12;
             rightCol.Add(sumBox);
 
-            // Placeholder for donut chart: A stacked horizontal bar chart
             var chartRow = new VisualElement(); chartRow.style.flexDirection = FlexDirection.Row; chartRow.style.height = 18; chartRow.style.marginBottom = 16;
             chartRow.style.borderTopLeftRadius = chartRow.style.borderTopRightRadius = chartRow.style.borderBottomLeftRadius = chartRow.style.borderBottomRightRadius = 6;
             chartRow.style.overflow = Overflow.Hidden;
@@ -2467,8 +2322,7 @@ namespace StateCraft.UI
             AddLegend("Navy", "15%", "(₦134.4B)", new Color(0, 150/255f, 255/255f));
             AddLegend("Defense Systems", "10%", "(₦90.3B)", cOrange);
 
-
-        }
+}
         private void PopulateResearch(CountryDataSO country)
         {
             if (_wPanelResearch == null) return;
@@ -2496,7 +2350,6 @@ namespace StateCraft.UI
             var root = scroll.contentContainer;
             root.style.paddingRight = 20;
 
-            // ── 3 COLUMN LAYOUT ─────────────────────────────────────────────
             var columns = new VisualElement();
             columns.style.flexDirection = FlexDirection.Row;
             columns.style.flexGrow = 1;
@@ -2523,7 +2376,6 @@ namespace StateCraft.UI
             columns.Add(rightCol);
 
             EnsureResearchData(country);
-            // ================= LEFT COL =================
             var overviewHeader = new Label("RESEARCH OVERVIEW");
             overviewHeader.style.color = cGreen;
             overviewHeader.style.fontSize = 9;
@@ -2619,7 +2471,6 @@ namespace StateCraft.UI
             SetBorderWidth(addBtn.style, 1); SetBorderColor(addBtn.style, cBorder); addBtn.style.borderTopLeftRadius = addBtn.style.borderTopRightRadius = addBtn.style.borderBottomLeftRadius = addBtn.style.borderBottomRightRadius = 3;
             leftCol.Add(addBtn);
 
-            // ================= MID COL =================
             var midHeaderRow = new VisualElement(); midHeaderRow.style.flexDirection = FlexDirection.Row; midHeaderRow.style.justifyContent = Justify.SpaceBetween; midHeaderRow.style.alignItems = Align.FlexEnd; midHeaderRow.style.marginBottom = 12;
             var mLbl = new Label("AVAILABLE RESEARCH"); mLbl.style.color = cGreen; mLbl.style.fontSize = 9; mLbl.style.unityFontStyleAndWeight = FontStyle.Bold; midHeaderRow.Add(mLbl);
             midCol.Add(midHeaderRow);
@@ -2659,8 +2510,7 @@ namespace StateCraft.UI
                 var star = new Label(isStarred ? "★" : "☆"); star.style.color = isStarred ? cYellow : cDim; star.style.fontSize = 12; top.Add(star);
                 c.Add(top);
 
-
-                var thumb = new VisualElement(); thumb.style.height = 70; thumb.style.backgroundColor = new Color(0,0,0,0.5f); thumb.style.marginBottom = 8; thumb.style.borderTopLeftRadius = thumb.style.borderTopRightRadius = thumb.style.borderBottomLeftRadius = thumb.style.borderBottomRightRadius = 4;
+var thumb = new VisualElement(); thumb.style.height = 70; thumb.style.backgroundColor = new Color(0,0,0,0.5f); thumb.style.marginBottom = 8; thumb.style.borderTopLeftRadius = thumb.style.borderTopRightRadius = thumb.style.borderBottomLeftRadius = thumb.style.borderBottomRightRadius = 4;
                 if (!string.IsNullOrEmpty(imageName))
                 {
                     var tex = UnityEngine.Resources.Load<UnityEngine.Texture2D>("EquipmentPhotos/" + imageName);
@@ -2717,7 +2567,6 @@ namespace StateCraft.UI
             SetBorderWidth(viewBtn.style, 1); SetBorderColor(viewBtn.style, cBorder); viewBtn.style.borderTopLeftRadius = viewBtn.style.borderTopRightRadius = viewBtn.style.borderBottomLeftRadius = viewBtn.style.borderBottomRightRadius = 3;
             midCol.Add(viewBtn);
 
-            // ================= RIGHT COL =================
             var statHeader = new Label("RESEARCH STATS");
             statHeader.style.color = cGreen; statHeader.style.fontSize = 9; statHeader.style.unityFontStyleAndWeight = FontStyle.Bold; statHeader.style.marginBottom = 10;
             rightCol.Add(statHeader);

@@ -11,7 +11,6 @@ namespace StateCraft.UI
 {
     public partial class MilitaryDashboardController
     {
-        // UXML Element References
         private Label _basesStatTotal;
         private Label _basesStatCapacity;
         private Label _basesStatOccupied;
@@ -27,7 +26,6 @@ namespace StateCraft.UI
         private Label _detailBaseSize;
         private Label _detailBaseThreat;
         
-        // Titles for Details
         private Label _titleBaseEstablished;
         private Label _titleBaseGarrison;
         private Label _titleBasePersonnel;
@@ -48,7 +46,6 @@ namespace StateCraft.UI
         private VisualElement _baseBannerImage;
         private Label _detailBaseIcon;
         
-        // Construction Modal
         private VisualElement _constructModalOverlay;
         private Button _btnCloseConstructModal;
         private Button _btnTypeBase;
@@ -61,16 +58,14 @@ namespace StateCraft.UI
         private Button _btnConfirmConstruct;
         private VisualElement _containerConstructBranch;
         
-        // Construction Stats
         private Label _labelConstructCost;
         private Label _labelConstructCapacityTitle;
         private Label _labelConstructCapacity;
         private Label _labelConstructTime;
         
-        private int _constructFacilityType = 0; // 0=Base, 1=Factory, 2=Training
+        private int _constructFacilityType = 0;
         private List<RegionDataSO> _availableConstructRegions;
         
-        // Upgrade Modal
         private VisualElement _upgradeModalOverlay;
         private Button _btnCloseUpgradeModal;
         private Button _btnCancelUpgrade;
@@ -271,7 +266,6 @@ namespace StateCraft.UI
             try 
             {
             
-            // 1. Top Stats
             int totalBases = country.militaryBases.Count + (country.defenseFactories?.Count ?? 0);
             int totalCapacity = 0;
             int totalOccupied = 0;
@@ -291,7 +285,6 @@ namespace StateCraft.UI
             }
             if (_basesStatUpkeep != null) _basesStatUpkeep.text = $"₦{totalUpkeep:F1}B";
 
-            // 2. Base List (Left Column)
             _basesListContainer.Clear();
             
             int cArmy = 0, cAir = 0, cNavy = 0, cJoint = 0, cAll = 0;
@@ -345,7 +338,7 @@ namespace StateCraft.UI
             {
                 foreach (var order in country.facilityConstructionOrders)
                 {
-                    if (order.facilityType == 1) continue; // Skip factories since they might be handled separately or they don't map to bases easily here
+                    if (order.facilityType == 1) continue;
                     
                     string branch = order.branch == "AIR" ? "AIR FORCE" : order.branch;
                     
@@ -361,8 +354,6 @@ namespace StateCraft.UI
                     string locationLabel = $"{order.regionName}, {GameManager.Instance.playerCountry.countryName}";
                     string role = order.facilityType == 2 ? "Training Academy" : "Base under construction";
 
-                    // For the click handler, we can pass a dummy MilitaryBase to ShowBaseDetails just so it renders something, or disable click.
-                    // For now, let's create a temporary MilitaryBase object to display in details panel
                     var tempBase = new MilitaryBase(
                         order.id,
                         order.facilityName,
@@ -387,7 +378,6 @@ namespace StateCraft.UI
             if (_btnFilterNavy != null) _btnFilterNavy.Query<Label>().Last().text = $"NAVY ({cNavy})";
             if (_btnFilterJoint != null) _btnFilterJoint.Query<Label>().Last().text = $"JOINT ({cJoint})";
 
-            // 3. Show first base details by default (auto-select first base)
             if (firstVisible != null)
             {
                 ShowBaseDetails(firstVisible, country);
@@ -402,7 +392,6 @@ namespace StateCraft.UI
                 if (_baseDetailsEmptyState != null) _baseDetailsEmptyState.style.display = DisplayStyle.Flex;
             }
 
-            // 4. Global Overview (live)
             int opCount    = country.militaryBases.FindAll(x => x.status == "OPERATIONAL").Count + (country.defenseFactories?.FindAll(f => f.level > 0).Count ?? 0);
             int constrCount = country.militaryBases.FindAll(x => x.status == "UNDER CONSTRUCTION").Count + (country.defenseFactories?.FindAll(f => f.level == 0).Count ?? 0);
             _globalBasesOverviewContainer.Clear();
@@ -410,7 +399,6 @@ namespace StateCraft.UI
             AddOverviewRow("Under Construction", constrCount.ToString(), new Color(1f, 0.67f, 0.25f));
             AddOverviewRow("Inactive", "0", Color.grey);
 
-            // 5. Construction & Upgrade queues
             PopulateQueues(country);
             
             Debug.Log("[Bases] PopulateBases finished successfully!");
@@ -428,10 +416,8 @@ namespace StateCraft.UI
             _constructionQueueContainer.Clear();
             _upgradeQueueContainer.Clear();
             
-            // Build combined construction list: new queue orders + legacy "UNDER CONSTRUCTION" bases
             bool hasConstructionItems = false;
 
-            // New queue orders
             if (country.facilityConstructionOrders != null)
             {
                 foreach (var order in country.facilityConstructionOrders)
@@ -443,7 +429,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // Legacy: bases added directly with UNDER CONSTRUCTION status (old save data)
             if (country.militaryBases != null)
             {
                 foreach (var b in country.militaryBases)
@@ -455,7 +440,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // Legacy: factories at level 0 are also under construction
             if (country.defenseFactories != null)
             {
                 foreach (var fac in country.defenseFactories)
@@ -471,7 +455,6 @@ namespace StateCraft.UI
                 _constructionQueueContainer.Add(new Label("No facilities under construction") { style = { fontSize = 11, color = new Color(0.5f, 0.5f, 0.5f), unityTextAlign = TextAnchor.MiddleCenter, marginTop = 16, marginBottom = 16, paddingBottom = 12, paddingTop = 12 } });
             }
 
-            // Upgrade queue
             if (country.facilityUpgradeOrders == null || country.facilityUpgradeOrders.Count == 0)
             {
                 _upgradeQueueContainer.Add(new Label("No active upgrades") { style = { fontSize = 11, color = new Color(0.5f, 0.5f, 0.5f), unityTextAlign = TextAnchor.MiddleCenter, marginTop = 16, marginBottom = 16, paddingBottom = 12, paddingTop = 12 } });
@@ -499,7 +482,6 @@ namespace StateCraft.UI
             var nameRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 2 } };
             nameRow.Add(new Label(name) { style = { fontSize = 14, color = Color.white, unityFontStyleAndWeight = FontStyle.Bold, marginRight = 6 } });
             
-            // Branch badge
             string cleanBranch = branch == "AIR" ? "AIR FORCE" : branch;
             Color branchColor = cleanBranch == "AIR FORCE" ? new Color(0.4f, 0.7f, 1f) : cleanBranch == "NAVY" ? new Color(0.1f, 0.4f, 0.9f) : cleanBranch == "JOINT" ? new Color(0.7f, 0.4f, 0.9f) : cleanBranch == "RDF" ? Color.black : new Color(0.3f, 0.6f, 0.3f);
             var badge = new VisualElement { style = { backgroundColor = branchColor, paddingLeft = 4, paddingRight = 4, paddingTop = 2, paddingBottom = 2, borderTopLeftRadius = 2, borderTopRightRadius = 2, borderBottomLeftRadius = 2, borderBottomRightRadius = 2 } };
@@ -509,7 +491,6 @@ namespace StateCraft.UI
 
             mid.Add(new Label(location) { style = { fontSize = 11, color = Color.grey, marginBottom = 6 } });
             
-            // Status and Capacity Bar
             var statRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
             
             var statusBadge = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, backgroundColor = new Color(statusColor.r, statusColor.g, statusColor.b, 0.15f), borderTopWidth = 1, borderBottomWidth = 1, borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = new Color(statusColor.r, statusColor.g, statusColor.b, 0.5f), borderBottomColor = new Color(statusColor.r, statusColor.g, statusColor.b, 0.5f), borderLeftColor = new Color(statusColor.r, statusColor.g, statusColor.b, 0.5f), borderRightColor = new Color(statusColor.r, statusColor.g, statusColor.b, 0.5f), borderTopLeftRadius = 6, borderTopRightRadius = 6, borderBottomLeftRadius = 6, borderBottomRightRadius = 6, paddingLeft = 6, paddingRight = 6, paddingTop = 2, paddingBottom = 2, marginRight = 10 } };
@@ -517,10 +498,9 @@ namespace StateCraft.UI
             statusBadge.Add(new Label(status) { style = { fontSize = 10, color = statusColor, unityFontStyleAndWeight = FontStyle.Bold } });
             statRow.Add(statusBadge);
             
-            // For now, Operational gets a full bar, construction gets a partial bar
             int progressVal = status == "OPERATIONAL" ? 100 : 45; 
             var pBar = new ProgressBar { value = progressVal, highValue = 100, style = { flexGrow = 1, height = 4, marginRight = 8 } };
-            pBar.style.backgroundColor = statusColor; // color bar to match status
+            pBar.style.backgroundColor = statusColor;
             statRow.Add(pBar);
             
             mid.Add(statRow);
@@ -533,7 +513,6 @@ namespace StateCraft.UI
             right.Add(roleLabel);
             card.Add(right);
             
-            // Click to show details
             card.RegisterCallback<ClickEvent>(e => {
                 if (onClick != null)
                 {
@@ -548,7 +527,6 @@ namespace StateCraft.UI
                 if (_detailBaseIcon != null) _detailBaseIcon.text = icon;
                 if (_detailBaseStatus != null) { _detailBaseStatus.text = status; _detailBaseStatus.style.color = statusColor; }
                 
-                // Dynamic Banner
                 if (_baseBannerImage != null)
                 {
                     string imgName = name.Contains("Air") ? "AirBase" : name.Contains("Nav") ? "NavalBase" : name.Contains("Joint") ? "JointBase" : "ArmyBase";
@@ -643,7 +621,6 @@ namespace StateCraft.UI
             _currentSelectedBase = b;
             _currentSelectedFactory = null;
 
-            // Reset Titles for Bases vs Training Academies
             bool isTraining = b.role == "Training Academy";
             if (_titleBaseEstablished != null) _titleBaseEstablished.text = "Established";
             if (_titleBaseGarrison != null) _titleBaseGarrison.text = isTraining ? "Class Capacity" : "Garrison Capacity";
@@ -669,7 +646,6 @@ namespace StateCraft.UI
             if (_detailBaseStatus != null) { _detailBaseStatus.text = b.status; _detailBaseStatus.style.color = b.status == "OPERATIONAL" ? new Color(0.14f, 0.93f, 0.34f) : new Color(1f, 0.67f, 0.25f); }
             if (_detailBaseEstablished != null) _detailBaseEstablished.text = $"Est. {b.establishedYear}";
 
-            // Dynamic Banner
             if (_baseBannerImage != null)
             {
                 string imgName = b.baseName.Contains("Air") ? "AirBase" : b.baseName.Contains("Nav") ? "NavalBase" : b.baseName.Contains("Joint") ? "JointBase" : "ArmyBase";
@@ -701,7 +677,6 @@ namespace StateCraft.UI
                 _detailBaseThreat.style.color = isTraining ? new Color(0.14f, 0.93f, 0.34f) : threatColor;
             }
 
-            // Base Information panel
             _baseInfoListContainer.Clear();
             AddBaseInfoRow("Location", locationLabel, FaIcons.Globe);
             AddBaseInfoRow("Type", $"{b.branch} Base", FaIcons.Building);
@@ -719,7 +694,6 @@ namespace StateCraft.UI
             }
             AddBaseInfoRow("Monthly Upkeep", $"₦{b.upkeepCost:F1}B", FaIcons.Coin);
 
-            // Capabilities — from live data
             _baseCapabilitiesContainer.Clear();
             if (b.capabilities != null && b.capabilities.Count > 0)
             {
@@ -732,7 +706,6 @@ namespace StateCraft.UI
                 AddCapabilityRow("Officer School", 1, FaIcons.GraduationCap);
             }
 
-            // Assigned Units — from live data
             _assignedUnitsContainer.Clear();
             if (b.assignedUnits != null && b.assignedUnits.Count > 0)
             {
@@ -745,7 +718,6 @@ namespace StateCraft.UI
                 AddAssignedUnit("Instructors", "120", FaIcons.UserSecret);
             }
 
-            // Base Activity
             _baseActivityContainer.Clear();
             if (isTraining)
             {
@@ -764,7 +736,6 @@ namespace StateCraft.UI
                 AddActivityIcon("Transfers", "0", FaIcons.Clock);
             }
             
-            // Revert icon color (might have been changed by factory)
             if (_titleBaseGarrison?.parent?.Q<Label>(className: "fa-icon") != null)
                 _titleBaseGarrison.parent.Q<Label>(className: "fa-icon").style.color = new Color(0.64f, 0.69f, 0.73f);
         }
@@ -777,14 +748,12 @@ namespace StateCraft.UI
             _currentSelectedBase = null;
             _currentSelectedFactory = fac;
 
-            // Set Factory Titles
             if (_titleBaseEstablished != null) _titleBaseEstablished.text = "Established";
             if (_titleBaseGarrison != null) _titleBaseGarrison.text = "Factory Level";
             if (_titleBasePersonnel != null) _titleBasePersonnel.text = "Utilization";
             if (_titleBaseSize != null) _titleBaseSize.text = "Monthly Output";
             if (_titleBaseThreat != null) _titleBaseThreat.text = "Efficiency";
 
-            // Update Icon Colors for Factory
             if (_titleBaseGarrison?.parent?.Q<Label>(className: "fa-icon") != null)
                 _titleBaseGarrison.parent.Q<Label>(className: "fa-icon").style.color = new Color(1f, 0.67f, 0.25f);
 
@@ -796,7 +765,6 @@ namespace StateCraft.UI
             if (_detailBaseStatus != null) { _detailBaseStatus.text = status; _detailBaseStatus.style.color = fac.level > 0 ? new Color(0.14f, 0.93f, 0.34f) : new Color(1f, 0.67f, 0.25f); }
             if (_detailBaseEstablished != null) _detailBaseEstablished.text = $"Est. 2024";
 
-            // Dynamic Banner
             if (_baseBannerImage != null)
             {
                 var tex = UnityEngine.Resources.Load<UnityEngine.Texture2D>($"EquipmentPhotos/FactoryBanner");
@@ -819,7 +787,6 @@ namespace StateCraft.UI
                 _detailBaseThreat.style.color = new Color(0.14f, 0.93f, 0.34f);
             }
 
-            // Factory Information panel
             _baseInfoListContainer.Clear();
             AddBaseInfoRow("Location", "National Industrial Zone", FaIcons.Globe);
             AddBaseInfoRow("Specialization", fac.produceType, FaIcons.Wrench);
@@ -845,7 +812,6 @@ namespace StateCraft.UI
 
             if (_currentSelectedBase != null)
             {
-                // Block if already queued
                 bool alreadyQueued = country?.facilityUpgradeOrders?.Exists(o => o.facilityId == _currentSelectedBase.id) ?? false;
                 if (alreadyQueued)
                 {
@@ -877,7 +843,6 @@ namespace StateCraft.UI
                     return;
                 }
 
-                // Block if already queued
                 bool alreadyQueued = country?.facilityUpgradeOrders?.Exists(o => o.facilityId == _currentSelectedFactory.id) ?? false;
                 if (alreadyQueued)
                 {
@@ -916,7 +881,6 @@ namespace StateCraft.UI
 
             if (country.facilityUpgradeOrders == null) country.facilityUpgradeOrders = new List<StateCraft.Data.FacilityUpgradeOrder>();
 
-            // Hard guard: prevent duplicate queue entries
             string targetId = _currentSelectedBase?.id ?? _currentSelectedFactory?.id;
             if (!string.IsNullOrEmpty(targetId) && country.facilityUpgradeOrders.Exists(o => o.facilityId == targetId))
             {
@@ -926,7 +890,7 @@ namespace StateCraft.UI
             }
             if (_currentSelectedBase != null)
             {
-                float costNGN = 20.0f; // 20B NGN to upgrade a base
+                float costNGN = 20.0f;
                 float costUSD = costNGN / country.exchangeRate;
                 
                 if (country.treasury >= costUSD)
@@ -947,7 +911,7 @@ namespace StateCraft.UI
                     if (Core.GameManager.Instance != null && Core.GameManager.Instance.playerCountry != null)
                     {
                         ShowBaseDetails(_currentSelectedBase, Core.GameManager.Instance.playerCountry);
-                        PopulateQueues(Core.GameManager.Instance.playerCountry); // update the visual queues
+                        PopulateQueues(Core.GameManager.Instance.playerCountry);
                     }
                     
                     if (_upgradeModalOverlay != null) _upgradeModalOverlay.style.display = DisplayStyle.None;
@@ -960,7 +924,7 @@ namespace StateCraft.UI
             }
             else if (_currentSelectedFactory != null)
             {
-                float costNGN = 35.0f; // 35B NGN to upgrade a factory
+                float costNGN = 35.0f;
                 float costUSD = costNGN / country.exchangeRate;
                 
                 if (_currentSelectedFactory.level < 3)
@@ -1018,7 +982,6 @@ namespace StateCraft.UI
 
             var validRegions = country.regions != null ? country.regions.Where(r => r != null).ToList() : new List<RegionDataSO>();
 
-            // Check if existing bases belong to a different country (e.g. leftover serialized data)
             if (country.militaryBases.Count > 0 && validRegions.Count > 0)
             {
                 bool baseMatchesRegion = false;
@@ -1040,15 +1003,12 @@ namespace StateCraft.UI
 
             if (country.militaryBases.Count == 0)
             {
-                // Generate dynamic bases based on the country's actual regions
                 if (validRegions.Count > 0)
                 {
                     int idCounter = 1;
                     
-                    // Base 1: National HQ in the first region (often capital)
                     country.militaryBases.Add(new MilitaryBase($"BASE_{idCounter++}", $"{validRegions[0].regionName} Defense HQ", validRegions[0].regionName, "JOINT", 3000, "National Defense HQ"));
                     
-                    // Create bases distributed among other regions
                     string[] branches = { "ARMY", "AIR", "NAVY", "ARMY" };
                     string[] roles = { "Training & Logistics", "Air Superiority", "Maritime Operations", "Armored Division" };
                     
@@ -1058,7 +1018,6 @@ namespace StateCraft.UI
                         string branch = branches[branchIdx];
                         string role = roles[branchIdx];
                         
-                        // Default to JOINT if landlocked and NAVY is selected, but for simplicity let's just use it
                         string baseName = branch == "AIR" ? $"{validRegions[i].regionName} Air Base" :
                                           branch == "NAVY" ? $"{validRegions[i].regionName} Naval Base" :
                                           $"{validRegions[i].regionName} Army Garrison";
@@ -1066,7 +1025,6 @@ namespace StateCraft.UI
                         country.militaryBases.Add(new MilitaryBase($"BASE_{idCounter++}", baseName, validRegions[i].regionName, branch, UnityEngine.Random.Range(1500, 2500), role));
                     }
                     
-                    // Add one under construction if they have enough regions
                     if (validRegions.Count > 2)
                     {
                         var bUnderConst = new MilitaryBase($"BASE_{idCounter++}", $"{validRegions[validRegions.Count - 1].regionName} Forward Op Base", validRegions[validRegions.Count - 1].regionName, "ARMY", 800, "Border Security");
@@ -1076,13 +1034,11 @@ namespace StateCraft.UI
                 }
                 else
                 {
-                    // Fallback if no regions defined
                     country.militaryBases.Add(new MilitaryBase("BASE_1", "National Defense HQ", "Capital", "JOINT", 3000, "National Defense HQ"));
                     country.militaryBases.Add(new MilitaryBase("BASE_2", "First Army Base", "Central", "ARMY", 2500, "Training & Logistics"));
                 }
             }
             
-            // Ensure any existing bases have the newly added fields populated
             foreach (var b in country.militaryBases)
             {
                 if (b.establishedYear == 0) b.establishedYear = 2010 + UnityEngine.Random.Range(0, 10);
@@ -1152,7 +1108,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // Allow players to build in any region they control, even if a base already exists there
             _availableConstructRegions = country.regions;
 
             if (_availableConstructRegions == null || _availableConstructRegions.Count == 0)
@@ -1182,7 +1137,6 @@ namespace StateCraft.UI
         {
             _constructFacilityType = facilityType;
             
-            // Failsafe lazy-binding in case of hot-reload without BindBasesElements re-run
             if (_labelConstructCost == null && _constructModalOverlay != null)
             {
                 _labelConstructCost = _constructModalOverlay.Q<Label>("LabelConstructCost");
@@ -1209,11 +1163,11 @@ namespace StateCraft.UI
 
             if (_containerConstructBranch != null)
             {
-                if (facilityType == 1) // Defense Factory
+                if (facilityType == 1)
                 {
                     _containerConstructBranch.style.display = DisplayStyle.None;
                 }
-                else // Military Base (0) or Training Academy (2)
+                else
                 {
                     _containerConstructBranch.style.display = DisplayStyle.Flex;
                     if (_dropdownConstructBranch != null)
@@ -1254,7 +1208,7 @@ namespace StateCraft.UI
 
         private void GetConstructStats(int type, string branch, out float cost, out int capacity, out string timeStr)
         {
-            if (type == 1) // Defense Factory
+            if (type == 1)
             {
                 cost = 120.0f;
                 capacity = 100;
@@ -1262,7 +1216,7 @@ namespace StateCraft.UI
                 return;
             }
             
-            if (type == 0) // Military Base
+            if (type == 0)
             {
                 cost = 50.0f;
                 capacity = 1000;
@@ -1270,7 +1224,7 @@ namespace StateCraft.UI
                 if (branch == "RDF") { cost = 80.0f; capacity = 300; }
                 else if (branch == "AIR FORCE") { cost = 75.0f; capacity = 500; }
             }
-            else // Training Academy (Type 2)
+            else
             {
                 cost = 35.0f;
                 capacity = 500;
@@ -1290,7 +1244,7 @@ namespace StateCraft.UI
             string selName = _inputConstructName?.value;
 
             string cleanBranch = selBranch == "AIR FORCE" ? "AIR" : selBranch;
-            if (_constructFacilityType == 1) cleanBranch = "Not Applicable"; // Defense factory doesn't use branch
+            if (_constructFacilityType == 1) cleanBranch = "Not Applicable";
 
             if (country.facilityConstructionOrders == null) country.facilityConstructionOrders = new List<StateCraft.Data.FacilityConstructionOrder>();
 

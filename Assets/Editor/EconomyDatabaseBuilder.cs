@@ -5,26 +5,17 @@ using StateCraft.Data.Economy;
 
 namespace StateCraft.Editor
 {
-    /// <summary>
-    /// One-shot helper: creates all EconomyDatabase sub-assets and populates them
-    /// with the values previously hardcoded in EconomyTabContent.
-    ///
-    /// Usage: StateCraft menu → Create Economy Database Assets
-    /// After running, drag the generated EconomyDatabase asset onto GameManager.EconomyDatabase.
-    /// </summary>
     public static class EconomyDatabaseBuilder
     {
         [MenuItem("StateCraft/Create Economy Database Assets")]
         public static void Build()
         {
-            // ── Ensure output folder exists ───────────────────────────────────
             const string folder = "Assets/ScriptableObjects/Economy";
             if (!AssetDatabase.IsValidFolder("Assets/ScriptableObjects"))
                 AssetDatabase.CreateFolder("Assets", "ScriptableObjects");
             if (!AssetDatabase.IsValidFolder(folder))
                 AssetDatabase.CreateFolder("Assets/ScriptableObjects", "Economy");
 
-            // ── Infrastructure ────────────────────────────────────────────────
             CreateInfra(folder, "Roads",     "NATIONAL HIGHWAYS",    InfraCategory.Transport, "TRN", "Links farms to cities; improves tax collection & army deployment speed.", 8f,  2.5f);
             CreateInfra(folder, "Rail",      "RAIL FREIGHT CORRIDORS", InfraCategory.Transport, "TRN", "Bulk minerals & grain move inland; lowers export delays.", 12f, 3f);
             CreateInfra(folder, "Ports",     "SEAPORTS & HARBORS",   InfraCategory.Transport, "TRN", "Drives resource dividends and trade deal value.", 15f, 4f);
@@ -34,14 +25,12 @@ namespace StateCraft.Editor
             CreateInfra(folder, "Education", "EDUCATION SYSTEM",     InfraCategory.Social,    "SOC", "Feeds IT/fintech sectors and long-run growth.", 7f,  2f);
             CreateInfra(folder, "Telecom",   "DIGITAL BACKBONE",     InfraCategory.Digital,   "NET", "Enables tech industry & intelligence coverage.", 9f,  2.5f);
 
-            // ── Industries ────────────────────────────────────────────────────
             CreateIndustry(folder, "Oil",    "OIL & GAS",       0.05f, 10f, 3f);
             CreateIndustry(folder, "Mining", "MINING & MINERALS", 0.02f, 8f, 2.5f);
             CreateIndustry(folder, "Agri",   "AGRICULTURE",     0.03f, 5f,  1.5f);
             CreateIndustry(folder, "Mfg",    "MANUFACTURING",   0.025f, 12f, 3f);
             CreateIndustry(folder, "Tech",   "TECH & FINTECH",  0.02f, 14f, 2f);
 
-            // ── Commodities ───────────────────────────────────────────────────
             CreateCommodity(folder, "Electricity",       "ELECTRICITY",        "Energy & Power",    "MW",      "National power grid load");
             CreateCommodity(folder, "CrudeOil",          "CRUDE OIL",          "Energy & Power",    "Barrels", "Export / refining feedstock");
             CreateCommodity(folder, "Rice",              "RICE",               "Food & Agriculture","Tonnes",  "Staple food security");
@@ -50,7 +39,6 @@ namespace StateCraft.Editor
             CreateCommodity(folder, "ProcessedMinerals", "PROCESSED MINERALS", "Materials & Goods", "Tonnes",  "Industrial inputs");
             CreateCommodity(folder, "TechGoods",         "TECH GOODS",         "Materials & Goods", "Units",   "High-value exports");
 
-            // ── Blueprints ────────────────────────────────────────────────────
             CreateBlueprint(folder, "Coastal Highway Phase II",    "Infra",  "Roads",        "",  45f,  18, "Paved corridor linking ports to interior.");
             CreateBlueprint(folder, "Trans-National Rail Spine",   "Infra",  "Rail",         "",  80f,  36, "Heavy freight line for minerals & grain.");
             CreateBlueprint(folder, "Deep-Water Port Expansion",   "Infra",  "Ports",        "",  60f,  24, "Container terminals & export berths.");
@@ -62,7 +50,6 @@ namespace StateCraft.Editor
             CreateBlueprint(folder, "Cocoa Processing Park",       "Agri",   "indAgriCocoa", "",  15f,  10, "Bean-to-bar export value chain.");
             CreateBlueprint(folder, "National Data Centre",        "Tech",   "indTechIT",    "",  25f,  16, "Cloud & fintech backbone.");
 
-            // ── Master database ───────────────────────────────────────────────
             string dbPath = $"{folder}/EconomyDatabase.asset";
             var db = AssetDatabase.LoadAssetAtPath<EconomyDatabaseSO>(dbPath)
                      ?? ScriptableObject.CreateInstance<EconomyDatabaseSO>();
@@ -98,9 +85,7 @@ namespace StateCraft.Editor
             Selection.activeObject = db;
         }
 
-        // ── Helpers ────────────────────────────────────────────────────────────
-
-        static void CreateInfra(string folder, string id, string title, InfraCategory cat, string icon, string effect, float baseCost, float costPerLevel)
+static void CreateInfra(string folder, string id, string title, InfraCategory cat, string icon, string effect, float baseCost, float costPerLevel)
         {
             string path = $"{folder}/Infra_{id}.asset";
             var so = AssetDatabase.LoadAssetAtPath<InfraDataSO>(path) ?? ScriptableObject.CreateInstance<InfraDataSO>();

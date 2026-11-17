@@ -3,10 +3,6 @@ using UnityEngine;
 
 namespace StateCraft.UI
 {
-    /// <summary>
-    /// Consistent money and percent formatting for UI Toolkit dashboards.
-    /// Values are expected in billions unless noted.
-    /// </summary>
     public static class UiFormat
     {
         public static string Money(float billions, string symbol = "$")
@@ -72,7 +68,6 @@ namespace StateCraft.UI
                 return FormatSuffix(absRaw / 1_000.0, "K", sign, symbol);
             }
 
-            // Sub-1000 (less than 4 digits before decimal)
             return $"{sign}{symbol}{Math.Round(absRaw).ToString("0")}";
         }
 

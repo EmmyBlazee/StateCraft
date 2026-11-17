@@ -12,7 +12,6 @@ namespace StateCraft.UI
     {
         private void PopulateSupplyRoutes(CountryDataSO country)
         {
-            // Re-route the old initialization call to the new layout generator
             RefreshLogisticsTab(country);
         }
 
@@ -23,7 +22,6 @@ namespace StateCraft.UI
             var gm = GameManager.Instance;
             if (gm == null) return;
 
-            // 1. Supply Reserves & Consumption
             var supplyContainer = _panelLogistics.Q<VisualElement>("SupplyStatusContainer");
 
             if (supplyContainer != null)
@@ -37,7 +35,6 @@ namespace StateCraft.UI
                 AddSupplyRow(supplyContainer, "Uniforms", 73f, "-25 Units");
             }
 
-            // 2. Storage & Depots
             var depotsContainer = _panelLogistics.Q<VisualElement>("DepotsContainer");
             if (depotsContainer != null)
             {
@@ -50,7 +47,6 @@ namespace StateCraft.UI
                 AddDepotRow(depotsContainer, "Air Force Depot (Makurdi)", 45f);
             }
 
-            // 3. Operational Readiness (Donuts)
             var readinessContainer = _panelLogistics.Q<VisualElement>("ReadinessContainer");
             if (readinessContainer != null)
             {
@@ -61,7 +57,6 @@ namespace StateCraft.UI
                 AddReadinessDonut(readinessContainer, "Rapid Deployment Force", 88f);
             }
 
-            // 4. Active Convoys
             var convoysScroll = _panelLogistics.Q<ScrollView>("ConvoysScroll");
             if (convoysScroll != null)
             {
@@ -72,7 +67,6 @@ namespace StateCraft.UI
                 AddConvoyRow(convoysScroll, "Kaduna → Jos", "Medical Supplies", "1 Day", "On Time");
             }
 
-            // 5. Supply Contracts
             var contractsScroll = _panelLogistics.Q<ScrollView>("ContractsScroll");
             var activeContractsScroll = _panelLogistics.Q<ScrollView>("ActiveContractsScroll");
             if (contractsScroll != null && activeContractsScroll != null)
@@ -80,7 +74,6 @@ namespace StateCraft.UI
                 contractsScroll.Clear();
                 activeContractsScroll.Clear();
 
-                // Populate Available Offers
                 AddSupplyContractOffer(contractsScroll, "Fuel Resupply (6 Mo)", "FUEL", 20f, 0.05f, 6);
                 AddSupplyContractOffer(contractsScroll, "Fuel Strategic Reserve (12 Mo)", "FUEL", 40f, 0.09f, 12);
                 AddSupplyContractOffer(contractsScroll, "Ammo Production Run (6 Mo)", "AMMO", 15f, 0.04f, 6);
@@ -88,7 +81,6 @@ namespace StateCraft.UI
                 AddSupplyContractOffer(contractsScroll, "Medical Supplies (6 Mo)", "MEDICAL", 10f, 0.02f, 6);
                 AddSupplyContractOffer(contractsScroll, "Rations Pipeline (6 Mo)", "FOOD", 25f, 0.03f, 6);
 
-                // Populate Active Contracts
                 if (country.activeSupplyContracts != null)
                 {
                     foreach (var contract in country.activeSupplyContracts)
@@ -98,10 +90,7 @@ namespace StateCraft.UI
                 }
             }
 
-            // (Emergency Actions removed as per request)
-
-            // 7. Alerts
-            var alertsContainer = _panelLogistics.Q<VisualElement>("AlertsContainer");
+var alertsContainer = _panelLogistics.Q<VisualElement>("AlertsContainer");
             if (alertsContainer != null)
             {
                 alertsContainer.style.flexDirection = FlexDirection.Column;
@@ -144,7 +133,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // 8. Summary
             var summaryContainer = _panelLogistics.Q<VisualElement>("SummaryContainer");
             if (summaryContainer != null)
             {
@@ -170,12 +158,11 @@ namespace StateCraft.UI
                 Color storageColor = storage < 85f ? new Color(0.1f, 0.8f, 0.3f) : Color.yellow;
                 AddSummaryStat(summaryContainer, "Storage Utilization", $"{storage:F0}%", storageStatus, storageColor, false);
                 
-                int transportVehicles = country.unitAPCs + 120; // Approximation for logistics vehicles
+                int transportVehicles = country.unitAPCs + 120;
                 AddSummaryStat(summaryContainer, "Transport Fleet", $"{transportVehicles}", "Vehicles", Color.white, false);
             }
         }
 
-        // --- HELPER METHODS ---        
         private void AddSupplyRow(VisualElement supplyParent, string name, float pct, string consumeRate)
         {
             var sRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 4, height = 20 } };
@@ -224,7 +211,6 @@ namespace StateCraft.UI
             
             var donutContainer = new VisualElement() { style = { width = 30, height = 30, marginRight = 15, justifyContent = Justify.Center, alignItems = Align.Center } };
             
-            // Draw a pseudo-donut with a colored border and text inside
             donutContainer.style.borderTopWidth = 3; donutContainer.style.borderBottomWidth = 3; donutContainer.style.borderLeftWidth = 3; donutContainer.style.borderRightWidth = 3;
             donutContainer.style.borderTopLeftRadius = 15; donutContainer.style.borderTopRightRadius = 15; donutContainer.style.borderBottomLeftRadius = 15; donutContainer.style.borderBottomRightRadius = 15;
             
@@ -354,9 +340,7 @@ namespace StateCraft.UI
             RefreshLogisticsTab(country);
         }
 
-
-
-        private void AddAlert(VisualElement parent, string msg, Color col)
+private void AddAlert(VisualElement parent, string msg, Color col)
         {
             var box = new VisualElement() { style = { 
                 flexDirection = FlexDirection.Row, alignItems = Align.Center,
@@ -369,7 +353,6 @@ namespace StateCraft.UI
             var icon = new VisualElement() { style = { width = 6, height = 6, borderTopLeftRadius = 3, borderTopRightRadius = 3, borderBottomLeftRadius = 3, borderBottomRightRadius = 3, backgroundColor = col, marginRight = 8 } };
             box.Add(icon);
 
-            // Strip newline for single-line display
             msg = msg.Replace("\n", " ");
             box.Add(new Label(msg) { style = { color = Color.white, fontSize = 10, whiteSpace = WhiteSpace.Normal, unityFontStyleAndWeight = FontStyle.Bold } });
             parent.Add(box);

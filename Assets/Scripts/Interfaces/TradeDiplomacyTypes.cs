@@ -44,7 +44,6 @@ namespace StateCraft.Interfaces
         public bool isBulkTransfer;
         public bool isSeller;
 
-        // Counter-offer tracking
         public float originalPaymentUSD;
         public int originalDurationMonths;
         public string counterReason;

@@ -25,7 +25,6 @@ namespace StateCraft.UI
             if (country == null) return;
             country.debtServiceRatio = val;
             if (_labelDebtService != null) _labelDebtService.text = $"{val:F0}%";
-            // Update monthly cost preview
             RefreshDebtServiceCostLabel(country);
         }
 
@@ -34,7 +33,7 @@ namespace StateCraft.UI
             if (_lblDebtServiceCost == null || GameManager.Instance?.DebtSystem == null) return;
             string sym = string.IsNullOrEmpty(country.currencySymbol) ? "₦" : country.currencySymbol;
             float interestUSD = GameManager.Instance.DebtSystem.CalculateInterest(country);
-            float principalPaymentUSD = (country.debt * 0.01f) * (country.debtServiceRatio / 100f); // 1% of principal × ratio
+            float principalPaymentUSD = (country.debt * 0.01f) * (country.debtServiceRatio / 100f);
             float totalMonthlyUSD = interestUSD + principalPaymentUSD;
             float totalMonthlyLocal = (totalMonthlyUSD * country.exchangeRate);
             _lblDebtServiceCost.text = $"Monthly payment: {UiFormat.Money(totalMonthlyLocal, sym)} (interest + principal)";
@@ -48,15 +47,12 @@ namespace StateCraft.UI
 
             float borrowAmt = _sliderDebtTransaction != null ? _sliderDebtTransaction.value : 50f;
 
-            // Convert to USD equivalent for the debt principal pools
             float usdEquiv = borrowAmt / country.exchangeRate;
             
-            // Add to principal
             country.domesticDebt += usdEquiv * 0.5f;
             country.foreignDebt += usdEquiv * 0.5f;
             country.debt = country.domesticDebt + country.foreignDebt;
             
-            // Add to treasury
             gm.playerBudget += borrowAmt;
             country.treasury = gm.playerBudget;
 
@@ -88,7 +84,6 @@ namespace StateCraft.UI
 
             float repayUSD = repayAmt / country.exchangeRate;
             
-            // Pay off domestic debt first, then foreign debt
             if (country.domesticDebt >= repayUSD)
             {
                 country.domesticDebt -= repayUSD;
@@ -101,7 +96,6 @@ namespace StateCraft.UI
             }
             country.debt = country.domesticDebt + country.foreignDebt;
 
-            // Deduct from budget
             gm.playerBudget -= repayAmt;
             country.treasury = gm.playerBudget;
 
@@ -122,7 +116,6 @@ namespace StateCraft.UI
             if (_root.Q<Label>("ValDomesticDebt") is Label lDom) lDom.text = UiFormat.Money(debtDom, sym);
             if (_root.Q<Label>("ValForeignDebt") is Label lFor) lFor.text = UiFormat.Money(debtFor, sym);
             
-            // The progress bar sits between Domestic and Foreign, so it represents the composition ratio.
             if (_root.Q<ProgressBar>("DebtRatioBar") is ProgressBar pBar) {
                 pBar.value = totalDebt > 0 ? (debtDom / totalDebt) * 100f : 0f;
             }
@@ -130,7 +123,6 @@ namespace StateCraft.UI
             if (_root.Q<Label>("LabelDebtService") is Label lDebtService) lDebtService.text = $"{country.debtServiceRatio:F0}%";
             if (_root.Q<Slider>("SliderDebtService") is Slider sDebtService) sDebtService.value = country.debtServiceRatio;
             
-            // Calculate a synthetic monthly payment display based on the ratio
             float monthlyCost = totalDebt * 0.05f / 12f * (country.debtServiceRatio / 100f);
             if (_root.Q<Label>("LblDebtServiceCost") is Label lCost) {
                 lCost.text = $"Monthly payment: {UiFormat.Money(monthlyCost, sym)} (interest + principal)";

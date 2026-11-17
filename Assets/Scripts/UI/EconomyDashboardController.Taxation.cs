@@ -12,7 +12,6 @@ namespace StateCraft.UI
     {
         private void AdjustTaxOrBudgetField(Button button, float delta)
         {
-            // First check if there is a live Slider in the same parent (existing behaviour)
             Slider slider = button.parent?.Q<Slider>();
             if (slider != null)
             {
@@ -23,15 +22,9 @@ namespace StateCraft.UI
             var country = GameManager.Instance?.playerCountry;
             if (country == null) return;
 
-            // Read ancestor label text to determine which field to touch
             string ctx = GetAncestorText(button, 4).ToUpperInvariant();
 
-            // NOTE: Tax rows (Income/Corporate/VAT/Import/Export) are no longer handled here.
-            // Their +/- buttons carry the "tax-step-btn" class and are excluded from this
-            // handler's wiring (see WireEconomyActionButtons) — WireTaxRow() owns them exclusively.
-
-            // ── Budget rows ─────────────────────────────────────────────────
-            var alloc = country.budgetAllocations.FirstOrDefault(b => ctx.Contains(b.id) || ctx.Contains(b.title.ToUpperInvariant()));
+var alloc = country.budgetAllocations.FirstOrDefault(b => ctx.Contains(b.id) || ctx.Contains(b.title.ToUpperInvariant()));
             if (alloc != null)
             {
                 if (!_draftBudgets.ContainsKey(alloc.id)) _draftBudgets[alloc.id] = alloc.sharePercentage;
@@ -41,7 +34,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // Fallback — nothing matched
             RefreshDisplay(); NotifyEconomy("Control adjusted.", Color.grey);
         }
 
@@ -52,17 +44,14 @@ namespace StateCraft.UI
             if (_draftVAT          >= 0f) country.vatRate           = _draftVAT;
             if (_draftExportDuty   >= 0f) country.exportDutyRate    = _draftExportDuty;
 
-            // Recalculate blended taxRate from all categories
             country.taxRate = country.incomeTaxRate   * 0.35f
                             + country.corporateTaxRate* 0.30f
                             + country.vatRate          * 0.25f
                             + country.exportDutyRate   * 0.10f;
 
-            // Approval / inflation ripple from tax change
             country.publicApproval = Mathf.Max(0f, country.publicApproval - 1f);
             country.inflationRate += country.vatRate * 0.0005f;
 
-            // Log
             string entry = $"Tax reform committed — Income:{country.incomeTaxRate:F1}% Corp:{country.corporateTaxRate:F1}% VAT:{country.vatRate:F1}% Export:{country.exportDutyRate:F1}% (blended {country.taxRate:F1}%)";
             if (country.taxReformLog == null) country.taxReformLog = new System.Collections.Generic.List<string>();
             int turn = GameManager.Instance?.TurnSystem?.CurrentTurn ?? 0;
@@ -96,7 +85,6 @@ namespace StateCraft.UI
         {
             if (_root == null) { Debug.LogError("[TaxUI] RefreshTaxationTab — _root is NULL"); return; }
 
-            // Re-attempt any refs that were null at startup (panel was display:none then)
             if (_lblTaxTotalRevenue    == null) _lblTaxTotalRevenue        = _root.Q<Label>("TaxTotal_Revenue");
             if (_lblTaxTotalRatio      == null) _lblTaxTotalRatio          = _root.Q<Label>("TaxTotal_Ratio");
             if (_lblTaxTotalMoM        == null) _lblTaxTotalMoM            = _root.Q<Label>("TaxTotal_MoMDelta");
@@ -169,8 +157,6 @@ namespace StateCraft.UI
             float gdpLocal = country.gdp * country.exchangeRate;
             if (_lblTaxTotalRatio != null) _lblTaxTotalRatio.text = $"{(gdpLocal > 0 ? ((total * 12f) / gdpLocal * 100f) : 0f):F1}%";
 
-            // Update Dynamic Share and Base Labels (cached refs — Base still reflects the
-            // committed rate, Share reflects this row's live draft revenue as a % of total)
             if (baseInc   != null) baseInc.text   = $"Base: {country.incomeTaxRate:F1}%";
             if (shareInc  != null) shareInc.text  = $"{(total > 0 ? (incRev / total * 100f) : 0f):F1}% of Total Revenue";
 
@@ -185,7 +171,6 @@ namespace StateCraft.UI
 
             if (baseExp   != null) baseExp.text   = $"Base: {country.exportDutyRate:F1}%";
             if (shareExp  != null) shareExp.text  = $"{(total > 0 ? (expRev / total * 100f) : 0f):F1}% of Total Revenue";
-            // ── Tax MoM Delta ────────────────────────────────────────────────
             if (_lblTaxTotalMoM != null) {
                 float prevTaxRev = country.prevMonthlyTaxRevenue * country.exchangeRate;
                 float diff = total - prevTaxRev;
@@ -196,20 +181,16 @@ namespace StateCraft.UI
                 _lblTaxTotalMoM.AddToClassList(diff >= 0 ? "positive" : "negative");
             }
 
-            // ── Tax Performance & Compliance ────────────────────────────────
             float compliance = Mathf.Clamp(100f - country.corruptionIndex, 10f, 100f);
             float eff = Mathf.Lerp(60f, 95f, country.stability / 100f);
-            // Monthly gap = what the state loses each month due to non-compliance
             float collectionEff = eff / 100f;
             float gap = total * (1f - (compliance / 100f) * collectionEff);
 
             if (_lblTaxComplianceRate != null) _lblTaxComplianceRate.text = $"{compliance:F0}%";
             if (_lblTaxCollectionEff  != null) _lblTaxCollectionEff.text  = $"{eff:F0}%";
             if (_lblTaxGap            != null) _lblTaxGap.text            = UiFormat.Money(gap, sym);
-            // Arrears = real accumulated unpaid taxes in the game core (EconomySystem.UpdateEconomy)
             if (_lblTaxArrears        != null) _lblTaxArrears.text        = UiFormat.Money(country.taxArrears * country.exchangeRate, sym);
 
-            // Donut — live segmented ring
             if (_lblComplianceDonut != null) _lblComplianceDonut.text = $"{compliance:F0}%\nCompliance";
             if (_lblComplianceCompliant    != null) _lblComplianceCompliant.text    = $"{compliance:F0}%";
             float nonComp  = Mathf.Max(0f, 100f - compliance);
@@ -219,12 +200,10 @@ namespace StateCraft.UI
             if (_lblComplianceNonCompliant != null) _lblComplianceNonCompliant.text = $"{outright:F0}%";
             _complianceDonut?.SetValues(compliance, partial, outright);
 
-            // ── Active Policies ─────────────────────────────────────────────
             var policiesCont = _taxPoliciesContainer;
             if (policiesCont != null) {
                 while (policiesCont.childCount > 1) policiesCont.RemoveAt(1);
 
-                // Add policies of type Economic
                 int added = 0;
                 if (country.activePolicies != null) {
                     foreach (var p in country.activePolicies) {
@@ -234,7 +213,6 @@ namespace StateCraft.UI
                             
                             var info = new VisualElement();
                             var title = new Label(p.policyName); title.AddToClassList("tax-row-title"); info.Add(title);
-                            // we don't have description in Policy string easily, we'll just put a generic text or nothing
                             var copy = new Label("Active economic reform policy."); copy.AddToClassList("tax-row-copy"); info.Add(copy);
                             row.Add(info);
 
@@ -255,7 +233,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // ── Tax Simulator ───────────────────────────────────────────────
             RefreshTaxSimulator(country, sym, total);
 
         }
@@ -269,7 +246,6 @@ namespace StateCraft.UI
             float rateDelta     = draftRate - currentRate;
             float monthlyGDP    = country.gdp / 12f * country.exchangeRate;
 
-            // Revenue impact projection
             float revenueImpact = _simSelectedTaxKey switch {
                 "INCOME"    => monthlyGDP * (rateDelta / 100f) * 0.35f,
                 "CORPORATE" => monthlyGDP * (rateDelta / 100f) * 0.35f,
@@ -279,10 +255,9 @@ namespace StateCraft.UI
                 _           => 0f
             };
 
-            float gdpImpact     = -rateDelta * 0.02f;   // -0.02% GDPgr per 1% tax hike
-            float approvalImpact = -rateDelta * 0.5f;   // -0.5% approval per 1% tax hike
+            float gdpImpact     = -rateDelta * 0.02f;
+            float approvalImpact = -rateDelta * 0.5f;
 
-            // Business confidence — corporate tax hits this hardest, consumption taxes least
             float confidenceImpact = _simSelectedTaxKey switch {
                 "CORPORATE" => -rateDelta * 0.6f,
                 "IMPORT"    => -rateDelta * 0.25f,
@@ -292,7 +267,6 @@ namespace StateCraft.UI
                 _           => -rateDelta * 0.3f
             };
 
-            // Investment inflow — corporate tax is the dominant lever here
             float investmentImpact = _simSelectedTaxKey switch {
                 "CORPORATE" => -rateDelta * 0.8f,
                 "IMPORT"    => -rateDelta * 0.3f,
@@ -302,7 +276,6 @@ namespace StateCraft.UI
                 _           => -rateDelta * 0.15f
             };
 
-            // Employment — expressed as a raw job count against the active labor force
             float laborForce = country.population * 0.45f;
             float employmentSensitivity = _simSelectedTaxKey switch {
                 "CORPORATE" => 0.00002f,
@@ -314,7 +287,6 @@ namespace StateCraft.UI
             };
             float employmentImpact = -rateDelta * laborForce * employmentSensitivity;
 
-            // Inflation — consumption-facing taxes (VAT, import duties) pass through to prices fastest
             float inflationImpact = _simSelectedTaxKey switch {
                 "VAT"       => rateDelta * 0.08f,
                 "IMPORT"    => rateDelta * 0.05f,
@@ -373,7 +345,6 @@ namespace StateCraft.UI
             }
 
             if (_lblSimInflation != null) {
-                // Rising inflation is the "negative" outcome here, unlike the other metrics
                 _lblSimInflation.text = $"{(inflationImpact >= 0 ? "+" : "")}{inflationImpact:F2}%";
                 _lblSimInflation.RemoveFromClassList("positive"); _lblSimInflation.RemoveFromClassList("negative");
                 _lblSimInflation.AddToClassList(inflationImpact > 0f ? "negative" : "positive");
@@ -419,8 +390,6 @@ namespace StateCraft.UI
             WireTaxRow(root, "IMPORT",    "TaxImport_Minus",    "TaxImport_Plus",    "TaxImport_Bar",    "TaxImport_Rate");
             WireTaxRow(root, "EXPORT",    "TaxExport_Minus",    "TaxExport_Plus",    "TaxExport_Bar",    "TaxExport_Rate");
 
-            // Cache the rest of the Taxation tab's labels once too — same reasoning as WireTaxRow:
-            // re-querying _root for these on every refresh was unreliable.
             _lblTaxTotalRevenue        = root.Q<Label>("TaxTotal_Revenue");
             _lblTaxTotalRatio          = root.Q<Label>("TaxTotal_Ratio");
             _lblTaxTotalMoM            = root.Q<Label>("TaxTotal_MoMDelta");
@@ -436,9 +405,6 @@ namespace StateCraft.UI
             Debug.Log($"[TaxUI] ComplianceDonutRoot query — {(donutContainer != null ? "FOUND, applying border override" : "NULL — element not found, check the UXML name")}");
             if (donutContainer != null)
             {
-                // Global.uss's .tax-donut rule applies an 18px solid border meant for the old
-                // single-color placeholder ring. Force it off here at runtime — this always
-                // wins over any stylesheet, regardless of USS specificity/cascade order.
                 donutContainer.style.borderLeftWidth = 0;
                 donutContainer.style.borderRightWidth = 0;
                 donutContainer.style.borderTopWidth = 0;
@@ -450,7 +416,6 @@ namespace StateCraft.UI
             if (donutContainer != null && _complianceDonut == null)
             {
                 _complianceDonut = new ComplianceDonutElement();
-                // Insert as first child so it sits behind the label/hole
                 donutContainer.Insert(0, _complianceDonut);
             }
             _lblSimSelectedTax         = root.Q<Label>("SimSelectedTax");
@@ -473,7 +438,6 @@ namespace StateCraft.UI
                 $"Donut:{(_lblComplianceDonut!=null?"OK":"NULL")} Compliant:{(_lblComplianceCompliant!=null?"OK":"NULL")} Partial:{(_lblCompliancePartial!=null?"OK":"NULL")} NonCompliant:{(_lblComplianceNonCompliant!=null?"OK":"NULL")} " +
                 $"SimTotal:{(_lblTaxSimTotal!=null?"OK":"NULL")} PoliciesContainer:{(_taxPoliciesContainer!=null?"OK":"NULL")}");
 
-            // Apply / Reset
             var applyBtn = root.Query<Button>(className: "tax-apply-btn").First();
             var resetBtn = root.Query<Button>(className: "tax-reset-btn").First();
             Debug.Log($"[TaxUI] ApplyBtn={(applyBtn != null ? "FOUND" : "NULL")}  ResetBtn={(resetBtn != null ? "FOUND" : "NULL")}");
@@ -490,15 +454,11 @@ namespace StateCraft.UI
             var slider = root.Q<Slider>(sliderName);
             var rate   = root.Q<Label>(rateLabelName);
 
-            // The Revenue/Base/Share labels follow the same "Tax<Name>_X" naming convention
-            // as the rate label, e.g. "TaxIncome_Rate" -> "TaxIncome_Revenue"/"_Base"/"_Share".
             string prefix  = rateLabelName.EndsWith("_Rate") ? rateLabelName.Substring(0, rateLabelName.Length - "_Rate".Length) : rateLabelName;
             var revenue = root.Q<Label>(prefix + "_Revenue");
             var baseLbl = root.Q<Label>(prefix + "_Base");
             var shareLbl= root.Q<Label>(prefix + "_Share");
 
-            // Cache once, here — avoids re-querying _root every RefreshTaxationTab() call,
-            // which was unreliable for some rows (see EconomyFeedbackPanel debug notes).
             _taxRowRefs[taxKey] = (rate, slider, revenue, baseLbl, shareLbl);
 
             Debug.Log($"[TaxUI] WireTaxRow [{taxKey}]  minus={minusName}:{(minus != null ? "OK" : "NULL")}  plus={plusName}:{(plus != null ? "OK" : "NULL")}  slider={sliderName}:{(slider != null ? "OK" : "NULL")}  rate={rateLabelName}:{(rate != null ? "OK" : "NULL")}  revenue={prefix}_Revenue:{(revenue != null ? "OK" : "NULL")}  base={prefix}_Base:{(baseLbl != null ? "OK" : "NULL")}  share={prefix}_Share:{(shareLbl != null ? "OK" : "NULL")}");
@@ -509,7 +469,7 @@ namespace StateCraft.UI
                 {
                     var c = GameManager.Instance?.playerCountry;
                     if (c == null) { Debug.LogWarning($"[TaxUI] {minusName} clicked but playerCountry is null"); return; }
-                    _simSelectedTaxKey = taxKey; // only affects which row the Simulator panel previews
+                    _simSelectedTaxKey = taxKey;
                     float before = GetDraftRate(c, taxKey);
                     _taxDraftRates[taxKey] = Mathf.Clamp(before - 0.5f, 0f, 60f);
                     Debug.Log($"[TaxUI] {minusName} clicked — {taxKey} draft {before:F1}% → {_taxDraftRates[taxKey]:F1}%");
@@ -525,7 +485,7 @@ namespace StateCraft.UI
                 {
                     var c = GameManager.Instance?.playerCountry;
                     if (c == null) { Debug.LogWarning($"[TaxUI] {plusName} clicked but playerCountry is null"); return; }
-                    _simSelectedTaxKey = taxKey; // only affects which row the Simulator panel previews
+                    _simSelectedTaxKey = taxKey;
                     float before = GetDraftRate(c, taxKey);
                     _taxDraftRates[taxKey] = Mathf.Clamp(before + 0.5f, 0f, 60f);
                     Debug.Log($"[TaxUI] {plusName} clicked — {taxKey} draft {before:F1}% → {_taxDraftRates[taxKey]:F1}%");
@@ -543,7 +503,7 @@ namespace StateCraft.UI
                     var c = GameManager.Instance?.playerCountry;
                     if (c == null) { Debug.LogWarning($"[TaxUI] {sliderName} changed but playerCountry is null"); return; }
                     Debug.Log($"[TaxUI] {sliderName} dragged — {taxKey} {evt.previousValue:F1}% → {evt.newValue:F1}%");
-                    _simSelectedTaxKey = taxKey; // only affects which row the Simulator panel previews
+                    _simSelectedTaxKey = taxKey;
                     _taxDraftRates[taxKey] = evt.newValue;
                     string sym = string.IsNullOrEmpty(c.currencySymbol) ? "₦" : c.currencySymbol;
                     RefreshTaxationTab(c, sym);
@@ -597,8 +557,6 @@ namespace StateCraft.UI
         private void ResetSimulatorTaxChange() {
             var country = GameManager.Instance?.playerCountry;
             if (country == null) return;
-            // Reset only the row currently being previewed in the simulator panel —
-            // other rows' independent drafts are left untouched.
             _taxDraftRates[_simSelectedTaxKey] = GetSimTaxRate(country, _simSelectedTaxKey);
             RefreshTaxationTab(country, string.IsNullOrEmpty(country.currencySymbol) ? "?" : country.currencySymbol);
         }

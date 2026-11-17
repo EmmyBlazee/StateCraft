@@ -44,7 +44,6 @@ namespace StateCraft.UI
 
         private void OnEnable()
         {
-            // Update UI when turn ends
             if (GameManager.Instance != null && GameManager.Instance.TurnSystem != null)
                 GameManager.Instance.TurnSystem.OnTurnEnded += UpdateUI;
         }
@@ -61,10 +60,9 @@ namespace StateCraft.UI
             if (playerCountry == null) return;
 
             countryNameText.text = playerCountry.countryName;
-            gdpText.text = $"GDP: ${playerCountry.gdp:N0}"; // Keep GDP in Dollars
+            gdpText.text = $"GDP: ${playerCountry.gdp:N0}";
             stabilityText.text = $"STABILITY: {playerCountry.stability:F0}%";
             
-            // Treasury items use local currency
             string symbol = string.IsNullOrEmpty(playerCountry.currencySymbol) ? "$" : playerCountry.currencySymbol;
             float debtLocal = playerCountry.debt * playerCountry.exchangeRate;
             debtText.text = $"DEBT: {UiFormat.MoneyRaw(debtLocal, symbol)}";
@@ -74,7 +72,6 @@ namespace StateCraft.UI
                 budgetText.text = $"TREASURY: {UiFormat.Money(GameManager.Instance.playerBudget, symbol)}";
         }
 
-        // Side Bar Methods
         public void ToggleInfoPanel() => TogglePanel(ref infoPanel, infoPrefab);
         public void ToggleNewsPanel() => TogglePanel(ref newsPanel, newsPrefab);
         public void ToggleDiplomacyPanel() => TogglePanel(ref diplomacyPanel, diplomacyPrefab);

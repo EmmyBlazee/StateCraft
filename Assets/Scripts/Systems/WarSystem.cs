@@ -104,28 +104,23 @@ namespace StateCraft.Systems
                 if (c != null) _lastWarMonthCounted[c] = data.lastWarMonthCountedValues[i];
             }
         }
-        // ─── State ────────────────────────────────────────────────────────────
         private Dictionary<CountryDataSO, WarStage> countryWarStages = new Dictionary<CountryDataSO, WarStage>();
         private HashSet<string> activeWars   = new HashSet<string>();
         private Dictionary<string, int>   warDuration    = new Dictionary<string, int>();
-        private Dictionary<string, float> frontProgress  = new Dictionary<string, float>(); // -100 to +100
+        private Dictionary<string, float> frontProgress  = new Dictionary<string, float>();
         private Dictionary<string, int>   lastPhaseMonth = new Dictionary<string, int>();
         private Dictionary<string, bool>  ceaseFireCalled= new Dictionary<string, bool>();
 
-        // Chaos tracking — real wars have wild momentum swings
-        private Dictionary<string, float> momentumVelocity = new Dictionary<string, float>(); // rate of change
+        private Dictionary<string, float> momentumVelocity = new Dictionary<string, float>();
         private Dictionary<string, int>   surpriseEventCooldown = new Dictionary<string, int>();
 
-        // Month-gate: ensures warTurnsActive counts calendar months, not 3-day ticks
         private Dictionary<CountryDataSO, int> _lastWarMonthCounted = new Dictionary<CountryDataSO, int>();
 
-        // ─── Tuning ───────────────────────────────────────────────────────────
         private const int   MIN_WAR_MONTHS_BEFORE_PEACE  = 6;
         private const float SUPPLY_DRAIN_FUEL_PER_TURN   = 8f;
         private const float SUPPLY_DRAIN_AMMO_PER_TURN   = 6f;
         private const float SUPPLY_DRAIN_FOOD_PER_TURN   = 4f;
 
-        // ─── Authentic African battle location flavour ─────────────────────────
         private static readonly string[] OffensiveVerbs  = {
             "launches armoured thrust near", "breaches defensive lines at", "advances on",
             "strikes positions at", "encircles forces near", "pushes through",
@@ -144,7 +139,6 @@ namespace StateCraft.Systems
             "conducts raids near", "holds exposed salient at"
         };
 
-        // Surprise / chaos events — the unpredictable face of war
         private static readonly string[] SurpriseEvents = {
             "AMBUSH", "SUPPLY CONVOY DESTROYED", "NIGHT RAID", "ARTILLERY BARRAGE",
             "FLANKING MANOEUVRE", "BRIDGE DEMOLISHED", "IED STRIKE", "DEFECTION",
@@ -152,10 +146,7 @@ namespace StateCraft.Systems
             "UNEXPECTED RESISTANCE", "ENEMY REINFORCEMENTS ARRIVE", "MASS SURRENDER"
         };
 
-        // ─── Public API ───────────────────────────────────────────────────────
-        
-        // ─── GEOGRAPHICAL WAR PROGRESSION ───────────────────────────────────────
-        public List<string> GetInvasionPath(CountryDataSO targetCountry)
+public List<string> GetInvasionPath(CountryDataSO targetCountry)
         {
             var path = new List<string> { "Border Defense" };
             string capital = targetCountry.capitalCity;
@@ -191,9 +182,6 @@ namespace StateCraft.Systems
         public string GetActiveCombatZone(CountryDataSO defender, float frontProgress)
         {
             var path = GetInvasionPath(defender);
-            // frontProgress is -100 to 100. If we are analyzing defender, 
-            // progress < 0 means enemy is pushing into defender.
-            // Let's map 0 to -100 across the path elements.
             if (frontProgress >= 0) return "Border Defense";
             
             float step = 100f / path.Count;
@@ -245,7 +233,6 @@ namespace StateCraft.Systems
             }
         }
 
-        // ─── Declare War ─────────────────────────────────────────────────────
         public void DeclareWar(CountryDataSO aggressor, CountryDataSO defender)
         {
             if (defender.hasNuclearWeapon)
@@ -259,7 +246,6 @@ namespace StateCraft.Systems
                 return;
             }
 
-            // ── Faction Friendly Fire Check ────────────────────────────────────────────
             if (aggressor.globalFaction == defender.globalFaction && 
                 aggressor.globalFaction != "Independent" && 
                 aggressor.globalFaction != "Non-Aligned")
@@ -269,7 +255,7 @@ namespace StateCraft.Systems
                     UI.NotificationManager.Instance?.AddNotification(
                         $"CANNOT DECLARE WAR: {defender.countryName} is a member of your Faction ({aggressor.globalFaction}).",
                         UnityEngine.Color.red);
-                return; // Block the war declaration completely
+                return;
             }
 
             countryWarStages[aggressor] = WarStage.Conflict;
@@ -280,7 +266,6 @@ namespace StateCraft.Systems
             {
                 activeWars.Add(key);
                 warDuration[key]   = 0;
-                // Start front slightly randomised — opening moves matter
                 frontProgress[key] = UnityEngine.Random.Range(-10f, 10f);
                 momentumVelocity[key] = 0f;
                 lastPhaseMonth[key]= 0;
@@ -306,7 +291,6 @@ namespace StateCraft.Systems
 
             var gm = GameManager.Instance;
 
-            // ── Faction Mutual Defence Obligations ──
             if (gm?.allCountries != null)
             {
                 foreach (var ally in gm.allCountries)
@@ -376,7 +360,6 @@ namespace StateCraft.Systems
             aggressor.globalPrestige = Mathf.Max(0f, aggressor.globalPrestige - 10f);
             if (gm != null) gm.worldTension = Mathf.Min(100f, gm.worldTension + 30f);
 
-            // Sever trade
             if (gm?.DiplomacySystem is DiplomacySystem diplo)
             {
                 for (int i = diplo.ActiveDeals.Count - 1; i >= 0; i--)
@@ -390,10 +373,8 @@ namespace StateCraft.Systems
 
             if (gm?.playerCountry == aggressor)
             {
-                // Force posture to OFFENSIVE
                 aggressor.militaryDoctrine = 2;
 
-                // Inject event into EventSystem
                 if (gm?.EventSystem is EventSystem evSys)
                 {
                     var warEv = UnityEngine.ScriptableObject.CreateInstance<GameEventSO>();
@@ -431,16 +412,13 @@ namespace StateCraft.Systems
             }
             else if (gm?.playerCountry == defender)
             {
-                // 1. Force posture to OFFENSIVE
-                defender.militaryDoctrine = 2; // Offensive / War posture
+                defender.militaryDoctrine = 2;
                 
-                // 2. Trigger Hard-Interrupt Modal
                 if (StateCraft.UI.MainDashboardToolkitController.Instance != null)
                 {
                     StateCraft.UI.MainDashboardToolkitController.Instance.ShowWarDeclaredModal(aggressor);
                 }
 
-                // 3. Inject Urgent Event into EventSystem
                 if (gm?.EventSystem is EventSystem evSys)
                 {
                     var warEv = UnityEngine.ScriptableObject.CreateInstance<GameEventSO>();
@@ -483,7 +461,6 @@ namespace StateCraft.Systems
                 $"BREAKING: {defender.countryName} declares state of national emergency. Armed forces mobilised.");
         }
 
-        // ─── War Stage Access ─────────────────────────────────────────────────
         public WarStage GetWarStage(CountryDataSO country)
         {
             return countryWarStages.TryGetValue(country, out WarStage s) ? s : WarStage.Peace;
@@ -494,7 +471,6 @@ namespace StateCraft.Systems
             countryWarStages[country] = stage;
         }
 
-        // ─── Peace ────────────────────────────────────────────────────────────
         public void ProposePeace(CountryDataSO proposer, CountryDataSO target)
         {
             string key = WarKey(proposer.countryName, target.countryName);
@@ -556,16 +532,13 @@ namespace StateCraft.Systems
             }
         }
 
-        // ─── CORE COMBAT ──────────────────────────────────────────────────────
         private void ProcessActiveCombat(CountryDataSO country)
         {
             var enemies = GetAllEnemies(country);
             if (enemies.Count == 0) { SetWarStage(country, WarStage.Peace); return; }
 
-            // ── Only count a new war month when the calendar month actually turns ──
-            // TurnSystem fires every 3 days AND at month-end; guard with a per-country gate.
             var ts = GameManager.Instance?.TurnSystem as TurnSystem;
-            int calendarMonth = ts != null ? ts.CurrentTurn : 0; // CurrentTurn increments once per month
+            int calendarMonth = ts != null ? ts.CurrentTurn : 0;
             bool isNewMonth = false;
             if (!_lastWarMonthCounted.ContainsKey(country) || _lastWarMonthCounted[country] != calendarMonth)
             {
@@ -576,11 +549,8 @@ namespace StateCraft.Systems
             var gm      = GameManager.Instance;
             bool isPlayer = (country == gm?.playerCountry);
 
-            // ── Per-tick lightweight checks (run every 3-day tick) ──
-            // (coalition maintenance runs every tick so ongoing costs stay proportional)
             HandleCoalitionMaintenance(country, gm, isPlayer);
 
-            // ── Everything below is MONTHLY — skip if this tick isn't a new month ──
             if (!isNewMonth) return;
 
             ProcessSupplyDrain(country, isPlayer);
@@ -600,15 +570,13 @@ namespace StateCraft.Systems
                 System.Collections.Generic.List<string> frontCasualtyCauses = new System.Collections.Generic.List<string>();
 
                 string key = WarKey(country.countryName, enemy.countryName);
-                if (warDuration.ContainsKey(key)) warDuration[key]++; // safe — inside isNewMonth block
+                if (warDuration.ContainsKey(key)) warDuration[key]++;
                 int warMonth = warDuration.ContainsKey(key) ? warDuration[key] : 1;
 
-                // Initialise momentum tracking
                 if (!momentumVelocity.ContainsKey(key)) momentumVelocity[key] = 0f;
                 if (!surpriseEventCooldown.ContainsKey(key)) surpriseEventCooldown[key] = 0;
                 if (surpriseEventCooldown[key] > 0) surpriseEventCooldown[key]--;
 
-                // ── PHASE SYSTEM ──────────────────────────────────────────
                 string warPhase;
                 if      (warMonth <= 2)  warPhase = "MOBILISATION";
                 else if (warMonth <= 6)  warPhase = "OFFENSIVE";
@@ -625,7 +593,6 @@ namespace StateCraft.Systems
                 }
                 lastPhaseMonth[key] = warMonth;
 
-                // ── FORCE CALCULATION ──────────────────────────────────────
                 float myPower    = GetFrontlinePowerAgainst(country, enemy.countryName, isPlayer) * generalBonus;
                 float enemyPower = GetFrontlinePowerAgainst(enemy, country.countryName, enemy == gm?.playerCountry);
 
@@ -634,7 +601,6 @@ namespace StateCraft.Systems
                                       warPhase == "ATTRITION"    ? 1.0f :
                                                                     1.5f;
 
-                // ── AIR SUPERIORITY ────────────────────────────────────────
                 bool hasAirCover       = (country.unitFighters + country.airForceStats.equipment) > 10;
                 bool enemyAirDominance = (enemy.unitFighters + enemy.airForceStats.equipment) >
                                          (country.unitFighters + country.airForceStats.equipment) * 1.5f;
@@ -646,7 +612,6 @@ namespace StateCraft.Systems
                         $"Ground troops taking +40% casualties. Deploy fighters via Military → Operations.",
                         new Color(1f, 0.5f, 0f));
 
-                // ── CASUALTY CALCULATION ───────────────────────────────────
                 float powerRatio  = enemyPower > 0 ? (enemyPower / Mathf.Max(myPower, 1f)) : 0.1f;
                 float baseCasRate = Mathf.Clamp(powerRatio * 0.012f * airPenalty * phaseModifier, 0.001f, 0.08f);
 
@@ -657,34 +622,23 @@ namespace StateCraft.Systems
                 float exhaustionMod = 1f - (country.warExhaustion / 300f);
                 baseCasRate *= Mathf.Clamp(exhaustionMod, 0.6f, 1f);
 
-                // ── REALISTIC FRONT MOMENTUM ───────────────────────────────
-                // Instead of a simple ratio shift, use an inertia system:
-                // momentum builds up and creates genuine swings, not smooth lines
                 if (!frontProgress.ContainsKey(key)) frontProgress[key] = 0f;
 
                 float powerDiff = myPower - enemyPower;
                 float totalPower = Mathf.Max(myPower + enemyPower, 1f);
 
-                // Base shift: power advantage drives momentum, but slowly
                 float baseShift = Mathf.Clamp(powerDiff / totalPower * 4f, -5f, 5f);
 
-                // WAR FRICTION: Random events disrupt expected outcomes
-                // Real wars rarely advance at a constant rate
                 float friction = UnityEngine.Random.Range(-3.5f, 3.5f);
 
-                // Terrain / weather / logistics disruption (more variance in long wars)
                 float variance = warMonth > 6 ? UnityEngine.Random.Range(-2f, 2f) : 0f;
 
-                // Momentum has inertia — hard to reverse a trend suddenly
                 float targetVelocity = baseShift + friction + variance;
                 momentumVelocity[key] = Mathf.Lerp(momentumVelocity[key], targetVelocity, 0.35f);
 
-                // Apply momentum to front progress
                 float progressShift = momentumVelocity[key];
                 frontProgress[key] = Mathf.Clamp(frontProgress[key] + progressShift, -100f, 100f);
 
-                // ── SURPRISE EVENTS — the chaos of real war ────────────────
-                // Every 2-5 turns there's a chance of an unexpected event
                 if (surpriseEventCooldown[key] <= 0 && warMonth > 1 && UnityEngine.Random.value < 0.25f)
                 {
                     float surpriseEquipLost = 0;
@@ -698,7 +652,6 @@ namespace StateCraft.Systems
                     surpriseEventCooldown[key] = UnityEngine.Random.Range(2, 5);
                 }
 
-                // ── APPLY CASUALTIES TO OPERATIONS ────────────────────────
                 int frontCasualties = 0;
                 bool hasOpsOnFront  = false;
 
@@ -734,34 +687,27 @@ namespace StateCraft.Systems
                         if (troopsLost > 0 && !frontCasualtyCauses.Contains("Frontline Infantry Combat")) frontCasualtyCauses.Add("Frontline Infantry Combat");
                         if ((tanksLost > 0 || apcsLost > 0) && !frontCasualtyCauses.Contains("Armoured Exhanges")) frontCasualtyCauses.Add("Armoured Exchanges");
 
-                        // RDF is more effective: reduces casualty rate and gets a combat power bonus
                         bool hasRDF = op.deployedRDF > 0;
                         float rdfEffectivenessBonus = hasRDF ? Mathf.Clamp(op.deployedRDF / 500f, 0f, 1f) : 0f;
-                        troopsLost = Mathf.RoundToInt(troopsLost * (1f - rdfEffectivenessBonus * 0.6f)); // RDF reduces casualties by up to 60%
+                        troopsLost = Mathf.RoundToInt(troopsLost * (1f - rdfEffectivenessBonus * 0.6f));
 
-                        int rdfLost = hasRDF ? Mathf.RoundToInt(op.deployedRDF * baseCasRate * 0.4f) : 0; // RDF takes fewer losses too
+                        int rdfLost = hasRDF ? Mathf.RoundToInt(op.deployedRDF * baseCasRate * 0.4f) : 0;
 
-                        // --- Active Air-to-Air Combat & Dogfighting ---
                         int enemyFighters = enemy.unitFighters + enemy.airForceStats.equipment;
                         int ourFighters = country.unitFighters + country.airForceStats.equipment;
                         
-                        // If both have fighters, they dogfight. The outnumbered side takes exponentially more losses.
                         if (op.deployedFighters > 0 && enemyFighters > 0)
                         {
-                            float fighterRatio = (float)op.deployedFighters / Mathf.Max(1f, enemyFighters * 0.2f); // Assuming enemy commits 20% to this front
-                            if (fighterRatio < 1f) fightersLost += Mathf.RoundToInt(op.deployedFighters * 0.15f); // Outnumbered = heavy losses
-                            else fightersLost += Mathf.RoundToInt(op.deployedFighters * 0.05f); // Dominating = light losses
+                            float fighterRatio = (float)op.deployedFighters / Mathf.Max(1f, enemyFighters * 0.2f);
+                            if (fighterRatio < 1f) fightersLost += Mathf.RoundToInt(op.deployedFighters * 0.15f);
+                            else fightersLost += Mathf.RoundToInt(op.deployedFighters * 0.05f);
                             
                             if (fightersLost > 0 && !frontCasualtyCauses.Contains("Air-to-Air Dogfights")) frontCasualtyCauses.Add("Air-to-Air Dogfights");
                         }
 
-                        // --- Close Air Support (CAS) ---
-                        // If we have air dominance, our fighters bomb enemy tanks/APCs
                         bool weHaveAirDominance = op.deployedFighters > 20 && op.deployedFighters > enemyFighters;
                         if (weHaveAirDominance)
                         {
-                            // We don't deduct enemy tanks here because the enemy's loop will calculate their own losses.
-                            // But we DO boost our front momentum and reduce our tank losses.
                             tanksLost = Mathf.RoundToInt(tanksLost * 0.4f);
                             apcsLost = Mathf.RoundToInt(apcsLost * 0.4f);
                         }
@@ -787,7 +733,6 @@ namespace StateCraft.Systems
 
                         if (enemyAirDominance && UnityEngine.Random.value < 0.50f)
                         {
-                            // Enemy Air Raid explicitly kills tanks and APCs
                             float raidEquipLost = 0;
                             ProcessEnemyAirRaid(op, country, enemy, ref totalInfantryKIA, ref raidEquipLost, isPlayer);
                             totalTanksLost += raidEquipLost * 0.6f;
@@ -797,7 +742,6 @@ namespace StateCraft.Systems
                             if (!frontCasualtyCauses.Contains("Enemy Close Air Support (Bombing)")) frontCasualtyCauses.Add("Enemy Close Air Support (Bombing)");
                         }
 
-                        // RDF overpowered — request reinforcements
                         if (isPlayer && hasRDF && op.deployedRDF < 200 && rdfLost > 0)
                         {
                             InboxSystem.Instance?.SendMessage(country,
@@ -840,7 +784,6 @@ namespace StateCraft.Systems
                             Color.red);
                 }
 
-                // ── NAMED BATTLE REPORTS & CASUALTY TICKER ──────────────────────────────────
                 if (frontCasualties > 0 || frontTanksLost > 0 || frontAPCsLost > 0 || frontFightersLost > 0)
                 {
                     int enemyCasualtiesEst = Mathf.RoundToInt(frontCasualties * (myPower / Mathf.Max(enemyPower, 1f)));
@@ -857,13 +800,11 @@ namespace StateCraft.Systems
                     int enemyTanksEst = Mathf.RoundToInt(tanks * (myPower / Mathf.Max(enemyPower, 1f)));
                     int enemyApcsEst = Mathf.RoundToInt(apcs * (myPower / Mathf.Max(enemyPower, 1f)));
 
-                    // Calculate civilian casualties if fighting inside country
                     string combatZone = GetActiveCombatZone(country, frontProgress.ContainsKey(key) ? frontProgress[key] : 0f);
                     if (combatZone != "Border Defense") {
                         int civCas = Mathf.RoundToInt(totalInfantryKIA * 0.2f * UnityEngine.Random.Range(0.5f, 1.5f));
                         country.totalCivilianCasualties += civCas;
                         
-                        // Warn player
                         if (isPlayer && civCas > 0) {
                             NotificationManager.Instance?.AddNotification($"CIVILIAN CASUALTIES: {civCas} civilians killed in {combatZone} crossfire.", UnityEngine.Color.red);
                         }
@@ -887,7 +828,6 @@ namespace StateCraft.Systems
                         totalInfantryKIA, myPower, enemyPower, warPhase, isPlayer, frontTanksLost, frontAPCsLost, frontFightersLost, frontCasualtyCauses);
             }
 
-            // ── KIA / WOUNDED ──────────────────────────────────────────────
             int newKIA     = Mathf.RoundToInt(totalInfantryKIA * 0.30f);
             int newWounded = Mathf.RoundToInt(totalInfantryKIA * 0.70f);
             country.totalKIA     += newKIA;
@@ -898,7 +838,6 @@ namespace StateCraft.Systems
             if (country.militaryState != null)
                 country.militaryState.army.infantry = country.unitInfantry;
 
-            // ── EXHAUSTION & WILL ──────────────────────────────────────────
             float exhaustionRise = 1.8f * enemies.Count;
             if (country.reserveAmmo < 30f) exhaustionRise += 2f;
             if (country.reserveFuel < 30f) exhaustionRise += 1.5f;
@@ -912,7 +851,6 @@ namespace StateCraft.Systems
             if (country.totalKIA > 10000)   willDrain += 2f;
             country.warWillToFight = Mathf.Max(0f, country.warWillToFight - willDrain);
 
-            // ── STABILITY & ECONOMY ────────────────────────────────────────
             country.warFatigueStabilityDrain = Mathf.Clamp(country.totalKIA / 4000f, 0f, 4f);
             country.stability = Mathf.Max(5f,
                 country.stability - (1.2f * enemies.Count) - country.warFatigueStabilityDrain);
@@ -922,10 +860,8 @@ namespace StateCraft.Systems
 
             if (gm != null) gm.worldTension = Mathf.Max(0f, gm.worldTension - 0.1f);
 
-            // ── LIVE WAR BULLETIN — fires every turn so combat never goes silent ──
             if (isPlayer)
             {
-                // Build a compact front-line summary for the notification
                 string frontBulletin = "";
                 foreach (var en in enemies)
                 {
@@ -940,8 +876,8 @@ namespace StateCraft.Systems
                 if (country.reserveFood < 15f) supplyFlag += " ⚠FOOD";
 
                 Color bulletinColor = supplyFlag.Length > 0
-                    ? new Color(1f, 0.5f, 0f)          // orange when supplies critical
-                    : new Color(0.9f, 0.75f, 0.25f);   // gold during normal combat
+                    ? new Color(1f, 0.5f, 0f)
+                    : new Color(0.9f, 0.75f, 0.25f);
 
                 NotificationManager.Instance?.AddNotification(
                     $"⚔ WAR UPDATE — Month {country.warTurnsActive}" +
@@ -950,11 +886,9 @@ namespace StateCraft.Systems
                     bulletinColor);
             }
 
-            // ── INBOX REPORT every 3 turns ──
             if (isPlayer && country.warTurnsActive % 3 == 0)
                 SendMonthlyWarReport(country, enemies, newKIA, newWounded, totalTanksLost, totalAPCsLost, totalFightersLost, gm);
 
-            // ── EXHAUSTION WARNINGS ────────────────────────────────────────
             if (isPlayer)
             {
                 if (country.warExhaustion >= 90f && country.warExhaustion < 92f)
@@ -996,23 +930,20 @@ namespace StateCraft.Systems
             }
         }
 
-        // ─── SURPRISE EVENTS — Chaos of war ──────────────────────────────────
         private void ProcessSurpriseEvent(CountryDataSO country, CountryDataSO enemy, string key,
             bool isPlayer, ref float totalKIA, ref float totalEquip, float baseCasRate,
             float myPower, float enemyPower)
         {
-            // Pick a random event category
             int roll = UnityEngine.Random.Range(0, 13);
             float progress = frontProgress.ContainsKey(key) ? frontProgress[key] : 0f;
 
             switch (roll)
             {
-                case 0: // AMBUSH — sudden casualties
+                case 0:
                 {
                     int ambushKIA = UnityEngine.Random.Range(80, 350);
                     country.unitInfantry = Mathf.Max(0, country.unitInfantry - ambushKIA);
                     totalKIA += ambushKIA;
-                    // Ambush dents momentum
                     if (momentumVelocity.ContainsKey(key))
                         momentumVelocity[key] -= UnityEngine.Random.Range(1f, 4f);
                     if (isPlayer)
@@ -1034,7 +965,7 @@ namespace StateCraft.Systems
                     break;
                 }
 
-                case 1: // SUPPLY CONVOY DESTROYED
+                case 1:
                 {
                     float fuelLost = UnityEngine.Random.Range(5f, 20f);
                     float ammoLost = UnityEngine.Random.Range(5f, 15f);
@@ -1051,7 +982,7 @@ namespace StateCraft.Systems
                     break;
                 }
 
-                case 2: // UNEXPECTED ENEMY OFFENSIVE — sudden momentum reversal
+                case 2:
                 {
                     float swing = UnityEngine.Random.Range(5f, 18f);
                     frontProgress[key] = Mathf.Clamp(frontProgress[key] - swing, -100f, 100f);
@@ -1081,7 +1012,7 @@ namespace StateCraft.Systems
                     break;
                 }
 
-                case 3: // BREAKTHROUGH — sudden advance
+                case 3:
                 {
                     float swing = UnityEngine.Random.Range(8f, 20f);
                     frontProgress[key] = Mathf.Clamp(frontProgress[key] + swing, -100f, 100f);
@@ -1108,11 +1039,10 @@ namespace StateCraft.Systems
                     break;
                 }
 
-                case 4: // MASS DEFECTION / SURRENDER
+                case 4:
                 {
                     if (UnityEngine.Random.value < 0.4f)
                     {
-                        // Enemy soldiers defect — boosts our side
                         int defectors = UnityEngine.Random.Range(200, 1200);
                         if (isPlayer)
                         {
@@ -1127,7 +1057,6 @@ namespace StateCraft.Systems
                     }
                     else
                     {
-                        // Our soldiers desert
                         int deserters = UnityEngine.Random.Range(100, 600);
                         country.unitInfantry = Mathf.Max(0, country.unitInfantry - deserters);
                         country.warWillToFight = Mathf.Max(0f, country.warWillToFight - 3f);
@@ -1141,7 +1070,7 @@ namespace StateCraft.Systems
                     break;
                 }
 
-                case 5: // COMMUNICATIONS BLACKOUT — fog of war
+                case 5:
                 {
                     if (isPlayer)
                     {
@@ -1158,7 +1087,7 @@ namespace StateCraft.Systems
                     break;
                 }
 
-                case 6: // FRIENDLY FIRE INCIDENT
+                case 6:
                 {
                     int ffiKIA = UnityEngine.Random.Range(20, 100);
                     country.unitInfantry = Mathf.Max(0, country.unitInfantry - ffiKIA);
@@ -1173,7 +1102,7 @@ namespace StateCraft.Systems
                     break;
                 }
 
-                case 7: // STRATEGIC VILLAGE / TOWN CAPTURED
+                case 7:
                 {
                     if (progress > 0f)
                     {
@@ -1205,7 +1134,7 @@ namespace StateCraft.Systems
                     break;
                 }
 
-                case 8: // ARTILLERY BARRAGE — both sides take losses
+                case 8:
                 {
                     int artKIA = UnityEngine.Random.Range(50, 200);
                     int enemyArtKIA = UnityEngine.Random.Range(30, 150);
@@ -1221,7 +1150,7 @@ namespace StateCraft.Systems
                     break;
                 }
 
-                case 9: // FLANKING MANOEUVRE
+                case 9:
                 {
                     if (myPower > enemyPower * 0.8f)
                     {
@@ -1249,7 +1178,7 @@ namespace StateCraft.Systems
                     break;
                 }
 
-                case 10: // DISEASE / HEAT / ENVIRONMENTAL ATTRITION
+                case 10:
                 {
                     int envKIA = UnityEngine.Random.Range(30, 150);
                     country.unitInfantry = Mathf.Max(0, country.unitInfantry - envKIA);
@@ -1269,7 +1198,7 @@ namespace StateCraft.Systems
                     break;
                 }
 
-                case 11: // INTELLIGENCE COUP — affects next turn
+                case 11:
                 {
                     if (isPlayer)
                     {
@@ -1293,9 +1222,8 @@ namespace StateCraft.Systems
                     break;
                 }
 
-                default: // STALEMATE — grinding, no progress
+                default:
                 {
-                    // Dampen momentum — war grinds to a halt
                     momentumVelocity[key] = Mathf.Lerp(momentumVelocity[key], 0f, 0.6f);
                     if (isPlayer && UnityEngine.Random.value < 0.4f)
                     {
@@ -1308,7 +1236,6 @@ namespace StateCraft.Systems
             }
         }
 
-        // ─── Phase Transition Briefing ────────────────────────────────────────
         private void SendPhaseTransitionBriefing(CountryDataSO country, CountryDataSO enemy,
             string newPhase, int warMonth, bool isPlayer)
         {
@@ -1368,16 +1295,14 @@ namespace StateCraft.Systems
                 new Color(0.9f, 0.7f, 0.2f));
         }
 
-        // ─── Named Battle Report ──────────────────────────────────────────────
         private void GenerateBattleReport(CountryDataSO country, CountryDataSO enemy, string key,
             int casualties, float totalKIA, float myPower, float enemyPower, string phase, bool isPlayer, float tanksLost, float apcsLost, float fightersLost, System.Collections.Generic.List<string> casualtyCauses)
         {
             if (!isPlayer) return;
-            // ── Cooldown gate: max one battle report per 3 turns per front ──
             if (InboxSystem.Instance != null &&
                 !InboxSystem.Instance.CanSendBattleReport(country.countryName, enemy.countryName))
                 return;
-            if (UnityEngine.Random.value > 0.35f) return; // 35% chance — higher since cooldown now limits frequency
+            if (UnityEngine.Random.value > 0.35f) return;
 
             float progress = frontProgress.ContainsKey(key) ? frontProgress[key] : 0f;
             float velocity = momentumVelocity.ContainsKey(key) ? momentumVelocity[key] : 0f;
@@ -1396,7 +1321,6 @@ namespace StateCraft.Systems
                                 progress > -20f ? "🟡 SLIGHT LOSS" :
                                                   "🔴 RETREATING";
 
-            // Authentic, varied battle summary
             string[] summaries;
             if (progress > 20f)
                 summaries = new[] {
@@ -1418,12 +1342,10 @@ namespace StateCraft.Systems
                 };
             string summary = summaries[UnityEngine.Random.Range(0, summaries.Length)];
 
-            // Momentum note — is the trend shifting?
             string momentumNote = velocity > 2f  ? "Momentum is building in our favour." :
                                   velocity < -2f ? "Momentum is shifting toward the enemy." :
                                                    "Front is in equilibrium.";
 
-            // ── Power display strings — show helpful status when units are still deploying ──
             string myPowerStr    = myPower > 0
                 ? $"{myPower:N0} combat power"
                 : "⏳ Deploying — units still in transit, check Operations tab";
@@ -1456,22 +1378,18 @@ namespace StateCraft.Systems
             NewsSystem.Instance?.PublishNews($"{headline}. {country.countryName} suffered ~{casualties:N0} military casualties and lost {(int)tanksLost:N0} Tanks.");
         }
 
-        // ─── Monthly War Report ───────────────────────────────────────────────
         private void SendMonthlyWarReport(CountryDataSO country, List<CountryDataSO> enemies,
             int newKIA, int newWounded, float tanksLost, float apcsLost, float fightersLost, GameManager gm)
         {
-            // ── CASUALTY AND BANKRUPTCY CAPITULATION ──
             if (country.treasury <= 0 && gm?.playerCountry == country) {
                 NotificationManager.Instance?.AddNotification("FINANCE MINISTER: We are out of funds! Take out an emergency loan immediately or we will capitulate!", UnityEngine.Color.red);
             }
             if (country.treasury <= 0 && country.debt >= country.gdp * 0.8f) {
-                // Bankrupt and high debt
                 EndWar(enemies[0], country, $"{enemies[0].countryName} Victory — Complete Economic Collapse");
                 return;
             }
             
             if (country.totalKIA > country.population * 0.05f) {
-                // Casualties exceeded 5% of population
                 EndWar(enemies[0], country, $"{enemies[0].countryName} Victory — Military Annihilation");
                 return;
             }
@@ -1524,7 +1442,6 @@ namespace StateCraft.Systems
                 reportBody,
                 "Important");
 
-            // If player, also inject this into the Event System so it's not missed
             if (gm?.playerCountry == country && gm?.EventSystem is EventSystem evSys)
             {
                 var repEv = UnityEngine.ScriptableObject.CreateInstance<GameEventSO>();
@@ -1550,7 +1467,6 @@ namespace StateCraft.Systems
             }
         }
 
-        // ─── Bombardment ──────────────────────────────────────────────────────
         private void ProcessBombardment(MilitaryOperation op, CountryDataSO country,
             CountryDataSO enemy, bool isPlayer)
         {
@@ -1603,7 +1519,6 @@ namespace StateCraft.Systems
                 op.deployedBombers = Mathf.Max(0, op.deployedBombers - 1);
         }
 
-        // ─── Enemy Air Raid ───────────────────────────────────────────────────
         private void ProcessEnemyAirRaid(MilitaryOperation op, CountryDataSO country,
             CountryDataSO enemy, ref float totalKIA, ref float totalEquip, bool isPlayer)
         {
@@ -1641,7 +1556,6 @@ namespace StateCraft.Systems
                 new Color(1f, 0.2f, 0.2f));
         }
 
-        // ─── Coalition Maintenance ────────────────────────────────────────────
         private void HandleCoalitionMaintenance(CountryDataSO country, GameManager gm, bool isPlayer)
         {
             if (!isPlayer || country.activeTreaties == null) return;
@@ -1671,7 +1585,6 @@ namespace StateCraft.Systems
             }
         }
 
-        // ─── Supply Drain ─────────────────────────────────────────────────────
         private void ProcessSupplyDrain(CountryDataSO country, bool isPlayer)
         {
             int deployed = GetTotalDeployedForces(country);
@@ -1684,11 +1597,6 @@ namespace StateCraft.Systems
             country.reserveAmmo = Mathf.Max(0f, country.reserveAmmo - SUPPLY_DRAIN_AMMO_PER_TURN * mult);
             country.reserveFood = Mathf.Max(0f, country.reserveFood - SUPPLY_DRAIN_FOOD_PER_TURN * mult);
 
-            // ── Oil-to-Fuel Conversion ─────────────────────────────────────────
-            // Countries with domestic oil stockpiles automatically refuel their
-            // military from national reserves. 1,000,000 barrels = 1 fuel unit.
-            // This ensures oil-producing nations (e.g. Nigeria) are never fuel-
-            // starved simply because the logistics pipeline was missing.
             const float OIL_BARRELS_PER_FUEL_UNIT = 1_000_000f;
             const float MAX_RESERVE_FUEL           = 100f;
             if (country.invOilBarrels > OIL_BARRELS_PER_FUEL_UNIT && country.reserveFuel < MAX_RESERVE_FUEL)
@@ -1714,7 +1622,6 @@ namespace StateCraft.Systems
                     "⚠ FOOD CRITICAL: Troop morale collapsing. Will to fight draining faster.", new Color(1f, 0.7f, 0f));
         }
 
-        // ─── General Bonus ────────────────────────────────────────────────────
         private float CalculateGeneralBonus(CountryDataSO country)
         {
             float bonus = 1.0f;
@@ -1728,7 +1635,6 @@ namespace StateCraft.Systems
             return bonus;
         }
 
-        // ─── End War ──────────────────────────────────────────────────────────
         private void EndWar(CountryDataSO a, CountryDataSO b, string outcome)
         {
             string key = WarKey(a.countryName, b.countryName);
@@ -1753,8 +1659,7 @@ namespace StateCraft.Systems
             var gm = GameManager.Instance;
             if (gm != null) gm.worldTension = Mathf.Max(0f, gm.worldTension - 15f);
 
-            
-            CountryDataSO winner = null;
+CountryDataSO winner = null;
             CountryDataSO loser = null;
 
             if (outcome.Contains($"{a.countryName} Victory"))
@@ -1773,7 +1678,6 @@ namespace StateCraft.Systems
 
             if (winner != null && loser != null)
             {
-                // Take 60% of treasury
                 if (loser.treasury > 0)
                 {
                     spoilsMoney = loser.treasury * 0.6f;
@@ -1781,7 +1685,6 @@ namespace StateCraft.Systems
                     winner.treasury += spoilsMoney;
                 }
 
-                // Take 60% of military hardware
                 spoilsTanks = UnityEngine.Mathf.FloorToInt(loser.unitTanks * 0.6f);
                 winner.unitTanks += spoilsTanks;
                 loser.unitTanks -= spoilsTanks;
@@ -1834,7 +1737,6 @@ namespace StateCraft.Systems
             }
         }
 
-        // ─── Helpers ──────────────────────────────────────────────────────────
         private List<CountryDataSO> GetAllEnemies(CountryDataSO country)
         {
             var enemies = new List<CountryDataSO>();
@@ -1870,7 +1772,6 @@ namespace StateCraft.Systems
                 power += op.deployedUAVs     * 3f * readinessMod;
             }
 
-            // Air Superiority Buff
             int ourFighters = country.unitFighters + (country.airForceStats != null ? country.airForceStats.equipment : 0);
             var gm = GameManager.Instance;
             if (gm != null)
@@ -1881,7 +1782,6 @@ namespace StateCraft.Systems
                     int enemyFighters = enemyData.unitFighters + (enemyData.airForceStats != null ? enemyData.airForceStats.equipment : 0);
                     if (ourFighters > 20 && ourFighters > enemyFighters * 1.5f)
                     {
-                        // We have air dominance -> +30% combat power
                         power *= 1.30f;
                     }
                 }
@@ -1920,13 +1820,10 @@ namespace StateCraft.Systems
             return $"{sorted[0]}_vs_{sorted[1]}";
         }
 
-        // ─── Treaty Processing ────────────────────────────────────────────────
         public void ProcessTradeDeals(CountryDataSO country)
         {
-            // Treaty expiry handled in DiplomacySystem.ProcessTradeDeals
         }
 
-        // ─── Phase 2 Capabilities (Naval/WMD/Generals/Air) ──────────────────
         public void ProcessNavalBlockades(CountryDataSO country)
         {
             if (country.activeBlockades == null) return;
@@ -2009,7 +1906,6 @@ namespace StateCraft.Systems
                 
                 int fightersSent = Mathf.Min(country.unitFighters, 10);
                 
-                // Roll for air combat
                 int bombersShotDown = 0;
                 if (enemy.unitBombers > 0)
                 {
@@ -2024,7 +1920,6 @@ namespace StateCraft.Systems
                     enemy.unitFighters -= fightersShotDown;
                 }
                 
-                // Our own losses
                 int ourLosses = Mathf.Min(country.unitFighters, Mathf.RoundToInt((enemy.unitFighters + enemy.unitBombers) * UnityEngine.Random.Range(0.01f, 0.1f)));
                 country.unitFighters -= ourLosses;
 

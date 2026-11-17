@@ -5,14 +5,8 @@ using StateCraft.Data.Economy;
 
 namespace StateCraft.Systems
 {
-    /// <summary>
-    /// Bridges EconomyDatabaseSO (pure data) with CountryDataSO (live state).
-    /// All gameplay logic that previously lived as inline delegates inside
-    /// EconomyTabContent is now centralised here, keyed by the SO's string Id.
-    /// </summary>
     public static class EconomyLogicEvaluator
     {
-        // ── INFRASTRUCTURE ───────────────────────────────────────────────────
 
         public static float GetInfraRating(CountryDataSO c, string id) => id switch
         {
@@ -135,9 +129,7 @@ namespace StateCraft.Systems
             }
         }
 
-        // ── INDUSTRY ─────────────────────────────────────────────────────────
-        
-        public static bool HasRequiredResource(CountryDataSO c, string industryId, out string missingResourceName)
+public static bool HasRequiredResource(CountryDataSO c, string industryId, out string missingResourceName)
         {
             missingResourceName = string.Empty;
             if (industryId == "Oil")
@@ -248,9 +240,7 @@ namespace StateCraft.Systems
             }
         }
 
-        // ── COMMODITIES ──────────────────────────────────────────────────────
-
-        public static float GetCommodityStock(CountryDataSO c, string id) => id switch
+public static float GetCommodityStock(CountryDataSO c, string id) => id switch
         {
             "Electricity"       => PowerCapacityMw(c) - (c.indManufacturing * 10f + c.population * 0.0005f),
             "CrudeOil"          => c.invOilBarrels,
@@ -286,9 +276,7 @@ namespace StateCraft.Systems
             _                   => 0f
         };
 
-        // ── HELPERS & ACTIONS ────────────────────────────────────────────────
-
-        private static float PowerCapacityMw(CountryDataSO c) =>
+private static float PowerCapacityMw(CountryDataSO c) =>
             c.powerGasPlants     * PowerGridManager.GasPlantCapacity +
             c.powerHydroPlants   * PowerGridManager.HydroPlantCapacity +
             c.powerNuclearPlants * PowerGridManager.NuclearPlantCapacity +
@@ -439,7 +427,6 @@ namespace StateCraft.Systems
             return true;
         }
 
-        // ── TAXATION ───────────────────────────────────────────────
         public static float GetTaxRevenue(CountryDataSO c, string taxType)
         {
             float rate = taxType switch
@@ -454,15 +441,12 @@ namespace StateCraft.Systems
             return GetTaxRevenue(c, taxType, rate);
         }
 
-        // Overload that lets callers (e.g. the tax UI's live slider preview) project revenue
-        // at a not-yet-committed draft rate, instead of always reading the country's saved rate.
         public static float GetTaxRevenue(CountryDataSO c, string taxType, float rateOverride)
         {
             float monthlyGDP = c.gdp / 12f;
             float reachBonus = 1f + (c.roadLevel * 0.02f);
             float taxEfficiency = (0.3f + (c.stability / 142f)) * reachBonus; 
 
-            // Base revenue multiplier to match previous generic tax scales and keep UI sane
             float revenue = taxType switch
             {
                 "Income" => monthlyGDP * (rateOverride / 100f) * 0.35f,

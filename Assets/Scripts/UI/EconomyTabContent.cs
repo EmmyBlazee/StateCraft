@@ -7,9 +7,6 @@ using StateCraft.Systems;
 
 namespace StateCraft.UI
 {
-    /// <summary>
-    /// Definitions, costs, and gameplay actions for Economy dashboard sub-tabs.
-    /// </summary>
     public static class EconomyTabContent
     {
         public enum InfraCategory { Transport, Energy, Social, Digital }
@@ -305,7 +302,6 @@ namespace StateCraft.UI
             {
                 Id = "Oil", Title = "OIL & GAS", GetLevel = c => c.indMiningOil,
                 GetWorkforce = c => c.workforceOil,
-                // gdp is stored in raw units; divide by 1e9 → USD billions; × exchangeRate → local billions
                 GetRevenueB = c => (c.gdp) * 0.05f * (c.indMiningOil / 10f) * c.exchangeRate,
                 GetSynergy = c => $"Ports Lv.{c.portLevel} · Power {c.electricityLevel:F0}%",
                 IsBullish = c => c.electricityLevel > 50f && c.portLevel > 1,

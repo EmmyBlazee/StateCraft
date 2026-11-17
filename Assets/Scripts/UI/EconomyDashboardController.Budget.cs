@@ -15,7 +15,6 @@ namespace StateCraft.UI
             if (draft < 0f) draft = baseline;
             draft = Mathf.Clamp(draft + delta, 0f, 60f);
             
-            // Note: Since the UI is dynamic now, finding by name requires Budget{ID}_Pct etc.
             string safeId = alloc.id.Replace(" ", "");
             if (_root?.Q<Label>($"Budget{safeId}_Pct") is Label l) l.text = $"{draft:F0}%"; 
             if (_root?.Q<ProgressBar>($"Budget{safeId}_Bar") is ProgressBar pb) pb.value = draft;
@@ -48,7 +47,6 @@ namespace StateCraft.UI
             var country = gm?.playerCountry;
             if (country == null) return;
 
-            // 1. Calculate projected true spending
             float totalPercentage = 0f;
             foreach (var kvp in _draftBudgets) totalPercentage += kvp.Value;
             foreach (var alloc in country.budgetAllocations) {
@@ -58,7 +56,6 @@ namespace StateCraft.UI
             float projectedSpending = country.income * (totalPercentage / 100f);
             float projectedDeficit = projectedSpending - country.income;
 
-            // 2. The Finance Lock - Check if deficit ruins treasury
             if (projectedDeficit > 0f) {
                 float projectedDeficitLocal = projectedDeficit * country.exchangeRate;
                 float treasuryLocal = country.treasury * country.exchangeRate;
@@ -66,11 +63,10 @@ namespace StateCraft.UI
                     ShowEconomyModal("Deficit Unaffordable", 
                         $"You are projecting a deficit of {UiFormat.Money(projectedDeficitLocal, string.IsNullOrEmpty(country.currencySymbol) ? "?" : country.currencySymbol)} but only have {UiFormat.Money(treasuryLocal, string.IsNullOrEmpty(country.currencySymbol) ? "?" : country.currencySymbol)} in reserves. Check the Adviser panel to borrow money, or reduce allocations.", 
                         "", "UNDERSTOOD", () => {});
-                    return; // Block execution
+                    return;
                 }
             }
 
-            // Commit staged budget shares permanently
             foreach (var kvp in _draftBudgets)
             {
                 var alloc = country.budgetAllocations.FirstOrDefault(b => b.id == kvp.Key);
@@ -87,12 +83,11 @@ namespace StateCraft.UI
 
             country.militaryBudgetUSD  = Mathf.Max(0.1f, country.income * (milShare / 100f));
             country.intelligenceBudget = Mathf.Max(0.1f, country.income * (intelShare / 100f));
-            country.spending           = Mathf.Max(0f,   projectedSpending); // TRUE DEFICIT MATH
+            country.spending           = Mathf.Max(0f,   projectedSpending);
 
             int turn = GameManager.Instance?.TurnSystem?.CurrentTurn ?? 0;
-            country.lastBudgetApprovalTurn = turn; // Quarterly Lock Trigger
+            country.lastBudgetApprovalTurn = turn;
 
-            // Penalties for running a deficit
             if (projectedDeficit > 0f) {
                 country.publicApproval     = Mathf.Max(0f, country.publicApproval - 5f);
                 country.stability          = Mathf.Max(0f, country.stability      - 2f);
@@ -108,7 +103,6 @@ namespace StateCraft.UI
             country.hasBudgetDraft = false;
             ClearBudgetDrafts();
             
-            // Re-evaluate adviser recommendations dynamically immediately after math changes
             AdviserEngine.Dismiss(country, "_refresh_"); 
             UpdateCurrentAdviserRecommendation(country);
             
@@ -125,7 +119,6 @@ namespace StateCraft.UI
                 if (dynamicWeights.ContainsKey(alloc.id)) alloc.sharePercentage = dynamicWeights[alloc.id];
             }
 
-            // Apply immediately
             country.militaryBudgetUSD  = Mathf.Max(0.1f, country.income * 0.20f);
             country.intelligenceBudget = Mathf.Max(0.1f, country.income * 0.07f);
             country.securitySpending   = Mathf.Max(0.1f, country.income * 0.07f);
@@ -151,13 +144,12 @@ namespace StateCraft.UI
         {
             if (_root == null) return;
             if (_panelInfrastructure == null) return;
-            var bp = _panelInfrastructure; // shorthand for budget panel
+            var bp = _panelInfrastructure;
             country.EnsureBudgetAllocations();
 
             int currentTurn = GameManager.Instance?.TurnSystem?.CurrentTurn ?? 0;
             bool isBudgetLocked = currentTurn < country.lastBudgetApprovalTurn + 3;
 
-            // Handle UI Lock (Hide Rows & Controls)
             if (_budgetRowsContainer != null) {
                 _budgetRowsContainer.style.display = isBudgetLocked ? DisplayStyle.None : DisplayStyle.Flex;
                 var lockLabel = bp.Q<Label>("BudgetLockMessage");
@@ -196,14 +188,13 @@ namespace StateCraft.UI
             float draftRatio = draftSum / 100f;
 
             float baseTotalB = country.income * country.exchangeRate;
-            float totalExpB = baseTotalB * draftRatio; // matches new True Deficit rule precisely
+            float totalExpB = baseTotalB * draftRatio;
             float revTotalB = baseTotalB;
             
-            // 15. Summary Box
             if (bp.Q<Label>("BudgetSummary_Revenue") is Label lRev) {
                 lRev.text = UiFormat.Money(revTotalB, sym);
                 lRev.RemoveFromClassList("negative");
-                lRev.AddToClassList("positive"); // Revenue is always green
+                lRev.AddToClassList("positive");
             }
 
             if (bp.Q<Label>("BudgetSummary_Expenditure") is Label lExp) lExp.text = UiFormat.Money(totalExpB, sym);
@@ -220,14 +211,12 @@ namespace StateCraft.UI
                 lStatus.AddToClassList(balB >= 0 ? "positive" : "negative");
             }
 
-            // 16. Available for Allocation header
             if (bp.Q<Label>("BudgetAvailable") is Label lAv) lAv.text = UiFormat.Money(revTotalB, sym) + " / quarter";
             if (bp.Q<Label>("BudgetLastBalance") is Label lLast) {
                 float lastB = country.prevMonthBalance * country.exchangeRate;
                 lLast.text = $"{(lastB >= 0 ? "+" : "")}{UiFormat.Money(lastB, sym)}";
             }
 
-            // --- Dynamic Row Updates ---
             country.EnsureBudgetAllocations();
             if (!_budgetRowsBuilt) BuildBudgetRows(country, sym);
 
@@ -243,9 +232,7 @@ namespace StateCraft.UI
                 }
             }
 
-            
-            // 17. Expenditure Breakdown (Stacked Bar + Legend)
-            string[] dotColors = new string[] { "#E04040", "#7B5EAE", "#4A9EDD", "#3ACEA4", "#E0A030", "#5BAD5B", "#E07B30", "#8EC4E8" };
+string[] dotColors = new string[] { "#E04040", "#7B5EAE", "#4A9EDD", "#3ACEA4", "#E0A030", "#5BAD5B", "#E07B30", "#8EC4E8" };
             if (bp.Q<Label>("BudgetStackedBar_Total") is Label lTotal) lTotal.text = UiFormat.Money(totalExpB, sym);
             var stackedBar = bp.Q<VisualElement>("BudgetStackedBar");
             var vLeg = bp.Q<VisualElement>("BudgetDonut_Legend");
@@ -277,9 +264,8 @@ namespace StateCraft.UI
                 }
             }
 
-            // 18. Budget Trend Chart
             if (bp.Q<Label>("BudgetTrendChart") is Label lChart && country.budgetHistory != null) {
-                lChart.text = ""; // Clear text
+                lChart.text = "";
                 lChart.Clear();
                 lChart.style.flexDirection = FlexDirection.Row;
                 lChart.style.alignItems = Align.FlexEnd;
@@ -287,7 +273,6 @@ namespace StateCraft.UI
                 lChart.style.height = 70;
                 lChart.style.paddingTop = 15;
 
-                // For testing/visuals, if history is completely empty, let's inject a few zero-bars so the chart structure is visible
                 var hist = country.budgetHistory;
                 
                 float maxVal = 0.1f;
@@ -311,18 +296,17 @@ namespace StateCraft.UI
                     barCont.style.justifyContent = Justify.FlexEnd;
                     barCont.style.alignItems = Align.Center;
 
-                    // The actual bar
                     var bar = new VisualElement();
                     bar.style.width = Length.Percent(100f);
                     
                     if (!hasData) {
                         bar.style.height = 4;
-                        bar.style.backgroundColor = new StyleColor(new Color(0.3f, 0.3f, 0.3f, 0.5f)); // Empty placeholder
+                        bar.style.backgroundColor = new StyleColor(new Color(0.3f, 0.3f, 0.3f, 0.5f));
                     } else {
                         float pct = Mathf.Clamp01(Mathf.Abs(val) / maxVal);
                         bar.style.height = Length.Percent(Mathf.Max(5f, pct * 100f));
-                        if (val >= 0) bar.style.backgroundColor = new StyleColor(new Color(0.23f, 0.81f, 0.64f)); // Green for surplus
-                        else bar.style.backgroundColor = new StyleColor(new Color(0.88f, 0.25f, 0.25f)); // Red for deficit
+                        if (val >= 0) bar.style.backgroundColor = new StyleColor(new Color(0.23f, 0.81f, 0.64f));
+                        else bar.style.backgroundColor = new StyleColor(new Color(0.88f, 0.25f, 0.25f));
                     }
                     bar.style.borderTopLeftRadius = 2;
                     bar.style.borderTopRightRadius = 2;
@@ -344,7 +328,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // 19. Key Effects Grid
             if (bp.Q<Label>("BudgetEffect_Growth") is Label lEg) lEg.text = $"Economic Growth\n{(country.gdpGrowthRate > 0 ? "+" : "")}{country.gdpGrowthRate:P1}";
             if (bp.Q<Label>("BudgetEffect_Military") is Label lEm) lEm.text = $"Military Readiness\n{country.militaryReadiness:F0}%";
             if (bp.Q<Label>("BudgetEffect_Inflation") is Label lEi) lEi.text = $"Inflation\n{country.inflationRate:P1}";
@@ -352,7 +335,6 @@ namespace StateCraft.UI
             if (bp.Q<Label>("BudgetEffect_Approval") is Label lEa) lEa.text = $"Approval Rating\n{country.publicApproval:F0}%";
             if (bp.Q<Label>("BudgetEffect_Debt") is Label lEd) lEd.text = $"Debt Change\n{(balB < 0 ? "+" : "")}{UiFormat.Money(Mathf.Abs(balB), sym)}";
 
-            // 20. Alerts
             var alertsCont = _root.Q<VisualElement>("BudgetAlertsContainer");
             if (alertsCont != null) {
                 while (alertsCont.childCount > 1) alertsCont.RemoveAt(1);
@@ -374,7 +356,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // 21. Adviser
             if (_currentAdviserRec != null) {
                 if (_root.Q<Label>("BudgetAdviserBody") is Label lAdv) lAdv.text = _currentAdviserRec.Value.Rationale;
             }
@@ -453,7 +434,6 @@ namespace StateCraft.UI
                     RefreshBudgetTab(country, sym);
                 };
 
-                // Seed initial display values
                 float pct = capturedAlloc.sharePercentage;
                 lblVal.text = UiFormat.Money(totalB * (pct / 100f), sym);
                 bar.value = pct;

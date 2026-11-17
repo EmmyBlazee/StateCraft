@@ -19,14 +19,12 @@ namespace StateCraft.Systems
         public IEnumerable<string> GlobalNewsHistory => globalNewsQueue;
         public event Action<string> OnGlobalNewsPublished;
 
-        // Tracks previous turn stats
         private Dictionary<string, float> lastTurnStability =
             new Dictionary<string, float>();
 
         private Dictionary<string, float> lastTurnGDP =
             new Dictionary<string, float>();
 
-        // BUG 2 FIX: Per-country, per-headline cooldown tracking to prevent spam
         private Dictionary<string, int> lastHeadlineTurn =
             new Dictionary<string, int>();
 
@@ -40,8 +38,6 @@ namespace StateCraft.Systems
 }
             else if (Instance != this)
             {
-                // NEVER destroy the whole gameObject — it may have other components (GameManager etc.)
-                // Just disable this component and let the existing Instance remain
 this.enabled = false;
             }
         }
@@ -69,7 +65,6 @@ this.enabled = false;
 
         private void HandleWorldEvent(WorldEvent worldEvent)
         {
-            // BUG FIX: Null guard against dead references holding this delegate if Destroyed without Unsubscribe
             if (worldEvent == null || this == null) return;
 
             PublishNews(worldEvent.title);
@@ -103,7 +98,6 @@ globalNewsQueue.Enqueue(boldHeadline);
 
 }
 
-        // BUG 2 FIX: Returns true only if this headline key hasn't fired within cooldownTurns turns
         private bool CanPublish(string key, int cooldownTurns = 4)
         {
             if (!lastHeadlineTurn.TryGetValue(key, out int last))
@@ -119,7 +113,6 @@ globalNewsQueue.Enqueue(boldHeadline);
             return false;
         }
 
-        // OVERLOAD VERSION
         public void GenerateTurnNews()
         {
             if (GameManager.Instance == null) return;
@@ -127,14 +120,11 @@ globalNewsQueue.Enqueue(boldHeadline);
             GenerateTurnNews(GameManager.Instance.allCountries);
         }
 
-        // MAIN VERSION
         public void GenerateTurnNews(List<CountryDataSO> countries)
         {
             var player = GameManager.Instance?.playerCountry;
-// BUG 2 FIX: Increment turn counter used for cooldowns
             currentTurn++;
 
-            // BUG 3 FIX: Pick a random country for global flash, not always the player
             float roll = UnityEngine.Random.value;
 if (roll > 0.8f && countries != null && countries.Count > 0)
             {
@@ -142,8 +132,6 @@ if (roll > 0.8f && countries != null && countries.Count > 0)
                 PublishNews(GetRandomGlobalFlash(flashCountry), true);
             }
 
-            // BUG 1 FIX: Sample at most 8 AI countries per tick to throttle generation volume.
-            // Always include the player country so player-relevant news is never skipped.
             var countriesToProcess = new List<CountryDataSO>();
             if (player != null) countriesToProcess.Add(player);
 
@@ -154,7 +142,6 @@ if (roll > 0.8f && countries != null && countries.Count > 0)
                     aiPool.Add(c);
             }
 
-            // Fisher-Yates shuffle on the AI pool
             for (int i = aiPool.Count - 1; i > 0; i--)
             {
                 int j = UnityEngine.Random.Range(0, i + 1);
@@ -171,17 +158,15 @@ if (roll > 0.8f && countries != null && countries.Count > 0)
 
                 string name = country.countryName;
 
-                // BUG 3 FIX: capitalCity null/empty fallback already present — kept as-is
                 string cap =
                     string.IsNullOrEmpty(country.capitalCity)
-                    ? name.ToUpper() + " CAPITAL"   // use country name instead of generic "THE CAPITAL"
+                    ? name.ToUpper() + " CAPITAL"
                     : country.capitalCity;
 
                 bool isPlayer = (country == player);
 
                 bool globalOnly = !isPlayer;
 
-                // Stability delta tracking
                 float prevStability =
                     lastTurnStability.ContainsKey(name)
                     ? lastTurnStability[name]
@@ -192,8 +177,6 @@ if (roll > 0.8f && countries != null && countries.Count > 0)
 
                 lastTurnStability[name] = country.stability;
 
-                // POLITICS & STABILITY
-                // BUG 2 FIX: Wrap all PublishNews calls with CanPublish cooldown checks
                 if (stabilityChange < -5f && CanPublish($"{name}_stability_collapse", 3))
                 {
                     PublishNews(
@@ -218,8 +201,6 @@ if (roll > 0.8f && countries != null && countries.Count > 0)
                     );
                 }
 
-                // ECONOMY
-                // BUG 4 FIX: GDP is now stored in billions — compare against 200f not 200e9f
                 float logChance = isPlayer ? 0.6f : 0.98f;
 
                 if (country.gdp > 200f &&
@@ -231,7 +212,6 @@ if (roll > 0.8f && countries != null && countries.Count > 0)
                         globalOnly
                     );
                 }
-                // BUG 2 FIX: Raise debt threshold from 50% → 70% and add cooldown
                 else if (country.debt > country.gdp * 0.7f &&
                          UnityEngine.Random.value > 0.9f &&
                          CanPublish($"{name}_debt_crisis", 5))
@@ -242,7 +222,6 @@ if (roll > 0.8f && countries != null && countries.Count > 0)
                     );
                 }
 
-                // MILITARY
                 if (country.militaryStrength > 400 &&
                     UnityEngine.Random.value > 0.95f &&
                     CanPublish($"{name}_military_exercises", 6))
@@ -253,7 +232,6 @@ if (roll > 0.8f && countries != null && countries.Count > 0)
                     );
                 }
 
-                // INSURGENCY & TERRORIST ATTACK REPORTS
                 bool hasInsurgency = false;
 
                 foreach (var r in country.regions)
@@ -290,7 +268,6 @@ if (roll > 0.8f && countries != null && countries.Count > 0)
                     }
                 }
 
-                // INTEL
                 if (!hasInsurgency &&
                     country.security < 40 &&
                     UnityEngine.Random.value > 0.95f &&
@@ -302,7 +279,6 @@ if (roll > 0.8f && countries != null && countries.Count > 0)
                     );
                 }
 
-                // WAR SYSTEM
                 if (GameManager.Instance?.WarSystem != null)
                 {
                     var warStage =
@@ -329,7 +305,6 @@ if (roll > 0.8f && countries != null && countries.Count > 0)
                 ? country.countryName
                 : "THE REGION";
 
-            // BUG 3 FIX: Use country name as fallback instead of generic "THE CAPITAL"
             string cap =
                 country != null &&
                 !string.IsNullOrEmpty(country.capitalCity)

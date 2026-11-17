@@ -28,7 +28,7 @@ namespace StateCraft.Systems
         public void ProcessMonthlyTick(CountryDataSO country)
         {
             var mil = country.militaryState;
-            if (config == null) return; // Wait until config is hooked up
+            if (config == null) return;
 
             TickRecruitment(country);
             ProcessWeaponDegradation(country);
@@ -58,7 +58,6 @@ namespace StateCraft.Systems
 
             foreach (var sc in country.activeSupplyContracts)
             {
-                // Resources supplied per turn
                 switch (sc.resourceType)
                 {
                     case "FUEL": country.reserveFuel = Mathf.Min(100f, country.reserveFuel + sc.amountPerTurn); break;
@@ -166,7 +165,6 @@ namespace StateCraft.Systems
 
             country.militaryReadiness = (int)mil.armyReadiness.OverallReadiness;
 
-            // Sync legacy fields so the existing UI seamlessly reflects new data!
             country.armyStats.readiness = mil.armyReadiness.OverallReadiness;
             country.airForceStats.readiness = mil.airForceReadiness.OverallReadiness;
             country.navyStats.readiness = mil.navyReadiness.OverallReadiness;
@@ -175,7 +173,6 @@ namespace StateCraft.Systems
             country.navyStats.personnel = mil.navy.sailors + mil.navy.navalOfficers + mil.navy.marines + mil.navy.technicalCrew;
             country.airForceStats.personnel = mil.airForce.pilots + mil.airForce.groundCrew + mil.airForce.airControllers;
             
-            // Also sync top level unit fields heavily relied on by GameManager/WarSystem
             country.unitInfantry = mil.army.infantry;
             country.rdfStats.personnel = mil.army.rdfPersonnel;
         }
@@ -495,7 +492,6 @@ namespace StateCraft.Systems
                     while (country.completedOperations.Count > 20)
                         country.completedOperations.RemoveAt(0);
 
-                    // Resolve recommendations when completed successfully!
                     country.activeRecommendations.RemoveAll(r => r.regionName == op.regionName);
 
                     country.activeOperations.RemoveAt(i);
@@ -669,11 +665,10 @@ namespace StateCraft.Systems
                 OnBattleReport?.Invoke(report);
             }
 
-            // Combat Decay: 5% of involved units go Out of Service, 10% if op failed
             float combatDecay = success ? 0.05f : 0.10f;
             if (op.usedRDF)
             {
-                int brokenRifles = Mathf.FloorToInt(country.unitRifles * combatDecay * 0.1f); // just a fraction
+                int brokenRifles = Mathf.FloorToInt(country.unitRifles * combatDecay * 0.1f);
                 if (brokenRifles > 0)
                 {
                     country.unitRifles -= brokenRifles;
@@ -715,10 +710,8 @@ namespace StateCraft.Systems
 
         private void ProcessWeaponDegradation(CountryDataSO country)
         {
-            // Base wear and tear
             float baseDecayRate = 0.015f; 
             
-            // Repair offsets wear and tear. Max budget (100%) = 10% repair per month
             float repairRate = (country.militaryBudgetPercent / 100f) * 0.10f; 
             
             int totalRepaired = 0;
