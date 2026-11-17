@@ -1,18 +1,3 @@
-// ============================================================
-// FILE: Scripts/Systems/BattleResultMessage.cs
-// PURPOSE: Typed battle result that the inbox renders as a
-//          structured card with a losses table — matching the
-//          Supremacy 1914 battle report style.
-//
-// HOW TO USE:
-//   Replace the plain InboxSystem.SendMessage() call inside
-//   WarSystem.SendMonthlyWarReport() with:
-//
-//     BattleResultMessage.Send(country, enemy,
-//         newKIA, newWounded, (int)equipLost,
-//         estEnemyKIA, frontProgress[key]);
-//
-// ============================================================
 
 using System;
 using UnityEngine;
@@ -25,25 +10,21 @@ namespace StateCraft.Systems
     [Serializable]
     public class BattleResultMessage
     {
-        // ── Metadata ───────────────────────────────────────────
         public string id;
         public string dateReceived;
         public int    turnReceived;
         public bool   isRead;
-        public bool   isBattleResult = true;  // flag for UI to pick the card renderer
+        public bool   isBattleResult = true;
 
-        // ── Combatants ─────────────────────────────────────────
         public string ourCountryName;
         public string enemyCountryName;
-        public string enemyFlag;          // country flag path or name for UI lookup
+        public string enemyFlag;
 
-        // ── Outcome ────────────────────────────────────────────
         public bool   weWon;
-        public string outcomeLabel;       // "Victory", "Defeat", "Stalemate"
-        public string frontStatusLabel;   // "Advancing", "Retreating", "Stalemate"
-        public float  frontProgress;      // -100 to +100
+        public string outcomeLabel;
+        public string frontStatusLabel;
+        public float  frontProgress;
 
-        // ── Our losses ─────────────────────────────────────────
         public int ourInfantryLost;
         public int ourTanksLost;
         public int ourAPCsLost;
@@ -52,7 +33,6 @@ namespace StateCraft.Systems
         public int ourKIA;
         public int ourWounded;
 
-        // ── Estimated enemy losses ─────────────────────────────
         public int enemyInfantryLost;
         public int enemyTanksLost;
         public int enemyAPCsLost;
@@ -60,18 +40,11 @@ namespace StateCraft.Systems
         public int enemyShipsLost;
         public int enemyKIA;
 
-        // ── Supply state snapshot ──────────────────────────────
         public float ammoRemaining;
         public float fuelRemaining;
         public float warExhaustion;
         public float willToFight;
 
-        // ── Factory ────────────────────────────────────────────
-        /// <summary>
-        /// Call this from WarSystem.SendMonthlyWarReport() instead of
-        /// the plain InboxSystem.SendMessage(). It builds the typed
-        /// result and appends it to the country's inbox.
-        /// </summary>
         public static void Send(
             CountryDataSO country,
             CountryDataSO enemy,
@@ -88,7 +61,6 @@ namespace StateCraft.Systems
             int turn = gm?.TurnSystem?.CurrentTurn ?? 0;
             string date = gm?.TurnSystem?.CurrentDate ?? "Unknown";
 
-            // Rough equipment split — refine if you track per-type losses later
             int tanksLost    = Mathf.RoundToInt(equipmentLost * 0.20f);
             int apcsLost     = Mathf.RoundToInt(equipmentLost * 0.40f);
             int fightersLost = Mathf.RoundToInt(equipmentLost * 0.15f);
@@ -139,14 +111,11 @@ namespace StateCraft.Systems
                 willToFight    = country.warWillToFight,
             };
 
-            // Store in the typed list on CountryDataSO (add this field — see note below)
             country.battleResults ??= new System.Collections.Generic.List<BattleResultMessage>();
             country.battleResults.Insert(0, msg);
             if (country.battleResults.Count > 20)
                 country.battleResults.RemoveRange(20, country.battleResults.Count - 20);
 
-            // Also send a short plain-text inbox alert so the existing
-            // notification badge / critical dispatch still fires correctly.
             string urgency = outcome == "Defeat" ? "Critical"
                            : outcome == "Victory" ? "Important"
                            : "Normal";
@@ -160,7 +129,6 @@ namespace StateCraft.Systems
                 shortSummary,
                 urgency);
 
-            // Fire on EventBus so news ticker picks it up
             EventBus.Publish(new WorldEvent
             {
                 eventType     = weWon ? WorldEventType.RegionCaptured : WorldEventType.FrontlineCollapsed,
@@ -175,10 +143,3 @@ namespace StateCraft.Systems
     }
 }
 
-// ============================================================
-// ADD THIS TO CountryDataSO.cs:
-//
-//   [Header("=== Battle History ===")]
-//   public List<BattleResultMessage> battleResults = new List<BattleResultMessage>();
-//
-// ============================================================

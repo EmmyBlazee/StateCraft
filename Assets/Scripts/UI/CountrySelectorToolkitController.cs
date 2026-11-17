@@ -20,7 +20,7 @@ namespace StateCraft.UI
         {
             _uiDocument = GetComponent<UIDocument>();
             if (_uiDocument == null) return;
-            _uiDocument.sortingOrder = 100; // Force to front to beat MainDashboard
+            _uiDocument.sortingOrder = 100;
             _root = _uiDocument.rootVisualElement;
             InitializeElements();
         }
@@ -28,7 +28,6 @@ namespace StateCraft.UI
         private void Start()
         {
             RefreshList("");
-            // Start hidden but initialized
             _selectorRoot.style.opacity = 0;
             _selectorRoot.pickingMode = PickingMode.Ignore;
         }
@@ -39,7 +38,6 @@ namespace StateCraft.UI
             
             _selectorRoot = _root.Q<VisualElement>("SelectorRoot");
             
-            // FALLBACK: If not in local root, check all UIDocuments (Global Search)
             if (_selectorRoot == null)
             {
                 var allDocs = FindObjectsOfType<UIDocument>();
@@ -49,7 +47,7 @@ namespace StateCraft.UI
                     if (found != null)
                     {
                         _selectorRoot = found;
-                        _root = doc.rootVisualElement; // Switch context to the successful one
+                        _root = doc.rootVisualElement;
                         break;
                     }
                 }
@@ -79,7 +77,7 @@ namespace StateCraft.UI
             if (_selectorRoot == null) return;
             
             _selectorRoot.style.opacity = 1;
-            _selectorRoot.pickingMode = PickingMode.Position; // BLOCK MAP
+            _selectorRoot.pickingMode = PickingMode.Position;
             _selectorRoot.style.visibility = Visibility.Visible;
             
             if (_searchInput != null) _searchInput.Focus();
@@ -92,7 +90,7 @@ namespace StateCraft.UI
             if (_selectorRoot == null) return;
             
             _selectorRoot.style.opacity = 0;
-            _selectorRoot.pickingMode = PickingMode.Ignore; // UNBLOCK MAP
+            _selectorRoot.pickingMode = PickingMode.Ignore;
             _selectorRoot.style.visibility = Visibility.Hidden;
             
 }
@@ -115,12 +113,10 @@ namespace StateCraft.UI
 
         private VisualElement CreateCountryRow(CountryDataSO country)
         {
-            // Create a button as the container for maximum reliability
             var row = new Button();
             row.name = $"Row_{country.countryName}";
             row.AddToClassList("selector-row");
             
-            // Layout
             row.style.flexDirection = FlexDirection.Row;
             row.style.alignItems = Align.Center;
             row.style.paddingLeft = 15;
@@ -128,17 +124,14 @@ namespace StateCraft.UI
             row.style.height = 50;
             row.style.backgroundColor = new Color(1f, 1f, 1f, 0.03f);
             
-            // Borders
             row.style.borderBottomWidth = 1;
             row.style.borderBottomColor = new Color(1f, 1f, 1f, 0.05f);
             row.style.borderTopWidth = 0;
             row.style.borderLeftWidth = 0;
             row.style.borderRightWidth = 0;
             
-            // Input Mode
             row.pickingMode = PickingMode.Position;
 
-            // Flag
             var flag = new Image();
             flag.style.width = 30;
             flag.style.height = 20;
@@ -147,14 +140,12 @@ namespace StateCraft.UI
             if (country.countryFlag != null) flag.sprite = country.countryFlag;
             row.Add(flag);
 
-            // Name
             var name = new Label(country.countryName.ToUpper());
             name.style.color = Color.white;
             name.style.fontSize = 14;
             name.pickingMode = PickingMode.Ignore;
             row.Add(name);
 
-            // Interaction - Using standard Button click for reliability
             row.clicked += () => {
 if (MapManager.Instance != null) MapManager.Instance.SelectCountry(country);
                 
@@ -170,4 +161,3 @@ if (MapManager.Instance != null) MapManager.Instance.SelectCountry(country);
         }
     }
 }
-// Force re-import: 2026-05-14 10:14

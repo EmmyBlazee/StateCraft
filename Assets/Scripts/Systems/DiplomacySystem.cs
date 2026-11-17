@@ -13,13 +13,8 @@ namespace StateCraft.Systems
 
         public void UpdateRelations(CountryDataSO country)
         {
-            // Future: Relations matrix logic
         }
 
-        /// <summary>
-        /// Returns true if both countries have a signed "Trade Agreement" treaty.
-        /// This gate must pass before any resource trade can be conducted.
-        /// </summary>
         public static bool HasSignedTradeAgreementTreaty(CountryDataSO a, CountryDataSO b)
         {
             if (a == null || b == null) return false;
@@ -32,7 +27,6 @@ namespace StateCraft.Systems
 
                 public void SignTradeDeal(CountryDataSO seller, CountryDataSO buyer, TradeResourceType resource, float paymentUSD)
         {
-            // ── GATE: Trade Agreement treaty must be signed first ──────────
             if (!HasSignedTradeAgreementTreaty(seller, buyer))
             {
                 bool isPlayer = seller == GameManager.Instance?.playerCountry
@@ -55,7 +49,7 @@ namespace StateCraft.Systems
                 buyerCountry = buyer.countryName,
                 resource = resource,
                 monthlyPaymentUSD = paymentUSD,
-                durationTurns = 24 // 2 year standard deal
+                durationTurns = 24
             };
 
             ActiveDeals.Add(deal);
@@ -68,10 +62,8 @@ namespace StateCraft.Systems
                     "Trade agreement signed", month2);
             }
             
-            // Log to news
             NewsSystem.Instance?.PublishNews($"TRADE DEAL: {seller.countryName} to supply {resource} to {buyer.countryName} for ${paymentUSD/1e6f:N1}M monthly.");
             
-            // Immediate Effect: If Uranium, buyer is now cleared to build Nuclear Plant
             if (resource == TradeResourceType.Uranium)
             {
                 buyer.isImportingUranium = true;
@@ -89,7 +81,6 @@ namespace StateCraft.Systems
                     country.income += paymentInBillions;
             }
 
-            // ── Treaty expiry with proper coalition cleanup ──
             if (country.activeTreaties != null)
             {
                 for (int i = country.activeTreaties.Count - 1; i >= 0; i--)
@@ -97,7 +88,6 @@ namespace StateCraft.Systems
                     var treaty = country.activeTreaties[i];
                     treaty.monthsRemaining--;
 
-                    // Warn 3 months before expiry
                     if (treaty.monthsRemaining == 3 && country == GameManager.Instance?.playerCountry)
                     {
                         UI.NotificationManager.Instance?.AddNotification(
@@ -107,7 +97,6 @@ namespace StateCraft.Systems
 
                     if (treaty.monthsRemaining <= 0)
                     {
-                        // Coalition pact: return contributed troops
                         if (treaty.treatyName == "Coalition Force Pact")
                         {
                             var partner = GameManager.Instance?.allCountries?.Find(c => c.countryName == treaty.partnerCountry);
@@ -190,9 +179,8 @@ namespace StateCraft.Systems
         
         public TradeAgreementProposal CreateProposal(CountryDataSO player, CountryDataSO ai, TradeResourceType resource, float basePayment, int duration, bool playerIsSeller)
         {
-            // ── GATE ──────────────────────────────────────────────────────
             if (!HasSignedTradeAgreementTreaty(player, ai))
-                return null; // caller (TradeAgreementController) checks for null
+                return null;
 
             var proposal = new TradeAgreementProposal
             {
@@ -203,7 +191,6 @@ namespace StateCraft.Systems
                 playerIsSeller = playerIsSeller
             };
             
-            // Forward to AI for counter-offer
             var aiSystem = GameManager.Instance.AICountrySystem;
             if (aiSystem != null)
             {
@@ -235,7 +222,6 @@ namespace StateCraft.Systems
                 counterReason = ""
             };
             
-            // Assuming player is always the initiator in this context (as per UI)
             var gm = GameManager.Instance;
             CountryDataSO player = gm.playerCountry;
             CountryDataSO partner = null;
@@ -256,7 +242,6 @@ namespace StateCraft.Systems
             
             if (partner != null)
             {
-                // We add a mirror agreement for the AI partner
                 var mirror = new TradeAgreement
                 {
                     id = agreement.id,
@@ -284,11 +269,6 @@ namespace StateCraft.Systems
             }
         }
 
-        /// <summary>
-        /// Proxy War: Secretly transfer sponsorAmount (USD billions) from 'sponsor' to boost
-        /// insurgency strength in a random region of 'target'. Leaves no diplomatic fingerprints
-        /// unless the operation is discovered.
-        /// </summary>
         public void FundProxyInsurgency(CountryDataSO sponsor, CountryDataSO target, float amountBillions)
         {
             if (sponsor == null || target == null || target.regions == null || target.regions.Count == 0) return;
@@ -300,23 +280,19 @@ namespace StateCraft.Systems
 
             sponsor.treasury -= amountBillions;
 
-            // Pick the most volatile region or a random one
             var borderRegions = target.regions.FindAll(r => r.specialization == Data.RegionSpecialization.BorderConflict);
             var targetRegion = borderRegions.Count > 0
                 ? borderRegions[UnityEngine.Random.Range(0, borderRegions.Count)]
                 : target.regions[UnityEngine.Random.Range(0, target.regions.Count)];
 
-            // Scale boost to amount invested
             float boost = amountBillions * 10f;
             targetRegion.insurgencyLevel = Mathf.Min(100f, targetRegion.insurgencyLevel + boost);
             targetRegion.insurgentSupplyLines = Mathf.Min(100f, targetRegion.insurgentSupplyLines + boost * 0.5f);
             targetRegion.heartsAndMinds = Mathf.Max(0f, targetRegion.heartsAndMinds - boost * 0.3f);
 
-            // Detection check: Based on target country's counter-intelligence
             float detectionChance = (target.counterIntelligence / 100f) * 0.25f;
             if (UnityEngine.Random.value < detectionChance)
             {
-                // EXPOSED!
                 sponsor.globalPrestige -= 15f;
                 sponsor.exposureRisk += 30f;
                 target.globalPrestige += 5f;
@@ -332,7 +308,6 @@ namespace StateCraft.Systems
             }
             else
             {
-                // Silent success
                 UI.NotificationManager.Instance?.AddNotification($"PROXY WAR: ${amountBillions:F1}B routed to destabilize {targetRegion.regionName}, {target.countryName}.", new Color(186/255f, 104/255f, 200/255f));
             }
         }
@@ -351,7 +326,6 @@ namespace StateCraft.Systems
 
             if (comply)
             {
-                // Player accepts terms — avoids war, pays prestige
                 gm.Relations.Adjust(player.countryName, sender.countryName, +15f,
                     "Ultimatum accepted — tensions defused", currentMonth);
                 VictorySystem.AwardPrestige(player, -5f, $"Conceded to {sender.countryName} ultimatum");
@@ -362,7 +336,6 @@ namespace StateCraft.Systems
             }
             else
             {
-                // Player refuses — sender may now declare war
                 gm.Relations.Adjust(player.countryName, sender.countryName, -20f,
                     "Ultimatum refused", currentMonth);
                 VictorySystem.AwardPrestige(player, +3f, $"Refused to bow to {sender.countryName}");

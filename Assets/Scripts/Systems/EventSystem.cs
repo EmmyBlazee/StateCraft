@@ -1,9 +1,3 @@
-// ============================================================
-// FILE: Scripts/Systems/EventSystem.cs
-// PURPOSE: Events now trigger a choice popup. Both options
-//          have real, immediate consequences applied when the
-//          player (or AI) selects them.
-// ============================================================
 
 using StateCraft.Interfaces;
 using StateCraft.Data;
@@ -18,7 +12,6 @@ namespace StateCraft.Systems
     {
         private List<GameEventSO> possibleEvents;
 
-        // Queue of events awaiting player choice (displayed on the event dashboard)
         private Queue<PendingEvent> _playerEventQueue = new Queue<PendingEvent>();
 
         public EventSystem(List<GameEventSO> events)
@@ -26,11 +19,10 @@ namespace StateCraft.Systems
             possibleEvents = events;
         }
 
-        // ── Called monthly for every country ────────────────
         public void CheckForEvents(CountryDataSO country)
         {
             if (possibleEvents == null || possibleEvents.Count == 0) return;
-            if (Random.value >= 0.05f) return; // 5% chance per month
+            if (Random.value >= 0.05f) return;
 
             TriggerRandomEvent(country);
         }
@@ -48,7 +40,6 @@ namespace StateCraft.Systems
 
             if (country == gm?.playerCountry)
             {
-                // Cap pending events to prevent stale queue overflow
                 const int MAX_PENDING = 5;
                 if (_playerEventQueue.Count >= MAX_PENDING)
                 {
@@ -62,7 +53,6 @@ namespace StateCraft.Systems
                     });
                 }
 
-                // Queue for UI display — player must make a choice
                 _playerEventQueue.Enqueue(new PendingEvent { country = country, ev = chosen });
 
                 EventBus.Publish(new WorldEvent {
@@ -74,18 +64,15 @@ namespace StateCraft.Systems
             }
             else
             {
-                // AI: pick the option with better stability outcome (greedy)
                 bool chooseA = (chosen.optionAStability >= chosen.optionBStability);
                 ApplyEventOutcome(country, chosen, chooseA);
 
-                // Publish a short news item for flavour
                 NewsSystem.Instance?.PublishNews(
                     $"REPORT: {country.countryName} faces {chosen.eventTitle}. " +
                     $"Government {(chooseA ? "takes decisive action" : "adopts measured response")}.");
             }
         }
 
-        // ── Expose Pending Events to the Dashboard ──────────
         public List<GameEventSO> GetPendingEvents(CountryDataSO country)
         {
             var list = new List<GameEventSO>();
@@ -116,7 +103,6 @@ namespace StateCraft.Systems
             _playerEventQueue = temp;
         }
 
-        // ── Apply the mechanical consequences of a choice ───
         public static void ApplyEventOutcome(CountryDataSO country, GameEventSO ev, bool chooseA)
         {
             float cost      = chooseA ? ev.optionACost      : ev.optionBCost;
@@ -128,7 +114,6 @@ namespace StateCraft.Systems
 
             var gm = GameManager.Instance;
 
-            // Treasury cost
             if (cost != 0f)
             {
                 country.treasury = Mathf.Max(0f, country.treasury - cost);
@@ -136,7 +121,6 @@ namespace StateCraft.Systems
                     gm.playerBudget = country.treasury;
             }
 
-            // Stability
             if (stability != 0f)
             {
                 foreach (var region in country.regions)
@@ -144,15 +128,12 @@ namespace StateCraft.Systems
                 country.stability = Mathf.Clamp(country.stability + stability, 0f, 100f);
             }
 
-            // GDP shock (expressed as fractional multiplier in the SO, e.g. -0.02 = -2%)
             if (gdpEffect != 0f)
                 country.gdp *= (1f + gdpEffect);
 
-            // Intelligence
             if (intelEff != 0f)
                 country.intelligenceLevel = Mathf.Clamp(country.intelligenceLevel + intelEff, 0f, 100f);
 
-            // Security
             if (secEff != 0f)
             {
                 country.security = Mathf.Clamp(country.security + secEff, 0f, 100f);
@@ -160,7 +141,6 @@ namespace StateCraft.Systems
                     region.security = Mathf.Clamp(region.security + secEff * 0.5f, 0f, 100f);
             }
 
-            // Notify via EventBus (Decoupled)
             if (country == gm?.playerCountry)
             {
                 string summary = BuildOutcomeSummary(cost, stability, gdpEffect, intelEff, secEff);

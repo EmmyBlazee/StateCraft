@@ -32,8 +32,6 @@ namespace StateCraft.UI
             CountryDataSO selected = MapManager.Instance.currentSelectedCountry;
             if (selected == null) return;
 
-            // In a real scenario, we would check for money/budget here
-            // For now, we apply the logic to the first region of the country
             if (selected.regions.Count > 0)
             {
                 var region = selected.regions[0];
@@ -77,7 +75,7 @@ return;
 }
             else if (type == "Economy")
             {
-                selected.gdp += 10f; // +$10B boost
+                selected.gdp += 10f;
                 selected.stability += 5f;
                 selected.stability = Mathf.Clamp(selected.stability, 0, 100);
 }

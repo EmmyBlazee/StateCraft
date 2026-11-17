@@ -26,7 +26,7 @@ namespace StateCraft.Systems
         public void ProcessMonthlyTick(CountryDataSO country)
         {
             var mil = country.militaryState;
-            if (config == null) return; // Wait until config is hooked up
+            if (config == null) return;
 
             TickRecruitment(country);
             RecalculateReadiness(country);
@@ -129,7 +129,6 @@ namespace StateCraft.Systems
 
             country.militaryReadiness = (int)mil.armyReadiness.OverallReadiness;
 
-            // Sync legacy fields so the existing UI seamlessly reflects new data!
             country.armyStats.readiness = mil.armyReadiness.OverallReadiness;
             country.airForceStats.readiness = mil.airForceReadiness.OverallReadiness;
             country.navyStats.readiness = mil.navyReadiness.OverallReadiness;
@@ -138,7 +137,6 @@ namespace StateCraft.Systems
             country.navyStats.personnel = mil.navy.sailors + mil.navy.navalOfficers + mil.navy.marines + mil.navy.technicalCrew;
             country.airForceStats.personnel = mil.airForce.pilots + mil.airForce.groundCrew + mil.airForce.airControllers;
             
-            // Also sync top level unit fields heavily relied on by GameManager/WarSystem
             country.unitInfantry = mil.army.infantry;
             country.rdfStats.personnel = mil.army.rdfPersonnel;
         }

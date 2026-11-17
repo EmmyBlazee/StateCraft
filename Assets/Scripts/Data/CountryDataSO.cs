@@ -12,7 +12,6 @@ namespace StateCraft.Data
         private void OnEnable()
         {
             if (militaryState == null) militaryState = new StateCraft.Systems.MilitaryState();
-            // Populate new personnel from existing legacy stats for backwards compatibility
             if (militaryState.army.infantry == 0 && unitInfantry > 0)
             {
                 militaryState.army.infantry = unitInfantry;
@@ -32,12 +31,12 @@ namespace StateCraft.Data
 
         [Header("Scenario Briefing")]
         [TextArea(4, 8)]
-        public string scenarioTitle   = "";   // e.g. "Nigeria: Oil & Fire"
+        public string scenarioTitle   = "";
         [TextArea(4, 8)]
-        public string scenarioContext = "";   // 2-3 sentence situation summary shown on briefing screen
+        public string scenarioContext = "";
         [TextArea(6, 12)]
-        public string scenarioPriorities = ""; // Bullet-point priorities shown under "YOUR PRIORITIES:"
-        public bool   hasShownBriefing   = false; // Set true after first-time briefing is dismissed
+        public string scenarioPriorities = "";
+        public bool   hasShownBriefing   = false;
         public Sprite countryFlag;
         public Color mapColor = Color.white;
 
@@ -55,47 +54,38 @@ namespace StateCraft.Data
         public float invTechGoods = 0f;
 
         [Header("Intelligence Dashboard Data")]
-        public float intelligenceLevel = 10f; // Legacy compatibility
+        public float intelligenceLevel = 10f;
         public float intelligenceBudget = 50f;
         public int satelliteCount = 0;
         public int satellitesUnderConstruction = 0;
         public int satelliteBuildMonthsRemaining = 0;
 
         public int operativeCount = 12;
-        public float globalIntelCoverage = 15f; // Score out of 100
+        public float globalIntelCoverage = 15f;
         public int foreignAgentsDetected = 0;
         public float agencyIntegrity = 85f;
         public List<CovertOperation> activeCovertOps = new List<CovertOperation>();
         public List<IntelligenceThreat> detectedThreats = new List<IntelligenceThreat>();
 
-
-        [Header("Economic Stats")]
-        // BUG 4 FIX: GDP, debt, and all monetary fields are stored in BILLIONS of USD.
-        // This matches treasury/income/spending which were already in billions.
-        // Old default was 1000f (raw float treated as raw USD = ~$1000, displayed as $0.0B).
-        // New default of 477f represents ~$477B, a realistic mid-range African economy.
-        public float gdp = 477f;             // Billions USD
-        public float income = 8f;            // Billions USD/month
-        public float spending = 6f;          // Billions USD/month
-        public float treasury = 12f;         // Billions USD
+[Header("Economic Stats")]
+        public float gdp = 477f;
+        public float income = 8f;
+        public float spending = 6f;
+        public float treasury = 12f;
 
         public float inflationRate = 0.02f;
         public float gdpGrowthRate = 0.03f;
         public float playerBudget;
-        public float exchangeRate = 1.0f;     // Live rate — Local currency per USD
-        public float baseExchangeRate = 1.0f; // Starting rate — used to cap devaluation and reset on new game
+        public float exchangeRate = 1.0f;
+        public float baseExchangeRate = 1.0f;
 
-        // BUG 5 FIX: Debt defaults reduced from 500/300/200 to realistic levels.
-        // Old defaults gave a 50% debt/GDP ratio on turn 1, immediately triggering debt crisis
-        // headlines for every country and near-instant default for the player country.
-        // New defaults give ~20% debt/GDP which is manageable at game start.
-        public float debt = 95f;             // Billions USD (~20% of default GDP)
-        public float domesticDebt = 60f;     // Billions USD
-        public float foreignDebt = 35f;      // Billions USD
+        public float debt = 95f;
+        public float domesticDebt = 60f;
+        public float foreignDebt = 35f;
 
-        public float taxRate = 15f; // Percentage
-        public float subsidyLevel = 5f; // Percentage of GDP
-        public float importTariffRate = 10f; // Percentage
+        public float taxRate = 15f;
+        public float subsidyLevel = 5f;
+        public float importTariffRate = 10f;
         [Header("Detailed Economy Policy")]
         public float incomeTaxRate = 12f;
         public float corporateTaxRate = 18f;
@@ -122,20 +112,19 @@ namespace StateCraft.Data
         public List<string> dismissedAdviserTitles = new List<string>();
         public int adviserDismissTurn = 0;
         public int adviserNextRecommendationTurn = 0;
-        public float corruptionIndex = 30f; // Percentage of state leakage
-        public float povertyRate = 45f; // Percentage of population below poverty line
-        public float unemploymentRate = 12f; // Percentage
-        public float foreignInvestment = 50f; // Billions USD
-        public float resourceSovereignty = 100f; // 0-100 score
-        public float foodSecurity = 70f; // 0-100 score
-        public float environmentScore = 50f; // 0-100 score
+        public float corruptionIndex = 30f;
+        public float povertyRate = 45f;
+        public float unemploymentRate = 12f;
+        public float foreignInvestment = 50f;
+        public float resourceSovereignty = 100f;
+        public float foodSecurity = 70f;
+        public float environmentScore = 50f;
 
-        // BUG 5 FIX: Start at 80% service ratio instead of 100% to give the player some breathing room
-        public float debtServiceRatio = 80f; // 100% = Pay full interest
+        public float debtServiceRatio = 80f;
         [Header("Monetary & Trade Policy")]
-        public float centralBankInterestRate = 5f; // Percentage
-        public float publicApproval = 65f; // Percentage
-        public string creditRating = "B+"; // AAA, AA, A, BBB, BB, B, CCC, CC, C, D
+        public float centralBankInterestRate = 5f;
+        public float publicApproval = 65f;
+        public string creditRating = "B+";
         public float foreignAidReceived = 0f;
         public float tradeVolumeUSD = 0f;        [Header("Historical & UI Tracking")]
         public float prevInflationRate;
@@ -145,8 +134,7 @@ namespace StateCraft.Data
         public float taxArrears;
         public List<float> budgetHistory = new List<float>();
 
-
-        [Header("Natural Resources")]
+[Header("Natural Resources")]
         public List<ResourceDeposit> resources = new List<ResourceDeposit>();
 
         [Header("Infrastructure")]
@@ -159,9 +147,8 @@ namespace StateCraft.Data
         [Range(0, 10)] public int hospitalLevel = 1;
         [Range(0, 10)] public int telecomLevel = 1;
 
-
-        [Header("Power Grid System")]
-        [Range(0, 100)] public float electricityLevel = 30f; // Percentage of population with power
+[Header("Power Grid System")]
+        [Range(0, 100)] public float electricityLevel = 30f;
         public bool hasNuclearPower = false;
         public bool isImportingUranium = false;
         
@@ -171,7 +158,7 @@ namespace StateCraft.Data
         public int powerSolarPlants = 0;
         public int powerWindPlants = 0;
         
-        public float gridTransmissionEfficiency = 0.85f; // 85% starting efficiency
+        public float gridTransmissionEfficiency = 0.85f;
         public float currentBlackoutRisk = 0f;
 
         [Header("Industry Tiers")]
@@ -183,18 +170,14 @@ namespace StateCraft.Data
         [Range(0, 10)] public int indTechIT = 0;
         [Range(0, 10)] public int indTechFintech = 0;
         [Range(0, 10)] public int indManufacturing = 0;
-        public float techIndustryOutput = 100f; // Productivity multiplier
+        public float techIndustryOutput = 100f;
 
-
-        
-        // Workforce distribution (abstracted)
-        public float workforceOil = 10000;
+public float workforceOil = 10000;
         public float workforceMining = 25000;
         public float workforceAgri = 150000;
         public float workforceManufacturing = 5000;
 
-
-        [Header("Political Stats")]
+[Header("Political Stats")]
         [Range(0, 100)]
         public float stability = 70f;
         [Range(0, 100)]
@@ -232,7 +215,6 @@ namespace StateCraft.Data
         public int baseAirForceCount = 3;
         public int baseRDFCount = 1;
         public int baseDefenseFactoryCount = 0;
-    // Tracks number of imports this turn (per-turn import cap)
     public int importsThisTurn = 0;
 
         public float rdfReadiness = 80f;
@@ -242,18 +224,17 @@ namespace StateCraft.Data
         public float securitySpending = 0f;
         public List<MilitaryProject> militaryProjects = new List<MilitaryProject>();
 
-        public float militaryBudgetUSD = 2.5f; // Billions
+        public float militaryBudgetUSD = 2.5f;
 
-        public float militaryReadiness = 75f; // Percentage
+        public float militaryReadiness = 75f;
         
-        // Detailed Branch Data
         public BranchStats armyStats = new BranchStats("Army", 50000, 250, 75, 80);
         public BranchStats navyStats = new BranchStats("Navy", 12000, 45, 60, 75);
         public BranchStats airForceStats = new BranchStats("Air Force", 8000, 120, 65, 85);
         public BranchStats rdfStats = new BranchStats("Rapid Deployable Force", 5000, 80, 90, 95);
 
         [Header("Military — Logistics")]
-        public float reserveFuel = 100f; // Days of supply
+        public float reserveFuel = 100f;
         public float reserveAmmo = 100f;
         public float reserveMedical = 100f;
         public float reserveFood = 100f;
@@ -263,28 +244,23 @@ namespace StateCraft.Data
         public List<StateCraft.Systems.InsurgentCamp> activeInsurgentCamps = new List<StateCraft.Systems.InsurgentCamp>();
         public List<RecruitmentPipeline> trainingPipelines = new List<RecruitmentPipeline>();
 
-        // War Stamina Tracking
-        public string warEnemyName = "";      // Name of the country we are at war with
-        public int warTurnsActive = 0;        // How many turns the war has been going
-        public float warExhaustion = 0f;      // 0-100. As it rises, military effectiveness falls
-        public float warWillToFight = 100f;   // 0-100. Public/political support for the war
+        public string warEnemyName = "";
+        public int warTurnsActive = 0;
+        public float warExhaustion = 0f;
+        public float warWillToFight = 100f;
         
-        // KIA & Casualty Tracking (Phase 2)
-        public int totalKIA = 0;              // Cumulative killed in action
-        public int totalWounded = 0;          // Cumulative wounded
-        public float warFatigueStabilityDrain = 0f; // How much stability is bleeding per turn due to war casualties
+        public int totalKIA = 0;
+        public int totalWounded = 0;
+        public float warFatigueStabilityDrain = 0f;
 
-        // Chain of Command (Phase 2)
         public List<General> assignedGenerals = new List<General>();
 
-        // Naval Blockades (Phase 2)
         public List<NavalBlockade> activeBlockades = new List<NavalBlockade>();
-        public bool isBlockaded = false;       // True when an enemy blockade cuts our maritime trade
+        public bool isBlockaded = false;
 
-        // WMD Deterrence (Phase 2)
         public bool hasNuclearWeapon = false;
         public bool hasChemicalWeapon = false;
-        public int wmdDevelopmentProgress = 0; // 0-100, built turn by turn
+        public int wmdDevelopmentProgress = 0;
         public bool wmdProgramDiscovered = false;
 
         public int rdfCooldownMonths = 0;
@@ -307,13 +283,12 @@ namespace StateCraft.Data
         public List<StateCraft.Systems.BattleResultMessage> battleResults = new List<StateCraft.Systems.BattleResultMessage>();
 
         [Header("Intelligence & Covert")]
-        public float covertBudget = 0f; // Billions USD per turn
-        public float counterIntelligence = 50f; // 0-100, defense against spies
-        public float exposureRisk = 0f; // 0-100. If it hits 100, huge scandal
+        public float covertBudget = 0f;
+        public float counterIntelligence = 50f;
+        public float exposureRisk = 0f;
         public List<ForeignAsset> recruitedAssets = new List<ForeignAsset>();
 
-
-        [Header("Geography")]
+[Header("Geography")]
         public List<RegionDataSO> regions = new List<RegionDataSO>();
 
         [Header("Factions")]
@@ -337,48 +312,39 @@ namespace StateCraft.Data
 
         public float CalculateMilitaryUpkeep()
         {
-            // Upkeep in Billions of USD per month.
-            // Rates calibrated so a 200k-force developing nation costs ~$3-4B/year total.
 
-            // Land Forces
-            float armyUpkeep = (unitInfantry    * 0.0000020f)   // ~$2,000/soldier/month
-                             + (unitRifles       * 0.0000002f)   // ~$200/rifle/month (ammo, maintenance)
-                             + (unitTanks        * 0.000030f)    // ~$30k/tank/month
-                             + (unitAPCs         * 0.000010f)    // ~$10k/APC/month
-                             + (unitArtillery    * 0.000015f);   // ~$15k/gun/month
+            float armyUpkeep = (unitInfantry    * 0.0000020f)
+                             + (unitRifles       * 0.0000002f)
+                             + (unitTanks        * 0.000030f)
+                             + (unitAPCs         * 0.000010f)
+                             + (unitArtillery    * 0.000015f);
 
-            // Air Force
-            float airForceUpkeep = (airForceStats.personnel * 0.000006f)  // ~$6k/person/month
-                                 + (unitFighters       * 0.000150f)        // ~$150k/fighter/month
-                                 + (unitBombers        * 0.000280f)        // ~$280k/bomber/month
-                                 + (unitAttackHelis    * 0.000080f)        // ~$80k/heli/month
-                                 + (unitUAVs           * 0.000020f);       // ~$20k/UAV/month
+            float airForceUpkeep = (airForceStats.personnel * 0.000006f)
+                                 + (unitFighters       * 0.000150f)
+                                 + (unitBombers        * 0.000280f)
+                                 + (unitAttackHelis    * 0.000080f)
+                                 + (unitUAVs           * 0.000020f);
 
-            // Navy
-            float navyUpkeep = (navyStats.personnel  * 0.000005f)   // ~$5k/person/month
-                             + (unitFrigates          * 0.000400f)   // ~$400k/frigate/month
-                             + (unitDestroyers        * 0.000800f)   // ~$800k/destroyer/month
-                             + (unitSubmarines        * 0.001000f)   // ~$1M/submarine/month
-                             + (unitPatrolBoats       * 0.000040f);  // ~$40k/boat/month
+            float navyUpkeep = (navyStats.personnel  * 0.000005f)
+                             + (unitFrigates          * 0.000400f)
+                             + (unitDestroyers        * 0.000800f)
+                             + (unitSubmarines        * 0.001000f)
+                             + (unitPatrolBoats       * 0.000040f);
 
-            // Rapid Deployable Force (elite, so slightly higher per-head)
-            float rdfUpkeep = (rdfStats.personnel * 0.000010f)   // ~$10k/person/month
+            float rdfUpkeep = (rdfStats.personnel * 0.000010f)
                             + (rdfStats.equipment  * 0.000050f);
 
-            // Fixed base infrastructure costs (reduced)
-            float basesUpkeep = (baseArmyCount      * 0.006f)   // ~$6M/base/month
-                              + (baseNavyCount       * 0.010f)   // ~$10M/base/month
+            float basesUpkeep = (baseArmyCount      * 0.006f)
+                              + (baseNavyCount       * 0.010f)
                               + (baseAirForceCount   * 0.010f)
                               + (baseRDFCount        * 0.015f);
 
-            // Scale unit upkeep by branch readiness (lower readiness = lower active costs)
             float totalUpkeep = armyUpkeep     * (armyStats.readiness     / 100f)
                               + airForceUpkeep * (airForceStats.readiness  / 100f)
                               + navyUpkeep     * (navyStats.readiness      / 100f)
                               + rdfUpkeep      * (rdfStats.readiness       / 100f)
                               + basesUpkeep;
 
-            // Minimum command & admin overhead: $100M/month
             return Mathf.Max(0.10f, totalUpkeep);
         }
     }
@@ -396,16 +362,16 @@ namespace StateCraft.Data
     public class ForeignAsset
     {
         public string targetCountry;
-        public string assetName; // e.g. "Minister of Defense", "Central Bank Insider"
-        public float loyalty; // 0-100
-        public int intelLevelProvided; // 1-5
+        public string assetName;
+        public float loyalty;
+        public int intelLevelProvided;
     }
 
     [System.Serializable]
     public class ActiveProject
     {
         public string projectName;
-        public string projectType; // "Infra", "Agri", "Tech", "Special"
+        public string projectType;
         public string regionName; 
         public string targetID;
         public float totalCost;
@@ -415,15 +381,14 @@ namespace StateCraft.Data
         public string description;
     }
 
-
-    [System.Serializable]
+[System.Serializable]
     public class MilitaryProject
 
     {
-        public string projectName;       // e.g. "Army Expansion", "Naval Frigate"
-        public string branch;            // "Army", "Navy", "AirForce", "RDF"
-        public float strengthGain;       // How much strength it adds on completion
-        public float costBillions;       // USD cost
+        public string projectName;
+        public string branch;
+        public float strengthGain;
+        public float costBillions;
         public int monthsRemaining;
         public int totalMonths;
     }
@@ -434,8 +399,8 @@ namespace StateCraft.Data
         public string branchName;
         public int personnel;
         public int equipment;
-        public float readiness; // 0-100
-        public float morale; // 0-100
+        public float readiness;
+        public float morale;
 
         public BranchStats(string name, int p, int e, float r, float m)
         {
@@ -443,14 +408,13 @@ namespace StateCraft.Data
         }
     }
 
-
-    [System.Serializable]
+[System.Serializable]
     public class MilitaryOperation
     {
         public string opName;
         public string regionName;
-        public string type; // "Offensive", "Defensive", "Air Patrol", "Naval Patrol", "COIN"
-        public string status; // "Active", "Stalled", "Success", "Failed"
+        public string type;
+        public string status;
         public float costPerMonth;
         public int deployedTroops;
         public int deployedHelis;
@@ -472,10 +436,10 @@ namespace StateCraft.Data
     public class CovertOperation
     {
         public string opName;
-        public string type; // "Sabotage", "Assassination", "Propaganda", "Economic Disruption", "Arms Supply"
+        public string type;
         public string target;
         public string operativeName;
-        public string riskLevel; // "Low", "Medium", "High", "Extreme"
+        public string riskLevel;
         public string status;
 
         public int currentPhase = 1;
@@ -488,8 +452,8 @@ namespace StateCraft.Data
     public class IntelligenceThreat
     {
         public string threatName;
-        public string category; // "Foreign Interference", "Insurgent Activity", "Internal Threats"
-        public string severity; // "Minor", "Major", "Critical"
+        public string category;
+        public string severity;
         public string description;
     }
 
@@ -513,8 +477,7 @@ namespace StateCraft.Data
         public bool isRead;
         public int turnReceived;
         
-        // Optional icon or color info
-        public string urgency; // "Normal", "Important", "Critical"
+        public string urgency;
     }
 
     [System.Serializable]
@@ -522,8 +485,8 @@ namespace StateCraft.Data
     {
         public string crisisName;
         public string affectedRegion;
-        public string severity; // "Minor", "Severe", "Catastrophic"
-        public float internationalPressure; // 0-100
+        public string severity;
+        public float internationalPressure;
     }
 
     [System.Serializable]
@@ -551,11 +514,11 @@ namespace StateCraft.Data
     public class General
     {
         public string generalName;
-        public int rank;                     // 1-5 stars
+        public int rank;
         public GeneralSpecialty specialty;
-        public float effectivenessBonus;     // e.g. 0.15 = +15% combat dmg
-        public float moraleBonus;            // e.g. 0.10 = +10% branch morale
-        public string assignedOperation;     // Op name they are leading
+        public float effectivenessBonus;
+        public float moraleBonus;
+        public string assignedOperation;
         public bool isDeployed;
     }
 
@@ -565,7 +528,7 @@ namespace StateCraft.Data
         public string blockerCountry;
         public string targetCountry;
         public int monthsActive;
-        public float tradeSuppressionPercent; // 0-100
+        public float tradeSuppressionPercent;
         public int frigatesAssigned;
         public int destroyersAssigned;
         public int submarinesAssigned;

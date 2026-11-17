@@ -160,8 +160,6 @@ namespace StateCraft.Editor
                         country.resources = new List<ResourceDeposit>(resourceMap[country.countryName]);
                     }
 
-                    // --- AUTOMATIC FLAG LINKING ---
-                    // Looks for a sprite named after the country in a specific folder
                     string flagPath = $"Assets/Textures/Flags/{country.countryName}.png";
                     Sprite flagSprite = AssetDatabase.LoadAssetAtPath<Sprite>(flagPath);
                     if (flagSprite != null)
@@ -170,7 +168,6 @@ namespace StateCraft.Editor
                     }
                     else
                     {
-                        // Fallback: Check for .jpg or other common names
                         flagPath = $"Assets/Textures/Flags/{country.countryName}.jpg";
                         flagSprite = AssetDatabase.LoadAssetAtPath<Sprite>(flagPath);
                         if (flagSprite != null) country.countryFlag = flagSprite;
@@ -179,12 +176,10 @@ namespace StateCraft.Editor
                     country.stability = Random.Range(60f, 85f);
                     country.security = Random.Range(40f, 70f);
                     
-                    // Split starting debt between Domestic and Foreign
                     float totalStartingDebt = country.gdp * Random.Range(0.2f, 0.5f);
-                    country.domesticDebt = totalStartingDebt * 0.6f; // 60% Domestic
-                    country.foreignDebt = totalStartingDebt * 0.4f;  // 40% Foreign
+                    country.domesticDebt = totalStartingDebt * 0.6f;
+                    country.foreignDebt = totalStartingDebt * 0.4f;
                     
-                    // Clear runtime lists to reset asset files
                     country.activeOperations = new List<MilitaryOperation>();
                     country.trainingPipelines = new List<RecruitmentPipeline>();
                     country.activeCovertOps = new List<CovertOperation>();

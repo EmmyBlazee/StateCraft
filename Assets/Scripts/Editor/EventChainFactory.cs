@@ -12,7 +12,6 @@ namespace StateCraft.Editor
         {
             string folderPath = "Assets/Resources/Events/Chains";
             
-            // Create directories safely
             if (!AssetDatabase.IsValidFolder("Assets/Resources"))
                 AssetDatabase.CreateFolder("Assets", "Resources");
             if (!AssetDatabase.IsValidFolder("Assets/Resources/Events"))
@@ -20,9 +19,6 @@ namespace StateCraft.Editor
             if (!AssetDatabase.IsValidFolder("Assets/Resources/Events/Chains"))
                 AssetDatabase.CreateFolder("Assets/Resources/Events", "Chains");
 
-            // ==========================================
-            // CHAIN 1: Economic Crisis -> Inflation / Debt
-            // ==========================================
             GameEventSO crisis = ScriptableObject.CreateInstance<GameEventSO>();
             crisis.eventTitle = "Economic Crisis";
             crisis.description = "Treasury reserves are dwindling rapidly due to unforeseen market shocks. The people are looking for an immediate solution.";
@@ -30,7 +26,7 @@ namespace StateCraft.Editor
             crisis.optionAStability = -2f;
             crisis.optionAGDP = 0f;
             crisis.optionBText = "Borrow Foreign Aid";
-            crisis.optionBCost = -5f; // Positive treasury injection but with debt implication later
+            crisis.optionBCost = -5f;
             crisis.optionBStability = 0f;
 
             GameEventSO inflation = ScriptableObject.CreateInstance<GameEventSO>();
@@ -51,21 +47,16 @@ namespace StateCraft.Editor
             debtCrisis.optionAStability = -20f;
             debtCrisis.optionBText = "Default on Debt";
             debtCrisis.optionBCost = 0f;
-            debtCrisis.optionBStability = -10f; // Leads to debt default event via Economy system dynamically
+            debtCrisis.optionBStability = -10f;
 
-            // Link them
             crisis.nextEventIfA = inflation;
             crisis.nextEventIfB = debtCrisis;
-            crisis.turnsUntilNextEvent = 2; // Trigger consequence 2 months later
+            crisis.turnsUntilNextEvent = 2;
 
-            // Save Chain 1
             AssetDatabase.CreateAsset(debtCrisis, $"{folderPath}/Event_DebtCrisis.asset");
             AssetDatabase.CreateAsset(inflation, $"{folderPath}/Event_InflationSurge.asset");
             AssetDatabase.CreateAsset(crisis, $"{folderPath}/Event_EconomicCrisis.asset");
 
-            // ==========================================
-            // CHAIN 2: Coup Attempt -> Human Rights / Fracture
-            // ==========================================
             GameEventSO coup = ScriptableObject.CreateInstance<GameEventSO>();
             coup.eventTitle = "Coup Attempt";
             coup.description = "Dissident generals have mobilized troops in the capital. They demand your immediate resignation.";
@@ -93,12 +84,10 @@ namespace StateCraft.Editor
             factionSplit.optionBText = "Flee The Capital";
             factionSplit.optionBStability = -30f;
 
-            // Link them
             coup.nextEventIfA = humanRights;
             coup.nextEventIfB = factionSplit;
             coup.turnsUntilNextEvent = 1;
 
-            // Save Chain 2
             AssetDatabase.CreateAsset(humanRights, $"{folderPath}/Event_HumanRights.asset");
             AssetDatabase.CreateAsset(factionSplit, $"{folderPath}/Event_MilitaryFracture.asset");
             AssetDatabase.CreateAsset(coup, $"{folderPath}/Event_CoupAttempt.asset");

@@ -13,14 +13,11 @@ namespace StateCraft.UI
         private UIDocument _uiDocument;
         private VisualElement _root;
 
-        // Tabs
         private Button _tabDashboard, _tabProduction, _tabIndustry, _tabInfrastructure, _tabConstruction;
         private VisualElement _panelDashboard, _panelProduction, _panelIndustry, _panelInfrastructure, _panelConstruction;
         private List<VisualElement> _allPanels = new List<VisualElement>();
 
-
-        // Header
-        private Label _headerCountryName, _headerCreditRating, _headerIncome, _headerExpense;
+private Label _headerCountryName, _headerCreditRating, _headerIncome, _headerExpense;
         private VisualElement _headerFlag;
         private Label _overviewAdviserName, _overviewAdviserTitle, _overviewAdviserBody;
         private Label _overviewAdviserBenefit1, _overviewAdviserBenefit2, _overviewAdviserBenefit3;
@@ -28,37 +25,28 @@ namespace StateCraft.UI
         private Button _overviewApproveButton, _overviewDeclineButton;
         private VisualElement _overviewAdviserImpactGrid, _overviewAdviserActionRow;
 
-        // Dashboard Metrics - Financial
         private Label _valTreasury, _valGDP, _valGDPGrowth, _valInflation, _valExchange, _valBudgetBalance;
         private ProgressBar _debtRatioBar;
         
-        // Policy Controls
         private Slider _sliderTaxRate, _sliderSubsidyLevel;
         private Label _labelTaxRate, _labelSubsidyLevel;
         
-        // New Policy Controls
         private Slider _sliderInterestRate, _sliderTariffRate, _sliderDebtService;
         private Label _labelInterestRate, _labelTariffRate, _labelDebtService;
         private Label _lblDebtServiceCost;
         private Button _btnBorrowDebt, _btnRepayDebt;
 
-        // Debt display
         private Label _valTotalDebt, _valDomesticDebt, _valForeignDebt;
 
-
-        // Dashboard Metrics - Social
-        private Label _valPopulation, _valPoverty, _valUnemployment, _valCorruption, _valApproval;
+private Label _valPopulation, _valPoverty, _valUnemployment, _valCorruption, _valApproval;
         private VisualElement _statusContainer;
 
-        // Ledger
         private VisualElement _incomeList, _expenseList;
         private Label _valNetBalance;
 
-        // Live content
         private Label _economyBriefing;
         private VisualElement _economyLiveFeed;
 
-        // Sub-tab panels
         private VisualElement _productionSummary, _productionCardsContainer, _resourceDepositsList;
         private VisualElement _industrySummary, _industryCardsContainer;
         private VisualElement _infraSummary, _infraCardsContainer;
@@ -67,28 +55,23 @@ namespace StateCraft.UI
         private Label _blueprintSectionTitle;
         private bool _blueprintsVisible;
 
-        // Overview tab live panels
         private VisualElement _econReportsPanel;
         private VisualElement _econSectorsGrid;
         private VisualElement _overviewProjectsPanel;
 
-        // Shared action modal
         private VisualElement _actionModal, _actionModalImpact;
         private Label _actionModalTitle, _actionModalBody;
         private Button _actionModalConfirm, _actionModalCancel, _actionModalClose;
         private System.Action _pendingModalAction;
 
-        // Filter state for Projects tab
         private static readonly string[] _filterCycle = { "ALL", "INFRASTRUCTURE", "ENERGY", "AGRICULTURE", "TECH", "DEFENCE" };
         private int _filterIndex = 0;
 
-        // Draft tax values (staged before APPLY CHANGE)
         private float _draftIncomeTax = -1f;
         private float _draftCorporateTax = -1f;
         private float _draftVAT = -1f;
         private float _draftExportDuty = -1f;
 
-        // Budget share draft (staged before APPROVE BUDGET)
         private float _draftMilitary = -1f;
         private float _draftIntelligence = -1f;
         private float _draftEducation = -1f;
@@ -98,13 +81,11 @@ namespace StateCraft.UI
         private float _draftEnergy = -1f;
         private float _draftWelfare = -1f;
 
-        // Current top adviser recommendation for this session
         private AdviserEngine.AdviserRecommendation? _currentAdviserRec;
         private string _currentAdviserTitle = "";
         private int _currentAdviserTurn = -1;
 
-
-        private void Awake()
+private void Awake()
         {
             _uiDocument = GetComponent<UIDocument>();
             if (_uiDocument != null) _root = _uiDocument.rootVisualElement;
@@ -136,7 +117,6 @@ namespace StateCraft.UI
 
         private void InitializeElements(VisualElement root)
         {
-            // Tabs
             _tabDashboard = root.Q<Button>("TabDashboard");
             _tabProduction = root.Q<Button>("TabProduction");
             _tabIndustry = root.Q<Button>("TabIndustry");
@@ -158,9 +138,7 @@ namespace StateCraft.UI
             _tabInfrastructure.clicked += () => SwitchTab(3);
             _tabConstruction.clicked += () => SwitchTab(4);
 
-
-            // Header
-            _headerCountryName = root.Q<Label>("CountryHeaderName");
+_headerCountryName = root.Q<Label>("CountryHeaderName");
             _headerFlag = root.Q<VisualElement>("CountryHeaderFlag");
             _headerCreditRating = root.Q<Label>("CreditRatingBadge");
             _headerIncome = root.Q<Label>("HeaderIncomeLabel");
@@ -179,7 +157,6 @@ namespace StateCraft.UI
             _overviewApproveButton = root.Q<Button>("OverviewApprovePolicy");
             _overviewDeclineButton = root.Q<Button>("OverviewDeclinePolicy");
 
-            // Financial
             _valTreasury = root.Q<Label>("ValTreasury");
             _valGDP = root.Q<Label>("ValGDP");
             _valGDPGrowth = root.Q<Label>("ValGDPGrowth");
@@ -188,7 +165,6 @@ namespace StateCraft.UI
             _valBudgetBalance = root.Q<Label>("ValBudgetBalance");
             _debtRatioBar = root.Q<ProgressBar>("DebtRatioBar");
 
-            // Policy Controls
             _sliderTaxRate = root.Q<Slider>("SliderTaxRate");
             _labelTaxRate = root.Q<Label>("LabelTaxRate");
             _sliderSubsidyLevel = root.Q<Slider>("SliderSubsidyLevel");
@@ -197,7 +173,6 @@ namespace StateCraft.UI
             if (_sliderTaxRate != null) _sliderTaxRate.RegisterValueChangedCallback(evt => UpdateTaxRate(evt.newValue));
             if (_sliderSubsidyLevel != null) _sliderSubsidyLevel.RegisterValueChangedCallback(evt => UpdateSubsidyLevel(evt.newValue));
 
-            // New Policy Controls
             _sliderInterestRate = root.Q<Slider>("SliderInterestRate");
             _labelInterestRate = root.Q<Label>("LabelInterestRate");
             _sliderTariffRate = root.Q<Slider>("SliderTariffRate");
@@ -208,7 +183,6 @@ namespace StateCraft.UI
             _btnBorrowDebt = root.Q<Button>("BtnBorrowDebt");
             _btnRepayDebt = root.Q<Button>("BtnRepayDebt");
 
-            // Debt breakdown labels
             _valTotalDebt = root.Q<Label>("ValTotalDebt");
             _valDomesticDebt = root.Q<Label>("ValDomesticDebt");
             _valForeignDebt = root.Q<Label>("ValForeignDebt");
@@ -219,13 +193,11 @@ namespace StateCraft.UI
             if (_btnBorrowDebt != null) _btnBorrowDebt.clicked += HandleBorrowDebt;
             if (_btnRepayDebt != null) _btnRepayDebt.clicked += HandleRepayDebt;
 
-            // Social
             _valApproval = root.Q<Label>("ValApproval");
             _statusContainer = root.Q<VisualElement>("StatusIndicators");
             _economyBriefing = root.Q<Label>("EconomyBriefing");
             _economyLiveFeed = root.Q<ScrollView>("EconomyLiveFeed");
 
-            // Ledger
             _incomeList = root.Q<VisualElement>("IncomeList");
             _expenseList = root.Q<VisualElement>("ExpenseList");
             _valNetBalance = root.Q<Label>("ValNetBalance");
@@ -254,12 +226,10 @@ namespace StateCraft.UI
             if (_actionModalCancel != null) _actionModalCancel.clicked += HideEconomyModal;
             if (_actionModalClose != null) _actionModalClose.clicked += HideEconomyModal;
 
-            // Overview live panels
             _econReportsPanel    = root.Q<VisualElement>("EconReportsPanel");
             _econSectorsGrid     = root.Q<VisualElement>("EconSectorsGrid");
             _overviewProjectsPanel = root.Q<VisualElement>("OverviewProjectsPanel");
 
-            // "VIEW ALL SECTORS ›" — jumps to the Industries tab
             var btnViewSectors = root.Q<Label>("BtnViewAllSectors");
             if (btnViewSectors != null)
             {
@@ -270,7 +240,6 @@ namespace StateCraft.UI
                     btnViewSectors.style.color = new StyleColor(new UnityEngine.Color(25/255f, 226/255f, 255/255f)));
             }
 
-            // "VIEW ALL PROJECTS ›" — jumps to the Projects tab
             var btnViewProjects = root.Q<Label>("BtnViewAllProjects");
             if (btnViewProjects != null)
             {
@@ -320,11 +289,8 @@ namespace StateCraft.UI
             });
         }
 
-        // Routes +/- clicks to the correct tax draft field or budget share field
-        // by scanning ancestor label text.
         private void AdjustTaxOrBudgetField(Button button, float delta)
         {
-            // First check if there is a live Slider in the same parent (existing behaviour)
             Slider slider = button.parent?.Q<Slider>();
             if (slider != null)
             {
@@ -335,10 +301,8 @@ namespace StateCraft.UI
             var country = GameManager.Instance?.playerCountry;
             if (country == null) return;
 
-            // Read ancestor label text to determine which field to touch
             string ctx = GetAncestorText(button, 4).ToUpperInvariant();
 
-            // ── Tax rows ────────────────────────────────────────────────────
             if (ctx.Contains("INCOME TAX"))
             {
                 if (_draftIncomeTax < 0f) _draftIncomeTax = country.incomeTaxRate;
@@ -381,7 +345,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // ── Budget rows ─────────────────────────────────────────────────
             if (ctx.Contains("MILITARY"))         { AdjustBudgetShare(ref _draftMilitary,       country.budgetMilitaryShare,       delta, country, "MILITARY");       return; }
             if (ctx.Contains("INTELLIGENCE"))      { AdjustBudgetShare(ref _draftIntelligence,   country.budgetIntelligenceShare,   delta, country, "INTELLIGENCE");    return; }
             if (ctx.Contains("EDUCATION"))         { AdjustBudgetShare(ref _draftEducation,      country.budgetEducationShare,      delta, country, "EDUCATION");       return; }
@@ -392,7 +355,6 @@ namespace StateCraft.UI
             if (ctx.Contains("SOCIAL WELFARE") || ctx.Contains("WELFARE"))
                                                   { AdjustBudgetShare(ref _draftWelfare,         country.budgetWelfareShare,        delta, country, "WELFARE");         return; }
 
-            // Fallback — nothing matched
             RefreshDisplay(); NotifyEconomy("Control adjusted.", Color.grey);
         }
 
@@ -420,7 +382,6 @@ namespace StateCraft.UI
             string action = actionText.ToUpperInvariant();
             var country = GameManager.Instance?.playerCountry;
 
-            // ── Close project side-panel ────────────────────────────────────
             if (action == "×" || action == "X")
             {
                 VisualElement detailCard = FindAncestorWithClass(button, "projects-side-card");
@@ -432,19 +393,16 @@ namespace StateCraft.UI
                 return;
             }
 
-            // ── FILTER (cycles project type) ────────────────────────────────
             if (action.Contains("FILTER"))
             {
                 _filterIndex = (_filterIndex + 1) % _filterCycle.Length;
                 string current = _filterCycle[_filterIndex];
                 NotifyEconomy($"Showing projects: {current}", Color.cyan);
-                // Re-populate the projects section with the new filter
                 if (country != null) PopulateConstruction(country,
                     string.IsNullOrEmpty(country.currencySymbol) ? "₦" : country.currencySymbol);
                 return;
             }
 
-            // ── APPLY CHANGE — commit draft tax values ──────────────────────
             if (action.Contains("APPLY CHANGE"))
             {
                 if (country == null) return;
@@ -452,7 +410,6 @@ namespace StateCraft.UI
                                 _draftVAT          >= 0f || _draftExportDuty   >= 0f;
                 string sym = string.IsNullOrEmpty(country.currencySymbol) ? "₦" : country.currencySymbol;
 
-                // Build impact preview
                 float oldTax = country.taxRate;
                 float newIncome  = _draftIncomeTax    >= 0f ? _draftIncomeTax    : country.incomeTaxRate;
                 float newCorp    = _draftCorporateTax >= 0f ? _draftCorporateTax : country.corporateTaxRate;
@@ -477,7 +434,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // ── RESET ───────────────────────────────────────────────────────
             if (action.Contains("RESET ALLOCATION") || action == "↻  RESET" || action.Contains(" RESET"))
             {
                 ShowEconomyModal(
@@ -495,12 +451,10 @@ namespace StateCraft.UI
                 return;
             }
 
-            // ── APPROVE BUDGET ──────────────────────────────────────────────
             if (action.Contains("APPROVE BUDGET"))
             {
                 if (country == null) return;
                 string sym = string.IsNullOrEmpty(country.currencySymbol) ? "₦" : country.currencySymbol;
-                // Build summary of what will be committed
                 float mil  = _draftMilitary      >= 0f ? _draftMilitary      : country.budgetMilitaryShare;
                 float edu  = _draftEducation     >= 0f ? _draftEducation     : country.budgetEducationShare;
                 float hlt  = _draftHealth        >= 0f ? _draftHealth        : country.budgetHealthShare;
@@ -514,7 +468,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // ── SAVE AS DRAFT ───────────────────────────────────────────────
             if (action.Contains("SAVE AS DRAFT"))
             {
                 if (country == null) return;
@@ -527,7 +480,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // ── AUTO-ALLOCATE ───────────────────────────────────────────────
             if (action.Contains("AUTO-ALLOCATE"))
             {
                 ShowEconomyModal(
@@ -539,7 +491,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // ── INVEST NOW ──────────────────────────────────────────────────
             if (action.Contains("INVEST NOW"))
             {
                 ShowEconomyModal(
@@ -551,7 +502,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // ── UPGRADE TO TIER ─────────────────────────────────────────────
             if (action.Contains("UPGRADE TO TIER"))
             {
                 string industryId = InferIndustryId(button);
@@ -564,7 +514,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // ── COMMISSION blueprint ─────────────────────────────────────────
             if (action.Contains("COMMISSION"))
             {
                 string blueprintName = InferBlueprintName(button);
@@ -577,7 +526,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // ── TAX REFORMS HISTORY ─────────────────────────────────────────
             if (action.Contains("TAX REFORMS HISTORY") || action.Contains("REFORMS HISTORY"))
             {
                 string log = "No reforms logged yet.";
@@ -587,7 +535,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // ── VIEW ALL POLICIES ────────────────────────────────────────────
             if (action.Contains("VIEW ALL POLICIES"))
             {
                 string policies = "No active policies on record.";
@@ -602,7 +549,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // ── VIEW ALL ALERTS ──────────────────────────────────────────────
             if (action.Contains("VIEW ALL ALERTS"))
             {
                 ShowEconomyModal("Economic Alerts", BuildAlertSummary(country),
@@ -610,7 +556,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // ── VIEW FULL REPORT / DETAILED REPORT ──────────────────────────
             if (action.Contains("VIEW FULL REPORT") || action.Contains("VIEW DETAILED REPORT"))
             {
                 ShowEconomyModal("Economy Report", BuildFullReport(country),
@@ -618,7 +563,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // ── VIEW ADVISER NOTES ───────────────────────────────────────────
             if (action.Contains("VIEW ADVISER NOTES"))
             {
                 ShowEconomyModal("Adviser Notes", BuildAdviserNotes(country),
@@ -626,7 +570,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // ── VIEW DETAILS (project cards) ─────────────────────────────────
             if (action.Contains("VIEW DETAILS"))
             {
                 string details = BuildProjectCardDetail(button, country);
@@ -635,7 +578,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // ── VIEW (generic fallback) ──────────────────────────────────────
             if (action.Contains("VIEW"))
             {
                 ShowEconomyModal("Report", actionText.Replace("\n", " "),
@@ -643,7 +585,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // ── APPROVE POLICY ───────────────────────────────────────────────
             if (action.Contains("APPROVE POLICY"))
             {
                 if (country == null) return;
@@ -672,7 +613,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // ── DECLINE ──────────────────────────────────────────────────────
             if (action.Contains("DECLINE"))
             {
                 if (country == null) return;
@@ -740,7 +680,6 @@ namespace StateCraft.UI
             action?.Invoke();
         }
 
-        // ── Commit tax drafts ────────────────────────────────────────────────
         private void CommitTaxDrafts(CountryDataSO country, string sym)
         {
             if (_draftIncomeTax    >= 0f) country.incomeTaxRate    = _draftIncomeTax;
@@ -748,17 +687,14 @@ namespace StateCraft.UI
             if (_draftVAT          >= 0f) country.vatRate           = _draftVAT;
             if (_draftExportDuty   >= 0f) country.exportDutyRate    = _draftExportDuty;
 
-            // Recalculate blended taxRate from all categories
             country.taxRate = country.incomeTaxRate   * 0.35f
                             + country.corporateTaxRate* 0.30f
                             + country.vatRate          * 0.25f
                             + country.exportDutyRate   * 0.10f;
 
-            // Approval / inflation ripple from tax change
             country.publicApproval = Mathf.Max(0f, country.publicApproval - 1f);
             country.inflationRate += country.vatRate * 0.0005f;
 
-            // Log
             string entry = $"Tax reform committed — Income:{country.incomeTaxRate:F1}% Corp:{country.corporateTaxRate:F1}% VAT:{country.vatRate:F1}% Export:{country.exportDutyRate:F1}% (blended {country.taxRate:F1}%)";
             if (country.taxReformLog == null) country.taxReformLog = new System.Collections.Generic.List<string>();
             int turn = GameManager.Instance?.TurnSystem?.CurrentTurn ?? 0;
@@ -776,7 +712,6 @@ namespace StateCraft.UI
             _draftIncomeTax = _draftCorporateTax = _draftVAT = _draftExportDuty = -1f;
         }
 
-        // ── Save budget draft ────────────────────────────────────────────────
         private void SaveBudgetDraft(CountryDataSO country)
         {
             country.budgetMilitaryShare      = _draftMilitary      >= 0f ? _draftMilitary      : country.budgetMilitaryShare;
@@ -805,7 +740,6 @@ namespace StateCraft.UI
             var country = gm?.playerCountry;
             if (country == null) return;
 
-            // Commit any staged budget shares
             country.budgetMilitaryShare       = _draftMilitary      >= 0f ? _draftMilitary      : country.budgetMilitaryShare;
             country.budgetIntelligenceShare   = _draftIntelligence  >= 0f ? _draftIntelligence  : country.budgetIntelligenceShare;
             country.budgetEducationShare      = _draftEducation     >= 0f ? _draftEducation     : country.budgetEducationShare;
@@ -815,7 +749,6 @@ namespace StateCraft.UI
             country.budgetEnergyShare         = _draftEnergy        >= 0f ? _draftEnergy        : country.budgetEnergyShare;
             country.budgetWelfareShare        = _draftWelfare       >= 0f ? _draftWelfare       : country.budgetWelfareShare;
 
-            // Derive actual spending from shares applied to income
             country.militaryBudgetUSD  = Mathf.Max(0.1f, country.income * (country.budgetMilitaryShare    / 100f));
             country.intelligenceBudget = Mathf.Max(0.1f, country.income * (country.budgetIntelligenceShare/ 100f));
             country.spending           = Mathf.Max(0f,   country.income * 0.96f);
@@ -836,7 +769,6 @@ namespace StateCraft.UI
             var country = GameManager.Instance?.playerCountry;
             if (country == null) return;
 
-            // Balanced profile weighted toward infrastructure, education, energy
             country.budgetMilitaryShare      = 20f;
             country.budgetIntelligenceShare  =  7f;
             country.budgetEducationShare     = 16f;
@@ -846,7 +778,6 @@ namespace StateCraft.UI
             country.budgetEnergyShare        =  9f;
             country.budgetWelfareShare       =  4f;
 
-            // Apply immediately
             country.militaryBudgetUSD  = Mathf.Max(0.1f, country.income * 0.20f);
             country.intelligenceBudget = Mathf.Max(0.1f, country.income * 0.07f);
             country.securitySpending   = Mathf.Max(0.1f, country.income * 0.07f);
@@ -1002,9 +933,7 @@ namespace StateCraft.UI
             if (_sliderDebtService  != null) _sliderDebtService.value  = country.debtServiceRatio;
         }
 
-        // ── Report builder helpers ───────────────────────────────────────────
-
-        private static string BuildFullReport(CountryDataSO c)
+private static string BuildFullReport(CountryDataSO c)
         {
             if (c == null) return "No country data available.";
             string sym = string.IsNullOrEmpty(c.currencySymbol) ? "₦" : c.currencySymbol;
@@ -1026,7 +955,6 @@ namespace StateCraft.UI
             sb.AppendLine($"Unemployment: {c.unemploymentRate:F0}%  |  Poverty:  {c.povertyRate:F0}%");
             sb.AppendLine($"Electricity:  {c.electricityLevel:F0}%  |  Food sec: {c.foodSecurity:F0}%");
 
-            // Top risk
             if (c.electricityLevel < 40f) sb.AppendLine("\n⚠ RISK: Power grid below 40% — industrial output constrained.");
             if (c.inflationRate > 0.08f)  sb.AppendLine($"\n⚠ RISK: Inflation {c.inflationRate:P1} — monetary tightening advised.");
             if (debtGDP > 60f)            sb.AppendLine($"\n⚠ RISK: Debt/GDP at {debtGDP:F0}% — above sustainability threshold.");
@@ -1113,7 +1041,6 @@ namespace StateCraft.UI
             if (c == null) return "No project data available.";
             string ctx = GetAncestorText(button, 6).ToUpperInvariant();
 
-            // Try to match to an active project by name
             if (c.activeProjects != null)
             {
                 foreach (var p in c.activeProjects)
@@ -1132,7 +1059,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // Static UXML card detail — pull from ancestor text
             string cardTitle = ctx.Length > 120 ? ctx.Substring(0, 120) : ctx;
             return $"Selected project detail:\n{cardTitle}\n(Live project data will populate once commissioned via Blueprint Library.)";
         }
@@ -1208,7 +1134,6 @@ namespace StateCraft.UI
             if (country == null) return;
             country.debtServiceRatio = val;
             if (_labelDebtService != null) _labelDebtService.text = $"{val:F0}%";
-            // Update monthly cost preview
             RefreshDebtServiceCostLabel(country);
         }
 
@@ -1217,7 +1142,7 @@ namespace StateCraft.UI
             if (_lblDebtServiceCost == null || GameManager.Instance?.DebtSystem == null) return;
             string sym = string.IsNullOrEmpty(country.currencySymbol) ? "₦" : country.currencySymbol;
             float interestUSD = GameManager.Instance.DebtSystem.CalculateInterest(country);
-            float principalPaymentUSD = (country.debt * 0.01f) * (country.debtServiceRatio / 100f); // 1% of principal × ratio
+            float principalPaymentUSD = (country.debt * 0.01f) * (country.debtServiceRatio / 100f);
             float totalMonthlyUSD = interestUSD + principalPaymentUSD;
             float totalMonthlyLocal = (totalMonthlyUSD * country.exchangeRate);
             _lblDebtServiceCost.text = $"Monthly payment: {UiFormat.Money(totalMonthlyLocal, sym)} (interest + principal)";
@@ -1229,16 +1154,13 @@ namespace StateCraft.UI
             var country = gm?.playerCountry;
             if (country == null) return;
 
-            float borrowAmt = 50f; // 50 Billion local
-            // Convert to USD equivalent for the debt principal pools
+            float borrowAmt = 50f;
             float usdEquiv = borrowAmt / country.exchangeRate;
             
-            // Add to principal
             country.domesticDebt += usdEquiv * 0.5f;
             country.foreignDebt += usdEquiv * 0.5f;
             country.debt = country.domesticDebt + country.foreignDebt;
             
-            // Add to treasury
             gm.playerBudget += borrowAmt;
             country.treasury = gm.playerBudget;
 
@@ -1254,7 +1176,7 @@ namespace StateCraft.UI
             var country = gm?.playerCountry;
             if (country == null) return;
 
-            float repayAmt = 50f; // 50 Billion local
+            float repayAmt = 50f;
             if (gm.playerBudget < repayAmt)
             {
                 NotificationManager.Instance?.AddNotification("Insufficient treasury funds to repay debt.", Color.red);
@@ -1270,7 +1192,6 @@ namespace StateCraft.UI
 
             float repayUSD = repayAmt / country.exchangeRate;
             
-            // Pay off domestic debt first, then foreign debt
             if (country.domesticDebt >= repayUSD)
             {
                 country.domesticDebt -= repayUSD;
@@ -1283,7 +1204,6 @@ namespace StateCraft.UI
             }
             country.debt = country.domesticDebt + country.foreignDebt;
 
-            // Deduct from budget
             gm.playerBudget -= repayAmt;
             country.treasury = gm.playerBudget;
 
@@ -1293,8 +1213,7 @@ namespace StateCraft.UI
             RefreshDisplay();
         }
 
-
-        public void Show()
+public void Show()
         {
             var panel = _root.Q<VisualElement>("EconomyDashboard");
             if (panel != null)
@@ -1302,7 +1221,7 @@ namespace StateCraft.UI
                 panel.style.display = DisplayStyle.Flex;
                 UIStateManager.Instance?.ApplySafeTransition(panel, true, 0.4f);
                 RefreshDisplay();
-                UIStateManager.FixScrollViews(panel); // Fix scrollbars in builds after UI refresh
+                UIStateManager.FixScrollViews(panel);
             }
         }
 
@@ -1319,10 +1238,8 @@ namespace StateCraft.UI
             var country = gm.playerCountry;
             string sym = string.IsNullOrEmpty(country.currencySymbol) ? "₦" : country.currencySymbol;
 
-            // Keep treasury in sync with HUD (playerBudget is authoritative, in billions)
             country.treasury = gm.playerBudget;
 
-            // Header
             if (_headerCountryName != null) _headerCountryName.text = country.countryName.ToUpper();
             
             if (_headerFlag != null)
@@ -1342,13 +1259,11 @@ namespace StateCraft.UI
                 else _headerCreditRating.style.color = new Color(255/255f, 82/255f, 82/255f);
             }
 
-            // Header date box
             if (_root.Q<Label>("DateMain") is Label lDateMain)
                 lDateMain.text = gm?.TurnSystem != null ? gm.TurnSystem.CurrentDate : "—";
             if (_root.Q<Label>("DateSub") is Label lDateSub)
                 lDateSub.text = System.DateTime.Now.ToString("dddd, HH:mm");
 
-            // KPI strip: MoM deltas & debt ratio
             if (_root.Q<Label>("ValInflationDelta") is Label lInfD)
             {
                 float dInf = country.inflationRate - country.prevInflationRate;
@@ -1376,7 +1291,6 @@ namespace StateCraft.UI
             float incomeB = country.income * country.exchangeRate;
             float spendingB = country.spending * country.exchangeRate;
             
-            // Reconstruct the exact net change as the GameManager calculates it (with interest)
             float domesticInterestLocal =  gm.DebtSystem != null ? (gm.DebtSystem.CalculateDomesticInterest(country) * country.exchangeRate) : 0f;
             float foreignInterestUSD = gm.DebtSystem != null ? gm.DebtSystem.CalculateForeignInterest(country) : 0f;
             float serviceMultiplier = country.debtServiceRatio / 100f;
@@ -1384,7 +1298,6 @@ namespace StateCraft.UI
             float actualForeignPaidUSD = foreignInterestUSD * serviceMultiplier;
             float foreignInterestLocal = actualForeignPaidUSD * country.exchangeRate;
             
-            // Active Operations Maintenance
             float totalOpCostLocal = 0f;
             if (country.activeOperations != null && country.activeOperations.Count > 0)
             {
@@ -1396,7 +1309,6 @@ namespace StateCraft.UI
                 totalOpCostLocal = totalOpCostUSD * country.exchangeRate;
             }
 
-            // Bring in Trade Deal / Trade Agreement net changes so they reflect in the summary
             float totalTradeNetLocal = 0f;
             if (gm.DiplomacySystem is DiplomacySystem diplo)
             {
@@ -1460,7 +1372,6 @@ namespace StateCraft.UI
             if (_sliderSubsidyLevel != null) _sliderSubsidyLevel.SetValueWithoutNotify(country.subsidyLevel);
             if (_labelSubsidyLevel != null) _labelSubsidyLevel.text = $"{country.subsidyLevel:F0}%";
 
-            // Refresh new sliders
             if (_sliderInterestRate != null) _sliderInterestRate.SetValueWithoutNotify(country.centralBankInterestRate);
             if (_labelInterestRate != null) _labelInterestRate.text = $"{country.centralBankInterestRate:F1}%";
             if (_sliderTariffRate != null) _sliderTariffRate.SetValueWithoutNotify(country.importTariffRate);
@@ -1468,7 +1379,6 @@ namespace StateCraft.UI
             if (_sliderDebtService != null) _sliderDebtService.SetValueWithoutNotify(country.debtServiceRatio);
             if (_labelDebtService != null) _labelDebtService.text = $"{country.debtServiceRatio:F0}%";
 
-            // Debt breakdown display
             string debtSym = sym;
             float totalDebtLocal = (country.debt * country.exchangeRate);
             float domDebtLocal  = (country.domesticDebt  * country.exchangeRate);
@@ -1478,12 +1388,10 @@ namespace StateCraft.UI
             if (_valForeignDebt  != null) _valForeignDebt.text  = UiFormat.Money(forDebtLocal,  debtSym);
             RefreshDebtServiceCostLabel(country);
 
-            // Update Borrow/Repay button texts based on currency symbol
             if (_btnBorrowDebt != null) _btnBorrowDebt.text = $"BORROW {sym}50B";
             if (_btnRepayDebt != null)
             {
                 _btnRepayDebt.text = $"REPAY {sym}50B";
-                // Only enable repayment if player has money and has debt to repay
                 _btnRepayDebt.SetEnabled(gm.playerBudget >= 50f && country.debt > 0f);
             }
 
@@ -1715,17 +1623,13 @@ namespace StateCraft.UI
             _incomeList.Clear();
             _expenseList.Clear();
 
-            // All base estimates (GDP, income, debt, spending) are stored in Billions of USD.
-            // We multiply by exchangeRate to get Billions of Local Currency, ready for AddLedgerRow.
-
-            float monthlyGDP = country.gdp / 12f;
+float monthlyGDP = country.gdp / 12f;
             float taxEstUSD = monthlyGDP * (country.taxRate / 100f) * 0.35f;
             float taxEstB = taxEstUSD * country.exchangeRate;
             
             float tariffEstUSD = monthlyGDP * 0.015f * (country.importTariffRate / 100f);
             float tariffEstB = tariffEstUSD * country.exchangeRate;
             
-            // Extract approximate resource dividend from income formula, backing out tax and tariff
             float resourceEstUSD = Mathf.Max(0f, country.income - taxEstUSD - tariffEstUSD);
             float resourceEstB = resourceEstUSD * country.exchangeRate;
 
@@ -1735,7 +1639,6 @@ namespace StateCraft.UI
             
             if (country.foreignAidReceived > 0f)
             {
-                // foreignAidReceived is mostly stored in Billions in CountryDataSO as well
                 float aidB = country.foreignAidReceived * country.exchangeRate;
                 AddLedgerRow(_incomeList, "Foreign Aid", aidB, true, sym);
             }
@@ -1744,7 +1647,6 @@ namespace StateCraft.UI
             {
                 foreach (var deal in diplo.ActiveDeals)
                 {
-                    // ActiveDeals monthlyPaymentUSD is stored in absolute string dollars, so we DO divide by 1e9f here
                     float dealB = (deal.monthlyPaymentUSD * country.exchangeRate) / 1e9f;
                     if (deal.sellerCountry == country.countryName)
                         AddLedgerRow(_incomeList, $"Trade: {deal.resource} export", dealB, true, sym);
@@ -1759,7 +1661,6 @@ namespace StateCraft.UI
                 {
                     if (agr.status == TradeAgreementStatus.Active)
                     {
-                        // monthlyPaymentUSD is absolute dollars, so we divide by 1e9f to match Billions
                         float valueInBillions = (agr.monthlyPaymentUSD * country.exchangeRate) / 1e9f;
                         if (agr.isSeller)
                         {
@@ -1773,7 +1674,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // Military budget is directly in Billions USD
             float militaryB = country.militaryBudgetUSD * country.exchangeRate;
             AddLedgerRow(_expenseList, "Military Budget", militaryB, false, sym);
 
@@ -1788,22 +1688,20 @@ namespace StateCraft.UI
                 AddLedgerRow(_expenseList, "Active Operations", totalOpCostLocal, false, sym);
             }
 
-            // Welfare Subsidies: country.gdp is in Billions. 
             float subsidyCostUSD = (country.gdp / 12f) * (country.subsidyLevel / 100f);
             float subsidyCostB = subsidyCostUSD * country.exchangeRate;
             AddLedgerRow(_expenseList, "Welfare Subsidies", subsidyCostB, false, sym);
 
             if (country.isImportingUranium)
             {
-                // Uranium imports is 0.05f Billions of USD.
                 float uraniumCostB = 0.05f * country.exchangeRate;
                 AddLedgerRow(_expenseList, "Uranium Imports", uraniumCostB, false, sym);
             }
 
             if (gm.DebtSystem != null && country.debt > 0f)
             {
-                float interestUSD = gm.DebtSystem.CalculateInterest(country); // returns Billions
-                float principalPaymentUSD = (country.debt * 0.01f) * (country.debtServiceRatio / 100f); // returns Billions
+                float interestUSD = gm.DebtSystem.CalculateInterest(country);
+                float principalPaymentUSD = (country.debt * 0.01f) * (country.debtServiceRatio / 100f);
                 float totalMonthlyUSD = interestUSD + principalPaymentUSD;
                 
                 float totalDebtCostB = totalMonthlyUSD * country.exchangeRate;
@@ -2195,9 +2093,8 @@ namespace StateCraft.UI
                 _blueprintCatalog.Add(card);
             }
         }
-    
 
-        private void RefreshTaxationTab(CountryDataSO country, string sym)
+private void RefreshTaxationTab(CountryDataSO country, string sym)
         {
             if (_root == null) return;
             
@@ -2242,7 +2139,6 @@ namespace StateCraft.UI
             var lblRatio = _root.Q<Label>("TaxTotal_Ratio");
             float gdpLocal = country.gdp * country.exchangeRate;
             if (lblRatio != null) lblRatio.text = $"{(gdpLocal > 0 ? ((total * 12f) / gdpLocal * 100f) : 0f):F1}%";
-            // ── Tax MoM Delta ────────────────────────────────────────────────
             var lblMoM = _root.Q<Label>("TaxTotal_MoMDelta");
             if (lblMoM != null) {
                 float prevTaxRev = country.prevMonthlyTaxRevenue * country.exchangeRate;
@@ -2254,7 +2150,6 @@ namespace StateCraft.UI
                 lblMoM.AddToClassList(diff >= 0 ? "positive" : "negative");
             }
 
-            // ── Tax Performance & Compliance ────────────────────────────────
             float compliance = Mathf.Clamp(100f - country.corruptionIndex, 10f, 100f);
             float eff = Mathf.Lerp(60f, 95f, country.stability / 100f);
             float gap = total * (1f - (eff / 100f));
@@ -2264,7 +2159,6 @@ namespace StateCraft.UI
             if (_root.Q<Label>("TaxGap") is Label lGap) lGap.text = UiFormat.Money(gap, sym);
             if (_root.Q<Label>("TaxArrears") is Label lArr) lArr.text = UiFormat.Money(country.taxArrears * country.exchangeRate, sym);
 
-            // Donut
             if (_root.Q<Label>("ComplianceDonut_Label") is Label lDonut) lDonut.text = $"{compliance:F0}%\nCompliance";
             if (_root.Q<Label>("ComplianceCompliant") is Label lC1) lC1.text = $"{compliance:F0}%";
             float nonComp = Mathf.Max(0f, 100f - compliance);
@@ -2273,12 +2167,10 @@ namespace StateCraft.UI
             if (_root.Q<Label>("CompliancePartial") is Label lC2) lC2.text = $"{partial:F0}%";
             if (_root.Q<Label>("ComplianceNonCompliant") is Label lC3) lC3.text = $"{outright:F0}%";
 
-            // ── Active Policies ─────────────────────────────────────────────
             var policiesCont = _root.Q<VisualElement>("TaxPoliciesContainer");
             if (policiesCont != null) {
                 while (policiesCont.childCount > 1) policiesCont.RemoveAt(1);
 
-                // Add policies of type Economic
                 int added = 0;
                 if (country.activePolicies != null) {
                     foreach (var p in country.activePolicies) {
@@ -2288,7 +2180,6 @@ namespace StateCraft.UI
                             
                             var info = new VisualElement();
                             var title = new Label(p.policyName); title.AddToClassList("tax-row-title"); info.Add(title);
-                            // we don't have description in Policy string easily, we'll just put a generic text or nothing
                             var copy = new Label("Active economic reform policy."); copy.AddToClassList("tax-row-copy"); info.Add(copy);
                             row.Add(info);
 
@@ -2309,7 +2200,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // ── Tax Simulator ───────────────────────────────────────────────
             RefreshTaxSimulator(country, sym, total);
 
         }
@@ -2328,7 +2218,6 @@ namespace StateCraft.UI
             float totalB = country.spending * country.exchangeRate;
             float revTotalB = country.income * country.exchangeRate;
             
-            // 15. Summary Box
             if (_root.Q<Label>("BudgetSummary_Revenue") is Label lRev) lRev.text = UiFormat.Money(revTotalB, sym);
             if (_root.Q<Label>("BudgetSummary_Expenditure") is Label lExp) lExp.text = UiFormat.Money(totalB, sym);
             float balB = revTotalB - totalB;
@@ -2344,14 +2233,12 @@ namespace StateCraft.UI
                 lStatus.AddToClassList(balB >= 0 ? "positive" : "negative");
             }
 
-            // 16. Available for Allocation
             if (_root.Q<Label>("BudgetAvailable") is Label lAv) lAv.text = UiFormat.Money(revTotalB, sym) + " / month";
             if (_root.Q<Label>("BudgetLastBalance") is Label lLast) {
                 float lastB = country.prevMonthBalance * country.exchangeRate;
                 lLast.text = $"{(lastB >= 0 ? "+" : "")}{UiFormat.Money(lastB, sym)}";
             }
 
-            // Row updates
             float milPct = _draftMilitary >= 0 ? _draftMilitary : country.budgetMilitaryShare;
             float infraPct = _draftInfrastructure >= 0 ? _draftInfrastructure : country.budgetInfrastructureShare;
             float eduPct = _draftEducation >= 0 ? _draftEducation : country.budgetEducationShare;
@@ -2370,7 +2257,6 @@ namespace StateCraft.UI
             UpdateBudgetStaticRow("Energy", energyPct, totalB, sym);
             UpdateBudgetStaticRow("Welfare", welPct, totalB, sym);
 
-            // 17. Donut Legend
             if (_root.Q<Label>("BudgetDonut_Label") is Label lDonut) lDonut.text = $"{UiFormat.Money(totalB, sym)}\nTotal";
             if (_root.Q<VisualElement>("BudgetDonut_Legend") is VisualElement vLeg) {
                 vLeg.Clear();
@@ -2384,7 +2270,6 @@ namespace StateCraft.UI
                 vLeg.Add(new Label($"● Welfare                  {welPct:F0}%   ({UiFormat.Money(totalB * welPct / 100f, sym)})"));
             }
 
-            // 18. Budget Trend Chart
             if (_root.Q<Label>("BudgetTrendChart") is Label lChart && country.budgetHistory != null) {
                 var sb = new System.Text.StringBuilder();
                 sb.AppendLine("Net Balance Trend (Last 6 Months)");
@@ -2398,16 +2283,13 @@ namespace StateCraft.UI
                 lChart.text = sb.ToString();
             }
 
-            // 19. Key Effects Grid
             if (_root.Q<Label>("BudgetEffect_Growth") is Label lEg) lEg.text = $"Economic Growth\n{(country.gdpGrowthRate > 0 ? "+" : "")}{country.gdpGrowthRate:P1}";
             if (_root.Q<Label>("BudgetEffect_Military") is Label lEm) lEm.text = $"Military Readiness\n{country.militaryReadiness:F0}%";
             if (_root.Q<Label>("BudgetEffect_Inflation") is Label lEi) lEi.text = $"Inflation\n{country.inflationRate:P1}";
-            // approx employment effect from budget size vs gdp
             if (_root.Q<Label>("BudgetEffect_Employment") is Label lEmp) lEmp.text = "Employment Base\nStable";
             if (_root.Q<Label>("BudgetEffect_Approval") is Label lEa) lEa.text = $"Approval Rating\n{country.publicApproval:F0}%";
             if (_root.Q<Label>("BudgetEffect_Debt") is Label lEd) lEd.text = $"Debt Change\n{(balB < 0 ? "+" : "")}{UiFormat.Money(Mathf.Abs(balB), sym)}";
 
-            // 20. Alerts
             var alertsCont = _root.Q<VisualElement>("BudgetAlertsContainer");
             if (alertsCont != null) {
                 while (alertsCont.childCount > 1) alertsCont.RemoveAt(1);
@@ -2429,7 +2311,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // 21. Adviser
             if (_currentAdviserRec != null) {
                 if (_root.Q<Label>("BudgetAdviserBody") is Label lAdv) lAdv.text = _currentAdviserRec.Value.Rationale;
             }
@@ -2464,7 +2345,6 @@ namespace StateCraft.UI
                 if (rev < weakRev) { weakRev = rev; weakInd = ind; }
             }
 
-            // Overview Card
             if (_root.Q<Label>("IndustryOverview_Output") is Label lOut) lOut.text = UiFormat.Money(totalRev, sym) + " / mo";
             float pctGDP = country.gdp > 0 ? (totalRev / (country.gdp * country.exchangeRate / 12f)) * 100f : 0f;
             if (_root.Q<Label>("IndustryOverview_GDPPct") is Label lGdpPct) lGdpPct.text = $"Total Contribution to GDP: {pctGDP:F1}%";
@@ -2497,24 +2377,20 @@ namespace StateCraft.UI
                 var stat1 = _root.Q<Label>($"Industry{ind.Id}_Stat1");
                 if (stat1 != null) stat1.text = $"Contribution to GDP\n{contrib:F0}%";
                 
-                // Ring
                 var ringObj = _root.Q<Label>($"Ring{ind.Id}");
                 if (ringObj != null) ringObj.text = $"{contrib:F0}%\n{ind.Title}";
             }
 
-            // Adviser
             if (_currentAdviserRec != null) {
                 if (_root.Q<Label>("IndustryAdviserName") is Label aName) aName.text = "Dr. Adekunle Okafor";
                 if (_root.Q<Label>("IndustryAdviserRec") is Label aRec) aRec.text = _currentAdviserRec.Value.Category;
                 if (_root.Q<Label>("IndustryAdviserBody") is Label aBody) aBody.text = _currentAdviserRec.Value.Rationale;
             }
 
-            // Alerts
             var alertsCont = _root.Q<VisualElement>("IndustryAlertsContainer");
             if (alertsCont != null) {
                 while (alertsCont.childCount > 1) alertsCont.RemoveAt(1);
                 var alerts = BuildUIAlerts(country).FindAll(a => a.Severity != AlertSeverity.Info);
-                // just pick top 3
                 int ct = 0;
                 foreach (var a in alerts) {
                     if (ct >= 3) break;
@@ -2618,8 +2494,7 @@ namespace StateCraft.UI
 
             card.Add(new Label($"Total Cost: {UiFormat.Money(p.totalCost, sym)}\nSpent: {UiFormat.Money(spent, sym)}\nMonthly: {UiFormat.Money(monthlyVal, sym)}\nLeft: {p.monthsRemaining} Months") { style = { color = Color.grey, fontSize = 8, marginTop = 8, whiteSpace = WhiteSpace.Normal } });
 
-            
-            card.RegisterCallback<ClickEvent>(evt => {
+card.RegisterCallback<ClickEvent>(evt => {
                 if (_root.Q<Label>("SideProject_Title") is Label tLabel) tLabel.text = p.projectName.ToUpper();
                 if (_root.Q<Label>("SideProject_Overview") is Label oLabel) oLabel.text = string.IsNullOrEmpty(p.description) ? "National strategic project driving growth across key economic sectors." : p.description;
                 if (_root.Q<VisualElement>("SideProject_Info") is VisualElement infoView) {
@@ -2645,9 +2520,7 @@ namespace StateCraft.UI
             container.Add(card);
         }
 
-        // ── Overview Tab live data ───────────────────────────────────────────
-
-        private void RefreshOverviewTab(CountryDataSO country, string sym, GameManager gm)
+private void RefreshOverviewTab(CountryDataSO country, string sym, GameManager gm)
         {
             RefreshOverviewReports(country, gm);
             RefreshOverviewSectors(country, sym);
@@ -2666,7 +2539,6 @@ namespace StateCraft.UI
             if (_root.Q<Label>("ValDomesticDebt") is Label lDom) lDom.text = UiFormat.Money(debtDom, sym);
             if (_root.Q<Label>("ValForeignDebt") is Label lFor) lFor.text = UiFormat.Money(debtFor, sym);
             
-            // The progress bar sits between Domestic and Foreign, so it represents the composition ratio.
             if (_root.Q<ProgressBar>("DebtRatioBar") is ProgressBar pBar) {
                 pBar.value = totalDebt > 0 ? (debtDom / totalDebt) * 100f : 0f;
             }
@@ -2674,23 +2546,16 @@ namespace StateCraft.UI
             if (_root.Q<Label>("LabelDebtService") is Label lDebtService) lDebtService.text = $"{country.debtServiceRatio:F0}%";
             if (_root.Q<Slider>("SliderDebtService") is Slider sDebtService) sDebtService.value = country.debtServiceRatio;
             
-            // Calculate a synthetic monthly payment display based on the ratio
             float monthlyCost = totalDebt * 0.05f / 12f * (country.debtServiceRatio / 100f);
             if (_root.Q<Label>("LblDebtServiceCost") is Label lCost) {
                 lCost.text = $"Monthly payment: {UiFormat.Money(monthlyCost, sym)} (interest + principal)";
             }
         }
 
-        /// <summary>
-        /// Replaces the four static Economic Reports rows with live FeedLines
-        /// from BuildEconomyFeed. The panel header is preserved.
-        /// Same CSS classes — design unchanged.
-        /// </summary>
         private void RefreshOverviewReports(CountryDataSO country, GameManager gm)
         {
             if (_econReportsPanel == null) return;
 
-            // Keep only the header (index 0), remove all report rows below it
             while (_econReportsPanel.childCount > 1)
                 _econReportsPanel.RemoveAt(1);
 
@@ -2701,10 +2566,8 @@ namespace StateCraft.UI
             {
                 var line = feed[i];
 
-                // Decide row class from Color (matches UXML classes: alert/good/warning/market)
                 string rowClass = ColorToReportClass(line.Color);
 
-                // Icon glyph by class — using Font Awesome 6 Solid codepoints
                 string icon = rowClass == "alert"  ? FaIcons.Fire
                             : rowClass == "good"   ? FaIcons.ArrowTrendUp
                             : rowClass == "market" ? FaIcons.Globe
@@ -2715,10 +2578,8 @@ namespace StateCraft.UI
                                  : rowClass == "market" ? "fa-cyan"
                                  :                       "fa-gold";
 
-                // Category label class
                 string catClass = rowClass == "alert" ? "negative" : (rowClass == "good" ? "positive" : (rowClass == "market" ? "market" : "warning"));
 
-                // Category display name
                 string catLabel = rowClass == "alert" ? "ECONOMIC ALERT"
                                 : rowClass == "good"  ? "POSITIVE DEVELOPMENT"
                                 : rowClass == "market"? "GLOBAL MARKET UPDATE"
@@ -2763,17 +2624,12 @@ namespace StateCraft.UI
 
         private static string ColorToReportClass(Color c)
         {
-            // Green → good, Red → alert, Yellow/amber → warning, everything else → market
             if (c.r < 0.2f && c.g > 0.7f) return "good";
             if (c.r > 0.7f && c.g < 0.5f) return "alert";
             if (c.r > 0.7f && c.g > 0.6f) return "warning";
             return "market";
         }
 
-        /// <summary>
-        /// Replaces the four static sector cards with live data from Industries[].
-        /// Same CSS classes — design unchanged.
-        /// </summary>
         private void RefreshOverviewSectors(CountryDataSO country, string sym)
         {
             if (_econSectorsGrid == null) return;
@@ -2784,7 +2640,6 @@ namespace StateCraft.UI
             foreach (var ind in EconomyTabContent.Industries)
                 totalRev += ind.GetRevenueB(country);
 
-            // The grid design supports exactly 4 cards; taking the top 4 by revenue prevents layout crushing
             var topSectors = new System.Collections.Generic.List<EconomyTabContent.IndustryDef>(EconomyTabContent.Industries);
             topSectors.Sort((a, b) => b.GetRevenueB(country).CompareTo(a.GetRevenueB(country)));
             int maxSectors = UnityEngine.Mathf.Min(topSectors.Count, 4);
@@ -2802,7 +2657,6 @@ namespace StateCraft.UI
                         ? $"{workforce / 1000f:F1}k"
                         : $"{workforce:F0}";
 
-                // Map sorted sector back to original index for consistent icon assignment
                 int origIdx = System.Array.IndexOf(EconomyTabContent.Industries, ind);
                 string faIcon = (origIdx >= 0 && origIdx < FaIcons.SectorIcons.Length)
                     ? FaIcons.SectorIcons[origIdx]
@@ -2811,10 +2665,8 @@ namespace StateCraft.UI
 
                 var card = new VisualElement();
                 card.AddToClassList("econ-sector-card");
-                // Right column cards (i=1,3) need no right margin — USS nth-child not supported in Unity
                 if (i % 2 == 1) card.style.marginRight = 0;
 
-                // Title row: FA icon + sector name
                 var titleRow = new VisualElement();
                 titleRow.style.flexDirection = FlexDirection.Row;
                 titleRow.style.alignItems = Align.Center;
@@ -2829,7 +2681,7 @@ namespace StateCraft.UI
 
                 var titleLbl = new Label(safeTitle);
                 titleLbl.AddToClassList("econ-sector-title");
-                titleLbl.style.marginBottom = 0; // already handled by titleRow marginBottom
+                titleLbl.style.marginBottom = 0;
                 titleRow.Add(titleLbl);
                 card.Add(titleRow);
 
@@ -2862,16 +2714,10 @@ namespace StateCraft.UI
             }
         }
 
-        /// <summary>
-        /// Replaces the three static project rows with live activeProjects data.
-        /// Falls back to hiding the section if no active projects exist.
-        /// Same CSS classes — design unchanged.
-        /// </summary>
         private void RefreshOverviewProjects(CountryDataSO country, string sym)
         {
             if (_overviewProjectsPanel == null) return;
 
-            // Keep only the panel header (index 0)
             while (_overviewProjectsPanel.childCount > 1)
                 _overviewProjectsPanel.RemoveAt(1);
 
@@ -2901,10 +2747,8 @@ namespace StateCraft.UI
                     : 0f;
                 float monthlyCost = p.totalMonths > 0 ? p.totalCost / p.totalMonths : p.totalCost;
 
-                // CSS class for the progress bar (match original "econ-progress" / "econ-progress warning-bar")
                 string barClass = pct < 40f ? "econ-progress warning-bar" : "econ-progress";
 
-                // Thumb class derived from project type string
                 string thumbClass = p.projectType?.ToLower().Contains("tech") == true ? "tech"
                                   : p.projectType?.ToLower().Contains("rail") == true ? "rail"
                                   : "";

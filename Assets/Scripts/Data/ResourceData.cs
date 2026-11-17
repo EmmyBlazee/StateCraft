@@ -23,7 +23,7 @@ namespace StateCraft.Data
     {
         public MineralType type;
         [Range(0, 100)]
-        public float abundance; // How much they have
-        public float marketValue; // Current global price (multiplier)
+        public float abundance;
+        public float marketValue;
     }
 }

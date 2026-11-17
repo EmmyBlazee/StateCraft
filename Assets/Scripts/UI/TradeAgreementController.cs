@@ -43,7 +43,6 @@ namespace StateCraft.UI
             var uiDoc = GetComponent<UIDocument>();
             if (uiDoc == null) return;
             
-            // Force this panel to render in front of standard dashboards
             uiDoc.sortingOrder = 100;
             
             _root = uiDoc.rootVisualElement;
@@ -129,7 +128,7 @@ namespace StateCraft.UI
             
             if (!string.IsNullOrEmpty(_currentProposalId))
             {
-                OnReject(); // Auto-reject if closed while proposing
+                OnReject();
             }
         }
 
@@ -168,7 +167,6 @@ namespace StateCraft.UI
             }
             else
             {
-                // If buying, player can attempt to buy ANY valid trade resource
                 resources.Add("Oil");
                 resources.Add("Gas");
                 resources.Add("Uranium");
@@ -211,7 +209,6 @@ namespace StateCraft.UI
             {
                 if (country == gm.playerCountry) continue;
 
-                // ── GATE: only show countries with a signed Trade Agreement ──
                 if (!StateCraft.Systems.DiplomacySystem.HasSignedTradeAgreementTreaty(gm.playerCountry, country))
                     continue;
 
@@ -219,7 +216,6 @@ namespace StateCraft.UI
                 
                 if (isSelling)
                 {
-                    // Player sells, AI buys (AI must have a shortage)
                     switch (selectedResource)
                     {
                         case TradeResourceType.Oil: validPartner = country.invOilBarrels < 2000000; break;
@@ -232,7 +228,6 @@ namespace StateCraft.UI
                 }
                 else
                 {
-                    // Player buys, AI sells (AI must have a surplus / abundance)
                     switch (selectedResource)
                     {
                         case TradeResourceType.Oil: validPartner = country.invOilBarrels > 1000000 || country.resources.Exists(r => r.type == MineralType.Oil); break;
@@ -282,7 +277,7 @@ namespace StateCraft.UI
             if (string.IsNullOrEmpty(selectedStr) || selectedStr == "None") return;
             
             bool isSelling = _dropdownTradeDirection == null || _dropdownTradeDirection.value == "Export (Sell)";
-            if (!isSelling) return; // Only makes sense to Max when selling your own stock
+            if (!isSelling) return;
 
             string resourceEnumStr = selectedStr.Split(' ')[0];
             if (System.Enum.TryParse(resourceEnumStr, out TradeResourceType resource))
@@ -458,11 +453,10 @@ namespace StateCraft.UI
                 _btnPropose.text = errorMsg;
                 _btnPropose.style.backgroundColor = new StyleColor(Color.red);
                 
-                // Reset after 3 seconds
                 _btnPropose.schedule.Execute(() => 
                 {
                     _btnPropose.text = "PROPOSE TRADE";
-                    _btnPropose.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0)); // Revert to stylesheet default
+                    _btnPropose.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0));
                 }).StartingIn(3000);
             }
         }
@@ -481,7 +475,6 @@ namespace StateCraft.UI
             string partnerName = _dropdownPartner.value;
             if (partnerName == "No Interested Partners" || string.IsNullOrEmpty(partnerName))
             {
-                // Give a more helpful message if the list is empty due to no treaties
                 bool hasAnyTreaty = gm.playerCountry?.activeTreaties != null &&
                     gm.playerCountry.activeTreaties.Exists(t => t.treatyName == "Trade Agreement");
                 if (!hasAnyTreaty)
@@ -510,7 +503,6 @@ namespace StateCraft.UI
                 return;
             }
             
-            // Extract the first word which maps to TradeResourceType
             string resourceEnumStr = selectedStr.Split(' ')[0];
             TradeResourceType resource = (TradeResourceType)System.Enum.Parse(typeof(TradeResourceType), resourceEnumStr);
             
@@ -530,8 +522,7 @@ namespace StateCraft.UI
             bool isBulk = false;
             
             float pricePerUnit = GlobalTradeMarket.GetPricePerUnit(resource);
-            float basePayment = (quantity * pricePerUnit) / 1e6f; // Store payment internally in Millions if needed, wait, the game uses raw USD or Millions? 
-            // In DiplomacySystem we usually use raw USD. Let's use raw USD.
+            float basePayment = (quantity * pricePerUnit) / 1e6f;
             basePayment = quantity * pricePerUnit;
 
             if (gm.DiplomacySystem is DiplomacySystem diplo)
@@ -545,7 +536,6 @@ namespace StateCraft.UI
                 proposal.resourceQuantity = quantity;
                 proposal.isBulkTransfer = isBulk;
                 
-                // Immediately show the counter offer (since AI evaluation is synchronous in the plan)
                 OnReceiveCounterOffer(proposal);
             }
         }
@@ -575,7 +565,6 @@ namespace StateCraft.UI
                 _currentProposalId = null;
                 _counterOfferArea.style.display = DisplayStyle.None;
                 
-                // Refresh diplomacy dashboard to show the new agreement
                 var dashboard = FindObjectOfType<DiplomacyDashboardController>();
                 if (dashboard != null) dashboard.RefreshDiplomacyData();
                 Hide();

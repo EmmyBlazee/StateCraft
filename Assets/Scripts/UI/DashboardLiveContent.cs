@@ -9,9 +9,6 @@ using StateCraft.Systems;
 
 namespace StateCraft.UI
 {
-    /// <summary>
-    /// Shared builders for live dashboard feeds, briefings, and game-driven status text.
-    /// </summary>
     public static class DashboardLiveContent
     {
         public struct FeedLine

@@ -4,7 +4,7 @@ using StateCraft.UI;
 
 namespace StateCraft.Map
 {
-    [RequireComponent(typeof(Collider2D))] // Assumes 2D map for now
+    [RequireComponent(typeof(Collider2D))]
     public class CountryController : MonoBehaviour
     {
         public CountryDataSO countryData;
@@ -50,15 +50,10 @@ namespace StateCraft.Map
 
         private void OnMouseDown()
         {
-// Block click if mouse is over UI Toolkit elements
             if (UIStateManager.Instance != null && UIStateManager.Instance.IsPointerOverUI())
             {
 return;
             }
-
-            // Removed legacy EventSystem check because UI Toolkit's Event System bridge 
-            // falsely flags transparent full-screen layout containers as interactive.
-            // We now solely rely on UIStateManager.Instance.IsPointerOverUI() above.
 
 if (MapManager.Instance != null)
                 MapManager.Instance.SelectCountry(countryData);
@@ -80,10 +75,8 @@ if (MapManager.Instance != null)
                 return;
             }
 
-            // Update color based on stability or other metrics
             if (countryData != null)
             {
-                // Dynamic coloring: Less stability = more red
                 float stabilityFactor = countryData.stability / 100f;
                 spriteRenderer.color = Color.Lerp(Color.red, originalColor, stabilityFactor);
             }

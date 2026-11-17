@@ -11,7 +11,7 @@ namespace StateCraft.Data
 
         [Header("Choice A")]
         public string optionAText;
-        public float optionACost; // Money removed from treasury
+        public float optionACost;
         public float optionAStability;
         public float optionAGDP;
         public float optionAIntel;

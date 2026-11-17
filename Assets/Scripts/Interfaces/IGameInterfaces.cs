@@ -6,7 +6,6 @@ namespace StateCraft.Interfaces
         string CurrentDate { get; }
         void AdvanceTurn();
         System.Action OnTurnEnded { get; set; }
-        /// <summary>Fires only when the month rolls over. Bind heavy monthly systems here.</summary>
         System.Action OnMonthEnded { get; set; }
     }
 

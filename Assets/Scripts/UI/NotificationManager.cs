@@ -30,7 +30,6 @@ namespace StateCraft.UI
                 doc.rootVisualElement.pickingMode = PickingMode.Ignore;
             }
 
-            // FALLBACK: Global search if not found locally
             if (_stack == null)
             {
                 var allDocs = FindObjectsOfType<UIDocument>();
@@ -53,11 +52,7 @@ namespace StateCraft.UI
             }
         }
 
-        // =========================
-        // EVENT BUS CONNECTION
-        // =========================
-
-        private void OnEnable()
+private void OnEnable()
         {
             EventBus.OnWorldEvent += HandleWorldEvent;
         }
@@ -95,16 +90,10 @@ namespace StateCraft.UI
             }
         }
 
-        // =========================
-        // EXISTING NOTIFICATION LOGIC
-        // =========================
-
-        public void AddNotification(string message, Color color)
+public void AddNotification(string message, Color color)
         {
-            // Determine if critical based on color
             bool isCritical = color == Color.red;
 
-            // War bulletins (gold/orange) stay longer so the player can actually read them
             bool isWarBulletin = color == new Color(0.9f, 0.75f, 0.25f) || color == new Color(1f, 0.5f, 0f);
             float displaySeconds = isCritical ? 10f : isWarBulletin ? 8f : 5f;
 
@@ -116,7 +105,6 @@ namespace StateCraft.UI
 
             ShowAlert(title, message, isCritical, displaySeconds);
 
-            // Notify listeners (like NewsTickerUI)
             OnNotificationAdded?.Invoke(message, color);
         }
 
@@ -128,7 +116,6 @@ namespace StateCraft.UI
         {
             if (_stack == null) return;
 
-            // Create Alert Card
             var card = new VisualElement();
 
             card.style.backgroundColor = isCritical
@@ -143,13 +130,11 @@ namespace StateCraft.UI
 
             card.style.marginBottom = 10;
 
-            // Padding
             card.style.paddingTop = 15;
             card.style.paddingBottom = 15;
             card.style.paddingLeft = 15;
             card.style.paddingRight = 15;
 
-            // Borders
             card.style.borderTopWidth = 1;
             card.style.borderBottomWidth = 1;
             card.style.borderRightWidth = 1;
@@ -161,7 +146,6 @@ namespace StateCraft.UI
             card.style.borderBottomColor = borderColor;
             card.style.borderRightColor = borderColor;
 
-            // Animation Start Position
             card.style.translate = new Translate(350, 0, 0);
 
             UIStateManager.ApplySafeTransition(
@@ -170,11 +154,7 @@ namespace StateCraft.UI
                 0.4f
             );
 
-            // =========================
-            // TITLE
-            // =========================
-
-            var titleLabel = new Label(title.ToUpper());
+var titleLabel = new Label(title.ToUpper());
 
             titleLabel.style.fontSize = 11;
 
@@ -186,11 +166,7 @@ namespace StateCraft.UI
 
             card.Add(titleLabel);
 
-            // =========================
-            // MESSAGE
-            // =========================
-
-            var msgLabel = new Label(message);
+var msgLabel = new Label(message);
 
             msgLabel.style.fontSize = 10;
             msgLabel.style.color = Color.white;
@@ -198,19 +174,12 @@ namespace StateCraft.UI
 
             card.Add(msgLabel);
 
-            // =========================
-            // ADD TO STACK
-            // =========================
+_stack.Add(card);
 
-            _stack.Add(card);
-
-            // Animate In
             StartCoroutine(AnimateIn(card));
 
-            // Auto Dismiss
             StartCoroutine(DismissAfter(card, displaySeconds));
 
-            // Pause Simulation On Critical
             if (isCritical && GameManager.Instance != null)
             {
                 GameManager.Instance.isRealTime = false;
@@ -218,11 +187,7 @@ namespace StateCraft.UI
 }
         }
 
-        // =========================
-        // ANIMATIONS
-        // =========================
-
-        private IEnumerator AnimateIn(VisualElement element)
+private IEnumerator AnimateIn(VisualElement element)
         {
             yield return new WaitForSeconds(0.05f);
 

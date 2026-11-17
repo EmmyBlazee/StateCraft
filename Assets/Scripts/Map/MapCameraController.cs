@@ -24,19 +24,15 @@ namespace StateCraft.Map
 
         private void Start()
         {
-            // Zoom out to see the whole map on load
             if (cam != null)
                 cam.orthographicSize = 25f;
         }
 
         private void Update()
         {
-            // Block all map interaction if over UI
             bool overUI = UIStateManager.Instance != null && UIStateManager.Instance.IsPointerOverUI();
             if (overUI) return;
 
-            // Also block zoom if mouse is hovering over the CountryInfo dossier panel
-            // (right 420px of screen) so the ScrollView can receive scroll wheel events
             bool mouseOverDossier = Input.mousePosition.x > Screen.width - 420f;
             
             HandleMovement();
@@ -46,7 +42,7 @@ namespace StateCraft.Map
 
         private void HandleMouseDrag()
         {
-            if (Input.GetMouseButtonDown(1)) // Right click to drag
+            if (Input.GetMouseButtonDown(1))
             {
                 dragOrigin = cam.ScreenToWorldPoint(Input.mousePosition);
             }
@@ -55,7 +51,7 @@ namespace StateCraft.Map
             {
                 Vector3 difference = dragOrigin - cam.ScreenToWorldPoint(Input.mousePosition);
                 Vector3 newPos = transform.position + difference;
-                newPos.z = transform.position.z; // Keep camera Z depth
+                newPos.z = transform.position.z;
                 transform.position = newPos;
             }
         }

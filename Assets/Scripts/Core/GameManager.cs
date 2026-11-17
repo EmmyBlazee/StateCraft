@@ -17,13 +17,11 @@ namespace StateCraft.Core
         public CountryDataSO playerCountry;
         public float playerBudget = 1000f;
 
-        // Phase 2: Global World Tension (0-100). Rises with wars, falls with diplomacy.
         public float worldTension = 20f;
 
-        // Systems
         [Header("Time System")]
         public bool isRealTime = true;
-        public float turnDuration = 5f; // Seconds per turn
+        public float turnDuration = 5f;
         private float turnTimer = 0f;
 
         [Header("Event Data")]
@@ -59,7 +57,7 @@ InitializeSystems();
             else if (Instance != this)
             {
 Destroy(gameObject);
-                return; // Stop execution immediately
+                return;
             }
         }
 
@@ -76,7 +74,6 @@ Destroy(gameObject);
                         country.activeCovertOps?.Clear();
                         country.detectedThreats?.Clear();
 
-                        // Reset exchange rate to baseline — prevents bloated rates from persisting across play sessions
                         if (country.baseExchangeRate > 0f)
                             country.exchangeRate = country.baseExchangeRate;
                     }
@@ -94,12 +91,6 @@ Destroy(gameObject);
                     playerCountry.exchangeRate = playerCountry.baseExchangeRate;
             }
 
-            // --- Save Clamping: Fix old broken save states ---
-            // BUG 4 FIX: Clamp bounds updated to match GDP-in-billions scale.
-            // Old bound of 20000f for gdp made sense as raw USD only if gdp was ~$20 trillion max.
-            // Now gdp is in billions so 20000f = $20 trillion which is still a fine upper cap,
-            // but the reset value changes from 1000f (raw) to 477f (billions).
-            // Similarly debt/foreign/domestic reset to the new default billion-scale values.
             foreach (var country in allCountries)
             {
                 if (country != null)
@@ -133,37 +124,30 @@ Destroy(gameObject);
             InboxSystem = new InboxSystem();
             VictorySystem = new VictorySystem();
 
-            TurnSystem.OnTurnEnded  += ProcessTick;   // fires every 3 days — lightweight only
-            TurnSystem.OnMonthEnded += ProcessMonth;  // fires once per calendar month — heavy sim
+            TurnSystem.OnTurnEnded  += ProcessTick;
+            TurnSystem.OnMonthEnded += ProcessMonth;
             TurnSystem.OnMonthEnded += () => Relations.SnapshotHistory();
 
-            // ── Apply scenario briefing text to all countries ──
             ScenarioBriefings.Apply(allCountries);
 
-            // Cleanly acquire NewsSystem — rely wholly on the Instance since it is a static singleton initialized in Awake.
             NewsSystem = Systems.NewsSystem.Instance;
 }
 
-        // ── Fires every 3 game-days — lightweight, UI-facing updates only ──
         private void ProcessTick()
         {
-            // Re-resolve singletons as safety net
             if (NewsSystem == null) NewsSystem = Systems.NewsSystem.Instance;
             if (playerCountry == null) playerCountry = MapManager.Instance?.currentSelectedCountry;
 
 foreach (var country in allCountries)
             {
-                // War status runs every tick (internally month-gated via _lastWarMonthCounted)
                 WarSystem.UpdateWarStatus(country);
 
-                // Naval blockades and WMD development run every tick (small per-tick effects)
                 if (WarSystem is Systems.WarSystem warSys)
                 {
                     warSys.ProcessNavalBlockades(country);
                     warSys.ProcessWMDDevelopment(country);
                 }
 
-                // Active operations give security boost every tick (makes them feel responsive)
                 if (country.activeOperations != null)
                 {
                     bool isShortOfWeapons = country.unitRifles < country.armyStats.personnel;
@@ -178,7 +162,7 @@ foreach (var country in allCountries)
                         var reg = country.regions.Find(r => r.regionName == op.regionName);
                         if (reg != null)
                         {
-                            float boost = (op.securityBoostRate > 0f ? op.securityBoostRate : 2.5f) / 10f; // scaled to per-tick
+                            float boost = (op.securityBoostRate > 0f ? op.securityBoostRate : 2.5f) / 10f;
                             if (isShortOfWeapons) boost *= 0.5f;
                             reg.security  = Mathf.Min(100f, reg.security  + boost);
                             reg.stability = Mathf.Min(100f, reg.stability + boost * 0.6f);
@@ -188,10 +172,8 @@ foreach (var country in allCountries)
             }
         }
 
-        // ── Fires once per calendar month — all heavy simulation ──
         private void ProcessMonth()
         {
-            // Auto-save periodically (e.g., at the start of every new year)
             if (TurnSystem != null && TurnSystem.CurrentTurn > 1 && TurnSystem.CurrentTurn % 12 == 1)
             {
                 SaveGame();
@@ -202,46 +184,33 @@ foreach (var country in allCountries)
 
             foreach (var country in allCountries)
             {
-                // 0. New Military System Tick
                 StateCraft.Systems.MilitaryManager.Instance?.ProcessMonthlyTick(country);
 
-                // 1. Core Economic Update (monthly — GDP growth, income, spending)
                 EconomySystem?.UpdateEconomy(country);
 
-                // 2. Security maintenance and decay
                 SecuritySystem.UpdateSecurity(country);
 
-                // 3. Insurgency simulation
                 InsurgencySystem.SimulateInsurgency(country);
 
-                // 4. Intelligence
                 IntelligenceSystem.SimulateIntelligence(country);
 
-                // 5. Debt interest (monthly compounding)
                 DebtSystem.UpdateDebt(country);
 
-                // 6. AI for non-player countries
                 if (country != playerCountry)
                     AICountrySystem.RunAI(country);
 
-                // 7. Random events (5% per month, not per tick)
                 EventSystem.CheckForEvents(country);
 
-                // 8. Public approval and elections
                 ApprovalSystem.ProcessApproval(country);
                 ElectionSystem.CheckForElection(country);
 
-                // 9. Monthly trade settlement
                 DiplomacySystem?.ProcessTradeDeals(country);
 
-                // 10. Stability aggregate
                 UpdateCountryStability(country);
 
-                // 11. Security recalculation and corruption
                 SecuritySystem.RecalculateSecurity(country);
                 CorruptionSystem.ProcessCorruption(country);
 
-                // 12. Player treasury update (monthly net income/spending)
                 if (country == playerCountry)
                 {
                     float incomeLocal        = country.income * country.exchangeRate;
@@ -278,7 +247,6 @@ foreach (var country in allCountries)
 
                     playerBudget += netChangeRawLocal;
                     
-                    // Deduct monthly active operations funding
                     if (country.activeOperations != null && country.activeOperations.Count > 0)
                     {
                         float totalOpCostUSD = 0f;
@@ -297,12 +265,10 @@ foreach (var country in allCountries)
                 ProcessMilitaryProjects(country);
             }
 
-            // 13. Monthly news generation
             if (NewsSystem == null) NewsSystem = Systems.NewsSystem.Instance;
             if (NewsSystem != null)
                 NewsSystem.GenerateTurnNews(allCountries);
             else
-// 14. Player briefings
             if (playerCountry != null)
                 StateCraft.Systems.GameCommunicator.ProcessTurnBriefing(playerCountry, TurnSystem.CurrentTurn);
 
@@ -319,7 +285,6 @@ foreach (var country in allCountries)
 
                 if (pipe.monthsRemaining <= 0)
                 {
-                    // Graduation! Add the troops to standing force
                     switch (pipe.id)
                     {
                         case "INF": 
@@ -347,7 +312,6 @@ foreach (var country in allCountries)
                             break;
                     }
 
-                    // Update combined strength
                     country.militaryStrength = (country.armyStrength * 0.5f) + (country.navyStrength * 0.2f) + (country.airForceStrength * 0.3f);
 
                     if (pipe.isPersonnel)
@@ -355,13 +319,11 @@ foreach (var country in allCountries)
                         country.militaryReadiness = Mathf.Min(100f, country.militaryReadiness + 0.5f);
                     }
 
-                    // Send high-priority graduation notification
                     if (country == playerCountry)
                     {
                         NotificationManager.Instance?.AddNotification($"GRADUATION: {pipe.amount:N0} newly trained {pipe.unitLabel} completed their 6-month instruction and deployed!", Color.green);
                     }
 
-                    // Publish news globally so players see other countries building up forces too!
                     NewsSystem.Instance?.PublishNews($"MILITARY: {country.countryName} has completed training of {pipe.amount:N0} {pipe.unitLabel} active duty forces.");
 
                     country.trainingPipelines.RemoveAt(i);
@@ -386,13 +348,11 @@ foreach (var country in allCountries)
 
                 if (proj.monthsRemaining <= 0)
                 {
-                    // Apply strength gain
                     if (proj.branch == "Army") country.armyStrength = Mathf.Min(100f, country.armyStrength + proj.strengthGain);
                     else if (proj.branch == "Navy") country.navyStrength = Mathf.Min(100f, country.navyStrength + proj.strengthGain);
                     else if (proj.branch == "AirForce") country.airForceStrength = Mathf.Min(100f, country.airForceStrength + proj.strengthGain);
                     else if (proj.branch == "RDF") country.rdfReadiness = Mathf.Min(100f, country.rdfReadiness + proj.strengthGain);
 
-                    // Update combined strength
                     country.militaryStrength = (country.armyStrength * 0.5f) + (country.navyStrength * 0.2f) + (country.airForceStrength * 0.3f);
 
                     if (country == playerCountry)
@@ -419,7 +379,6 @@ foreach (var country in allCountries)
                 country.stability = averageRegionStability / country.regions.Count;
             }
 
-            // BUG 4 FIX: GDP is in billions — debt > gdp comparison is now apples-to-apples
             if (country.debt > country.gdp) country.stability -= 5f;
             if (country.inflationRate > 0.1f) country.stability -= 2f;
 
@@ -508,20 +467,17 @@ foreach (var country in allCountries)
             this.worldTension = data.worldTension;
             this.playerCountry = GetCountryByName(data.playerCountryName);
 
-            // Restore countries
             for(int i=0; i < data.countryJsonData.Count; i++) {
                 if (i < allCountries.Count && allCountries[i] != null)
                     UnityEngine.JsonUtility.FromJsonOverwrite(data.countryJsonData[i], allCountries[i]);
             }
 
-            // Restore relations
             if (Relations != null) {
                 var rels = new List<StateCraft.Data.BilateralRelation>();
                 foreach(var rJson in data.relationsMatrix) rels.Add(UnityEngine.JsonUtility.FromJson<StateCraft.Data.BilateralRelation>(rJson));
                 Relations.ImportRelations(rels);
             }
 
-            // Restore ledgers
             if (Ledger != null) {
                 var ledgers = new List<StateCraft.Systems.LedgerSaveWrapper>();
                 foreach(var lJson in data.economyLedgers) ledgers.Add(UnityEngine.JsonUtility.FromJson<StateCraft.Systems.LedgerSaveWrapper>(lJson));
@@ -546,7 +502,6 @@ foreach (var country in allCountries)
         {
             get
             {
-                // Start date: Jan 2026
                 int startYear = 2026;
                 int monthsSinceStart = Mathf.Max(0, CurrentTurn - 1);
                 
@@ -562,7 +517,6 @@ foreach (var country in allCountries)
         {
             currentDay++;
 
-            // Use real month lengths for the date display
             int[] daysInMonth = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
             int monthIndex = Mathf.Max(0, CurrentTurn - 1) % 12;
             int daysThisMonth = daysInMonth[monthIndex];
@@ -574,7 +528,6 @@ foreach (var country in allCountries)
                 OnTurnEnded?.Invoke();
                 OnMonthEnded?.Invoke();
             }
-            // Fire news/economy update every 3 days without changing the month counter
             else if (currentDay % 3 == 0)
             {
                 OnTurnEnded?.Invoke();

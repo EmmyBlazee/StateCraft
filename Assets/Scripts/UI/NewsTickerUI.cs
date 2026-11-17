@@ -41,7 +41,6 @@ namespace StateCraft.UI
             {
                 currentMessage = messageQueue.Dequeue();
                 tickerText.text = currentMessage;
-                // Start from the right side of the screen
                 rectTransform.anchoredPosition = new Vector2(containerWidth, rectTransform.anchoredPosition.y);
             }
 
@@ -49,7 +48,6 @@ namespace StateCraft.UI
             {
                 rectTransform.anchoredPosition += Vector2.left * scrollSpeed * Time.deltaTime;
 
-                // If the text has scrolled all the way past the left edge
                 if (rectTransform.anchoredPosition.x < -tickerText.preferredWidth)
                 {
                     currentMessage = null;

@@ -16,10 +16,8 @@ namespace StateCraft.UI
         private VisualElement _eventDashboard;
         private Button _btnClose;
 
-        // Ticker
         private Label _tickerText;
 
-        // Scrolls
         private ScrollView _alertsScroll;
         private ScrollView _troopsScroll;
         private ScrollView _suggestionsScroll;
@@ -86,7 +84,6 @@ namespace StateCraft.UI
         {
             if (_tickerText == null) return;
             
-            // Collect intense active conditions
             List<string> alerts = new List<string>();
             if (GameManager.Instance.WarSystem.GetWarStage(country) == WarStage.Conflict)
                 alerts.Add($"🔴 WAR DECLARED: {country.countryName} is actively engaging {country.warEnemyName}.");
@@ -113,14 +110,12 @@ namespace StateCraft.UI
             if (_alertsScroll == null) return;
             _alertsScroll.Clear();
 
-            // Check War
             var warStage = GameManager.Instance.WarSystem.GetWarStage(country);
             if (warStage >= WarStage.Tension)
             {
                 _alertsScroll.Add(CreateAlertCard("CRITICAL", $"Border tensions escalating with {country.warEnemyName}.", "alert-critical"));
             }
 
-            // Check Insurgency
             foreach(var r in country.regions)
             {
                 if (r.insurgencyLevel > 70f)
@@ -129,13 +124,11 @@ namespace StateCraft.UI
                     _alertsScroll.Add(CreateAlertCard("HIGH", $"Heavy fighting reported in {r.regionName}.", "alert-high"));
             }
 
-            // Check Economic Ruin
             if (country.treasury < 0)
                 _alertsScroll.Add(CreateAlertCard("HIGH", "Treasury is NEGATIVE. Total default imminent.", "alert-high"));
             else if (country.debtServiceRatio < 50f)
                 _alertsScroll.Add(CreateAlertCard("MEDIUM", "Debt service missing payments. Compounding interest.", "alert-medium"));
 
-            // ── Election Status — always visible ──
             _alertsScroll.Add(BuildElectionStatusCard(country));
 
             if (_alertsScroll.childCount == 0)
@@ -172,7 +165,6 @@ namespace StateCraft.UI
             int monthsUntil = electionEvery - (currentTurn % electionEvery);
             if (monthsUntil == electionEvery) monthsUntil = 0;
 
-            // Approval calculation
             float stabilityScore = country.stability * 0.40f;
             float econScore      = country.income > country.spending ? 30f : 
                                    Mathf.Clamp(30f + ((country.income - country.spending) * 5f), 0f, 30f);
@@ -188,7 +180,6 @@ namespace StateCraft.UI
                                 approval >= 50f ? new Color(0.95f, 0.78f, 0.1f) :
                                                   new Color(1f, 0.3f, 0.3f);
 
-            // Card container
             var card = new VisualElement();
             card.style.marginBottom      = 10;
             card.style.paddingTop        = 14; card.style.paddingBottom = 14;
@@ -203,7 +194,6 @@ namespace StateCraft.UI
             card.style.borderTopLeftRadius    = 4; card.style.borderTopRightRadius    = 4;
             card.style.borderBottomLeftRadius = 4; card.style.borderBottomRightRadius = 4;
 
-            // Header row
             var headerRow = new VisualElement();
             headerRow.style.flexDirection  = FlexDirection.Row;
             headerRow.style.justifyContent = Justify.SpaceBetween;
@@ -224,7 +214,6 @@ namespace StateCraft.UI
             headerRow.Add(timeLabel);
             card.Add(headerRow);
 
-            // Approval bar
             var barBg = new VisualElement();
             barBg.style.height          = 6;
             barBg.style.backgroundColor = new Color(0.15f, 0.15f, 0.2f);
@@ -241,7 +230,6 @@ namespace StateCraft.UI
             barBg.Add(barFill);
             card.Add(barBg);
 
-            // Approval % label + status
             var approvalRow = new VisualElement();
             approvalRow.style.flexDirection  = FlexDirection.Row;
             approvalRow.style.justifyContent = Justify.SpaceBetween;
@@ -261,7 +249,6 @@ namespace StateCraft.UI
             });
             card.Add(approvalRow);
 
-            // Score breakdown
             var breakdown = new VisualElement();
             breakdown.style.backgroundColor = new Color(0.08f, 0.08f, 0.12f, 0.8f);
             breakdown.style.paddingTop  = 8; breakdown.style.paddingBottom = 8;
@@ -294,7 +281,6 @@ namespace StateCraft.UI
             AddBreakdownRow($"Inflation penalty ({country.inflationRate:F0}%)", inflationPenalty, 10f, false);
             card.Add(breakdown);
 
-            // Advice
             string advice = winning
                 ? "Keep stability high and avoid costly wars before election day."
                 : country.stability < 40f ? "⚠ Raise stability urgently — it's your biggest vote driver."
@@ -331,7 +317,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // Summary header
             int totalDeployedTroops = 0;
             foreach (var op in country.activeOperations) totalDeployedTroops += op.deployedTroops;
             var summaryRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, marginBottom = 10, paddingLeft = 4, paddingRight = 4 } };
@@ -341,13 +326,11 @@ namespace StateCraft.UI
 
             foreach (var op in country.activeOperations)
             {
-                // Determine status colour
                 Color statusColor = op.status == "Active"   ? new Color(0.2f, 0.85f, 0.4f) :
                                     op.status == "Stalled"  ? new Color(1f, 0.78f, 0.2f) :
                                     op.status == "Failed"   ? new Color(1f, 0.3f, 0.3f) :
                                                               new Color(0.5f, 0.8f, 1f);
 
-                // Card shell
                 var card = new VisualElement();
                 card.style.marginBottom = 12;
                 card.style.paddingTop = 14;
@@ -368,20 +351,17 @@ namespace StateCraft.UI
                 card.style.borderBottomLeftRadius = 4;
                 card.style.borderBottomRightRadius = 4;
 
-                // Header row: op name + status badge
                 var headerRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, marginBottom = 6 } };
                 headerRow.Add(new Label($"⚔ {op.opName.ToUpper()}") { style = { color = Color.white, fontSize = 12, unityFontStyleAndWeight = FontStyle.Bold } });
                 headerRow.Add(new Label(op.status?.ToUpper() ?? "ACTIVE") { style = { color = statusColor, fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
                 card.Add(headerRow);
 
-                // Region + type
                 var metaRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, marginBottom = 10 } };
                 metaRow.Add(new Label($"📍 {op.regionName}") { style = { color = new Color(0.5f, 0.8f, 1f), fontSize = 9, marginRight = 16 } });
                 if (!string.IsNullOrEmpty(op.type))
                     metaRow.Add(new Label($"🎯 {op.type}") { style = { color = new Color(0.7f, 0.7f, 0.8f), fontSize = 9 } });
                 card.Add(metaRow);
 
-                // ── LAND FORCES ──
                 bool hasLand = op.deployedTroops > 0 || op.deployedTanks > 0 || op.deployedAPCs > 0 || op.deployedRDF > 0;
                 if (hasLand)
                 {
@@ -395,7 +375,6 @@ namespace StateCraft.UI
                     card.Add(landGrid);
                 }
 
-                // ── AIR FORCES ──
                 bool hasAir = op.deployedFighters > 0 || op.deployedHelis > 0 || op.deployedBombers > 0;
                 if (hasAir)
                 {
@@ -407,7 +386,6 @@ namespace StateCraft.UI
                     card.Add(airGrid);
                 }
 
-                // ── NAVAL FORCES ──
                 bool hasNaval = op.deployedFrigates > 0 || op.deployedSubmarines > 0;
                 if (hasNaval)
                 {
@@ -418,17 +396,14 @@ namespace StateCraft.UI
                     card.Add(navalGrid);
                 }
 
-                // Cost
                 if (op.costPerMonth > 0)
                 {
                     string sym = string.IsNullOrEmpty(country.currencySymbol) ? "$" : country.currencySymbol;
                     card.Add(new Label($"Monthly cost: {sym}{op.costPerMonth:F1}B") { style = { color = new Color(1f, 0.4f, 0.4f), fontSize = 8, marginTop = 2 } });
                 }
 
-                // Recall button
                 var capturedOp = op;
                 var btnRecall = new Button(() => {
-                    // Refund all units back to the standing force pool
                     country.unitInfantry += capturedOp.deployedTroops;
                     country.unitTanks += capturedOp.deployedTanks;
                     country.unitAPCs += capturedOp.deployedAPCs;
@@ -490,7 +465,6 @@ namespace StateCraft.UI
             if (_suggestionsScroll == null) return;
             _suggestionsScroll.Clear();
 
-            // 0. Render ACTIVE Pending Events from the EventSystem
             var eventSys = GameManager.Instance?.EventSystem;
             if (eventSys != null)
             {
@@ -510,7 +484,6 @@ namespace StateCraft.UI
                         _suggestionsScroll.Add(card);
                     }
 
-                    // Divider
                     var divider = new VisualElement();
                     divider.style.height = 1;
                     divider.style.backgroundColor = new Color(1, 1, 1, 0.15f);
@@ -520,7 +493,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // 1. Military Suggestion (Insurgency Check)
             foreach (var region in country.regions)
             {
                 if (region.insurgencyLevel > 40f)
@@ -530,10 +502,8 @@ namespace StateCraft.UI
                         $"Mr. President, insurgent activity in {region.regionName} has reached critical levels ({region.insurgencyLevel:F0}%). Recommend immediate troop deployment to suppress the threat before regional GDP collapses.",
                         "⚔ DEPLOY TROOPS IMMEDIATELY", () =>
                         {
-                            // Build a real operation and add it right away
                             int troops = Mathf.Max(1000, country.unitInfantry / 10);
                             
-                            // Prevent recruiting troops out of thin air if the reserve pool is empty
                             if (country.unitInfantry < troops) troops = country.unitInfantry;
                             if (troops <= 0)
                             {
@@ -551,7 +521,7 @@ namespace StateCraft.UI
                                 costPerMonth  = 0.05f,
                             };
                             country.activeOperations.Add(op);
-                            country.unitInfantry -= troops; // Deduct from available standing pool
+                            country.unitInfantry -= troops;
 
                             capturedRegion.insurgencyLevel = Mathf.Max(0f, capturedRegion.insurgencyLevel - 15f);
                             NotificationManager.Instance?.AddNotification(
@@ -565,7 +535,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // 2. Economic Suggestion (Debt Check)
             if (country.treasury < 2f && country.debt > 0)
             {
                 var card = CreateSuggestionCard("📈 ECONOMIC SUGGESTION",
@@ -577,17 +546,15 @@ namespace StateCraft.UI
                 _suggestionsScroll.Add(card);
             }
 
-            // 3. Diplomatic Suggestion (Tension Stub)
             var warStage = GameManager.Instance.WarSystem.GetWarStage(country);
             if (warStage == WarStage.Tension)
             {
                 var card = CreateSuggestionCard("🌍 DIPLOMATIC SUGGESTION",
                     $"Tensions with {country.warEnemyName} are critically high. You must force a resolution before they declare war.",
                     "ISSUE ULTIMATUM", () => {
-                        // Backend Stub
                         country.globalPrestige += 10f;
                         NewsSystem.Instance.PublishNews($"ULTIMATUM GIVEN: {country.countryName} formally warns {country.warEnemyName} to stand down immediately.");
-                        GameManager.Instance.WarSystem.SetWarStage(country, WarStage.Conflict); // Pushes it over the edge!
+                        GameManager.Instance.WarSystem.SetWarStage(country, WarStage.Conflict);
                         Refresh();
                     });
                 _suggestionsScroll.Add(card);
@@ -681,10 +648,8 @@ namespace StateCraft.UI
             card.Add(lblTitle);
             card.Add(lblDesc);
 
-            // Container for the two choices
             var choicesContainer = new VisualElement() { style = { flexDirection = FlexDirection.Column } };
 
-            // OPTION A
             var btnA = new Button(() => { 
                 evSys.ResolvePendingEvent(country, ev, true); 
                 Refresh(); 
@@ -703,7 +668,6 @@ namespace StateCraft.UI
             btnA.Add(lblAAction);
             btnA.Add(lblAImpact);
 
-            // OPTION B
             var btnB = new Button(() => { 
                 evSys.ResolvePendingEvent(country, ev, false); 
                 Refresh(); 
@@ -747,14 +711,12 @@ namespace StateCraft.UI
             if (_historyScroll == null || NewsSystem.Instance == null) return;
             _historyScroll.Clear();
 
-            // Wire up filter buttons dynamically
             string[] filters = { "ALL", "MILITARY", "DIPLOMACY", "ECONOMY", "INSURGENCY" };
             foreach (var f in filters)
             {
                 var btn = _eventDashboard.Q<Button>($"Filter{f}");
                 if (btn != null)
                 {
-                    // Clean up dirty clicks by unregistering anonymous first (in a real system we'd use named methods)
                     btn.clicked += () => { SetFilter(f); };
                 }
             }
@@ -764,7 +726,6 @@ namespace StateCraft.UI
             {
                 string entry = history[i];
 
-                // Simple text-based filtering based on news headline
                 if (_activeFilter != "ALL")
                 {
                     if (_activeFilter == "MILITARY" && !entry.Contains("WAR") && !entry.Contains("TROOP") && !entry.Contains("ARMY") && !entry.Contains("ATTACK")) continue;
@@ -795,7 +756,6 @@ namespace StateCraft.UI
         {
             _activeFilter = filter;
             
-            // Update UI buttons
             string[] filters = { "ALL", "MILITARY", "DIPLOMACY", "ECONOMY", "INSURGENCY" };
             foreach (var f in filters)
             {

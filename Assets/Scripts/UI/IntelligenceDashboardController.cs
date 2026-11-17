@@ -115,11 +115,9 @@ namespace StateCraft.UI
             root.Q<Button>("BtnLaunchCovertOp")?.RegisterCallback<ClickEvent>(_ => LaunchSampleCovertOp());
             root.Q<Button>("BtnInternalAudit")?.RegisterCallback<ClickEvent>(_ => RunInternalAudit());
             
-            // Hide the legacy UXML button since we build a customized one
             var legacyLaunchBtn = root.Q<Button>("BtnLaunchSatellite");
             if (legacyLaunchBtn != null) legacyLaunchBtn.style.display = DisplayStyle.None;
             
-            // Create a dedicated container for the satellite section
             _satellitePanelContainer = new VisualElement();
             if (_intelGridList != null && _intelGridList.parent != null)
             {
@@ -136,7 +134,6 @@ namespace StateCraft.UI
                 bool active = (i == index);
                 _allPanels[i].style.display = active ? DisplayStyle.Flex : DisplayStyle.None;
                 _allPanels[i].pickingMode = active ? PickingMode.Position : PickingMode.Ignore;
-                // Fix scrollviews in active panel so scrollbars work in builds
                 if (active) UIStateManager.FixScrollViews(_allPanels[i]);
             }
 
@@ -157,7 +154,7 @@ namespace StateCraft.UI
                 panel.style.display = DisplayStyle.Flex;
                 UIStateManager.Instance?.ApplySafeTransition(panel, true, 0.4f);
                 RefreshIntelligenceData();
-                UIStateManager.FixScrollViews(panel); // Fix scrollbars in builds after UI refresh
+                UIStateManager.FixScrollViews(panel);
             }
         }
 
@@ -182,13 +179,11 @@ namespace StateCraft.UI
 
             if (_headerBudget != null)
             {
-                // intelligenceBudget is stored as billions directly
                 _headerBudget.text = $"{UiFormat.Money(country.intelligenceBudget, sym)} / Turn";
             }
             if (_headerOperatives != null) _headerOperatives.text = country.operativeCount.ToString();
             if (_headerCoverage  != null) _headerCoverage.text   = $"{country.globalIntelCoverage:F0}/100";
 
-            // Exposure Risk display
             if (_exposureRiskLabel != null)
             {
                 _exposureRiskLabel.text = $"{country.exposureRisk:F0}%";
@@ -205,7 +200,6 @@ namespace StateCraft.UI
                 else if (country.exposureRisk > 40f) { _exposureRiskBarLabel.text = "ELEVATED RISK"; _exposureRiskBarLabel.style.color = new Color(1f, 0.67f, 0.25f); }
                 else { _exposureRiskBarLabel.text = "LOW RISK"; _exposureRiskBarLabel.style.color = new Color(0f, 0.82f, 0.39f); }
             }
-            // Sync slider to current budget
             if (_covertBudgetSlider != null) _covertBudgetSlider.SetValueWithoutNotify(country.covertBudget);
             if (_covertBudgetValueLabel != null) _covertBudgetValueLabel.text = $"${country.covertBudget:F1}B / Turn";
 
@@ -216,7 +210,6 @@ namespace StateCraft.UI
             }
 
             if (_foreignAgentsLabel != null) _foreignAgentsLabel.text = $"FOREIGN AGENTS DETECTED: {country.foreignAgentsDetected}";
-            // Active mole hunts = agents detected that haven't been neutralised yet
             int activeMoleHunts = Mathf.Max(0, country.foreignAgentsDetected - (country.agencyIntegrity > 70f ? 1 : 0));
             if (_moleHuntLabel != null) _moleHuntLabel.text = $"Active mole hunts: {activeMoleHunts}  |  Agency integrity: {country.agencyIntegrity:F0}%";
 
@@ -301,7 +294,6 @@ namespace StateCraft.UI
                 cell.style.borderTopLeftRadius = 4; cell.style.borderTopRightRadius = 4;
                 cell.style.borderBottomLeftRadius = 4; cell.style.borderBottomRightRadius = 4;
 
-                // Top accent stripe
                 var stripe = new VisualElement();
                 stripe.style.height = 2;
                 stripe.style.backgroundColor = new Color(0.73f, 0.41f, 0.78f, 0.9f);
@@ -314,7 +306,6 @@ namespace StateCraft.UI
                 _intelGridList.Add(cell);
             }
 
-            // ── Satellite Purchase Panel ──
             if (_satellitePanelContainer != null)
             {
                 _satellitePanelContainer.Clear();
@@ -576,7 +567,6 @@ namespace StateCraft.UI
 
         private void PopulateProxyWarPanel(CountryDataSO country, GameManager gm)
         {
-            // Provides a shortcut button in the Threat Board to fund enemy insurgencies
         }
 
         private void PopulateThreatBoard(CountryDataSO country, GameManager gm)
@@ -586,8 +576,6 @@ namespace StateCraft.UI
             _insurgentThreatsList.Clear();
             _internalThreatsList.Clear();
 
-            // ── Real detected insurgent camps from RegionDataSO ──
-            // These are discovered by IntelligenceSystem and shown here for Military to act on
             bool anyCampsDetected = false;
             foreach (var region in country.regions)
             {
@@ -596,7 +584,6 @@ namespace StateCraft.UI
                 _insurgentThreatsList.Add(BuildCampThreatCard(region, country));
             }
 
-            // ── Standard IntelligenceThreat objects (foreign + internal) ──
             var threats = new List<IntelligenceThreat>(country.detectedThreats);
             if (threats.Count == 0)
                 threats.AddRange(GenerateAmbientThreats(country, gm));
@@ -619,11 +606,6 @@ namespace StateCraft.UI
                 _internalThreatsList.Add(EmptyThreatLabel("No internal threats flagged."));
         }
 
-        /// <summary>
-        /// Builds a rich camp card for a detected insurgent camp.
-        /// Shows camp intel, threat level, and a "FLAG FOR AIRSTRIKE" button that
-        /// marks the camp so Military → Operations knows to target it.
-        /// </summary>
         private VisualElement BuildCampThreatCard(RegionDataSO region, CountryDataSO country)
         {
             var card = new VisualElement();
@@ -640,7 +622,6 @@ namespace StateCraft.UI
             card.style.borderTopLeftRadius = 4; card.style.borderTopRightRadius = 4;
             card.style.borderBottomLeftRadius = 4; card.style.borderBottomRightRadius = 4;
 
-            // ── Header row: name + CONFIRMED badge ──
             var header = new VisualElement();
             header.style.flexDirection = FlexDirection.Row;
             header.style.justifyContent = Justify.SpaceBetween;
@@ -661,7 +642,6 @@ namespace StateCraft.UI
             header.Add(badge);
             card.Add(header);
 
-            // ── Intel data grid ──
             string ideology = region.insurgencyIdeology != InsurgencyIdeology.None
                 ? region.insurgencyIdeology.ToString() : "Unknown Faction";
 
@@ -689,7 +669,6 @@ namespace StateCraft.UI
             AddDataCell("SUPPLY LINES", $"{region.insurgentSupplyLines:F0}%", new Color(0.7f, 0.7f, 0.8f));
             card.Add(dataGrid);
 
-            // ── Status line ──
             bool strikeOrdered = region.campStrikeOrdered;
             string statusText = strikeOrdered
                 ? "✅ AIRSTRIKE REQUESTED — Awaiting Military execution via OPERATIONS"
@@ -701,7 +680,6 @@ namespace StateCraft.UI
             statusLabel.style.marginBottom = 10;
             card.Add(statusLabel);
 
-            // ── Warning: camp growing ──
             if (region.campStrength > 70f && !strikeOrdered)
             {
                 var warn = new Label("🔴 CAMP APPROACHING FULL STRENGTH — strike window closing");
@@ -711,10 +689,8 @@ namespace StateCraft.UI
                 card.Add(warn);
             }
 
-            // ── Action buttons ──
             if (!strikeOrdered)
             {
-                // Primary: Flag for airstrike (Intel authorises → Military executes)
                 var flagBtn = new Button(() =>
                 {
                     region.campStrikeOrdered = true;
@@ -761,7 +737,6 @@ namespace StateCraft.UI
                 flagBtn.style.marginBottom = 6;
                 card.Add(flagBtn);
 
-                // Secondary: Fund counter-insurgency instead (softer option)
                 var cinBtn = new Button(() =>
                 {
                     float cost = 0.08f;
@@ -793,7 +768,6 @@ namespace StateCraft.UI
             }
             else
             {
-                // Strike already ordered — show reminder
                 var reminder = new Label("→ Go to MILITARY → OPERATIONS to execute the strike");
                 reminder.style.color = new Color(0.6f, 0.6f, 0.7f);
                 reminder.style.fontSize = 8;
@@ -917,7 +891,7 @@ namespace StateCraft.UI
                     var gm = GameManager.Instance;
                     if (country == null || gm == null) return;
 
-                    float cost = 0.05f; // $50M per asset deployment
+                    float cost = 0.05f;
                     if (gm.playerBudget < cost)
                     {
                         NotificationManager.Instance?.AddNotification($"INSUFFICIENT FUNDS: Need $0.05B to deploy intelligence assets.", Color.red);
@@ -930,11 +904,10 @@ namespace StateCraft.UI
                         return;
                     }
 
-                    // Deduct cost and allocate operative
                     gm.playerBudget -= cost;
                     country.treasury = gm.playerBudget;
                     country.operativeCount--;
-                    country.exposureRisk = Mathf.Min(100f, country.exposureRisk + 3f); // small exposure increase for deploying
+                    country.exposureRisk = Mathf.Min(100f, country.exposureRisk + 3f);
 
                     string effectDesc = "";
                     if (threat.category == "Foreign Interference")
@@ -943,7 +916,6 @@ namespace StateCraft.UI
                         country.security = Mathf.Min(100f, country.security + 8f);
                         effectDesc = $"Counter-intelligence net active. Intel Coverage +10%, Security +8%.";
 
-                        // Also surface a Proxy War retaliation option
                         var targetName = threat.threatName.Replace(" military buildup", "").Trim();
                         var targetCountry = gm?.allCountries?.Find(c => c.countryName == targetName);
                         if (targetCountry != null && gm?.DiplomacySystem is DiplomacySystem diplo)
@@ -960,7 +932,7 @@ namespace StateCraft.UI
                             item.Add(proxyBtn);
                         }
                     }
-                    else // Internal Threats
+                    else
                     {
                         country.agencyIntegrity = Mathf.Min(100f, country.agencyIntegrity + 15f);
                         country.corruptionIndex = Mathf.Max(0f, country.corruptionIndex - 5f);
@@ -970,7 +942,6 @@ namespace StateCraft.UI
                     NotificationManager.Instance?.AddNotification($"ASSET DEPLOYED: {threat.threatName}. {effectDesc}", new Color(186/255f, 104/255f, 200/255f));
                     NewsSystem.Instance?.PublishNews($"INTELLIGENCE: Assets deployed to address {threat.threatName}.");
                     
-                    // Add to resolved threat list and remove from country list
                     _resolvedThreatNames.Add(threat.threatName);
                     country.detectedThreats.Remove(threat);
 
@@ -995,7 +966,6 @@ namespace StateCraft.UI
                 foreach (var other in gm.allCountries)
                 {
                     if (other == c) continue;
-                    // Detect at Crisis normally, or at Tension if satellites are available
                     var requiredStage = c.satelliteCount > 0 ? WarStage.Tension : WarStage.Crisis;
                     if (gm.WarSystem != null && gm.WarSystem.GetWarStage(other) >= requiredStage)
                     {
@@ -1013,7 +983,6 @@ namespace StateCraft.UI
 
             foreach (var region in c.regions)
             {
-                // Detect insurgency earlier with good satellite coverage
                 float threshold = c.satelliteCount >= 2 ? 55f : 40f;
                 if (region.security < threshold)
                 {
@@ -1095,14 +1064,13 @@ namespace StateCraft.UI
             var gm = GameManager.Instance;
             if (country == null || gm == null) return;
 
-            // Pick a valid rival country to target
             var rivals = gm.allCountries.Where(c => c != country && gm.WarSystem != null && gm.WarSystem.GetWarStage(c) != WarStage.Peace).ToList();
             if (rivals.Count == 0) rivals = gm.allCountries.Where(c => c != country).ToList();
             var targetCountry = rivals.Count > 0 ? rivals[Random.Range(0, rivals.Count)].countryName : "Unknown";
 
             string[] types = { "Sabotage", "Propaganda", "Asset Recruitment", "Assassination" };
             
-            float opCost = 0.1f; // $100M per op
+            float opCost = 0.1f;
             var gm3 = GameManager.Instance;
             if (gm3 != null && gm3.playerBudget < opCost)
             {
@@ -1148,7 +1116,7 @@ namespace StateCraft.UI
             if (country == null) return;
 
             var gm2 = GameManager.Instance;
-            float auditCost = 0.05f; // $50M
+            float auditCost = 0.05f;
             if (gm2 != null && gm2.playerBudget < auditCost)
             {
                 NotificationManager.Instance?.AddNotification($"INSUFFICIENT FUNDS: Need $0.05B to run internal audit.", Color.red);
@@ -1170,7 +1138,7 @@ namespace StateCraft.UI
             if (country == null || gm == null) return;
             if (country.satelliteCount + country.satellitesUnderConstruction >= 4) return;
             
-            float cost = 0.5f; // $500M
+            float cost = 0.5f;
             if (gm.playerBudget < cost)
             {
                 NotificationManager.Instance?.AddNotification($"INSUFFICIENT FUNDS: Need $0.5B to build spy satellite.", Color.red);

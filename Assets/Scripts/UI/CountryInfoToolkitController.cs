@@ -13,31 +13,23 @@ namespace StateCraft.UI
         private VisualElement _root;
         private CountryDataSO _currentCountry;
 
-        // Header
         private Label _nameLabel, _typeLabel, _capitalLabel, _relationBadge, _populationValue;
         private Image _flagImage;
         private Label _intelText;
 
-        // Economic stats
         private Label _gdpVal, _gdpGrowthVal, _inflationVal, _debtRatioVal;
 
-        // Political stats
         private Label _stabilityVal, _securityVal, _threatVal;
 
-        // Military stats
         private Label _milPersonnel, _milStrength, _milTanks, _milJets;
 
-        // Crisis container
         private VisualElement _crisisContainer;
 
-        // News headline
         private VisualElement _headlineBox;
         private Label _headlineText;
 
-        // Scroll
         private ScrollView _scrollView;
 
-        // Buttons
         private Button _btnClose, _btnInvest, _btnSpy, _btnSabotage, _btnWar, _btnAlly;
 
         private void Awake()
@@ -45,8 +37,6 @@ namespace StateCraft.UI
             _uiDocument = GetComponent<UIDocument>();
             if (_uiDocument != null)
             {
-                // CRITICAL: keep this document BELOW the main dashboard so it
-                // never intercepts raycast clicks when the panel is hidden.
                 _uiDocument.sortingOrder = -1;
                 _root = _uiDocument.rootVisualElement;
             }
@@ -63,9 +53,6 @@ namespace StateCraft.UI
 
             if (_root != null)
             {
-                // The document root must ALWAYS be Ignore — clicks go through it
-                // to the main dashboard. Only the panel element itself becomes
-                // Position when the dossier is shown.
                 _root.pickingMode = PickingMode.Ignore;
 
                 var p = _root.Q<VisualElement>("CountryInfoPanel");
@@ -111,7 +98,6 @@ namespace StateCraft.UI
         {
             if (GameManager.Instance == null || GameManager.Instance.playerCountry == null || GameManager.Instance.playerCountry == country)
             {
-                // Hide the panel — set display none AND picking ignore so nothing bleeds through
                 var p = _root?.Q<VisualElement>("CountryInfoPanel");
                 if (p != null)
                 {
@@ -134,7 +120,6 @@ namespace StateCraft.UI
             if (panel != null)
             {
                 panel.style.display = DisplayStyle.Flex;
-                // Re-enable picking on the panel and its children
                 panel.pickingMode = PickingMode.Position;
                 panel.Query<VisualElement>().ForEach(ve =>
                 {
@@ -208,7 +193,6 @@ namespace StateCraft.UI
             if (_nameLabel != null) _nameLabel.text = country.countryName.ToUpper();
             if (_flagImage != null && country.countryFlag != null) _flagImage.sprite = country.countryFlag;
 
-            // Derive a government descriptor from available data (no governmentType field on SO)
             string govType = country.stability > 70f ? "STABLE DEMOCRACY" :
                              country.stability > 45f ? "TRANSITIONAL GOVERNMENT" :
                              country.militaryStrength > 300f ? "MILITARY-LED REGIME" : "FRAGILE STATE";
@@ -237,7 +221,6 @@ namespace StateCraft.UI
 
             string headline = null;
 
-            // Search the global news history for a recent mention of this country
             if (NewsSystem.Instance != null)
             {
                 headline = System.Linq.Enumerable.FirstOrDefault(
@@ -250,8 +233,7 @@ namespace StateCraft.UI
                         n => n.IndexOf(country.countryName, System.StringComparison.OrdinalIgnoreCase) >= 0);
             }
 
-            // Determine border color from headline keywords, or fall back to stat-based brief
-            Color accent = new Color(255/255f, 152/255f, 0/255f); // amber default
+            Color accent = new Color(255/255f, 152/255f, 0/255f);
             if (!string.IsNullOrEmpty(headline))
             {
                 if (headline.Contains("WAR") || headline.Contains("MILITARY") || headline.Contains("CONFLICT") || headline.Contains("SKIRMISH"))
@@ -265,7 +247,6 @@ namespace StateCraft.UI
             }
             else
             {
-                // Fallback: derive a brief from live stats
                 var gm = GameManager.Instance;
                 var warStage = gm?.WarSystem != null ? gm.WarSystem.GetWarStage(country) : StateCraft.Interfaces.WarStage.Peace;
 
@@ -298,7 +279,6 @@ namespace StateCraft.UI
             _headlineBox.style.borderLeftColor   = new Color(accent.r, accent.g, accent.b, 0.5f);
             _headlineBox.style.borderRightColor  = new Color(accent.r, accent.g, accent.b, 0.5f);
 
-            // Tint the "▶ LATEST HEADLINE" label too
             var titleLbl = _headlineBox.Q<Label>();
             if (titleLbl != null && titleLbl != _headlineText) titleLbl.style.color = accent;
         }
@@ -311,7 +291,6 @@ namespace StateCraft.UI
             int tier = Mathf.Clamp(Mathf.FloorToInt(level / 25f) + 1, 1, 4);
             if (_intelText != null) _intelText.text = $"INTEL LEVEL {tier}: {GetIntelTierName(tier)}";
 
-            // ECONOMICS
             string sym = c.currencySymbol ?? "$";
             if (_gdpVal != null)     _gdpVal.text     = tier >= 1 ? UiFormat.Money(c.gdp * c.exchangeRate, sym) : "REDACTED";
             if (_gdpGrowthVal != null)
@@ -327,7 +306,6 @@ namespace StateCraft.UI
                 _debtRatioVal.style.color = ratio > 0.8f ? new Color(255/255f, 82/255f, 82/255f) : Color.white;
             }
 
-            // STABILITY
             if (_stabilityVal != null)
             {
                 _stabilityVal.text = tier >= 2 ? $"{c.stability:F0}%" : "UNCERTAIN";
@@ -346,13 +324,11 @@ namespace StateCraft.UI
                 _threatVal.style.color = tc;
             }
 
-            // MILITARY
             if (_milPersonnel != null) _milPersonnel.text = tier >= 3 ? $"{c.armyStats.personnel:N0}" : "CLASSIFIED";
             if (_milStrength != null)  _milStrength.text  = tier >= 3 ? $"{c.militaryStrength:F0}" : "CLASSIFIED";
             if (_milTanks != null)     _milTanks.text     = tier >= 3 ? $"{c.unitTanks:N0}" : "—";
             if (_milJets != null)      _milJets.text      = tier >= 3 ? $"{c.unitFighters:N0}" : "—";
 
-            // CRISES
             if (_crisisContainer != null)
             {
                 _crisisContainer.Clear();
@@ -381,9 +357,7 @@ namespace StateCraft.UI
             }
         }
 
-        // ---- ACTIONS ----
-
-        private void OnInvestClicked()
+private void OnInvestClicked()
         {
             if (GameManager.Instance == null || _currentCountry == null) return;
             float cost = 2.0f;
@@ -456,9 +430,7 @@ namespace StateCraft.UI
             NotificationManager.Instance?.AddNotification($"AID SENT to {_currentCountry.countryName}: +5 stability.", new Color(76/255f, 175/255f, 80/255f));
         }
 
-        // ---- HELPERS ----
-
-        private static string FormatPopulation(long pop)
+private static string FormatPopulation(long pop)
         {
             if (pop >= 1_000_000_000) return $"{pop / 1_000_000_000f:F1}B";
             if (pop >= 1_000_000)     return $"{pop / 1_000_000f:F1}M";

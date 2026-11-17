@@ -13,16 +13,12 @@ namespace StateCraft.UI
         private UIDocument _uiDoc;
         private VisualElement _root;
         
-        // Tabs
         private Button _tabForces, _tabRecruit, _tabWeapons, _tabBases, _tabOps, _tabProjects, _tabLogistics, _tabBudget;
         private VisualElement _panelForces, _panelRecruit, _panelWeapons, _panelBases, _panelOps, _panelProjects, _panelLogistics, _panelBudget;
         private List<VisualElement> _allPanels = new List<VisualElement>();
 
+private Label _headerBudget, _headerReadiness, _threatLevelBadge, _headerKIA;
 
-        // Header
-        private Label _headerBudget, _headerReadiness, _threatLevelBadge, _headerKIA;
-
-        // Forces
         private ScrollView _generalsContainer, _blockadesContainer;
         private Button _btnRecruitGeneral, _btnDeclareBlockade;
 
@@ -30,7 +26,6 @@ namespace StateCraft.UI
         private VisualElement _personnelGrid, _weaponsGrid, _basesGrid;
         private Label _milBriefing;
         private VisualElement _milLiveFeed;
-                // NEW OPERATIONS DASHBOARD FIELDS
         private ScrollView _threatList;
         private ScrollView _opsList;
         private ScrollView _feedList;
@@ -43,18 +38,14 @@ namespace StateCraft.UI
         private ScrollView _activeProjectsList, _availableProjectsList;
         private ScrollView _budgetLedgerList;
 
-        // Strategic Deterrence (WMD)
         private ProgressBar _wmdProgressBar;
         private Label _wmdStatusLabel, _wmdOperationalBadge;
 
-        // Logistics
         private ProgressBar _fuelBar, _ammoBar, _medicalBar, _foodBar, _elecBar;
         private VisualElement _supplyRouteList;
         private Label _natFuelStock, _natFoodStock, _natElecStock;
 
-
-        // Doctrine
-        private Label _doctrineDesc;
+private Label _doctrineDesc;
         private string _currentPosture = "DETERRENCE";
 
         private void Awake()
@@ -119,14 +110,11 @@ namespace StateCraft.UI
             _tabLogistics.clicked += () => SwitchTab(6);
             _tabBudget.clicked += () => SwitchTab(7);
 
-
-            // Header
-            _headerBudget = root.Q<Label>("HeaderMilBudget");
+_headerBudget = root.Q<Label>("HeaderMilBudget");
             _headerReadiness = root.Q<Label>("HeaderReadiness");
             _threatLevelBadge = root.Q<Label>("ThreatLevelBadge");
             _headerKIA = root.Q<Label>("HeaderKIA");
 
-            // Containers
             _generalsContainer = root.Q<ScrollView>("GeneralsContainer");
             _blockadesContainer = root.Q<ScrollView>("BlockadesContainer");
 
@@ -162,7 +150,6 @@ namespace StateCraft.UI
             _wmdStatusLabel = root.Q<Label>("WMDStatusLabel");
             _wmdOperationalBadge = root.Q<Label>("WMDOperationalBadge");
 
-            // Logistics
             _fuelBar = root.Q<ProgressBar>("FuelBar");
             _ammoBar = root.Q<ProgressBar>("AmmoBar");
             _medicalBar = root.Q<ProgressBar>("MedicalBar");
@@ -187,24 +174,21 @@ namespace StateCraft.UI
             var btnBuyFood = root.Q<Button>("BtnBuyFood");
             if (btnBuyFood != null) btnBuyFood.clicked += () => BuyLogistics("FOOD", 0.02f);
 
-
-            // Doctrine
-            _doctrineDesc = root.Q<Label>("DoctrineDesc");
+_doctrineDesc = root.Q<Label>("DoctrineDesc");
             root.Q<Button>("BtnPostureDefensive").clicked += () => SetPosture("DEFENSIVE");
             root.Q<Button>("BtnPostureDeterrence").clicked += () => SetPosture("DETERRENCE");
             root.Q<Button>("BtnPostureOffensive").clicked += () => SetPosture("OFFENSIVE");
             root.Q<Button>("BtnPostureCOIN").clicked += () => SetPosture("COIN FOCUS");
 
             var btnLaunchOp = root.Q<Button>("btn-launch-new");
-            if (btnLaunchOp == null) btnLaunchOp = root.Q<Button>("BtnLaunchOp"); // fallback
+            if (btnLaunchOp == null) btnLaunchOp = root.Q<Button>("BtnLaunchOp");
             if (btnLaunchOp != null)
             {
                 btnLaunchOp.clicked += ShowLaunchOpModal;
             }
 
-            // Map layout link buttons to actual game views
             var btnViewForces = root.Q<Button>("btn-view-forces");
-            if (btnViewForces != null) btnViewForces.clicked += () => SwitchTab(0); // Switch to Forces tab (index 0)
+            if (btnViewForces != null) btnViewForces.clicked += () => SwitchTab(0);
 
             var btnViewOpTypes = root.Q<Button>("btn-view-op-types");
             if (btnViewOpTypes != null) btnViewOpTypes.clicked += ShowLaunchOpModal;
@@ -265,7 +249,7 @@ namespace StateCraft.UI
             if (panel != null)
             {
                 panel.style.display = DisplayStyle.Flex;
-                UIStateManager.FixScrollViews(panel); // Fix scrollbars in builds
+                UIStateManager.FixScrollViews(panel);
                 UIStateManager.Instance?.ApplySafeTransition(panel, true, 0.4f);
                 RefreshMilitaryData();
             }
@@ -283,9 +267,6 @@ namespace StateCraft.UI
             var gm = GameManager.Instance;
             var country = gm.playerCountry;
 
-            // --- Auto-Sync Healer ---
-            // Corrects legacy save-state discrepancies where old instant-recruit buttons 
-            // did not update the barracks available unit pool.
             int totalDeployed = 0;
             if (country.activeOperations != null)
             {
@@ -298,12 +279,10 @@ namespace StateCraft.UI
                 country.unitInfantry = correctBarracksPool;
             }
 
-            // Sync equipment counts so Forces tab perfectly matches actual available units
-            country.armyStats.equipment = country.unitTanks + country.unitAPCs + country.unitArtillery; // Not counting rifles as heavy equipment
+            country.armyStats.equipment = country.unitTanks + country.unitAPCs + country.unitArtillery;
             country.airForceStats.equipment = country.unitFighters + country.unitBombers + country.unitAttackHelis + country.unitUAVs;
             country.navyStats.equipment = country.unitFrigates + country.unitDestroyers + country.unitSubmarines + country.unitPatrolBoats;
 
-            // Toggle shortage alert badge globally!
             var shortageBadge = _root?.Q<Label>("ShortageAlertBadge");
             bool isWeaponsShortage = country.unitRifles < country.armyStats.personnel;
             if (shortageBadge != null)
@@ -440,7 +419,6 @@ namespace StateCraft.UI
             if (country.treasury >= 250f)
             {
                 country.treasury -= 250f;
-                // Add a random 1-2 star general
                 string[] firstNames = { "John", "Ahmed", "David", "Sani", "Ibrahim", "James", "Victor" };
                 string[] lastNames = { "Okafor", "Adeyemi", "Bello", "Ojo", "Musa", "Dogo", "Umar" };
                 string name = $"{firstNames[Random.Range(0, firstNames.Length)]} {lastNames[Random.Range(0, lastNames.Length)]}";
@@ -459,7 +437,6 @@ namespace StateCraft.UI
 
         private void ShowBlockadeModal()
         {
-            // Placeholder: Typically pops up a list of enemies, for now just auto-blockade test target
             var gm = GameManager.Instance;
             if (gm == null || gm.playerCountry == null) return;
             var target = gm.GetCountryByName(gm.playerCountry.warEnemyName);
@@ -513,7 +490,6 @@ namespace StateCraft.UI
             var gm = GameManager.Instance;
             if (gm == null) return;
 
-            // Find blockades we are ENFORCING
             bool foundAny = false;
             foreach (var enemy in gm.allCountries)
             {
@@ -539,7 +515,7 @@ namespace StateCraft.UI
         {
             if (_wmdProgressBar == null || _wmdStatusLabel == null || _wmdOperationalBadge == null) return;
 
-            _wmdProgressBar.value = country.wmdDevelopmentProgress; // 0-100
+            _wmdProgressBar.value = country.wmdDevelopmentProgress;
 
             if (country.hasNuclearWeapon)
             {
@@ -631,8 +607,6 @@ namespace StateCraft.UI
             if (_activeOpsList == null) return;
             _activeOpsList.Clear();
 
-            // ── WAR FRONT STATUS PANEL ──────────────────────────────────────
-            // Show active war fronts at the top of the operations panel
             if (gm?.WarSystem != null && gm.allCountries != null)
             {
                 bool atWar = false;
@@ -642,7 +616,6 @@ namespace StateCraft.UI
                     if (gm.WarSystem.GetWarStage(other) != StateCraft.Interfaces.WarStage.Conflict) continue;
                     atWar = true;
 
-                    // Build front status card
                     var frontCard = new VisualElement();
                     frontCard.style.marginBottom      = 12;
                     frontCard.style.paddingTop        = 14; frontCard.style.paddingBottom = 14;
@@ -657,7 +630,6 @@ namespace StateCraft.UI
                     frontCard.style.borderTopLeftRadius    = 4; frontCard.style.borderTopRightRadius    = 4;
                     frontCard.style.borderBottomLeftRadius = 4; frontCard.style.borderBottomRightRadius = 4;
 
-                    // Header
                     var fHeader = new VisualElement();
                     fHeader.style.flexDirection  = FlexDirection.Row;
                     fHeader.style.justifyContent = Justify.SpaceBetween;
@@ -678,7 +650,6 @@ namespace StateCraft.UI
                     fHeader.Add(phaseLabel);
                     frontCard.Add(fHeader);
 
-                    // Force comparison bar
                     float myPower    = CalculateFrontPower(country, other.countryName);
                     float enemyPower = CalculateFrontPower(other, country.countryName);
                     float totalPower = Mathf.Max(myPower + enemyPower, 1f);
@@ -692,7 +663,6 @@ namespace StateCraft.UI
                     barLabel.Add(new Label($"ENEMY COMBAT POWER: {enemyPower:N0}") { style = { color = new Color(1f, 0.45f, 0.45f), fontSize = 8 } });
                     frontCard.Add(barLabel);
 
-                    // Power ratio bar — green for us, red for them
                     var barBg = new VisualElement();
                     barBg.style.height = 8; barBg.style.flexDirection = FlexDirection.Row;
                     barBg.style.borderTopLeftRadius    = 4; barBg.style.borderTopRightRadius    = 4;
@@ -710,7 +680,6 @@ namespace StateCraft.UI
                     barBg.Add(enemyBar);
                     frontCard.Add(barBg);
 
-                    // Stats row
                     var statsRow = new VisualElement();
                     statsRow.style.flexDirection  = FlexDirection.Row;
                     statsRow.style.flexWrap       = Wrap.Wrap;
@@ -738,7 +707,6 @@ namespace StateCraft.UI
                         country.reserveFuel < 20f ? new Color(1f, 0.4f, 0.4f) : Color.white);
                     frontCard.Add(statsRow);
 
-                    // Enemy stats comparison
                     var enemyRow = new VisualElement();
                     enemyRow.style.flexDirection  = FlexDirection.Row;
                     enemyRow.style.justifyContent = Justify.SpaceBetween;
@@ -748,7 +716,6 @@ namespace StateCraft.UI
                     });
                     frontCard.Add(enemyRow);
 
-                    // Advantage / momentum message
                     string momMsg;
                     Color  momCol;
                     if (myPower > enemyPower * 1.5f) { momMsg = "▲ WE HOLD THE INITIATIVE — press the advantage"; momCol = Color.green; }
@@ -762,7 +729,6 @@ namespace StateCraft.UI
                     _activeOpsList.Add(frontCard);
                 }
 
-                // Supply warning banner if at war and ammo/fuel critical
                 if (atWar && (country.reserveAmmo < 30f || country.reserveFuel < 20f))
                 {
                     var supplyWarn = new VisualElement();
@@ -800,7 +766,6 @@ namespace StateCraft.UI
                 card.style.paddingRight = 12;
                 card.style.marginBottom = 8;
 
-                // Color-code border defense ops distinctly
                 bool isBorderDefense = op.type == "DEFEND BORDERS";
                 if (isBorderDefense)
                 {
@@ -828,13 +793,12 @@ namespace StateCraft.UI
                 Color statusColor = op.turnsToDeploy > 0 ? new Color(241/255f, 196/255f, 15/255f) : new Color(0, 210/255f, 255/255f);
                 footer.Add(new Label(displayStatus) { style = { color = statusColor, fontSize = 9 } });
                 
-                float opCostB = (op.costPerMonth / 1000f) * country.exchangeRate; // e.g. 50M becomes 0.05B USD converted to local currency
+                float opCostB = (op.costPerMonth / 1000f) * country.exchangeRate;
                 string sym = string.IsNullOrEmpty(country.currencySymbol) ? "₦" : country.currencySymbol;
                 footer.Add(new Label($"{sym}{opCostB:F2}B/mo") { style = { color = Color.grey, fontSize = 8 } });
                 footer.Add(new Label($"{op.deployedTroops:N0} INF") { style = { color = Color.grey, fontSize = 8 } });
                 card.Add(footer);
 
-                // If it is a custom launched operation, add a DECOMMISSION button
                 if (country.activeOperations.Contains(op))
                 {
                     var actionRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, marginTop = 8 } };
@@ -858,7 +822,6 @@ namespace StateCraft.UI
                     
                     terminateBtn.clicked += () =>
                     {
-                        // Return deployed forces to standing pool!
                         country.unitInfantry += captureOp.deployedTroops;
                         country.rdfStats.personnel += captureOp.deployedRDF;
                         country.unitAttackHelis += captureOp.deployedHelis;
@@ -893,15 +856,12 @@ namespace StateCraft.UI
                 _activeOpsList.Add(card);
             }
 
-            // ── Wartime Quick-Actions (shown only during conflict) ──
             var warStage = gm.WarSystem?.GetWarStage(country) ?? WarStage.Peace;
             if (warStage == WarStage.Conflict)
             {
-                // Section header
                 var warActHeader = new Label("⚔ WARTIME QUICK ACTIONS") { style = { color = new Color(255/255f, 82/255f, 82/255f), fontSize = 10, unityFontStyleAndWeight = FontStyle.Bold, marginTop = 14, marginBottom = 6 } };
                 _activeOpsList.Add(warActHeader);
 
-                // ── Deploy to National Borders ──
                 var borderCard = new VisualElement();
                 borderCard.AddToClassList("sub-panel");
                 borderCard.style.paddingTop = 14;
@@ -965,7 +925,6 @@ namespace StateCraft.UI
                 }
                 _activeOpsList.Add(borderCard);
 
-                // ── Air Intercept Card ──
                 var enemy = gm.GetCountryByName(country.warEnemyName)
                          ?? gm.allCountries?.Find(c => c != country && (gm.WarSystem?.GetWarStage(c) == WarStage.Conflict));
                 if (enemy != null)
@@ -1006,7 +965,6 @@ namespace StateCraft.UI
         private void ShowInboxModal()
         {
             var country = GameManager.Instance.playerCountry;
-            // Clear the routine message badge when player opens inbox
             StateCraft.Systems.InboxSystem.Instance?.ClearRoutineBadge();
             var overlay = new VisualElement() { style = { position = Position.Absolute, left = 0, top = 0, right = 0, bottom = 0, backgroundColor = new Color(0, 0, 0, 0.85f), justifyContent = Justify.Center, alignItems = Align.Center } };
             var modal = new VisualElement() { style = { width = 500, paddingBottom = 20, paddingTop = 20, paddingLeft = 20, paddingRight = 20, backgroundColor = new Color(0.1f, 0.1f, 0.1f, 1f), borderTopLeftRadius=8, borderTopRightRadius=8, borderBottomLeftRadius=8, borderBottomRightRadius=8 } };
@@ -1032,7 +990,6 @@ namespace StateCraft.UI
             }
             else
             {
-                // Show newest first
                 var messages = new List<InboxMessage>(country.inboxMessages);
                 messages.Reverse();
 
@@ -1093,7 +1050,6 @@ namespace StateCraft.UI
 
             scroll.Add(new Label("AVAILABLE RESERVES TO DEPLOY") { style = { color = Color.grey, fontSize = 9, marginBottom = 10 } });
 
-            // Only show slider if they have any reserves for it
             SliderInt troopsSlider = null;
             if (country.unitInfantry > 0)
             {
@@ -1160,19 +1116,16 @@ namespace StateCraft.UI
                     return;
                 }
 
-                // Append to OP
                 op.deployedTroops += sendTroops;
                 op.deployedTanks += sendTanks;
                 op.deployedAPCs += sendApcs;
                 op.deployedUAVs += sendUavs;
 
-                // Deduct from Reserve
                 country.unitInfantry = Mathf.Max(0, country.unitInfantry - sendTroops);
                 country.unitTanks = Mathf.Max(0, country.unitTanks - sendTanks);
                 country.unitAPCs = Mathf.Max(0, country.unitAPCs - sendApcs);
                 country.unitUAVs = Mathf.Max(0, country.unitUAVs - sendUavs);
 
-                // Add flat cost + recalculate boost
                 float addedBoost = (sendTroops / 1000f) * 0.5f + sendTanks * 0.8f + sendApcs * 0.4f + sendUavs * 1.2f;
                 op.securityBoostRate += addedBoost;
 
@@ -1235,7 +1188,6 @@ namespace StateCraft.UI
             _weaponsGrid.Clear();
             if (_basesGrid != null) _basesGrid.Clear();
 
-            // --- PERSONNEL RECRUITMENT & TRAINING ---
             int infantryCapacity = 5000 + (country.baseArmyCount * 15000);
             int inTrainingInfantry = GetTotalInTraining(country, "INF");
             string infantryLabel = $"Infantry Battalion (Cap: {country.armyStats.personnel + inTrainingInfantry:N0}/{infantryCapacity:N0})";
@@ -1261,7 +1213,6 @@ namespace StateCraft.UI
             string rdfLabel = $"Elite Spec-Ops RDF (Cap: {country.rdfStats.personnel + inTrainingRDF:N0}/{rdfCapacity:N0})";
             AddRecruitCard(rdfLabel, "RDF_PERS", country.rdfStats.personnel, 0.08f, 100, _personnelGrid, true);
 
-            // Draw active training pipelines if any
             if (country.trainingPipelines != null && country.trainingPipelines.Count > 0)
             {
                 var divider = new VisualElement();
@@ -1304,7 +1255,6 @@ namespace StateCraft.UI
                 }
             }
 
-            // --- WEAPONS & EQUIPMENT ---
             AddWeaponCard("Tactical Service Rifles", "RIFLE", country.unitRifles, 0.01f, 1000, _weaponsGrid, country);
             AddWeaponCard("Artillery Battery", "ARTILLERY", country.unitArtillery, 0.10f, 15, _weaponsGrid, country);
             AddWeaponCard("Main Battle Tanks", "TNK", country.unitTanks, 0.25f, 10, _weaponsGrid, country);
@@ -1318,7 +1268,6 @@ namespace StateCraft.UI
             AddWeaponCard("Attack Submarine", "SUB", country.unitSubmarines, 2.5f, 1, _weaponsGrid, country);
             AddWeaponCard("Destroyers", "DESTROYER", country.unitDestroyers, 2.5f, 1, _weaponsGrid, country);
             
-            // --- STRATEGIC BASE CONSTRUCTIONS ---
             if (_basesGrid != null)
             {
                 AddRecruitCard("Military Base (Army)", "BASE_ARMY", country.baseArmyCount, 0.40f, 1, _basesGrid, false);
@@ -1337,7 +1286,6 @@ namespace StateCraft.UI
             var gm = GameManager.Instance;
             if (gm.allCountries == null || gm.allCountries.Count == 0) return;
 
-            // Sort all countries by their military firepower score
             var sortedCountries = new List<CountryDataSO>(gm.allCountries);
             sortedCountries.Sort((a, b) => b.GetMilitaryFirepowerScore().CompareTo(a.GetMilitaryFirepowerScore()));
 
@@ -1360,7 +1308,6 @@ namespace StateCraft.UI
                 row.style.paddingLeft = 15;
                 row.style.paddingRight = 15;
 
-                // Left element: Rank & Country Name
                 var leftGroup = new VisualElement() { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
                 
                 var rankLabel = new Label($"#{i + 1}") 
@@ -1387,7 +1334,6 @@ namespace StateCraft.UI
                 leftGroup.Add(nameLabel);
                 row.Add(leftGroup);
 
-                // Middle: Visual comparison bar
                 var barContainer = new VisualElement() { style = { flexGrow = 1, height = 8, backgroundColor = new Color(0, 0, 0, 0.4f), marginLeft = 20, marginRight = 20 } };
                 barContainer.style.borderTopLeftRadius = 4;
                 barContainer.style.borderTopRightRadius = 4;
@@ -1411,7 +1357,6 @@ namespace StateCraft.UI
                 barContainer.Add(fillBar);
                 row.Add(barContainer);
 
-                // Right element: Firepower Index & Threat Tag
                 var rightGroup = new VisualElement() { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
                 
                 var scoreLabel = new Label($"{score:N0} MPI") 
@@ -1466,9 +1411,6 @@ namespace StateCraft.UI
             }
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        // STRATEGIC PROJECTS TAB
-        // ─────────────────────────────────────────────────────────────────────
         private void PopulateProjects(CountryDataSO country)
         {
             if (_activeProjectsList == null || _availableProjectsList == null) return;
@@ -1477,7 +1419,6 @@ namespace StateCraft.UI
 
             string sym = string.IsNullOrEmpty(country.currencySymbol) ? "₦" : country.currencySymbol;
 
-            // ── ACTIVE PROJECTS ──────────────────────────────────────────────
             if (country.militaryProjects == null || country.militaryProjects.Count == 0)
             {
                 var emptyLabel = new Label("No active projects. Commission a directive below.");
@@ -1499,7 +1440,6 @@ namespace StateCraft.UI
                     card.style.paddingLeft = 16;
                     card.style.paddingRight = 16;
 
-                    // Branch color
                     Color branchColor = proj.branch switch
                     {
                         "Army"     => new Color(255/255f, 152/255f, 0),
@@ -1509,7 +1449,6 @@ namespace StateCraft.UI
                         _          => Color.grey
                     };
 
-                    // Header row: name + branch badge
                     var headerRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, marginBottom = 8 } };
                     var nameLabel = new Label(proj.projectName) { style = { color = Color.white, unityFontStyleAndWeight = FontStyle.Bold, fontSize = 11 } };
                     var branchBadge = new Label(proj.branch.ToUpper()) { style = { color = branchColor, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } };
@@ -1522,7 +1461,6 @@ namespace StateCraft.UI
                     headerRow.Add(branchBadge);
                     card.Add(headerRow);
 
-                    // Progress bar
                     float elapsed = Mathf.Max(0, proj.totalMonths - proj.monthsRemaining);
                     float pct = proj.totalMonths > 0 ? (elapsed / proj.totalMonths) * 100f : 0f;
                     var barBg = new VisualElement() { style = { height = 6, backgroundColor = new Color(0, 0, 0, 0.4f), marginBottom = 6 } };
@@ -1534,7 +1472,6 @@ namespace StateCraft.UI
                     barBg.Add(fill);
                     card.Add(barBg);
 
-                    // Info row: time remaining + strength gain
                     var infoRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween } };
                     infoRow.Add(new Label($"⏱ {proj.monthsRemaining} months remaining") { style = { color = new Color(255/255f, 152/255f, 0), fontSize = 9 } });
                     infoRow.Add(new Label($"+{proj.strengthGain:F0}% Strength on completion") { style = { color = new Color(0, 230/255f, 118/255f), fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
@@ -1544,32 +1481,25 @@ namespace StateCraft.UI
                 }
             }
 
-            // ── AVAILABLE PROJECTS CATALOG ───────────────────────────────────
-            // Define the full catalog of unlockable directives
             var catalog = new System.Collections.Generic.List<(string name, string branch, float strengthGain, float costBillions, int months, string desc)>
             {
-                // ARMY
                 ("Iron Fist Armour Programme",  "Army",     12f, 0.80f, 12, "Procure 50 MBTs & 100 APCs. +12% Army Strength."),
                 ("Artillery Modernization",     "Army",     8f,  0.40f,  8, "Upgrade field artillery systems. +8% Army Strength."),
                 ("Infantry Combat System",      "Army",     6f,  0.25f,  6, "Advanced body armour & small arms. +6% Army Strength."),
                 ("Rapid Reaction Force Uplift", "Army",     5f,  0.30f,  6, "Pre-position stockpiles for fast deployment. +5% Army."),
-                // NAVY
                 ("Blue-Water Fleet Expansion",  "Navy",     15f, 2.50f, 18, "Commission 2 Destroyers & 1 Frigate. +15% Navy Strength."),
                 ("Submarine Stealth Pack",      "Navy",     10f, 1.80f, 14, "Acquire 2 SSK attack submarines. +10% Navy Strength."),
                 ("Coastal Defence Network",     "Navy",     7f,  0.60f,  9, "Mine layers, patrol boats, radar. +7% Navy Strength."),
                 ("Naval Air Integration",       "Navy",     8f,  1.00f, 12, "Carrier-capable aircraft & EW systems. +8% Navy Strength."),
-                // AIR FORCE
                 ("Generation-5 Fighter Block",  "AirForce", 18f, 3.50f, 24, "Procure 12 5th-gen multi-role jets. +18% Air Strength."),
                 ("Strategic Bomber Fleet",      "AirForce", 14f, 2.80f, 20, "4 long-range strategic bombers. +14% Air Strength."),
                 ("UAV Swarm Programme",         "AirForce", 9f,  0.70f, 10, "50 tactical & 10 MALE UAVs. +9% Air Strength."),
                 ("Air Defence Umbrella",        "AirForce", 11f, 1.20f, 12, "S-400 class SAM network. +11% Air Strength."),
-                // RDF / SPECIAL OPS
                 ("Black Sabre Spec-Ops",        "RDF",      20f, 0.50f,  8, "Elite tier-1 operators & equipment. +20% RDF Readiness."),
                 ("SIGINT & Cyber Warfare",      "RDF",      12f, 0.35f,  6, "Electronic warfare & signals intel. +12% RDF Readiness."),
                 ("Hostage Rescue Unit",         "RDF",      8f,  0.20f,  4, "Dedicated HRU with transport helis. +8% RDF Readiness."),
             };
 
-            // Check which are already active (by name) to prevent duplicate queuing
             var activeNames = new System.Collections.Generic.HashSet<string>();
             if (country.militaryProjects != null)
                 foreach (var p in country.militaryProjects) activeNames.Add(p.projectName);
@@ -1598,7 +1528,6 @@ namespace StateCraft.UI
                 card.style.paddingRight = 16;
                 card.style.opacity = isActive ? 0.45f : 1.0f;
 
-                // Header
                 var headerRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, marginBottom = 6 } };
                 var nameLabel = new Label(name) { style = { color = Color.white, unityFontStyleAndWeight = FontStyle.Bold, fontSize = 11, flexShrink = 1 } };
                 var branchBadge = new Label(branch.ToUpper()) { style = { color = branchColor, fontSize = 8, unityFontStyleAndWeight = FontStyle.Bold } };
@@ -1611,18 +1540,15 @@ namespace StateCraft.UI
                 headerRow.Add(branchBadge);
                 card.Add(headerRow);
 
-                // Description
                 var descLabel = new Label(desc) { style = { color = Color.grey, fontSize = 9, whiteSpace = WhiteSpace.Normal, marginBottom = 8 } };
                 card.Add(descLabel);
 
-                // Cost / time / strength row
                 var statsRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, marginBottom = 10 } };
                 statsRow.Add(new Label($"Cost: {UiFormat.Money(localCost, sym)}") { style = { color = canAfford ? new Color(0, 230/255f, 118/255f) : new Color(255/255f, 82/255f, 82/255f), fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
                 statsRow.Add(new Label($"Duration: {months} months") { style = { color = Color.grey, fontSize = 9 } });
                 statsRow.Add(new Label($"+{strengthGain:F0}% on completion") { style = { color = new Color(0, 210/255f, 255/255f), fontSize = 9, unityFontStyleAndWeight = FontStyle.Bold } });
                 card.Add(statsRow);
 
-                // Commission button
                 var btn = new Button();
                 btn.AddToClassList("button-premium");
                 btn.style.height = 26;
@@ -1758,7 +1684,6 @@ namespace StateCraft.UI
 
             var actionRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, marginTop = 10 } };
             
-            // IMPORT BUTTON
             var btnImport = new Button(() => ShowPurchaseModal(name, id, costB, amountPerClick, false, false, 0)) 
             { 
                 text = $"IMPORT..." 
@@ -1780,10 +1705,9 @@ namespace StateCraft.UI
             importCol.Add(importCostLabel);
             actionRow.Add(importCol);
 
-            // MANUFACTURE BUTTON
             float prodCost = localCost * 0.5f;
             float prodCostB = costB * 0.5f;
-            float mineralsCost = costB * 10000f; // Baseline minerals cost
+            float mineralsCost = costB * 10000f;
             
             var btnProduce = new Button(() => ShowPurchaseModal(name, id, prodCostB, amountPerClick, false, true, mineralsCost)) 
             { 
@@ -1848,7 +1772,7 @@ namespace StateCraft.UI
             sliderLabel.style.marginBottom = 5;
             modal.Add(sliderLabel);
 
-            int maxBatches = 100; // Default max 100 batches
+            int maxBatches = 100;
             
             if (isPersonnel)
             {
@@ -1881,7 +1805,7 @@ namespace StateCraft.UI
                 }
                 
                 int availableSpace = Mathf.Max(0, capacity - currentTotal);
-                maxBatches = Mathf.Max(1, availableSpace / batchSize); // Don't let it be 0 to avoid broken slider
+                maxBatches = Mathf.Max(1, availableSpace / batchSize);
             }
 
             SliderInt amountSlider = new SliderInt(1, maxBatches) { style = { marginBottom = 15 } };
@@ -1946,7 +1870,6 @@ namespace StateCraft.UI
 
             if (isPersonnel)
             {
-                // Enforce base capacity limit!
                 int capacity = 0;
                 int currentTotal = 0;
                 int inTraining = GetTotalInTraining(country, id);
@@ -2007,7 +1930,6 @@ namespace StateCraft.UI
                 string tag = isPersonnel ? "TRAINING" : (isProduce ? "MANUFACTURE" : "IMPORT");
                 string unitLabel = "";
 
-                // Determine label
                 switch (id)
                 {
                     case "INF": unitLabel = "Ground Troops"; break;
@@ -2038,7 +1960,6 @@ namespace StateCraft.UI
 
                 if (isPersonnel)
                 {
-                    // Queue for 6 months of training!
                     country.trainingPipelines.Add(new RecruitmentPipeline(id, unitLabel, amount, true));
                     
                     country.militaryReadiness = Mathf.Min(100f, country.militaryReadiness + 0.5f);
@@ -2048,7 +1969,6 @@ namespace StateCraft.UI
                 }
                 else
                 {
-                    // Direct Hardware procurement / Base Construction
                     switch (id)
                     {
                         case "RIFLE": 
@@ -2136,7 +2056,6 @@ namespace StateCraft.UI
                             break;
                     }
 
-                    // Update combined strength
                     country.militaryStrength = (country.armyStrength * 0.5f) + (country.navyStrength * 0.2f) + (country.airForceStrength * 0.3f);
                     country.militaryReadiness = Mathf.Min(100f, country.militaryReadiness + 1.0f);
 
@@ -2290,7 +2209,6 @@ namespace StateCraft.UI
 
             if (amountRemoved > 0)
             {
-                // Simple recalculation based on actual hardware
                 country.militaryStrength = (country.armyStrength * 0.5f) + (country.navyStrength * 0.2f) + (country.airForceStrength * 0.3f);
                 
                 NotificationManager.Instance?.AddNotification($"DECOMMISSIONED: {amountRemoved:N0} {unitLabel} removed from active service.", new Color(255/255f, 82/255f, 82/255f));
@@ -2324,7 +2242,6 @@ namespace StateCraft.UI
             var country = GameManager.Instance?.playerCountry;
             if (country == null) return;
 
-            // Enforce that at least one region has deteriorated security (< 70%)
             var deterioratedRegions = country.regions.FindAll(r => r.security < 70f);
             if (deterioratedRegions.Count == 0)
             {
@@ -2332,7 +2249,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // ── Quick Camp Strike shortcut — show if any camps are detected ──
             var campRegions = country.regions.FindAll(r => r.insurgentCampDetected && !r.campStrikeOrdered);
             if (campRegions.Count > 0 && country.unitBombers < 1 && country.unitFighters < 5)
             {
@@ -2341,7 +2257,6 @@ namespace StateCraft.UI
                     new Color(1f, 0.5f, 0f));
             }
 
-            // Create Modal background container (semi-solid dark overlay to block messy sitrep behind)
             var overlay = new VisualElement();
             overlay.name = "OpModalOverlay";
             overlay.style.position = Position.Absolute;
@@ -2353,7 +2268,6 @@ namespace StateCraft.UI
             overlay.style.justifyContent = Justify.Center;
             overlay.style.alignItems = Align.Center;
 
-            // Glassmorphic Modal Panel
             var modal = new VisualElement();
             modal.AddToClassList("sub-panel");
             modal.style.width = 440;
@@ -2368,7 +2282,6 @@ namespace StateCraft.UI
             SetBorderColor(modal.style, new Color(255/255f, 82/255f, 82/255f, 0.4f));
             overlay.Add(modal);
 
-            // Title (Pinned at the top)
             var title = new Label("LAUNCH MILITARY OPERATION");
             title.style.color = Color.white;
             title.style.unityFontStyleAndWeight = FontStyle.Bold;
@@ -2376,20 +2289,17 @@ namespace StateCraft.UI
             title.style.marginBottom = 15;
             modal.Add(title);
 
-            // Scrollable Form Container
             var scroll = new ScrollView(ScrollViewMode.Vertical);
             scroll.style.flexGrow = 1;
             scroll.style.marginBottom = 12;
             modal.Add(scroll);
 
-            // Input fields: Name
             scroll.Add(new Label("OPERATION CODENAME") { style = { color = Color.grey, fontSize = 9, marginBottom = 4 } });
             var nameInput = new TextField() { value = $"OPERATION {deterioratedRegions[0].regionName.ToUpper().Replace(" ", "")} SHIELD" };
             nameInput.style.marginBottom = 12;
             nameInput.style.height = 32;
             scroll.Add(nameInput);
 
-            // Style inner text element so it is beautifully legible in dark glass style and doesn't overlap
             var inputElement = nameInput.Q<VisualElement>(className: "unity-text-field__input") ?? nameInput.Q<VisualElement>("unity-text-input");
             if (inputElement != null)
             {
@@ -2403,7 +2313,6 @@ namespace StateCraft.UI
                 SetBorderColor(inputElement.style, new Color(0, 210/255f, 255/255f, 0.3f));
             }
 
-            // Select fields: Region / Frontlines
             scroll.Add(new Label("TARGET THEATRE (DOMESTIC REGIONS OR ENEMY FRONTLINES)") { style = { color = Color.grey, fontSize = 9, marginBottom = 4 } });
             var regionSelectContainer = new VisualElement() { style = { flexDirection = FlexDirection.Row, flexWrap = Wrap.Wrap, marginBottom = 12 } };
             
@@ -2422,16 +2331,15 @@ namespace StateCraft.UI
                 }
             }
 
-            // ── Add detected insurgent camps as priority strike targets ──
             var detectedCamps = country.regions.FindAll(r => r.insurgentCampDetected && !r.campStrikeOrdered);
             foreach (var campRegion in detectedCamps)
             {
                 string campEntry = $"🎯 CAMP: {campRegion.regionName}";
                 if (!availableTheaters.Contains(campEntry))
-                    availableTheaters.Insert(0, campEntry); // Camps go to top of list
+                    availableTheaters.Insert(0, campEntry);
             }
 
-            if (availableTheaters.Count == 0) availableTheaters.Add("HOME DEFENSE"); // Fallback
+            if (availableTheaters.Count == 0) availableTheaters.Add("HOME DEFENSE");
             string selectedRegion = availableTheaters[0];
 
             var regionButtons = new List<Button>();
@@ -2479,7 +2387,6 @@ namespace StateCraft.UI
             }
             scroll.Add(regionSelectContainer);
 
-            // Operation Type Buttons
             scroll.Add(new Label("OPERATION OBJECTIVE") { style = { color = Color.grey, fontSize = 9, marginBottom = 4 } });
             var typeSelectContainer = new VisualElement() { style = { flexDirection = FlexDirection.Row, marginBottom = 15 } };
             string selectedType = "COIN";
@@ -2533,7 +2440,6 @@ namespace StateCraft.UI
             }
             scroll.Add(typeSelectContainer);
 
-            // Slider: Ground Troops
             var troopsLabel = new Label($"DEPLOY INFANTRY: 2,500 Troops (Available: {country.unitInfantry:N0})");
             troopsLabel.style.color = Color.grey;
             troopsLabel.style.fontSize = 9;
@@ -2547,7 +2453,6 @@ namespace StateCraft.UI
             troopsSlider.highValue = Mathf.Min(maxInfantry, 10000);
             scroll.Add(troopsSlider);
 
-            // Slider: Tanks
             var tanksLabel = new Label($"DEPLOY TANKS: 0 Tanks (Available: {country.unitTanks:N0})");
             tanksLabel.style.color = Color.grey;
             tanksLabel.style.fontSize = 9;
@@ -2561,7 +2466,6 @@ namespace StateCraft.UI
             tanksSlider.highValue = Mathf.Min(maxTanks, 50);
             scroll.Add(tanksSlider);
 
-            // Slider: APCs
             var apcsLabel = new Label($"DEPLOY APCs: 0 APCs (Available: {country.unitAPCs:N0})");
             apcsLabel.style.color = Color.grey;
             apcsLabel.style.fontSize = 9;
@@ -2575,9 +2479,7 @@ namespace StateCraft.UI
             apcsSlider.highValue = Mathf.Min(maxAPCs, 100);
             scroll.Add(apcsSlider);
 
-
-            // Slider: Fighter Jets
-            var fightersLabel = new Label($"DEPLOY FIGHTER JETS: 0 Jets (Available: {country.unitFighters:N0})");
+var fightersLabel = new Label($"DEPLOY FIGHTER JETS: 0 Jets (Available: {country.unitFighters:N0})");
             fightersLabel.style.color = Color.grey;
             fightersLabel.style.fontSize = 9;
             fightersLabel.style.marginBottom = 4;
@@ -2590,7 +2492,6 @@ namespace StateCraft.UI
             fightersSlider.highValue = Mathf.Min(maxFighters, 10);
             scroll.Add(fightersSlider);
 
-            // Slider: Helicopters
             var helisLabel = new Label($"DEPLOY HELICOPTERS: 0 Helicopters (Available: {country.unitAttackHelis:N0})");
             helisLabel.style.color = Color.grey;
             helisLabel.style.fontSize = 9;
@@ -2604,7 +2505,6 @@ namespace StateCraft.UI
             helisSlider.highValue = Mathf.Min(maxHelis, 15);
             scroll.Add(helisSlider);
 
-            // Slider: Coastal Frigates
             var frigatesLabel = new Label($"DEPLOY FRIGATES: 0 Frigates (Available: {country.unitFrigates:N0})");
             frigatesLabel.style.color = Color.grey;
             frigatesLabel.style.fontSize = 9;
@@ -2618,7 +2518,6 @@ namespace StateCraft.UI
             frigatesSlider.highValue = Mathf.Min(maxFrigates, 5);
             scroll.Add(frigatesSlider);
 
-            // Slider: Attack Submarines
             var submarinesLabel = new Label($"DEPLOY SUBMARINES: 0 Submarines (Available: {country.unitSubmarines:N0})");
             submarinesLabel.style.color = Color.grey;
             submarinesLabel.style.fontSize = 9;
@@ -2632,7 +2531,6 @@ namespace StateCraft.UI
             submarinesSlider.highValue = Mathf.Min(maxSubmarines, 5);
             scroll.Add(submarinesSlider);
 
-            // Slider: RDF
             var rdfLabel = new Label($"DEPLOY RDF SPEC-OPS: 0 RDF (Available: {country.rdfStats.personnel:N0})");
             rdfLabel.style.color = Color.grey;
             rdfLabel.style.fontSize = 9;
@@ -2646,7 +2544,6 @@ namespace StateCraft.UI
             rdfSlider.highValue = Mathf.Min(maxRDF, 5000);
             scroll.Add(rdfSlider);
 
-            // Slider: Bombers
             var bombersLabel = new Label($"DEPLOY STRATEGIC BOMBERS: 0 Bombers (Available: {country.unitBombers:N0})");
             bombersLabel.style.color = Color.grey;
             bombersLabel.style.fontSize = 9;
@@ -2660,7 +2557,6 @@ namespace StateCraft.UI
             bombersSlider.highValue = Mathf.Min(maxBombers, 20);
             scroll.Add(bombersSlider);
 
-            // Slider: UAVs
             var uavsLabel = new Label($"DEPLOY TACTICAL UAVs: 0 UAVs (Available: {country.unitUAVs:N0})");
             uavsLabel.style.color = Color.grey;
             uavsLabel.style.fontSize = 9;
@@ -2674,7 +2570,6 @@ namespace StateCraft.UI
             uavsSlider.highValue = Mathf.Min(maxUAVs, 100);
             scroll.Add(uavsSlider);
 
-            // Cost per Turn (Adds to Monthly Military Spending)
             var costLabel = new Label();
             costLabel.style.color = new Color(0, 230/255f, 118/255f);
             costLabel.style.fontSize = 9;
@@ -2783,8 +2678,7 @@ namespace StateCraft.UI
                 bombersLabel.text = $"DEPLOY STRATEGIC BOMBERS: {bombVal:N0} Bombers (Available: {country.unitBombers:N0})";
                 uavsLabel.text = $"DEPLOY TACTICAL UAVs: {uavVal:N0} UAVs (Available: {country.unitUAVs:N0})";
 
-
-                float monthlyCost = 0.01f +
+float monthlyCost = 0.01f +
                                     (tVal / 1000f) * 0.01f +
                                     tankVal * 0.005f +
                                     apcVal * 0.002f +
@@ -2808,14 +2702,12 @@ namespace StateCraft.UI
                                       bombVal * 3.0f +
                                       uavVal * 1.2f;
 
-                // Success chance: 50-95% based on force strength vs region threat
                 float baseChance = Mathf.Clamp(50f + securityBoost * 1.5f, 50f, 95f);
                 int durationMonths = Mathf.Max(1, Mathf.RoundToInt(3f + (10f / Mathf.Max(1f, securityBoost * 0.3f))));
 
                 float localCost = monthlyCost * country.exchangeRate;
                 string sym = string.IsNullOrEmpty(country.currencySymbol) ? "₦" : country.currencySymbol;
 
-                // Update the impact card labels
                 var impactCostVal = scroll.Q<Label>("impactCostVal");
                 if (impactCostVal != null) impactCostVal.text = $"{UiFormat.Money(localCost, sym)} / Month";
                 
@@ -2833,7 +2725,6 @@ namespace StateCraft.UI
                             : new Color(1f, 0.32f, 0.32f));
                 }
 
-                // Effects
                 var impactEffectsRow = scroll.Q<VisualElement>("impactEffectsRow");
                 if (impactEffectsRow != null)
                 {
@@ -2845,7 +2736,6 @@ namespace StateCraft.UI
                 }
             };
 
-            // ── OPERATION IMPACT PANEL (live preview) ──────────────────────────
             var impactPanel = new VisualElement();
             impactPanel.style.backgroundColor = new StyleColor(new Color(0.02f, 0.08f, 0.14f, 0.95f));
             impactPanel.style.borderTopWidth = impactPanel.style.borderBottomWidth =
@@ -2867,7 +2757,6 @@ namespace StateCraft.UI
             impactTitle.style.marginBottom = 6;
             impactPanel.Add(impactTitle);
 
-            // 3-col stat row
             var impactStatRow = new VisualElement();
             impactStatRow.style.flexDirection = FlexDirection.Row;
             impactStatRow.style.marginBottom = 6;
@@ -2880,7 +2769,6 @@ namespace StateCraft.UI
             impactChanceValLbl.name = "impactChanceVal";
             impactPanel.Add(impactStatRow);
 
-            // Effects tags row
             var impactEffectsLabel = new Label("EFFECTS:");
             impactEffectsLabel.style.color = new StyleColor(Color.grey);
             impactEffectsLabel.style.fontSize = 8;
@@ -2907,7 +2795,6 @@ namespace StateCraft.UI
             uavsSlider.RegisterValueChangedCallback(_ => UpdateEstimation());
             UpdateEstimation();
 
-            // Button actions: Confirm / Cancel (Pinned at the bottom of the modal)
             var actionRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween } };
             
             var cancelBtn = new Button(() => overlay.parent?.Remove(overlay)) { text = "CANCEL" };
@@ -2938,7 +2825,6 @@ namespace StateCraft.UI
 
             modal.Add(actionRow);
 
-            // Add overlay to main MilitaryDashboard container so it blocks background elements completely!
             var dashboard = _root?.Q<VisualElement>("MilitaryDashboard");
             if (dashboard != null)
             {
@@ -2954,7 +2840,6 @@ namespace StateCraft.UI
             int troops, int tanks, int apcs, int fighters, int helis, int frigates, int submarines,
             int rdf = 0, int bombers = 0, int uavs = 0)
         {
-            // Calculate dynamic cost per turn based on the deployed sizes
             float monthlyCost = 0.01f + 
                                 (troops / 1000f) * 0.01f + 
                                 tanks * 0.005f + 
@@ -2979,13 +2864,11 @@ namespace StateCraft.UI
                                       bombers * 3.0f +
                                       uavs * 1.2f;
 
-            // Apply weapons shortage penalty!
             if (country.unitRifles < country.armyStats.personnel)
             {
                 securityBoostRate *= 0.5f;
             }
 
-            // Deduct from standing unit counts
             country.unitInfantry = Mathf.Max(0, country.unitInfantry - troops);
             country.unitTanks = Mathf.Max(0, country.unitTanks - tanks);
             country.unitAPCs = Mathf.Max(0, country.unitAPCs - apcs);
@@ -3003,7 +2886,7 @@ namespace StateCraft.UI
                 regionName = regionName,
                 type = type,
                 status = "Active",
-                costPerMonth = monthlyCost * 1000f, // Cost in millions for persistence
+                costPerMonth = monthlyCost * 1000f,
                 deployedTroops = troops,
                 deployedHelis = helis,
                 deployedTanks = tanks,
@@ -3020,7 +2903,6 @@ namespace StateCraft.UI
 
             country.activeOperations.Add(op);
 
-            // Deduct initial deployment funding immediately
             var gm = GameManager.Instance;
             if (gm != null)
             {
@@ -3028,16 +2910,12 @@ namespace StateCraft.UI
                 country.treasury = gm.playerBudget;
             }
 
-            // Boost regional security immediately on deployment!
             var targetReg = country.regions.Find(r => r.regionName == regionName);
             if (targetReg != null)
             {
-                // Elite RDF Spec-Ops amplify the immediate first-strike zone securing!
                 float rdfBonus = rdf > 0 ? (rdf / 1000f) * 8f : 
                                  (country.rdfStats.personnel > 0 && country.rdfReadiness >= 75f) ? 3.0f : 0f;
-                // UAV recon provides immediate ISR (Intelligence, Surveillance, Reconnaissance) boost
                 float uavBonus = uavs > 0 ? uavs * 0.15f : 0f;
-                // Bomber strike provides immediate suppression
                 float airBonus = bombers > 0 ? bombers * 0.5f : 0f;
 
                 targetReg.security = Mathf.Min(100f, targetReg.security + 5f + (troops / 1000f) * 1.5f + rdfBonus + uavBonus + airBonus);
@@ -3068,8 +2946,7 @@ namespace StateCraft.UI
             RefreshMilitaryData();
         }
 
-
-        private void PopulateBranches(CountryDataSO country)
+private void PopulateBranches(CountryDataSO country)
         {
             if (_branchContainer == null) return;
             _branchContainer.Clear();
@@ -3293,7 +3170,7 @@ namespace StateCraft.UI
             var gm = GameManager.Instance;
             if (country == null || gm == null) return;
 
-            float refund = cost * 0.40f; // Reclaim 40% of the training/construction budget!
+            float refund = cost * 0.40f;
 
             if (isPersonnel)
             {
@@ -3556,11 +3433,7 @@ namespace StateCraft.UI
             _budgetLedgerList.Add(row);
         }
 
-        // ══════════════════════════════════════════════════════════════
-        // NEW OPERATIONS TAB DATA POPULATION
-        // ══════════════════════════════════════════════════════════════
-
-        private void PopulateThreatList(CountryDataSO country)
+private void PopulateThreatList(CountryDataSO country)
         {
             if (_threatList == null) return;
             _threatList.Clear();
@@ -3618,7 +3491,7 @@ namespace StateCraft.UI
         private void UpdateIntelAssessment(CountryDataSO country)
         {
             if (country.regions.Count == 0) return;
-            var r = country.regions[0]; // Example: grab the first region for the assessment or the lowest security one
+            var r = country.regions[0];
             foreach (var reg in country.regions)
             {
                 if (reg.security < r.security) r = reg;
@@ -3655,7 +3528,6 @@ namespace StateCraft.UI
             if (_opsList == null) return;
             _opsList.Clear();
 
-            // Update the count badge on the header button
             var btnViewAll = _root?.Q<Button>("btn-view-all-ops");
             int opCount = country.activeOperations != null ? country.activeOperations.Count : 0;
             if (btnViewAll != null)
@@ -3663,7 +3535,6 @@ namespace StateCraft.UI
 
             if (country.activeOperations == null || country.activeOperations.Count == 0)
             {
-                // Styled empty state
                 var empty = new VisualElement();
                 empty.style.flexDirection = FlexDirection.Column;
                 empty.style.alignItems = Align.Center;
@@ -3762,7 +3633,7 @@ namespace StateCraft.UI
                 etaEl.Add(etaLbl); etaEl.Add(etaVal);
                 card.Add(etaEl);
                 
-                var viewBtn = new Button(() => { /* End mission logic */ });
+                var viewBtn = new Button(() => {  });
                 viewBtn.text = "ABORT";
                 viewBtn.AddToClassList("op-card__view-btn");
                 viewBtn.style.backgroundColor = new Color(244/255f, 67/255f, 54/255f, 0.4f);
@@ -3922,7 +3793,6 @@ namespace StateCraft.UI
             }
         }
 
-        // ── Operations Tab Helpers & Enums ──
         public enum ThreatLevel  { High, Medium, Low }
         public enum OpType       { CounterTerror, Peacekeeping, BorderPatrol, AirRecon, Maritime, HvtCapture }
         public enum FeedColour   { Green, Yellow, Red }
@@ -4008,8 +3878,7 @@ namespace StateCraft.UI
             return "feed-item__dot--red";
         }
 
-
-        private Label AddImpactStat(VisualElement parent, string titleText, string initialVal)
+private Label AddImpactStat(VisualElement parent, string titleText, string initialVal)
         {
             var box = new VisualElement();
             box.style.flexDirection = FlexDirection.Column;

@@ -32,7 +32,6 @@ namespace StateCraft.Editor
 
         private void Generate()
         {
-            // Ensure folders exist using AssetDatabase for Unity compatibility
             string[] folders = assetPath.Split('/');
             string currentPath = "";
             for (int i = 0; i < folders.Length; i++)
@@ -61,10 +60,8 @@ namespace StateCraft.Editor
                 string name = rawName.Trim();
                 if (string.IsNullOrEmpty(name)) continue;
 
-                // Sanitize name for filename
                 string safeName = name.Replace("'", "").Replace(" ", "_");
 
-                // 1. Create ScriptableObject
                 string fullPath = $"{assetPath}/{safeName}.asset";
                 CountryDataSO data = AssetDatabase.LoadAssetAtPath<CountryDataSO>(fullPath);
 
@@ -76,8 +73,7 @@ namespace StateCraft.Editor
                     AssetDatabase.CreateAsset(data, fullPath);
                 }
 
-                // 2. Create GameObject in Scene
-                if (GameObject.Find(name) == null) // Don't duplicate if already exists in scene
+                if (GameObject.Find(name) == null)
                 {
                     GameObject go = new GameObject(name);
                     go.AddComponent<PolygonCollider2D>();

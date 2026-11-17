@@ -1,8 +1,3 @@
-// ============================================================
-// FILE: Scripts/Systems/EventSystem_and_Popup.cs
-// Contains: EventChoicePopupController
-// The EventSystem class lives in EventSystem.cs
-// ============================================================
 
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -19,7 +14,6 @@ namespace StateCraft.UI
         private UIDocument   _uiDoc;
         private VisualElement _root;
 
-        // UI elements
         private Label   _titleLabel;
         private Label   _descLabel;
         private Label   _optionALabel;
@@ -54,13 +48,11 @@ namespace StateCraft.UI
             Hide();
         }
 
-        // ── Static entry point called by EventSystem ────────
         public static void Show(GameEventSO ev, CountryDataSO country, Action onChoiceA, Action onChoiceB)
         {
             if (_instance == null)
             {
                 Debug.LogError("[EventChoicePopup] No instance in scene — event skipped to prevent silent consequences.");
-                // Log and skip rather than forcing an invisible choice.
                 return;
             }
             _instance.ShowInternal(ev, country, onChoiceA, onChoiceB);

@@ -8,14 +8,13 @@ using UnityEngine;
 
 namespace StateCraft.Systems
 {
-    // ─── Insurgent Camp Data ──────────────────────────────────────────────────
     [System.Serializable]
     public class InsurgentCamp
     {
         public string campId;
         public string regionName;
-        public string campType;          // "Training Base", "Supply Depot", "Command Post", "Hidden Village"
-        public float strength;           // 0-100
+        public string campType;
+        public float strength;
         public int estimatedFighters;
         public bool isDetected;
         public bool isDestroyed;
@@ -24,7 +23,6 @@ namespace StateCraft.Systems
         public string detectedBy;
     }
 
-    // ─── Strike Result DTO ────────────────────────────────────────────────────
     public class CampStrikeResult
     {
         public bool success;
@@ -110,7 +108,6 @@ namespace StateCraft.Systems
                 camp.turnsActive++;
                 if (camp.isDetected) camp.turnsDetected++;
 
-                // Follow-up warning if detected but not struck
                 if (camp.isDetected && !camp.isDestroyed && camp.turnsDetected == 3 && country == GameManager.Instance?.playerCountry)
                 {
                     NotificationManager.Instance?.AddNotification(
@@ -118,7 +115,6 @@ namespace StateCraft.Systems
                         new Color(1f, 0.6f, 0f));
                 }
 
-                // Undetected / unstrikes camps reinforce
                 if (!camp.isDestroyed && !camp.isDetected)
                 {
                     camp.strength = Mathf.Min(100f, camp.strength + 1.5f);
@@ -126,7 +122,7 @@ namespace StateCraft.Systems
                 }
                 else if (!camp.isDestroyed && camp.isDetected && camp.turnsDetected > 3)
                 {
-                    camp.strength = Mathf.Min(100f, camp.strength + 2.5f); // Faster reinforcement once they know they're detected
+                    camp.strength = Mathf.Min(100f, camp.strength + 2.5f);
                     camp.estimatedFighters = Mathf.RoundToInt(camp.estimatedFighters * 1.02f);
                 }
             }
@@ -197,7 +193,6 @@ namespace StateCraft.Systems
                 if (_notifiedCamps.Contains(notifKey)) continue;
                 _notifiedCamps.Add(notifKey);
 
-                // Inbox briefing
                 InboxSystem.Instance?.SendMessage(country,
                     "DIRECTORATE OF MILITARY INTELLIGENCE",
                     $"CAMP DETECTED: Insurgent {camp.campType} — {camp.regionName}",
@@ -210,7 +205,6 @@ namespace StateCraft.Systems
                     $"WARNING: After 3 turns without a strike, camp strength increases by +25% and fighter count grows by 20%.",
                     "Critical");
 
-                // Pop-up notification
                 NotificationManager.Instance?.AddNotification(
                     $"🎯 CAMP DETECTED: Insurgent {camp.campType} in {camp.regionName} — ~{camp.estimatedFighters} fighters. " +
                     $"Go to MILITARY OPS → BOMB DETECTED CAMP to strike now!",
@@ -221,7 +215,6 @@ namespace StateCraft.Systems
             }
         }
 
-        // ─── Air Strike on Detected Camp (called from MilitaryDashboardController) ──
         public CampStrikeResult StrikeInsurgentCamp(CountryDataSO country, InsurgentCamp camp, int fighters, int bombers, int attackHelis, int uavs)
         {
             var result = new CampStrikeResult { camp = camp };
@@ -236,7 +229,6 @@ namespace StateCraft.Systems
             if (country.reserveFuel < fuelRequired)
             { result.success = false; result.message = $"Insufficient fuel. Need {fuelRequired:F0}, have {country.reserveFuel:F0}."; return result; }
 
-            // Deduct assets
             country.reserveFuel     = Mathf.Max(0f, country.reserveFuel - fuelRequired);
             country.unitFighters    = Mathf.Max(0, country.unitFighters - fighters);
             country.unitBombers     = Mathf.Max(0, country.unitBombers - bombers);
@@ -247,7 +239,6 @@ namespace StateCraft.Systems
             float campDefense = camp.strength * 0.5f;
             float netDamage   = Mathf.Clamp(strikePower - campDefense, 10f, strikePower * 1.5f);
 
-            // AA fire risk
             float aaRisk = camp.strength / 200f;
             int fightersLost = 0, helisLost = 0;
             if (UnityEngine.Random.value < aaRisk)
@@ -285,7 +276,6 @@ namespace StateCraft.Systems
                 ? $"DESTROYED: Insurgent {camp.campType} in {camp.regionName} neutralized. ~{killEstimate} fighters killed. Security +{result.securityGained:F0}%.{lossNote}"
                 : $"STRIKE COMPLETE: {camp.campType} damaged ({netDamage:F0}% damage). ~{killEstimate} killed, ~{camp.estimatedFighters} remain — follow-up strike recommended.{lossNote}";
 
-            // Remove from notification cache if destroyed (so a new camp spawning will fire again)
             if (result.campDestroyed) _notifiedCamps.Remove(camp.campId);
 
             return result;

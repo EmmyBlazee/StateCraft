@@ -86,7 +86,6 @@ namespace StateCraft.UI
                     var gm = GameManager.Instance;
                     var player = gm?.playerCountry;
 
-                    // Check if a country is selected and has a Trade Agreement treaty
                     if (_selectedCountry != null && player != null)
                     {
                         bool hasTreaty = StateCraft.Systems.DiplomacySystem
@@ -126,13 +125,11 @@ namespace StateCraft.UI
             _treatiesContainer = root.Q<ScrollView>("TreatiesContainer");
             _crisisContainer = root.Q<ScrollView>("CrisisContainer");
 
-            // --- Force 3-column horizontal layout in code (overrides any UXML/USS caching) ---
             if (_panelRelations != null)
             {
                 _panelRelations.style.flexDirection = FlexDirection.Row;
                 _panelRelations.style.height = Length.Percent(100);
 
-                // Wire feed column: narrow, fixed width
                 var wireContainer = _diplomacyWireFeed?.parent;
                 if (wireContainer != null)
                 {
@@ -144,11 +141,10 @@ namespace StateCraft.UI
                     if (_diplomacyWireFeed != null)
                     {
                         _diplomacyWireFeed.style.flexGrow = 1;
-                        _diplomacyWireFeed.style.maxHeight = StyleKeyword.None; // Remove max-height cap
+                        _diplomacyWireFeed.style.maxHeight = StyleKeyword.None;
                     }
                 }
 
-                // Nations list column: medium fixed width
                 var nationsContainer = _globalNationsList?.parent;
                 if (nationsContainer != null)
                 {
@@ -159,7 +155,6 @@ namespace StateCraft.UI
                     nationsContainer.style.height = Length.Percent(100);
                 }
 
-                // Bilateral panel: fills the rest
                 if (_bilateralPanel != null)
                 {
                     _bilateralPanel.style.flexGrow = 1;
@@ -170,7 +165,6 @@ namespace StateCraft.UI
                     _bilateralPanel.style.paddingBottom = 0;
                     _bilateralPanel.style.marginLeft = 0;
 
-                    // Wrap inner content in a ScrollView so buttons never get clipped
                     var bilateralScroll = new ScrollView();
                     bilateralScroll.style.flexGrow = 1;
                     bilateralScroll.style.paddingTop = 15;
@@ -203,7 +197,6 @@ namespace StateCraft.UI
                 bool active = (i == index);
                 _allPanels[i].style.display = active ? DisplayStyle.Flex : DisplayStyle.None;
                 _allPanels[i].pickingMode = active ? PickingMode.Position : PickingMode.Ignore;
-                // Fix scrollviews in active panel so scrollbars work in builds
                 if (active) UIStateManager.FixScrollViews(_allPanels[i]);
             }
 
@@ -225,7 +218,7 @@ namespace StateCraft.UI
                 panel.style.display = DisplayStyle.Flex;
                 UIStateManager.Instance?.ApplySafeTransition(panel, true, 0.4f);
                 RefreshDiplomacyData();
-                UIStateManager.FixScrollViews(panel); // Fix scrollbars in builds after UI refresh
+                UIStateManager.FixScrollViews(panel);
             }
         }
 
@@ -279,7 +272,6 @@ namespace StateCraft.UI
 
         private void AddRelationItem(CountryDataSO other, float relation)
         {
-            // Use VisualElement + ClickEvent instead of Button to avoid unity-dragger blocking clicks inside ScrollView
             var row = new VisualElement();
             row.AddToClassList("sub-panel");
             row.pickingMode = PickingMode.Position;
@@ -300,11 +292,9 @@ namespace StateCraft.UI
             bar.pickingMode = PickingMode.Ignore;
             row.Add(bar);
 
-            // Hover highlight
             row.RegisterCallback<MouseEnterEvent>(_ => row.style.backgroundColor = new Color(1f, 1f, 1f, 0.06f));
             row.RegisterCallback<MouseLeaveEvent>(_ => row.style.backgroundColor = StyleKeyword.Null);
 
-            // Click — capture both other and relation so lambda doesn't close over loop variable
             var captureOther = other;
             var captureRelation = relation;
             row.RegisterCallback<ClickEvent>(evt =>
@@ -419,7 +409,7 @@ namespace StateCraft.UI
                 _headlineBox.style.borderLeftColor = new Color(boxColor.r, boxColor.g, boxColor.b, 0.7f);
                 _headlineBox.style.borderRightColor = new Color(boxColor.r, boxColor.g, boxColor.b, 0.7f);
                 
-                var titleLabel = _headlineBox.Q<Label>(classes: null); // Gets the first label (the title)
+                var titleLabel = _headlineBox.Q<Label>(classes: null);
                 if (titleLabel != null && titleLabel.name != "SelectedMajorHeadline")
                     titleLabel.style.color = boxColor;
 
@@ -435,7 +425,6 @@ namespace StateCraft.UI
             var btnPeace    = _root?.Q<Button>("BtnProposePeace");
             var btnRep      = _root?.Q<Button>("BtnDemandReparations");
 
-            // Rename buttons to be clearer about what they do
             if (btnAmb != null)       btnAmb.text       = "🤝  IMPROVE RELATIONS  (+8)";
             if (btnTrade != null)     btnTrade.text     = "📝  PROPOSE TRADE AGREEMENT";
             if (btnUlt != null)       btnUlt.text       = "⚠️  ISSUE SANCTIONS";
@@ -672,7 +661,7 @@ namespace StateCraft.UI
             if (_selectedCountry == null) { NotifyNeedSelection(); return; }
             var player = GameManager.Instance.playerCountry;
 
-            float cost = 0.005f; // $5M diplomatic cost
+            float cost = 0.005f;
             if (GameManager.Instance.playerBudget < cost)
             {
                 NotificationManager.Instance?.AddNotification("INSUFFICIENT FUNDS: Need $0.005B to send an ambassador.", Color.red);
@@ -697,7 +686,6 @@ namespace StateCraft.UI
             if (_selectedCountry == null) { NotifyNeedSelection(); return; }
             var player = GameManager.Instance.playerCountry;
             
-            // Check if already signed
             if (StateCraft.Systems.DiplomacySystem.HasSignedTradeAgreementTreaty(player, _selectedCountry))
             {
                 NotificationManager.Instance?.AddNotification(
@@ -705,7 +693,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // Check relations
             if (_selectedRelation < 40f)
             {
                 NotificationManager.Instance?.AddNotification(
@@ -713,8 +700,7 @@ namespace StateCraft.UI
                 return;
             }
 
-            // Deduct cost
-            float cost = 0.01f; // $10M diplomatic cost
+            float cost = 0.01f;
             if (GameManager.Instance.playerBudget < cost)
             {
                 NotificationManager.Instance?.AddNotification("INSUFFICIENT FUNDS: Need $0.01B to open formal trade channels.", Color.red);
@@ -723,7 +709,6 @@ namespace StateCraft.UI
             GameManager.Instance.playerBudget -= cost;
             player.treasury = GameManager.Instance.playerBudget;
 
-            // Sign the treaty
             var treaty = new DiplomaticTreaty
             {
                 treatyName    = "Trade Agreement",
@@ -756,11 +741,10 @@ namespace StateCraft.UI
             if (_selectedCountry == null) { NotifyNeedSelection(); return; }
             var player = GameManager.Instance.playerCountry;
 
-            // Sanctions: hurts their economy, costs prestige, drops relations both ways
-            _selectedCountry.gdp        = Mathf.Max(0f, _selectedCountry.gdp * 0.97f);        // -3% GDP
-            _selectedCountry.stability  = Mathf.Max(0f, _selectedCountry.stability - 5f);      // -5 stability
-            _selectedRelation           = Mathf.Max(0f, _selectedRelation - 20f);              // -20 relations
-            player.globalPrestige       = Mathf.Max(0f, player.globalPrestige - 3f);           // costs prestige
+            _selectedCountry.gdp        = Mathf.Max(0f, _selectedCountry.gdp * 0.97f);
+            _selectedCountry.stability  = Mathf.Max(0f, _selectedCountry.stability - 5f);
+            _selectedRelation           = Mathf.Max(0f, _selectedRelation - 20f);
+            player.globalPrestige       = Mathf.Max(0f, player.globalPrestige - 3f);
             player.sanctionIssuedCount++;
 
             NotificationManager.Instance?.AddNotification(
@@ -783,7 +767,6 @@ namespace StateCraft.UI
                 return;
             }
 
-            // Check not already allied
             if (player.activeTreaties.Any(t => t.partnerCountry == _selectedCountry.countryName && t.treatyName == "Mutual Defence Pact"))
             {
                 NotificationManager.Instance?.AddNotification(
@@ -791,8 +774,7 @@ namespace StateCraft.UI
                 return;
             }
 
-            // Alliance costs prestige to establish and commits both nations
-            float cost = 0.02f; // $20M diplomatic cost
+            float cost = 0.02f;
             if (GameManager.Instance.playerBudget < cost)
             {
                 NotificationManager.Instance?.AddNotification("INSUFFICIENT FUNDS: Need $0.02B for alliance negotiations.", Color.red);
@@ -838,7 +820,6 @@ namespace StateCraft.UI
             var player = GameManager.Instance.playerCountry;
             var gm = GameManager.Instance;
 
-            // ── Requirement checks ──
             if (_selectedRelation < 80f)
             {
                 NotificationManager.Instance?.AddNotification(
@@ -855,8 +836,7 @@ namespace StateCraft.UI
                 return;
             }
 
-            // ── Cost: Coalition maintenance requires budget commitment ──
-            float signingCost = 0.15f; // $150M signing cost
+            float signingCost = 0.15f;
             if (gm.playerBudget < signingCost)
             {
                 NotificationManager.Instance?.AddNotification(
@@ -864,9 +844,7 @@ namespace StateCraft.UI
                 return;
             }
 
-            // ── Partner contribution calculation ──
-            // Partner contributes troops proportional to their military strength
-            int partnerInfantry = Mathf.RoundToInt(_selectedCountry.unitInfantry * 0.15f); // 15% of their forces
+            int partnerInfantry = Mathf.RoundToInt(_selectedCountry.unitInfantry * 0.15f);
             int partnerTanks    = Mathf.RoundToInt(_selectedCountry.unitTanks    * 0.10f);
             int partnerFighters = Mathf.RoundToInt(_selectedCountry.unitFighters * 0.10f);
             bool partnerHasForces = partnerInfantry + partnerTanks > 0;
@@ -878,11 +856,9 @@ namespace StateCraft.UI
                     $"This pact provides diplomatic benefits only.", Color.yellow);
             }
 
-            // Deduct signing cost
             gm.playerBudget -= signingCost;
             player.treasury = gm.playerBudget;
 
-            // ── Create treaty with real terms ──
             string terms =
                 $"Joint forces committed: {partnerInfantry:N0} infantry, {partnerTanks} tanks, {partnerFighters} fighters from {_selectedCountry.countryName}. " +
                 $"Monthly maintenance: $0.02B. Duration: 36 months. " +
@@ -905,7 +881,6 @@ namespace StateCraft.UI
                 monthsRemaining = 36
             });
 
-            // ── Partner deploys a contribution to player's military ──
             if (partnerHasForces)
             {
                 player.unitInfantry += partnerInfantry;
@@ -916,13 +891,11 @@ namespace StateCraft.UI
                 _selectedCountry.unitFighters -= partnerFighters;
             }
 
-            // ── Diplomatic effects ──
             _selectedRelation = Mathf.Min(100f, _selectedRelation + 10f);
             player.globalPrestige       = Mathf.Min(100f, player.globalPrestige + 8f);
             player.stability            = Mathf.Min(100f, player.stability + 5f);
             _selectedCountry.stability  = Mathf.Min(100f, _selectedCountry.stability + 5f);
 
-            // ── Detailed inbox briefing ──
             InboxSystem.Instance?.SendMessage(player, "JOINT CHIEFS OF STAFF",
                 $"⚔️ COALITION FORCE PACT ACTIVE — {_selectedCountry.countryName}",
                 $"The Coalition Force Pact with {_selectedCountry.countryName} is now active.\n\n" +
@@ -965,7 +938,7 @@ namespace StateCraft.UI
             if (warSys == null) return;
 
             warSys.DeclareWar(player, _selectedCountry);
-            _selectedRelation = 0f; // Drop relations immediately to absolute zero
+            _selectedRelation = 0f;
             
             NotificationManager.Instance?.AddNotification($"WAR DECLARED: Mobilizing all combat branches against {_selectedCountry.countryName}!", Color.red);
             NewsSystem.Instance?.PublishNews($"CONFLICT: {player.countryName} has declared war against {_selectedCountry.countryName}! Tactical divisions are mobilizing.");
